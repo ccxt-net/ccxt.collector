@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace CCXT.Collector.Upbit.Orderbook
 {
-    public partial class UProcessing
+    public partial class Processing
     {
         private static ConcurrentDictionary<string, SOrderBook> __qOrderBooks = new ConcurrentDictionary<string, SOrderBook>();
         private static ConcurrentDictionary<string, Settings> __qSettings = new ConcurrentDictionary<string, Settings>();
@@ -48,7 +48,7 @@ namespace CCXT.Collector.Upbit.Orderbook
 
         private async Task<bool> updateTradeItem(SOrderBook lob, List<UTradeItem> tradeItems, string stream)
         {
-            var _nob = new SOrderBook(ULogger.exchange_name, stream, lob.symbol)
+            var _nob = new SOrderBook(UPLogger.exchange_name, stream, lob.symbol)
             {
                 sequential_id = tradeItems.Max(t => t.sequential_id)
             };
@@ -184,22 +184,22 @@ namespace CCXT.Collector.Upbit.Orderbook
 #if DEBUG
                         // modified check
                         if (_current_ask_size != _settings.last_order_ask_size || _current_bid_size != _settings.last_order_bid_size)
-                            ULogger.WriteQ($"diffb-{orderbook.type}: timestamp => {_settings.last_orderbook_time}, symbol => {orderbook.symbol}, ask_size => {_current_ask_size}, {_settings.last_order_ask_size}, bid_size => {_current_bid_size}, {_settings.last_order_bid_size}");
+                            UPLogger.WriteQ($"diffb-{orderbook.type}: timestamp => {_settings.last_orderbook_time}, symbol => {orderbook.symbol}, ask_size => {_current_ask_size}, {_settings.last_order_ask_size}, bid_size => {_current_bid_size}, {_settings.last_order_bid_size}");
 
                         if (_tob.data.Count != 30)
                         {
                             var _ask_count = _tob.data.Where(o => o.side == "ask").Count();
                             var _bid_count = _tob.data.Where(o => o.side == "bid").Count();
 
-                            ULogger.WriteQ($"diffb-{orderbook.type}: timestamp => {_settings.last_orderbook_time}, symbol => {orderbook.symbol}, ask_count => {_ask_count}, bid_count => {_bid_count}");
+                            UPLogger.WriteQ($"diffb-{orderbook.type}: timestamp => {_settings.last_orderbook_time}, symbol => {orderbook.symbol}, ask_count => {_ask_count}, bid_count => {_bid_count}");
                         }
 #endif
                     }
                     else
-                        ULogger.WriteQ($"trade-{orderbook.type}: timestamp => {_settings.last_orderbook_time}, symbol => {orderbook.symbol}, ask_size => {_current_ask_size}, bid_size => {_current_bid_size}");
+                        UPLogger.WriteQ($"trade-{orderbook.type}: timestamp => {_settings.last_orderbook_time}, symbol => {orderbook.symbol}, ask_size => {_current_ask_size}, bid_size => {_current_bid_size}");
                 }
                 else
-                    ULogger.WriteQ($"equal-{orderbook.type}: timestamp => {_settings.last_orderbook_time}, symbol => {orderbook.symbol}, ask_size => {_current_ask_size}, bid_size => {_current_bid_size}");
+                    UPLogger.WriteQ($"equal-{orderbook.type}: timestamp => {_settings.last_orderbook_time}, symbol => {orderbook.symbol}, ask_size => {_current_ask_size}, bid_size => {_current_bid_size}");
             }
             //else
             //    ULogger.WriteQ($"pastb-{orderBook.type}: timestamp => {_settings.last_orderbook_time}, symbol => {orderBook.symbol}, ask_size => {_settings.last_order_ask_size}, bid_size => {_settings.last_order_bid_size}");
@@ -209,7 +209,7 @@ namespace CCXT.Collector.Upbit.Orderbook
 
         private async Task<bool> updateOrderbook(SOrderBook lob, Settings settings, SOrderBook cob)
         {
-            var _dqo = new SOrderBook(ULogger.exchange_name, "diffbooks", cob.symbol)
+            var _dqo = new SOrderBook(UPLogger.exchange_name, "diffbooks", cob.symbol)
             {
                 sequential_id = cob.sequential_id
             };
@@ -279,7 +279,7 @@ namespace CCXT.Collector.Upbit.Orderbook
 
         private async Task<bool> updateOrderbook_old(SOrderBook qob, Settings settings, UOrderBook orderBook)
         {
-            var _dqo = new SOrderBook(ULogger.exchange_name, "diffbooks", orderBook.symbol)
+            var _dqo = new SOrderBook(UPLogger.exchange_name, "diffbooks", orderBook.symbol)
             {
                 sequential_id = orderBook.timestamp
             };
@@ -415,13 +415,13 @@ namespace CCXT.Collector.Upbit.Orderbook
                     _qox.quantity = 0;
                 }
 
-                ULogger.WriteQ($"clean-orderbook: timestamp => {lob.sequential_id}, symbol => {lob.symbol}, price => {price}, quantity => {quantity}");
+                UPLogger.WriteQ($"clean-orderbook: timestamp => {lob.sequential_id}, symbol => {lob.symbol}, price => {price}, quantity => {quantity}");
             }
         }
 
         private async Task<SOrderBook> convertOrderbook(UOrderBook orderBook, string stream)
         {
-            var _sob = new SOrderBook(ULogger.exchange_name, stream, orderBook.symbol)
+            var _sob = new SOrderBook(UPLogger.exchange_name, stream, orderBook.symbol)
             {
                 sequential_id = orderBook.timestamp
             };
@@ -450,7 +450,7 @@ namespace CCXT.Collector.Upbit.Orderbook
 
         private async Task snapshotOrderbook(string exchange, string symbol)
         {
-            if (exchange == ULogger.exchange_name)
+            if (exchange == UPLogger.exchange_name)
             {
                 var _sob = (SOrderBook)null;
 

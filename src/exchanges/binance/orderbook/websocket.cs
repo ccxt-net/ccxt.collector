@@ -22,7 +22,10 @@ namespace CCXT.Collector.Binance.Orderbook
      * 9. Local orderbook에 없는 가격을 제거하라는 이벤트를 수신 할수 있습니다.
      */
 
-    public partial class WsBinance
+    /// <summary>
+    /// 
+    /// </summary>
+    public partial class WebSocket
     {
         private static ConcurrentQueue<QMessage> __command_queue = null;
 
@@ -75,7 +78,7 @@ namespace CCXT.Collector.Binance.Orderbook
 
         public async Task Start(CancellationTokenSource tokenSource, string symbol)
         {
-            BLogger.WriteO($"websocket service start: symbol => {symbol}...");
+            BNLogger.WriteO($"websocket service start: symbol => {symbol}...");
 
             using (var _cws = new ClientWebSocket())
             {
@@ -93,7 +96,7 @@ namespace CCXT.Collector.Binance.Orderbook
                                 __last_receive_time = CUnixTime.NowMilli;
                                 await Open(tokenSource, _cws, symbol);
 
-                                BLogger.WriteO($"websocket open: symbol => {symbol}...");
+                                BNLogger.WriteO($"websocket open: symbol => {symbol}...");
                             }
 
                             var _message = (QMessage)null;
@@ -116,13 +119,13 @@ namespace CCXT.Collector.Binance.Orderbook
                         }
                         catch (Exception ex)
                         {
-                            BLogger.WriteX(ex.ToString());
+                            BNLogger.WriteX(ex.ToString());
                         }
                         //finally
                         {
                             if (_cws.State != WebSocketState.Open)
                             {
-                                BLogger.WriteO($"disconnect from server(cmd): symbol => {symbol}...");
+                                BNLogger.WriteO($"disconnect from server(cmd): symbol => {symbol}...");
                                 tokenSource.Cancel();
                                 break;
                             }
@@ -174,7 +177,7 @@ namespace CCXT.Collector.Binance.Orderbook
                             if (_result.MessageType == WebSocketMessageType.Text)
                             {
                                 var _data = Encoding.UTF8.GetString(_buffer, 0, _offset);
-                                BProcessing.SendReceiveQ(new QMessage { command = "WS", json = _data });
+                                Processing.SendReceiveQ(new QMessage { command = "WS", json = _data });
                             }
                             else if (_result.MessageType == WebSocketMessageType.Binary)
                             {
@@ -183,7 +186,7 @@ namespace CCXT.Collector.Binance.Orderbook
                             {
                                 await _cws.CloseOutputAsync(WebSocketCloseStatus.NormalClosure, "", tokenSource.Token);
 
-                                BLogger.WriteO($"receive close message from server: symbol => {symbol}...");
+                                BNLogger.WriteO($"receive close message from server: symbol => {symbol}...");
                                 tokenSource.Cancel();
                                 break;
                             }
@@ -193,13 +196,13 @@ namespace CCXT.Collector.Binance.Orderbook
                         }
                         catch (Exception ex)
                         {
-                            BLogger.WriteX(ex.ToString());
+                            BNLogger.WriteX(ex.ToString());
                         }
                         //finally
                         {
                             if (_cws.State != WebSocketState.Open)
                             {
-                                BLogger.WriteO($"disconnect from server: symbol => {symbol}...");
+                                BNLogger.WriteO($"disconnect from server: symbol => {symbol}...");
                                 tokenSource.Cancel();
                                 break;
                             }
@@ -217,7 +220,7 @@ namespace CCXT.Collector.Binance.Orderbook
 
                 await Task.WhenAll(_sending, _receiving);
 
-                BLogger.WriteO($"websocket service stopped: symbol => {symbol}...");
+                BNLogger.WriteO($"websocket service stopped: symbol => {symbol}...");
             }
         }
     }

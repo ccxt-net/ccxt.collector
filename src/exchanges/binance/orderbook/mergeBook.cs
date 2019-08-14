@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace CCXT.Collector.Binance.Orderbook
 {
-    public partial class BProcessing
+    public partial class Processing
     {
         private static ConcurrentDictionary<string, SOrderBook> __qOrderBooks = new ConcurrentDictionary<string, SOrderBook>();
         private static ConcurrentDictionary<string, Settings> __qSettings = new ConcurrentDictionary<string, Settings>();
@@ -48,7 +48,7 @@ namespace CCXT.Collector.Binance.Orderbook
 
         private async Task<bool> updateTradeItem(SOrderBook qob, List<BTradeItem> tradeItems, string stream)
         {
-            var _rqo = new SOrderBook(BLogger.exchange_name, stream, qob.symbol)
+            var _rqo = new SOrderBook(BNLogger.exchange_name, stream, qob.symbol)
             {
                 sequential_id = tradeItems.Max(t => t.timestamp)
             };
@@ -118,7 +118,7 @@ namespace CCXT.Collector.Binance.Orderbook
                             _qox.quantity = 0;
                         }
 
-                        BLogger.WriteQ($"nofnd-{stream}: timestamp => {_settings.last_trade_time}, symbol => {qob.symbol}, price => {_t.price}, quantity => {_t.quantity}");
+                        BNLogger.WriteQ($"nofnd-{stream}: timestamp => {_settings.last_trade_time}, symbol => {qob.symbol}, price => {_t.price}, quantity => {_t.quantity}");
                     }
                 }
 
@@ -146,7 +146,7 @@ namespace CCXT.Collector.Binance.Orderbook
             {
                 _settings.last_orderbook_id = orderBook.data.lastId;
 
-                var _sqo = new SOrderBook(BLogger.exchange_name, "snapshot", orderBook.data.symbol)
+                var _sqo = new SOrderBook(BNLogger.exchange_name, "snapshot", orderBook.data.symbol)
                 {
                     sequential_id = orderBook.data.lastId
                 };
@@ -200,22 +200,22 @@ namespace CCXT.Collector.Binance.Orderbook
 #if DEBUG
                         // modified check
                         if (_current_ask_size != _settings.last_order_ask_size || _current_bid_size != _settings.last_order_bid_size)
-                            BLogger.WriteQ($"diffb-{orderBook.stream}: timestamp => {_settings.last_orderbook_id}, symbol => {orderBook.data.symbol}, ask_size => {_current_ask_size}, {_settings.last_order_ask_size}, bid_size => {_current_bid_size}, {_settings.last_order_bid_size}");
+                            BNLogger.WriteQ($"diffb-{orderBook.stream}: timestamp => {_settings.last_orderbook_id}, symbol => {orderBook.data.symbol}, ask_size => {_current_ask_size}, {_settings.last_order_ask_size}, bid_size => {_current_bid_size}, {_settings.last_order_bid_size}");
 
                         if (_qob.data.Count != 40)
                         {
                             var _ask_count = _qob.data.Where(o => o.side == "ask").Count();
                             var _bid_count = _qob.data.Where(o => o.side == "bid").Count();
 
-                            BLogger.WriteQ($"diffb-{orderBook.stream}: timestamp => {_settings.last_orderbook_id}, symbol => {orderBook.data.symbol}, ask_count => {_ask_count}, bid_count => {_bid_count}");
+                            BNLogger.WriteQ($"diffb-{orderBook.stream}: timestamp => {_settings.last_orderbook_id}, symbol => {orderBook.data.symbol}, ask_count => {_ask_count}, bid_count => {_bid_count}");
                         }
 #endif
                     }
                     else
-                        BLogger.WriteQ($"trade-{orderBook.stream}: timestamp => {_settings.last_orderbook_id}, symbol => {orderBook.data.symbol}, ask_size => {_current_ask_size}, bid_size => {_current_bid_size}");
+                        BNLogger.WriteQ($"trade-{orderBook.stream}: timestamp => {_settings.last_orderbook_id}, symbol => {orderBook.data.symbol}, ask_size => {_current_ask_size}, bid_size => {_current_bid_size}");
                 }
                 else
-                    BLogger.WriteQ($"equal-{orderBook.stream}: timestamp => {_settings.last_orderbook_id}, symbol => {orderBook.data.symbol}, ask_size => {_current_ask_size}, bid_size => {_current_bid_size}");
+                    BNLogger.WriteQ($"equal-{orderBook.stream}: timestamp => {_settings.last_orderbook_id}, symbol => {orderBook.data.symbol}, ask_size => {_current_ask_size}, bid_size => {_current_bid_size}");
             }
             //else
             //    BLogger.WriteQ($"pastb-{orderBook.stream}: timestamp => {_settings.last_orderbook_id}, symbol => {orderBook.data.symbol}, ask_size => {_settings.last_order_ask_size}, bid_size => {_settings.last_order_bid_size}");
@@ -225,7 +225,7 @@ namespace CCXT.Collector.Binance.Orderbook
 
         private async Task<bool> updateOrderbook(SOrderBook qob, Settings settings, BAOrderBook orderBook)
         {
-            var _dqo = new SOrderBook(BLogger.exchange_name, "diffbooks", orderBook.data.symbol)
+            var _dqo = new SOrderBook(BNLogger.exchange_name, "diffbooks", orderBook.data.symbol)
             {
                 sequential_id = orderBook.data.lastId
             };
@@ -348,7 +348,7 @@ namespace CCXT.Collector.Binance.Orderbook
 
         private async Task snapshotOrderbook(string exchange, string symbol)
         {
-            if (exchange == BLogger.exchange_name)
+            if (exchange == BNLogger.exchange_name)
             {
                 var _sob = (SOrderBook)null;
 

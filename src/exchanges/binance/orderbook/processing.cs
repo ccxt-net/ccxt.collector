@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace CCXT.Collector.Binance.Orderbook
 {
-    public partial class BProcessing
+    public partial class Processing
     {
         private static ConcurrentQueue<QMessage> __recv_queue = null;
 
@@ -37,7 +37,7 @@ namespace CCXT.Collector.Binance.Orderbook
 
         public async Task Start(CancellationTokenSource tokenSource)
         {
-            BLogger.WriteO($"processing service start...");
+            BNLogger.WriteO($"processing service start...");
 
             var _processing = Task.Run(async () =>
             {
@@ -101,7 +101,7 @@ namespace CCXT.Collector.Binance.Orderbook
                         }
 #if DEBUG
                         else
-                            BLogger.WriteO(_message.json);
+                            BNLogger.WriteO(_message.json);
 #endif
                         if (tokenSource.IsCancellationRequested == true)
                             break;
@@ -111,7 +111,7 @@ namespace CCXT.Collector.Binance.Orderbook
                     }
                     catch (Exception ex)
                     {
-                        BLogger.WriteX(ex.ToString());
+                        BNLogger.WriteX(ex.ToString());
                     }
                 }
             },
@@ -120,7 +120,7 @@ namespace CCXT.Collector.Binance.Orderbook
 
             await Task.WhenAll(_processing);
 
-            BLogger.WriteO($"processing service stopped...");
+            BNLogger.WriteO($"processing service stopped...");
         }
     }
 }

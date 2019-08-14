@@ -41,8 +41,8 @@ namespace CCXT.Collector.Library.Service
             }
         }
 
-        public LoggerQ(string queue_name = LoggerQName)
-            : base(queue_name: queue_name)
+        public LoggerQ()
+            : base(queue_name: LoggerQName)
         {
         }
 

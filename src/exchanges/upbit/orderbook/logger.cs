@@ -2,7 +2,10 @@
 
 namespace CCXT.Collector.Upbit.Orderbook
 {
-    public class ULogger
+    /// <summary>
+    /// upbit
+    /// </summary>
+    public class UPLogger
     {
         public const string exchange_name = "upbit";
 

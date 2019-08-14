@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace CCXT.Collector.Upbit.Orderbook
 {
-    public partial class UProcessing
+    public partial class Processing
     {
         private static ConcurrentQueue<QMessage> __recv_queue = null;
 
@@ -37,7 +37,7 @@ namespace CCXT.Collector.Upbit.Orderbook
 
         public async Task Start(CancellationTokenSource tokenSource)
         {
-            ULogger.WriteO($"processing service start...");
+            UPLogger.WriteO($"processing service start...");
 
             var _processing = Task.Run(async () =>
             {
@@ -97,7 +97,7 @@ namespace CCXT.Collector.Upbit.Orderbook
                         }
 #if DEBUG
                         else
-                            ULogger.WriteO(_message.json);
+                            UPLogger.WriteO(_message.json);
 #endif
                         if (tokenSource.IsCancellationRequested == true)
                             break;
@@ -107,7 +107,7 @@ namespace CCXT.Collector.Upbit.Orderbook
                     }
                     catch (Exception ex)
                     {
-                        ULogger.WriteX(ex.ToString());
+                        UPLogger.WriteX(ex.ToString());
                     }
                 }
             },
@@ -116,7 +116,7 @@ namespace CCXT.Collector.Upbit.Orderbook
 
             await Task.WhenAll(_processing);
 
-            ULogger.WriteO($"processing service stopped...");
+            UPLogger.WriteO($"processing service stopped...");
         }
     }
 }

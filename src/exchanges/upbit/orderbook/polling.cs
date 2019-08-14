@@ -11,11 +11,11 @@ using System.Threading.Tasks;
 
 namespace CCXT.Collector.Upbit.Orderbook
 {
-    public class UPolling : KRestClient
+    public class Polling : KRestClient
     {
         public async Task OStart(CancellationTokenSource tokenSource, string symbol, int limit = 32)
         {
-            ULogger.WriteO($"opolling service start: symbol => {symbol}...");
+            UPLogger.WriteO($"opolling service start: symbol => {symbol}...");
 
             var _t_polling = Task.Run(async () =>
             {
@@ -51,14 +51,14 @@ namespace CCXT.Collector.Upbit.Orderbook
                             };
 
                             var _t_json_content = JsonConvert.SerializeObject(_trades);
-                            UProcessing.SendReceiveQ(new QMessage { command = "AP", json = _t_json_content });
+                            Processing.SendReceiveQ(new QMessage { command = "AP", json = _t_json_content });
                         }
                         else
                         {
                             var _http_status = (int)_t_json_value.StatusCode;
                             if (_http_status == 403 || _http_status == 418)// || _http_status == 429)
                             {
-                                ULogger.WriteQ($"request-limit: symbol => {symbol}, https_status => {_http_status}");
+                                UPLogger.WriteQ($"request-limit: symbol => {symbol}, https_status => {_http_status}");
 
                                 var _waiting = tokenSource.Token.WaitHandle.WaitOne(0);
                                 if (_waiting == true)
@@ -73,7 +73,7 @@ namespace CCXT.Collector.Upbit.Orderbook
                     }
                     catch (Exception ex)
                     {
-                        ULogger.WriteX(ex.ToString());
+                        UPLogger.WriteX(ex.ToString());
                     }
                     //finally
                     {
@@ -118,14 +118,14 @@ namespace CCXT.Collector.Upbit.Orderbook
                             _o_json_data[0].type = "arderbook";
 
                             var _o_json_content = JsonConvert.SerializeObject(_o_json_data[0]);
-                            UProcessing.SendReceiveQ(new QMessage { command = "AP", json = _o_json_content });
+                            Processing.SendReceiveQ(new QMessage { command = "AP", json = _o_json_content });
                         }
                         else
                         {
                             var _http_status = (int)_o_json_value.StatusCode;
                             if (_http_status == 403 || _http_status == 418)// || _http_status == 429)
                             {
-                                ULogger.WriteQ($"request-limit: symbol => {symbol}, https_status => {_http_status}");
+                                UPLogger.WriteQ($"request-limit: symbol => {symbol}, https_status => {_http_status}");
 
                                 var _waiting = tokenSource.Token.WaitHandle.WaitOne(0);
                                 if (_waiting == true)
@@ -140,7 +140,7 @@ namespace CCXT.Collector.Upbit.Orderbook
                     }
                     catch (Exception ex)
                     {
-                        ULogger.WriteX(ex.ToString());
+                        UPLogger.WriteX(ex.ToString());
                     }
                     //finally
                     {
@@ -160,12 +160,12 @@ namespace CCXT.Collector.Upbit.Orderbook
 
             await Task.WhenAll(_t_polling, _o_polling);
 
-            ULogger.WriteO($"opolling service stopped: symbol => {symbol}...");
+            UPLogger.WriteO($"opolling service stopped: symbol => {symbol}...");
         }
 
         public async Task BStart(CancellationTokenSource tokenSource, string[] symbols)
         {
-            ULogger.WriteO($"bpolling service start..");
+            UPLogger.WriteO($"bpolling service start..");
 
             var _b_polling = Task.Run(async () =>
             {
@@ -207,7 +207,7 @@ namespace CCXT.Collector.Upbit.Orderbook
 
                             var _bookticker = new SBookTicker
                             {
-                                exchange = ULogger.exchange_name,
+                                exchange = UPLogger.exchange_name,
                                 stream = "bookticker",
                                 sequential_id = _last_limit_milli_secs,
                                 data = _b_json_data.Select(o => 
@@ -228,14 +228,14 @@ namespace CCXT.Collector.Upbit.Orderbook
                             };
 
                             var _b_json_content = JsonConvert.SerializeObject(_bookticker);
-                            UProcessing.SendReceiveQ(new QMessage { command = "AP", json = _b_json_content });
+                            Processing.SendReceiveQ(new QMessage { command = "AP", json = _b_json_content });
                         }
                         else
                         {
                             var _http_status = (int)_b_json_value.StatusCode;
                             if (_http_status == 403 || _http_status == 418)// || _http_status == 429)
                             {
-                                ULogger.WriteQ($"request-limit: symbol => {_symbols}, https_status => {_http_status}");
+                                UPLogger.WriteQ($"request-limit: symbol => {_symbols}, https_status => {_http_status}");
 
                                 var _waiting = tokenSource.Token.WaitHandle.WaitOne(0);
                                 if (_waiting == true)
@@ -250,7 +250,7 @@ namespace CCXT.Collector.Upbit.Orderbook
                     }
                     catch (Exception ex)
                     {
-                        ULogger.WriteX(ex.ToString());
+                        UPLogger.WriteX(ex.ToString());
                     }
                     //finally
                     {
@@ -268,7 +268,7 @@ namespace CCXT.Collector.Upbit.Orderbook
 
             await Task.WhenAll(_b_polling);
 
-            ULogger.WriteO($"bpolling service stopped..");
+            UPLogger.WriteO($"bpolling service stopped..");
         }
 
         /// <summary>
@@ -282,7 +282,7 @@ namespace CCXT.Collector.Upbit.Orderbook
 
         public async Task EStart(CancellationTokenSource tokenSource)
         {
-            ULogger.WriteO($"epolling service start..");
+            UPLogger.WriteO($"epolling service start..");
 
             var _b_polling = Task.Run(async () =>
             {
@@ -332,7 +332,7 @@ namespace CCXT.Collector.Upbit.Orderbook
                             var _http_status = (int)_b_json_value.StatusCode;
                             if (_http_status == 403 || _http_status == 418)// || _http_status == 429)
                             {
-                                ULogger.WriteQ($"https_status => {_http_status}");
+                                UPLogger.WriteQ($"https_status => {_http_status}");
 
                                 var _waiting = tokenSource.Token.WaitHandle.WaitOne(0);
                                 if (_waiting == true)
@@ -347,7 +347,7 @@ namespace CCXT.Collector.Upbit.Orderbook
                     }
                     catch (Exception ex)
                     {
-                        ULogger.WriteX(ex.ToString());
+                        UPLogger.WriteX(ex.ToString());
                     }
                     //finally
                     {
@@ -365,7 +365,7 @@ namespace CCXT.Collector.Upbit.Orderbook
 
             await Task.WhenAll(_b_polling);
 
-            ULogger.WriteO($"epolling service stopped..");
+            UPLogger.WriteO($"epolling service stopped..");
         }
     }
 }

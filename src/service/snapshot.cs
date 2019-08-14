@@ -69,12 +69,12 @@ namespace CCXT.Collector.Library.Service
             __change_symbol_flag = true;
 
             if (String.IsNullOrEmpty(__last_symbol) == false)
-                LoggerQ.WriteO($"ssnapshot stopped: symbol => {__last_symbol}", __last_exchange);
+                LoggerQ.WriteO($"snapshot stopped: symbol => {__last_symbol}", __last_exchange);
 
             await CancelSnapshot();
 
             var _symbols = baseIds.Split(';');
-            if (exchange == "upbit")
+            if (exchange == UPLogger.exchange_name)
             {
                 if (KConfig.UpbitUsePollingBookticker == false)
                 {
@@ -83,16 +83,16 @@ namespace CCXT.Collector.Library.Service
                         if (String.IsNullOrEmpty(_s) == true)
                             continue;
 
-                        SnapshotTasks.Add((new WsUpbit()).Start(SSTokenSource, _s));
-                        SnapshotTasks.Add((new UPolling()).OStart(SSTokenSource, _s));
+                        SnapshotTasks.Add((new Upbit.Orderbook.WebSocket()).Start(SSTokenSource, _s));
+                        SnapshotTasks.Add((new Upbit.Orderbook.Polling()).OStart(SSTokenSource, _s));
                     }
                 }
                 else
-                    SnapshotTasks.Add((new UPolling()).BStart(SSTokenSource, _symbols));
+                    SnapshotTasks.Add((new Upbit.Orderbook.Polling()).BStart(SSTokenSource, _symbols));
 
-                SnapshotTasks.Add((new UProcessing()).Start(SSTokenSource));
+                SnapshotTasks.Add((new Upbit.Orderbook.Processing()).Start(SSTokenSource));
             }
-            else if (exchange == "binance")
+            else if (exchange == BNLogger.exchange_name)
             {
                 if (KConfig.BinanceUsePollingBookticker == false)
                 {
@@ -101,17 +101,17 @@ namespace CCXT.Collector.Library.Service
                         if (String.IsNullOrEmpty(_s) == true)
                             continue;
 
-                        SnapshotTasks.Add((new WsBinance()).Start(SSTokenSource, _s));
-                        SnapshotTasks.Add((new BPolling()).OStart(SSTokenSource, _s));
+                        SnapshotTasks.Add((new Binance.Orderbook.WebSocket()).Start(SSTokenSource, _s));
+                        SnapshotTasks.Add((new Binance.Orderbook.Polling()).OStart(SSTokenSource, _s));
                     }
                 }
                 else
-                    SnapshotTasks.Add((new BPolling()).BStart(SSTokenSource, _symbols));
+                    SnapshotTasks.Add((new Binance.Orderbook.Polling()).BStart(SSTokenSource, _symbols));
 
-                SnapshotTasks.Add((new BProcessing()).Start(SSTokenSource));
+                SnapshotTasks.Add((new Binance.Orderbook.Processing()).Start(SSTokenSource));
             }
 
-            LoggerQ.WriteO($"ssnapshot restart: symbol => {baseIds}", exchange);
+            LoggerQ.WriteO($"snapshot restart: symbol => {baseIds}", exchange);
 
             __last_exchange = exchange;
             __last_symbol = baseIds;
@@ -121,10 +121,9 @@ namespace CCXT.Collector.Library.Service
 
         public SnapshotQ(
              string host_name = null, string ip_address = null, string virtual_host = null,
-             string user_name = null, string password = null,
-             string queue_name = SnapshotQName
+             string user_name = null, string password = null
          )
-         : base(host_name, ip_address, virtual_host, user_name, password, queue_name)
+         : base(host_name, ip_address, virtual_host, user_name, password, SnapshotQName)
         {
         }
 
@@ -146,7 +145,7 @@ namespace CCXT.Collector.Library.Service
 
                         var _consumer = new EventingBasicConsumer(_channel);
 
-                        _consumer.Received += async (model, ea) =>
+                        _consumer.Received += async (object model, BasicDeliverEventArgs ea) =>
                         {
                             var _payload = ea.Body;
                             var _message = Encoding.UTF8.GetString(_payload);
@@ -168,15 +167,15 @@ namespace CCXT.Collector.Library.Service
                                             })
                                         };
 
-                                        if (_selector.exchange == "binance")
+                                        if (_selector.exchange == BNLogger.exchange_name)
                                         {
                                             if (KConfig.BinanceUsePollingBookticker == false)
-                                                BProcessing.SendReceiveQ(_q_message);
+                                                Binance.Orderbook.Processing.SendReceiveQ(_q_message);
                                         }
-                                        else if (_selector.exchange == "upbit")
+                                        else if (_selector.exchange == UPLogger.exchange_name)
                                         {
                                             if (KConfig.UpbitUsePollingBookticker == false)
-                                                UProcessing.SendReceiveQ(_q_message);
+                                                Upbit.Orderbook.Processing.SendReceiveQ(_q_message);
                                         }
                                     }
                                 }

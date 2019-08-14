@@ -62,8 +62,6 @@ namespace CCXT.OCollector
             {
 #if DEBUG
                 FactoryQ.RootQName = "odin";
-#else
-                FactoryQ.RootQName = "ccxt";
 #endif
 
                 Console.Out.WriteLine($"{FactoryQ.RootQName} collector {KConfig.CollectorVersion} start...");

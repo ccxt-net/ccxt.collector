@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace CCXT.Collector.Upbit.Orderbook
 {
-    public class WsUpbit
+    public class WebSocket
     {
         private static ConcurrentQueue<QMessage> __command_queue = null;
 
@@ -65,7 +65,7 @@ namespace CCXT.Collector.Upbit.Orderbook
 
         public async Task Start(CancellationTokenSource tokenSource, string symbol)
         {
-            ULogger.WriteO($"websocket service start: symbol => {symbol}...");
+            UPLogger.WriteO($"websocket service start: symbol => {symbol}...");
 
             using (var _cws = new ClientWebSocket())
             {
@@ -83,7 +83,7 @@ namespace CCXT.Collector.Upbit.Orderbook
                                 __last_receive_time = CUnixTime.NowMilli;
                                 await Open(tokenSource, _cws, symbol);
 
-                                ULogger.WriteO($"websocket open: symbol => {symbol}...");
+                                UPLogger.WriteO($"websocket open: symbol => {symbol}...");
                             }
 
                             var _message = (QMessage)null;
@@ -106,13 +106,13 @@ namespace CCXT.Collector.Upbit.Orderbook
                         }
                         catch (Exception ex)
                         {
-                            ULogger.WriteX(ex.ToString());
+                            UPLogger.WriteX(ex.ToString());
                         }
                         //finally
                         {
                             if (_cws.State != WebSocketState.Open)
                             {
-                                ULogger.WriteO($"disconnect from server(cmd): symbol => {symbol}...");
+                                UPLogger.WriteO($"disconnect from server(cmd): symbol => {symbol}...");
                                 tokenSource.Cancel();
                                 break;
                             }
@@ -167,13 +167,13 @@ namespace CCXT.Collector.Upbit.Orderbook
                             else if (_result.MessageType == WebSocketMessageType.Binary)
                             {
                                 var _data = Encoding.UTF8.GetString(_buffer, 0, _offset);
-                                UProcessing.SendReceiveQ(new QMessage { command = "WS", json = _data });
+                                Processing.SendReceiveQ(new QMessage { command = "WS", json = _data });
                             }
                             else if (_result.MessageType == WebSocketMessageType.Close)
                             {
                                 await _cws.CloseOutputAsync(WebSocketCloseStatus.NormalClosure, "", tokenSource.Token);
 
-                                ULogger.WriteO($"receive close message from server: symbol => {symbol}...");
+                                UPLogger.WriteO($"receive close message from server: symbol => {symbol}...");
                                 tokenSource.Cancel();
                                 break;
                             }
@@ -183,13 +183,13 @@ namespace CCXT.Collector.Upbit.Orderbook
                         }
                         catch (Exception ex)
                         {
-                            ULogger.WriteX(ex.ToString());
+                            UPLogger.WriteX(ex.ToString());
                         }
                         //finally
                         {
                             if (_cws.State != WebSocketState.Open)
                             {
-                                ULogger.WriteO($"disconnect from server: symbol => {symbol}...");
+                                UPLogger.WriteO($"disconnect from server: symbol => {symbol}...");
                                 tokenSource.Cancel();
                                 break;
                             }
@@ -207,7 +207,7 @@ namespace CCXT.Collector.Upbit.Orderbook
 
                 await Task.WhenAll(_sending, _receiving);
 
-                ULogger.WriteO($"websocket service stopped: symbol => {symbol}...");
+                UPLogger.WriteO($"websocket service stopped: symbol => {symbol}...");
             }
         }
     }

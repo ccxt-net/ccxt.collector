@@ -2,7 +2,10 @@
 
 namespace CCXT.Collector.Binance.Orderbook
 {
-    public class BLogger
+    /// <summary>
+    /// binance
+    /// </summary>
+    public class BNLogger
     {
         public const string exchange_name = "binance";
 

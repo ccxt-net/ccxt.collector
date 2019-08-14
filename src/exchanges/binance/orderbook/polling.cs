@@ -32,7 +32,7 @@ namespace CCXT.Collector.Binance.Orderbook
     //    }
     //]
 
-    public class BPolling : KRestClient
+    public class Polling : KRestClient
     {
         private SynchronizedCollection<Task> __polling_tasks;
 
@@ -56,7 +56,7 @@ namespace CCXT.Collector.Binance.Orderbook
 
         public async Task OStart(CancellationTokenSource tokenSource, string symbol)
         {
-            BLogger.WriteO($"opolling service start: symbol => {symbol}...");
+            BNLogger.WriteO($"opolling service start: symbol => {symbol}...");
 
             if (KConfig.BinanceUsePollingBookticker == false)
             {
@@ -109,14 +109,14 @@ namespace CCXT.Collector.Binance.Orderbook
                                     };
 
                                     var _o_json_content = JsonConvert.SerializeObject(_orderbook);
-                                    BProcessing.SendReceiveQ(new QMessage { command = "AP", json = _o_json_content });
+                                    Processing.SendReceiveQ(new QMessage { command = "AP", json = _o_json_content });
                                 }
                                 else
                                 {
                                     var _http_status = (int)_o_json_value.StatusCode;
                                     if (_http_status == 403 || _http_status == 418 || _http_status == 429)
                                     {
-                                        BLogger.WriteQ($"request-limit: symbol => {symbol}, https_status => {_http_status}");
+                                        BNLogger.WriteQ($"request-limit: symbol => {symbol}, https_status => {_http_status}");
 
                                         var _waiting = tokenSource.Token.WaitHandle.WaitOne(0);
                                         if (_waiting == true)
@@ -132,7 +132,7 @@ namespace CCXT.Collector.Binance.Orderbook
                         }
                         catch (Exception ex)
                         {
-                            BLogger.WriteX(ex.ToString());
+                            BNLogger.WriteX(ex.ToString());
                         }
                         //finally
                         {
@@ -153,12 +153,12 @@ namespace CCXT.Collector.Binance.Orderbook
 
             await Task.WhenAll(PollingTasks);
 
-            BLogger.WriteO($"opolling service stopped: symbol => {symbol}...");
+            BNLogger.WriteO($"opolling service stopped: symbol => {symbol}...");
         }
 
         public async Task BStart(CancellationTokenSource tokenSource, string[] symbols)
         {
-            BLogger.WriteO($"bpolling service start...");
+            BNLogger.WriteO($"bpolling service start...");
 
             if (KConfig.BinanceUsePollingBookticker == true)
             {
@@ -197,21 +197,21 @@ namespace CCXT.Collector.Binance.Orderbook
 
                                 var _bookticker = new SBookTicker
                                 {
-                                    exchange = BLogger.exchange_name,
+                                    exchange = BNLogger.exchange_name,
                                     stream = "bookticker",
                                     sequential_id = _last_limit_milli_secs,
                                     data = _b_json_data.Where(t => symbols.Contains(t.symbol)).ToList()
                                 };
 
                                 var _b_json_content = JsonConvert.SerializeObject(_bookticker);
-                                BProcessing.SendReceiveQ(new QMessage { command = "AP", json = _b_json_content });
+                                Processing.SendReceiveQ(new QMessage { command = "AP", json = _b_json_content });
                             }
                             else
                             {
                                 var _http_status = (int)_b_json_value.StatusCode;
                                 if (_http_status == 403 || _http_status == 418 || _http_status == 429)
                                 {
-                                    BLogger.WriteQ($"request-limit: https_status => {_http_status}");
+                                    BNLogger.WriteQ($"request-limit: https_status => {_http_status}");
 
                                     var _waiting = tokenSource.Token.WaitHandle.WaitOne(0);
                                     if (_waiting == true)
@@ -226,7 +226,7 @@ namespace CCXT.Collector.Binance.Orderbook
                         }
                         catch (Exception ex)
                         {
-                            BLogger.WriteX(ex.ToString());
+                            BNLogger.WriteX(ex.ToString());
                         }
                         //finally
                         {
@@ -245,7 +245,7 @@ namespace CCXT.Collector.Binance.Orderbook
 
             await Task.WhenAll(PollingTasks);
 
-            BLogger.WriteO($"bpolling service stopped...");
+            BNLogger.WriteO($"bpolling service stopped...");
         }
     }
 }

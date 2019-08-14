@@ -11,10 +11,9 @@ namespace CCXT.Collector.Library.Service
     {
         public BooktickerQ(
              string host_name = null, string ip_address = null, string virtual_host = null,
-             string user_name = null, string password = null,
-             string queue_name = BooktickerQName
+             string user_name = null, string password = null
          )
-         : base(host_name, ip_address, virtual_host, user_name, password, queue_name)
+         : base(host_name, ip_address, virtual_host, user_name, password, BooktickerQName)
         {
         }
 
