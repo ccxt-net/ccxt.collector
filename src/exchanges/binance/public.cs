@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace CCXT.Collector.Binance
 {
-    public class BPublicApi : KRestClient
+    public class PublicApi : KRestClient
     {
         public const string PublicUrl = "https://api.binance.com/api/v1";
 

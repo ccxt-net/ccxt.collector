@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace CCXT.Collector.Upbit
 {
-    public class UPublicApi : KRestClient
+    public class PublicApi : KRestClient
     {
         public const string PublicUrl = "https://api.upbit.com/v1";
         public const string DunamuUrl = "https://quotation-api-cdn.dunamu.com/v1";

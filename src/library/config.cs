@@ -11,14 +11,7 @@ namespace CCXT.Collector.Library
     {
         public static CConfig CConfig = new CConfig();
 
-        public static string CollectorVersion
-        {
-            get
-            {
-                return CConfig.GetAppString("collector.version");
-            }
-        }
-
+        #region Binance
         public static bool BinanceUsePollingBookticker
         {
             get
@@ -27,27 +20,105 @@ namespace CCXT.Collector.Library
             }
         }
 
-        private static long? __binance_polling_prev = null;
+        private static int? __binance_orderbook_counter = null;
 
-        public static long PollingPrevTime
+        public static int BinanceOrderBookCounter
         {
             get
             {
-                if (__binance_polling_prev == null)
-                    __binance_polling_prev = CConfig.GetAppInteger64("polling.bookticker.prev.millisconds");
-                return __binance_polling_prev.Value;
+                if (__binance_orderbook_counter == null)
+                    __binance_orderbook_counter = CConfig.GetAppInteger("binance.orderbook.snapshot.counter");
+                return __binance_orderbook_counter.Value;
             }
         }
 
-        private static long? __binance_polling_term = null;
+        private static int? __binance_websocket_retry = null;
 
-        public static long PollingTermTime
+        public static int BinanceWebSocketRetry
         {
             get
             {
-                if (__binance_polling_term == null)
-                    __binance_polling_term = CConfig.GetAppInteger64("polling.bookticker.term.millisconds");
-                return __binance_polling_term.Value;
+                if (__binance_websocket_retry == null)
+                    __binance_websocket_retry = CConfig.GetAppInteger("websocket.retry.waiting.milliseconds");
+                return __binance_websocket_retry.Value;
+            }
+        }
+        #endregion
+
+        #region Bitmex
+        public static bool BitmexUsePollingBookticker
+        {
+            get
+            {
+                return CConfig.GetAppBoolean("bitmex.use.polling.bookticker");
+            }
+        }
+
+        private static int? __bitmex_orderbook_counter = null;
+
+        public static int BitmexOrderBookCounter
+        {
+            get
+            {
+                if (__bitmex_orderbook_counter == null)
+                    __bitmex_orderbook_counter = CConfig.GetAppInteger("bitmex.orderbook.snapshot.counter");
+                return __bitmex_orderbook_counter.Value;
+            }
+        }
+
+        private static int? __bitmex_websocket_retry = null;
+
+        public static int BitmexWebSocketRetry
+        {
+            get
+            {
+                if (__bitmex_websocket_retry == null)
+                    __bitmex_websocket_retry = CConfig.GetAppInteger("websocket.retry.waiting.milliseconds");
+                return __bitmex_websocket_retry.Value;
+            }
+        }
+        #endregion
+
+        #region Upbit
+        private static int? __upbit_websocket_retry = null;
+
+        public static int UpbitWebSocketRetry
+        {
+            get
+            {
+                if (__upbit_websocket_retry == null)
+                    __upbit_websocket_retry = CConfig.GetAppInteger("websocket.retry.waiting.milliseconds");
+                return __upbit_websocket_retry.Value;
+            }
+        }
+
+        public static bool UpbitUsePollingBookticker
+        {
+            get
+            {
+                return CConfig.GetAppBoolean("upbit.use.polling.bookticker");
+            }
+        }
+
+        private static int? __upbit_polling_sleep = null;
+
+        public static int UpbitPollingSleep
+        {
+            get
+            {
+                if (__upbit_polling_sleep == null)
+                    __upbit_polling_sleep = CConfig.GetAppInteger("upbit.polling.sleep.milliseconds");
+                return __upbit_polling_sleep.Value;
+            }
+        }
+        #endregion
+
+        #region Common
+        public static string CollectorVersion
+        {
+            get
+            {
+                return CConfig.GetAppString("collector.version");
             }
         }
 
@@ -83,62 +154,58 @@ namespace CCXT.Collector.Library
             }
         }
 
-        private static int? __binance_orderbook_counter = null;
+        private static long? __polling_prev_time = null;
 
-        public static int BinanceOrderBookCounter
+        public static long PollingPrevTime
         {
             get
             {
-                if (__binance_orderbook_counter == null)
-                    __binance_orderbook_counter = CConfig.GetAppInteger("binance.orderbook.snapshot.counter");
-                return __binance_orderbook_counter.Value;
+                if (__polling_prev_time == null)
+                    __polling_prev_time = CConfig.GetAppInteger64("polling.bookticker.prev.millisconds");
+                return __polling_prev_time.Value;
             }
         }
 
-        private static int? __binance_websocket_retry = null;
+        private static long? __polling_term_time = null;
 
-        public static int BinanceWebSocketRetry
+        public static long PollingTermTime
         {
             get
             {
-                if (__binance_websocket_retry == null)
-                    __binance_websocket_retry = CConfig.GetAppInteger("websocket.retry.waiting.milliseconds");
-                return __binance_websocket_retry.Value;
+                if (__polling_term_time == null)
+                    __polling_term_time = CConfig.GetAppInteger64("polling.bookticker.term.millisconds");
+                return __polling_term_time.Value;
             }
         }
+        #endregion
 
-        private static int? __upbit_websocket_retry = null;
-
-        public static int UpbitWebSocketRetry
+        #region Arbitrage
+        public static bool UsePollingArbitrage
         {
             get
             {
-                if (__upbit_websocket_retry == null)
-                    __upbit_websocket_retry = CConfig.GetAppInteger("websocket.retry.waiting.milliseconds");
-                return __upbit_websocket_retry.Value;
+                return CConfig.GetAppBoolean("use.polling.arbitrage");
             }
         }
 
-        public static bool UpbitUsePollingBookticker
+        public static string ArbitrageBaseNames
         {
             get
             {
-                return CConfig.GetAppBoolean("upbit.use.polling.bookticker");
+                return CConfig.GetAppString("arbitrage.base.names");
             }
         }
 
-        private static int? __upbit_polling_sleep = null;
-
-        public static int UpbitPollingSleep
+        public static string ArbitrageQuoteNames
         {
             get
             {
-                if (__upbit_polling_sleep == null)
-                    __upbit_polling_sleep = CConfig.GetAppInteger("upbit.polling.sleep.milliseconds");
-                return __upbit_polling_sleep.Value;
+                return CConfig.GetAppString("arbitrage.quote.names");
             }
         }
+        #endregion
 
+        #region Creator
         private static IConfigurationBuilder __config_builder = null;
         private static IConfigurationRoot __config_root = null;
 
@@ -153,5 +220,6 @@ namespace CCXT.Collector.Library
 
             CConfig.SetConfigRoot(__config_root);
         }
+        #endregion
     }
 }

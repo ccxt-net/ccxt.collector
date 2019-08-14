@@ -1,11 +1,14 @@
 ﻿using CCXT.Collector.Binance.Orderbook;
+using CCXT.Collector.Bitmex.Orderbook;
 using CCXT.Collector.Library.Types;
 using CCXT.Collector.Upbit.Orderbook;
+using CCXT.NET.Coin.Public;
 using Newtonsoft.Json;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -110,10 +113,77 @@ namespace CCXT.Collector.Library.Service
 
                 SnapshotTasks.Add((new Binance.Orderbook.Processing()).Start(SSTokenSource));
             }
+            else if (exchange == BMLogger.exchange_name)
+            {
+                if (KConfig.BitmexUsePollingBookticker == false)
+                {
+                    foreach (var _s in _symbols)
+                    {
+                        if (String.IsNullOrEmpty(_s) == true)
+                            continue;
+
+                        SnapshotTasks.Add((new Binance.Orderbook.WebSocket()).Start(SSTokenSource, _s));
+                        SnapshotTasks.Add((new Binance.Orderbook.Polling()).OStart(SSTokenSource, _s));
+                    }
+                }
+                else
+                    SnapshotTasks.Add((new Binance.Orderbook.Polling()).BStart(SSTokenSource, _symbols));
+
+                SnapshotTasks.Add((new Binance.Orderbook.Processing()).Start(SSTokenSource));
+            }
 
             LoggerQ.WriteO($"snapshot restart: symbol => {baseIds}", exchange);
 
             __last_exchange = exchange;
+            __last_symbol = baseIds;
+
+            __change_symbol_flag = false;
+        }
+
+        private async Task StartNewMarket(string baseIds, string quoteIds)
+        {
+            __change_symbol_flag = true;
+
+            if (String.IsNullOrEmpty(__last_symbol) == false)
+                LoggerQ.WriteO($"qsnapshot stopped: symbol => {__last_symbol}", __last_exchange);
+
+            await CancelSnapshot();
+
+            var _base_ids = baseIds.Split(';');
+            var _quote_ids = quoteIds.Split(';');
+
+            var _usymbols = new List<IMarketItem>();
+            var _bsymbols = new List<IMarketItem>();
+            {
+                var _umarkets = await (new Upbit.PublicApi()).LoadMarkets();
+                var _bmarkets = await (new Binance.PublicApi()).LoadMarkets();
+
+                foreach (var _base_id in _base_ids)
+                {
+                    foreach (var _quote_id in _quote_ids)
+                    {
+                        var _market_id = _base_id + "/" + _quote_id;
+
+                        var _umarket = _umarkets.result.Values.Where(m => m.marketId == _market_id).SingleOrDefault();
+                        if (_umarket != null)
+                            _usymbols.Add(_umarket as IMarketItem);
+
+                        var _bmarket = _bmarkets.result.Values.Where(m => m.marketId == _market_id).SingleOrDefault();
+                        if (_bmarket != null)
+                            _bsymbols.Add(_bmarket as IMarketItem);
+                    }
+                }
+            }
+
+            SnapshotTasks.Add((new Upbit.Orderbook.Polling()).AStart(SSTokenSource, _usymbols));
+            SnapshotTasks.Add((new Binance.Orderbook.Polling()).AStart(SSTokenSource, _bsymbols));
+
+            foreach (var _base_id in _base_ids)
+                SnapshotTasks.Add((new AProcessing()).Start(SSTokenSource, _base_id));
+
+            LoggerQ.WriteO($"qsnapshot restart: symbol => {baseIds}", "market");
+
+            __last_exchange = "market";
             __last_symbol = baseIds;
 
             __change_symbol_flag = false;
@@ -131,8 +201,15 @@ namespace CCXT.Collector.Library.Service
         {
             LoggerQ.WriteO($"snapshot service start...", FactoryQ.RootQName);
 
-            if (KConfig.UseAutoStart == true)
-                await StartNewSymbol(KConfig.StartExchangeName, KConfig.StartSymbolNames);
+            if (KConfig.UsePollingArbitrage == false)
+            {
+                if (KConfig.UseAutoStart == true)
+                    await StartNewSymbol(KConfig.StartExchangeName, KConfig.StartSymbolNames);
+            }
+            else
+            {
+                await StartNewMarket(KConfig.ArbitrageBaseNames, KConfig.ArbitrageQuoteNames);
+            }
 
             var _processing = Task.Run(async () =>
             {
@@ -171,6 +248,11 @@ namespace CCXT.Collector.Library.Service
                                         {
                                             if (KConfig.BinanceUsePollingBookticker == false)
                                                 Binance.Orderbook.Processing.SendReceiveQ(_q_message);
+                                        }
+                                        else if (_selector.exchange == BMLogger.exchange_name)
+                                        {
+                                            if (KConfig.BitmexUsePollingBookticker == false)
+                                                Bitmex.Orderbook.Processing.SendReceiveQ(_q_message);
                                         }
                                         else if (_selector.exchange == UPLogger.exchange_name)
                                         {
