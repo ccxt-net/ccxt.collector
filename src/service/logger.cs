@@ -1,4 +1,5 @@
-﻿using CCXT.NET.Configuration;
+﻿using CCXT.Collector.Library;
+using CCXT.NET.Configuration;
 using CCXT.NET.Extension;
 using RabbitMQ.Client;
 using System;
@@ -7,7 +8,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace CCXT.Collector.Library.Service
+namespace CCXT.Collector.Service
 {
     public class LoggerQ : FactoryQ
     {

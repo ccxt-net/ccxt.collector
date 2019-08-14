@@ -1,4 +1,4 @@
-﻿using CCXT.Collector.Library.Service;
+﻿using CCXT.Collector.Service;
 
 namespace CCXT.Collector.Bitmex.Orderbook
 {

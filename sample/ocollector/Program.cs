@@ -1,5 +1,5 @@
 ﻿using CCXT.Collector.Library;
-using CCXT.Collector.Library.Service;
+using CCXT.Collector.Service;
 using System;
 using System.Collections.Generic;
 using System.Linq;

@@ -1,5 +1,5 @@
 ﻿using CCXT.Collector.Library;
-using CCXT.Collector.Library.Service;
+using CCXT.Collector.Service;
 using CCXT.Collector.Library.Types;
 using CCXT.Collector.Upbit.Types;
 using Newtonsoft.Json;

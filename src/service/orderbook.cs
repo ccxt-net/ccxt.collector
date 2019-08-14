@@ -1,11 +1,12 @@
-﻿using RabbitMQ.Client;
+﻿using CCXT.Collector.Library;
+using RabbitMQ.Client;
 using System;
 using System.Collections.Concurrent;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace CCXT.Collector.Library.Service
+namespace CCXT.Collector.Service
 {
     public class OrderbookQ : FactoryQ
     {
