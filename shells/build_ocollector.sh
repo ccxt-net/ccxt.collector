@@ -1,4 +1,4 @@
-cd ./sample
+cd ./sample/ocollector
 
 supervisorctl stop ccxt.ocollector
 
