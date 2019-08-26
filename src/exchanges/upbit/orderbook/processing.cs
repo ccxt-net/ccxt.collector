@@ -79,7 +79,7 @@ namespace CCXT.Collector.Upbit.Orderbook
                                 var _trades = JsonConvert.DeserializeObject<UATrade>(_message.json);
                                 await mergeTradeItems(_trades);
                             }
-                            else if (_json_data.type == "arderbook")
+                            else if (_json_data.type == "orderbooks")
                             {
                                 var _orderbook = JsonConvert.DeserializeObject<UAOrderBook>(_message.json);
                                 await mergeOrderbook(_orderbook);
