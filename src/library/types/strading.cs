@@ -1,47 +1,13 @@
-﻿using System.Collections.Generic;
+﻿using CCXT.Collector.Upbit.Types;
+using System.Collections.Generic;
 
 namespace CCXT.Collector.Library
 {
     /// <summary>
     /// 
     /// </summary>
-    public class STradeItem
+    public class STradeItem : UTradeItem
     {
-        /// <summary>
-        /// I,U,D
-        /// </summary>
-        public string action
-        {
-            get;
-            set;
-        }
-
-        /// <summary>
-        ///
-        /// </summary>
-        public string side
-        {
-            get;
-            set;
-        }
-
-        /// <summary>
-        /// quantity
-        /// </summary>
-        public decimal quantity
-        {
-            get;
-            set;
-        }
-
-        /// <summary>
-        /// price
-        /// </summary>
-        public decimal price
-        {
-            get;
-            set;
-        }
     }
 
     /// <summary>

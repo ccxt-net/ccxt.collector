@@ -92,19 +92,27 @@ namespace CCXT.Collector.Library
             }
         }
 
+        private static bool? __upbit_use_polling_bookticker = null;
+
         public static bool UpbitUsePollingBookticker
         {
             get
             {
-                return CConfig.GetAppBoolean("upbit.use.polling.bookticker");
+                if (__upbit_use_polling_bookticker == null)
+                    __upbit_use_polling_bookticker = CConfig.GetAppBoolean("upbit.use.polling.bookticker");
+                return __upbit_use_polling_bookticker.Value;
             }
         }
+
+        private static bool? __upbit_use_publish_trade = null;
 
         public static bool UpbitUsePublishTrade
         {
             get
             {
-                return CConfig.GetAppBoolean("upbit.use.publish.trade");
+                if (__upbit_use_publish_trade == null)
+                    __upbit_use_publish_trade = CConfig.GetAppBoolean("upbit.use.publish.trade");
+                return __upbit_use_publish_trade.Value;
             }
         }
 

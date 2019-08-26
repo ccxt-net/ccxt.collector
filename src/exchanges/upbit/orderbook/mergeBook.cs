@@ -29,18 +29,12 @@ namespace CCXT.Collector.Upbit.Orderbook
 
                 if (KConfig.UpbitUsePublishTrade == true)
                 {
-                    var _str = new STrading(UPLogger.exchange_name, "trade", tradeItem.symbol)
+                    var _str = new STrading(UPLogger.exchange_name, "wtrades", tradeItem.symbol)
                     {
                         sequential_id = tradeItem.sequential_id,
                         data = new List<STradeItem>
                         {
-                            new STradeItem
-                            {
-                                action = "U",
-                                side = tradeItem.ask_bid,
-                                quantity = tradeItem.trade_volume,
-                                price = tradeItem.trade_price
-                            }
+                            (STradeItem)tradeItem
                         }
                     };
 
@@ -61,7 +55,20 @@ namespace CCXT.Collector.Upbit.Orderbook
                 _qob.stream = stream;
 
                 if (tradeItems.data != null)
+                {
                     _result = await updateTradeItem(_qob, tradeItems.data.ToList<UTradeItem>(), stream);
+
+                    if (KConfig.UpbitUsePublishTrade == true)
+                    {
+                        var _str = new STrading(UPLogger.exchange_name, "atrades", tradeItems.symbol)
+                        {
+                            sequential_id = tradeItems.data.Max(t => t.sequential_id),
+                            data = tradeItems.data.Cast<STradeItem>().ToList()
+                        };
+
+                        await publishTrading(_str);
+                    }
+                }
             }
 
             return _result;
