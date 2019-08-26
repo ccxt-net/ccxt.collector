@@ -71,35 +71,35 @@ namespace CCXT.Collector.Upbit.Orderbook
                 {
                     _result = await updateTradeItem(_qob, tradeItems.data.ToList<UTradeItem>(), stream);
 
-                    if (KConfig.UpbitUsePublishTrade == true)
-                    {
-                        var _str = new STrading(UPLogger.exchange_name, "atrades", tradeItems.symbol)
-                        {
-                            sequential_id = tradeItems.data.Max(t => t.sequential_id)
-                        };
+                    //if (KConfig.UpbitUsePublishTrade == true)
+                    //{
+                    //    var _str = new STrading(UPLogger.exchange_name, "atrades", tradeItems.symbol)
+                    //    {
+                    //        sequential_id = tradeItems.data.Max(t => t.sequential_id)
+                    //    };
 
-                        foreach (var _t in tradeItems.data)
-                        {
-                            _str.data.Add(new STradeItem
-                            {
-                                ask_bid = _t.ask_bid,
-                                change = _t.change,
-                                change_price = _t.change_price,
-                                prev_closing_price = _t.prev_closing_price,
-                                sequential_id = _t.sequential_id,
-                                stream_type = _t.stream_type,
-                                symbol = _t.symbol,
-                                timestamp = _t.timestamp,
-                                trade_date = _t.trade_date,
-                                trade_price = _t.trade_price,
-                                trade_time = _t.trade_time,
-                                trade_timestamp = _t.trade_timestamp,
-                                trade_volume = _t.trade_volume
-                            });
-                        }
+                    //    foreach (var _t in tradeItems.data)
+                    //    {
+                    //        _str.data.Add(new STradeItem
+                    //        {
+                    //            ask_bid = _t.ask_bid,
+                    //            change = _t.change,
+                    //            change_price = _t.change_price,
+                    //            prev_closing_price = _t.prev_closing_price,
+                    //            sequential_id = _t.sequential_id,
+                    //            stream_type = _t.stream_type,
+                    //            symbol = _t.symbol,
+                    //            timestamp = _t.timestamp,
+                    //            trade_date = _t.trade_date,
+                    //            trade_price = _t.trade_price,
+                    //            trade_time = _t.trade_time,
+                    //            trade_timestamp = _t.trade_timestamp,
+                    //            trade_volume = _t.trade_volume
+                    //        });
+                    //    }
 
-                        await publishTrading(_str);
-                    }
+                    //    await publishTrading(_str);
+                    //}
                 }
             }
 
