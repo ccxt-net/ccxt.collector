@@ -118,7 +118,7 @@ namespace CCXT.Collector.Upbit.Orderbook
                         if (_o_json_value.IsSuccessful && _o_json_value.Content[0] == '[')
                         {
                             var _o_json_data = JsonConvert.DeserializeObject<List<UAOrderBook>>(_o_json_value.Content);
-                            _o_json_data[0].type = "arderbook";
+                            _o_json_data[0].type = "apiorderbooks";
 
                             var _o_json_content = JsonConvert.SerializeObject(_o_json_data[0]);
                             Processing.SendReceiveQ(new QMessage { command = "AP", json = _o_json_content });

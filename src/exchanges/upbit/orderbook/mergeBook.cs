@@ -15,7 +15,7 @@ namespace CCXT.Collector.Upbit.Orderbook
         private static ConcurrentDictionary<string, SOrderBook> __qOrderBooks = new ConcurrentDictionary<string, SOrderBook>();
         private static ConcurrentDictionary<string, Settings> __qSettings = new ConcurrentDictionary<string, Settings>();
 
-        private async Task<bool> mergeTradeItem(UTradeItem tradeItem, string stream = "wsctrades")
+        private async Task<bool> mergeTradeItem(UTradeItem tradeItem, string stream = "wscorders")
         {
             var _result = false;
 
@@ -29,7 +29,7 @@ namespace CCXT.Collector.Upbit.Orderbook
 
                 if (KConfig.UpbitUsePublishTrade == true)
                 {
-                    var _str = new STrading(UPLogger.exchange_name, "wtrades", tradeItem.symbol)
+                    var _str = new STrading(UPLogger.exchange_name, "wsctrades", tradeItem.symbol)
                     {
                         sequential_id = tradeItem.sequential_id
                     };
@@ -58,7 +58,7 @@ namespace CCXT.Collector.Upbit.Orderbook
             return _result;
         }
 
-        private async Task<bool> mergeTradeItems(UATrade tradeItems, string stream = "apitrades")
+        private async Task<bool> mergeTradeItems(UATrade tradeItems, string stream = "apiorders")
         {
             var _result = false;
 
@@ -68,39 +68,7 @@ namespace CCXT.Collector.Upbit.Orderbook
                 _qob.stream = stream;
 
                 if (tradeItems.data != null)
-                {
                     _result = await updateTradeItem(_qob, tradeItems.data.ToList<UTradeItem>(), stream);
-
-                    //if (KConfig.UpbitUsePublishTrade == true)
-                    //{
-                    //    var _str = new STrading(UPLogger.exchange_name, "atrades", tradeItems.symbol)
-                    //    {
-                    //        sequential_id = tradeItems.data.Max(t => t.sequential_id)
-                    //    };
-
-                    //    foreach (var _t in tradeItems.data)
-                    //    {
-                    //        _str.data.Add(new STradeItem
-                    //        {
-                    //            ask_bid = _t.ask_bid,
-                    //            change = _t.change,
-                    //            change_price = _t.change_price,
-                    //            prev_closing_price = _t.prev_closing_price,
-                    //            sequential_id = _t.sequential_id,
-                    //            stream_type = _t.stream_type,
-                    //            symbol = _t.symbol,
-                    //            timestamp = _t.timestamp,
-                    //            trade_date = _t.trade_date,
-                    //            trade_price = _t.trade_price,
-                    //            trade_time = _t.trade_time,
-                    //            trade_timestamp = _t.trade_timestamp,
-                    //            trade_volume = _t.trade_volume
-                    //        });
-                    //    }
-
-                    //    await publishTrading(_str);
-                    //}
-                }
             }
 
             return _result;
