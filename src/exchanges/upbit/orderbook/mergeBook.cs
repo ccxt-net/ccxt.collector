@@ -31,12 +31,25 @@ namespace CCXT.Collector.Upbit.Orderbook
                 {
                     var _str = new STrading(UPLogger.exchange_name, "wtrades", tradeItem.symbol)
                     {
-                        sequential_id = tradeItem.sequential_id,
-                        data = new List<STradeItem>
-                        {
-                            (STradeItem)tradeItem
-                        }
+                        sequential_id = tradeItem.sequential_id
                     };
+
+                    _str.data.Add(new STradeItem
+                    {
+                        ask_bid = tradeItem.ask_bid,
+                        change = tradeItem.change,
+                        change_price = tradeItem.change_price,
+                        prev_closing_price = tradeItem.prev_closing_price,
+                        sequential_id = tradeItem.sequential_id,
+                        stream_type = tradeItem.stream_type,
+                        symbol = tradeItem.symbol,
+                        timestamp = tradeItem.timestamp,
+                        trade_date = tradeItem.trade_date,
+                        trade_price = tradeItem.trade_price,
+                        trade_time = tradeItem.trade_time,
+                        trade_timestamp = tradeItem.trade_timestamp,
+                        trade_volume = tradeItem.trade_volume
+                    });
 
                     await publishTrading(_str);
                 }
@@ -62,9 +75,28 @@ namespace CCXT.Collector.Upbit.Orderbook
                     {
                         var _str = new STrading(UPLogger.exchange_name, "atrades", tradeItems.symbol)
                         {
-                            sequential_id = tradeItems.data.Max(t => t.sequential_id),
-                            data = tradeItems.data.Cast<STradeItem>().ToList()
+                            sequential_id = tradeItems.data.Max(t => t.sequential_id)
                         };
+
+                        foreach (var _t in tradeItems.data)
+                        {
+                            _str.data.Add(new STradeItem
+                            {
+                                ask_bid = _t.ask_bid,
+                                change = _t.change,
+                                change_price = _t.change_price,
+                                prev_closing_price = _t.prev_closing_price,
+                                sequential_id = _t.sequential_id,
+                                stream_type = _t.stream_type,
+                                symbol = _t.symbol,
+                                timestamp = _t.timestamp,
+                                trade_date = _t.trade_date,
+                                trade_price = _t.trade_price,
+                                trade_time = _t.trade_time,
+                                trade_timestamp = _t.trade_timestamp,
+                                trade_volume = _t.trade_volume
+                            });
+                        }
 
                         await publishTrading(_str);
                     }
