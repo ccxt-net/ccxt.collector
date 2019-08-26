@@ -87,7 +87,7 @@ namespace CCXT.Collector.Upbit.Orderbook
                             else if (_json_data.stream == "bookticker")
                             {
                                 var _bookticker = JsonConvert.DeserializeObject<SBookTicker>(_message.json);
-                                await snapshotBookticker(_bookticker);
+                                await publishBookticker(_bookticker);
                             }
                         }
                         else if (_message.command == "SS")

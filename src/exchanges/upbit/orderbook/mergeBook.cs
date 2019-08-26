@@ -24,7 +24,28 @@ namespace CCXT.Collector.Upbit.Orderbook
                 var _qob = __qOrderBooks[tradeItem.symbol];
                 _qob.stream = stream;
 
-                _result = await updateTradeItem(_qob, new List<UTradeItem> { tradeItem }, stream);
+                var _trade_items = new List<UTradeItem> { tradeItem };
+                _result = await updateTradeItem(_qob, _trade_items, stream);
+
+                if (KConfig.UpbitUsePublishTrade == true)
+                {
+                    var _str = new STrading(UPLogger.exchange_name, "trade", tradeItem.symbol)
+                    {
+                        sequential_id = tradeItem.sequential_id,
+                        data = new List<STradeItem>
+                        {
+                            new STradeItem
+                            {
+                                action = "U",
+                                side = tradeItem.ask_bid,
+                                quantity = tradeItem.trade_volume,
+                                price = tradeItem.trade_price
+                            }
+                        }
+                    };
+
+                    await publishTrading(_str);
+                }
             }
 
             return _result;
@@ -479,7 +500,18 @@ namespace CCXT.Collector.Upbit.Orderbook
             }
         }
 
-        private async Task snapshotBookticker(SBookTicker sbt)
+        private async Task publishTrading(STrading str)
+        {
+            await Task.Delay(0);
+
+            if (str != null)
+            {
+                var _json_data = JsonConvert.SerializeObject(str);
+                OrderbookQ.Write(_json_data);
+            }
+        }
+
+        private async Task publishBookticker(SBookTicker sbt)
         {
             await Task.Delay(0);
 

@@ -100,6 +100,14 @@ namespace CCXT.Collector.Library
             }
         }
 
+        public static bool UpbitUsePublishTrade
+        {
+            get
+            {
+                return CConfig.GetAppBoolean("upbit.use.publish.trade");
+            }
+        }
+
         private static int? __upbit_polling_sleep = null;
 
         public static int UpbitPollingSleep
