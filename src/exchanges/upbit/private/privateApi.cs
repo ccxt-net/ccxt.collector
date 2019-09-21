@@ -99,7 +99,7 @@ namespace CCXT.Collector.Upbit.Private
 
             var _params = new Dictionary<string, object>();
             {
-                _params.Add("uuid", $"{orderId}");
+                _params.Add("uuid", orderId);
             }
 
             var _response = await privateClient.CallApiGet2Async("/order", _params);
@@ -191,7 +191,7 @@ namespace CCXT.Collector.Upbit.Private
 
             var _params = new Dictionary<string, object>();
             {
-                _params.Add("uuid", $"{orderId}");
+                _params.Add("uuid", orderId);
             }
 
             var _response = await privateClient.CallApiDelete2Async("/order", _params);
@@ -251,9 +251,9 @@ namespace CCXT.Collector.Upbit.Private
         /// </summary>
         /// <param name="currencyId">Currency 코드</param>
         /// <returns></returns>
-        public async Task<ApiResult<List<Withdraw>>> GetWithdraws(string currencyId)
+        public async Task<ApiResult<List<Transfer>>> GetWithdraws(string currencyId)
         {
-            var _result = new ApiResult<List<Withdraw>>();
+            var _result = new ApiResult<List<Transfer>>();
 
             var _params = new Dictionary<string, object>();
             {
@@ -263,7 +263,7 @@ namespace CCXT.Collector.Upbit.Private
             var _response = await privateClient.CallApiGet2Async("/withdraws", _params);
             if (_response.IsSuccessful == true)
             {
-                _result.result = privateClient.DeserializeObject<List<Withdraw>>(_response.Content);
+                _result.result = privateClient.DeserializeObject<List<Transfer>>(_response.Content);
                 _result.SetSuccess();
             }
             else
@@ -280,19 +280,19 @@ namespace CCXT.Collector.Upbit.Private
         /// </summary>
         /// <param name="withdrawId"></param>
         /// <returns></returns>
-        public async Task<ApiResult<Withdraw>> GetWithdraw(string withdrawId)
+        public async Task<ApiResult<Transfer>> GetWithdraw(string withdrawId)
         {
-            var _result = new ApiResult<Withdraw>();
+            var _result = new ApiResult<Transfer>();
 
             var _params = new Dictionary<string, object>();
             {
-                _params.Add("uuid", $"{withdrawId}");
+                _params.Add("uuid", withdrawId);
             }
 
             var _response = await privateClient.CallApiGet2Async("/withdraw", _params);
             if (_response.IsSuccessful == true)
             {
-                _result.result = privateClient.DeserializeObject<Withdraw>(_response.Content);
+                _result.result = privateClient.DeserializeObject<Transfer>(_response.Content);
                 _result.SetSuccess();
             }
             else
@@ -340,9 +340,9 @@ namespace CCXT.Collector.Upbit.Private
         /// <param name="amount">출금 코인 수량</param>
         /// <param name="address">출금 지갑 주소</param>
         /// <returns></returns>
-        public async Task<ApiResult<Withdraw>> WithdrawsCoin(string currencyId, decimal amount, string address)
+        public async Task<ApiResult<Transfer>> WithdrawsCoin(string currencyId, decimal amount, string address)
         {
-            var _result = new ApiResult<Withdraw>();
+            var _result = new ApiResult<Transfer>();
 
             var _params = new Dictionary<string, object>();
             {
@@ -354,7 +354,183 @@ namespace CCXT.Collector.Upbit.Private
             var _response = await privateClient.CallApiPost2Async("/withdraws/coin", _params);
             if (_response.IsSuccessful == true)
             {
-                _result.result = privateClient.DeserializeObject<Withdraw>(_response.Content);
+                _result.result = privateClient.DeserializeObject<Transfer>(_response.Content);
+                _result.SetSuccess();
+            }
+            else
+            {
+                var _message = privateClient.GetResponseMessage(_response);
+                _result.SetFailure(_message.message);
+            }
+
+            return _result;
+        }
+
+        /// <summary>
+        /// 원화 출금하기: 원화 출금을 요청한다.등록된 출금 계좌로 출금된다.
+        /// </summary>
+        /// <param name="amount"></param>
+        /// <returns></returns>
+        public async Task<ApiResult<Transfer>> WithdrawsKrw(decimal amount)
+        {
+            var _result = new ApiResult<Transfer>();
+
+            var _params = new Dictionary<string, object>();
+            {
+                _params.Add("amount", amount);
+            }
+
+            var _response = await privateClient.CallApiPost2Async("/withdraws/krw", _params);
+            if (_response.IsSuccessful == true)
+            {
+                _result.result = privateClient.DeserializeObject<Transfer>(_response.Content);
+                _result.SetSuccess();
+            }
+            else
+            {
+                var _message = privateClient.GetResponseMessage(_response);
+                _result.SetFailure(_message.message);
+            }
+
+            return _result;
+        }
+
+        /// <summary>
+        /// 입금 리스트 조회
+        /// </summary>
+        /// <param name="currencyId"></param>
+        /// <returns></returns>
+        public async Task<ApiResult<List<Transfer>>> GetDeposits(string currencyId)
+        {
+            var _result = new ApiResult<List<Transfer>>();
+
+            var _params = new Dictionary<string, object>();
+            {
+                _params.Add("currency", currencyId);
+            }
+
+            var _response = await privateClient.CallApiGet2Async("/deposits", _params);
+            if (_response.IsSuccessful == true)
+            {
+                _result.result = privateClient.DeserializeObject<List<Transfer>>(_response.Content);
+                _result.SetSuccess();
+            }
+            else
+            {
+                var _message = privateClient.GetResponseMessage(_response);
+                _result.SetFailure(_message.message);
+            }
+
+            return _result;
+        }
+
+        /// <summary>
+        /// 개별 입금 조회
+        /// </summary>
+        /// <param name="depositId"></param>
+        /// <returns></returns>
+        public async Task<ApiResult<Transfer>> GetDeposit(string depositId)
+        {
+            var _result = new ApiResult<Transfer>();
+
+            var _params = new Dictionary<string, object>();
+            {
+                _params.Add("uuid", depositId);
+            }
+
+            var _response = await privateClient.CallApiGet2Async("/deposit", _params);
+            if (_response.IsSuccessful == true)
+            {
+                _result.result = privateClient.DeserializeObject<Transfer>(_response.Content);
+                _result.SetSuccess();
+            }
+            else
+            {
+                var _message = privateClient.GetResponseMessage(_response);
+                _result.SetFailure(_message.message);
+            }
+
+            return _result;
+        }
+
+        /// <summary>
+        /// 입금 주소 생성 요청: 입금 주소 생성을 요청한다.
+        /// </summary>
+        /// <param name="currencyId"></param>
+        /// <returns></returns>
+        public async Task<ApiResult<Address>> DepositsGenerateCoinAddress(string currencyId)
+        {
+            var _result = new ApiResult<Address>();
+
+            var _params = new Dictionary<string, object>();
+            {
+                _params.Add("currency", currencyId);
+            }
+
+            var _response = await privateClient.CallApiPost2Async("/deposits/generate_coin_address", _params);
+            if (_response.IsSuccessful == true)
+            {
+                var _generate = privateClient.DeserializeObject<GenerateAddress>(_response.Content);
+                if (_generate.success == false)
+                {
+                    _result.result = _generate;
+                    _result.SetSuccess();
+                }
+                else
+                {
+                    _result.SetFailure(_generate.message);
+                }
+            }
+            else
+            {
+                var _message = privateClient.GetResponseMessage(_response);
+                _result.SetFailure(_message.message);
+            }
+
+            return _result;
+        }
+
+        /// <summary>
+        /// 전체 입금 주소 조회: 내가 보유한 자산 리스트를 보여줍니다.
+        /// </summary>
+        /// <returns></returns>
+        public async Task<ApiResult<List<Address>>> GetDepositsCoinAddresses()
+        {
+            var _result = new ApiResult<List<Address>>();
+
+            var _response = await privateClient.CallApiGet2Async("/deposits/coin_addresses");
+            if (_response.IsSuccessful == true)
+            {
+                _result.result = privateClient.DeserializeObject<List<Address>>(_response.Content);
+                _result.SetSuccess();
+            }
+            else
+            {
+                var _message = privateClient.GetResponseMessage(_response);
+                _result.SetFailure(_message.message);
+            }
+
+            return _result;
+        }
+
+        /// <summary>
+        /// 개별 입금 주소 조회
+        /// </summary>
+        /// <param name="currencyId"></param>
+        /// <returns></returns>
+        public async Task<ApiResult<Address>> GetDepositsCoinAddress(string currencyId)
+        {
+            var _result = new ApiResult<Address>();
+
+            var _params = new Dictionary<string, object>();
+            {
+                _params.Add("currency", currencyId);
+            }
+
+            var _response = await privateClient.CallApiGet2Async("/deposits/coin_address", _params);
+            if (_response.IsSuccessful == true)
+            {
+                _result.result = privateClient.DeserializeObject<Address>(_response.Content);
                 _result.SetSuccess();
             }
             else
