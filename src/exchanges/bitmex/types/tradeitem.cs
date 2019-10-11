@@ -1,4 +1,4 @@
-﻿namespace CCXT.Collector.Bitmex.Types
+﻿namespace CCXT.Collector.BitMEX.Types
 {
     /// <summary>
     ///

@@ -1,6 +1,6 @@
 ﻿using CCXT.Collector.KebHana.Types;
 using CCXT.Collector.Library;
-using CCXT.NET.Configuration;
+using OdinSdk.BaseLib.Configuration;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -9,7 +9,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace CCXT.Collector.KebHana.Collector
+namespace CCXT.Collector.KebHana.Public
 {
     // var exView = {
     //"날짜": "2019년 07월 22일 14:49",
@@ -59,7 +59,7 @@ namespace CCXT.Collector.KebHana.Collector
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         public static KebExchange LastExchange
         {

@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace CCXT.Collector.Library
+namespace CCXT.Collector.Library.Types
 {
     /// <summary>
     /// item of orderbook

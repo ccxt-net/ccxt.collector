@@ -1,23 +1,37 @@
-﻿using CCXT.NET.Serialize;
+﻿using OdinSdk.BaseLib.Serialize;
 using RestSharp;
-using System.Collections.Generic;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace CCXT.Collector.Library
 {
-    public class KRestClient
+    public class KRestClient : OdinSdk.BaseLib.Coin.XApiClient
     {
         private const string __content_type = "application/json";
         private const string __user_agent = "odinsoft - ccxt.collector / 1.0.2019.08";
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public KRestClient() : base("")
+        {
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="division"></param>
+        public KRestClient(string division) : base(division)
+        {
+        }
 
         /// <summary>
         ///
         /// </summary>
         /// <param name="baseurl"></param>
         /// <returns></returns>
-        public IRestClient CreateJsonClient(string baseurl)
+        public override IRestClient CreateJsonClient(string baseurl)
         {
             var _client = new RestClient(baseurl)
             {
@@ -32,7 +46,6 @@ namespace CCXT.Collector.Library
 
             return _client;
         }
-
 
         /// <summary>
         ///
@@ -51,26 +64,6 @@ namespace CCXT.Collector.Library
             _client.AddHandler(__content_type, () => new RestSharpJsonNetDeserializer());
 
             return _client;
-        }
-
-        /// <summary>
-        ///
-        /// </summary>
-        /// <param name="endpoint">api link address of a function</param>
-        /// <param name="args">Add additional attributes for each exchange</param>
-        /// <returns></returns>
-        public IRestRequest CreateJsonRequest(string endpoint, Dictionary<string, object> args)
-        {
-            var _request = new RestRequest(endpoint, Method.GET)
-            {
-                RequestFormat = DataFormat.Json,
-                JsonSerializer = new RestSharpJsonNetSerializer()
-            };
-
-            foreach (var _arg in args)
-                _request.AddParameter(_arg.Key, _arg.Value);
-
-            return _request;
         }
 
         /// <summary>
@@ -104,7 +97,6 @@ namespace CCXT.Collector.Library
 
             return _result;
         }
-
 
         /// <summary>
         ///

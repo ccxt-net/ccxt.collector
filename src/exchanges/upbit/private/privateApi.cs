@@ -1,13 +1,12 @@
-﻿using CCXT.NET.Coin;
-using CCXT.NET.Coin.Private;
-using CCXT.NET.Coin.Types;
-using CCXT.NET.Upbit;
+﻿using OdinSdk.BaseLib.Coin;
+using OdinSdk.BaseLib.Coin.Private;
+using OdinSdk.BaseLib.Coin.Types;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace CCXT.Collector.Upbit.Private
 {
-    public class PrivateApi : CCXT.NET.Coin.Private.PrivateApi, IPrivateApi
+    public class PrivateApi : OdinSdk.BaseLib.Coin.Private.PrivateApi, IPrivateApi
     {
         private readonly string __connect_key;
         private readonly string __secret_key;
@@ -93,9 +92,9 @@ namespace CCXT.Collector.Upbit.Private
         /// </summary>
         /// <param name="orderId">주문 UUID</param>
         /// <returns></returns>
-        public async Task<ApiResult<Order>> GetOrder(string orderId)
+        public async Task<ApiResult<UMyOrderItem>> GetOrder(string orderId)
         {
-            var _result = new ApiResult<Order>();
+            var _result = new ApiResult<UMyOrderItem>();
 
             var _params = new Dictionary<string, object>();
             {
@@ -105,7 +104,7 @@ namespace CCXT.Collector.Upbit.Private
             var _response = await privateClient.CallApiGet2Async("/order", _params);
             if (_response.IsSuccessful == true)
             {
-                _result.result = privateClient.DeserializeObject<Order>(_response.Content);
+                _result.result = privateClient.DeserializeObject<UMyOrderItem>(_response.Content);
                 _result.SetSuccess();
             }
             else
@@ -123,9 +122,9 @@ namespace CCXT.Collector.Upbit.Private
         /// <param name="baseId">코인명</param>
         /// <param name="quoteId">화폐명</param>
         /// <returns></returns>
-        public async Task<ApiResult<List<Order>>> GetOrders(string baseId, string quoteId)
+        public async Task<ApiResult<List<UMyOrderItem>>> GetOrders(string baseId, string quoteId)
         {
-            var _result = new ApiResult<List<Order>>();
+            var _result = new ApiResult<List<UMyOrderItem>>();
 
             var _params = new Dictionary<string, object>();
             {
@@ -138,7 +137,7 @@ namespace CCXT.Collector.Upbit.Private
             var _response = await privateClient.CallApiGet2Async("/orders", _params);
             if (_response.IsSuccessful == true)
             {
-                _result.result = privateClient.DeserializeObject<List<Order>>(_response.Content);
+                _result.result = privateClient.DeserializeObject<List<UMyOrderItem>>(_response.Content);
                 _result.SetSuccess();
             }
             else
@@ -154,9 +153,9 @@ namespace CCXT.Collector.Upbit.Private
         /// 전체 주문 리스트 조회: 전체 주문 리스트를 조회한다.
         /// </summary>
         /// <returns></returns>
-        public async Task<ApiResult<List<Order>>> GetAllOrders()
+        public async Task<ApiResult<List<UMyOrderItem>>> GetAllOrders()
         {
-            var _result = new ApiResult<List<Order>>();
+            var _result = new ApiResult<List<UMyOrderItem>>();
 
             var _params = new Dictionary<string, object>();
             {
@@ -168,7 +167,7 @@ namespace CCXT.Collector.Upbit.Private
             var _response = await privateClient.CallApiGet2Async("/orders", _params);
             if (_response.IsSuccessful == true)
             {
-                _result.result = privateClient.DeserializeObject<List<Order>>(_response.Content);
+                _result.result = privateClient.DeserializeObject<List<UMyOrderItem>>(_response.Content);
                 _result.SetSuccess();
             }
             else
@@ -185,9 +184,9 @@ namespace CCXT.Collector.Upbit.Private
         /// </summary>
         /// <param name="orderId">주문 UUID</param>
         /// <returns></returns>
-        public async Task<ApiResult<Order>> DeleteOrder(string orderId)
+        public async Task<ApiResult<UMyOrderItem>> DeleteOrder(string orderId)
         {
-            var _result = new ApiResult<Order>();
+            var _result = new ApiResult<UMyOrderItem>();
 
             var _params = new Dictionary<string, object>();
             {
@@ -196,8 +195,8 @@ namespace CCXT.Collector.Upbit.Private
 
             var _response = await privateClient.CallApiDelete2Async("/order", _params);
             if (_response.IsSuccessful == true)
-            {                
-                _result.result = privateClient.DeserializeObject<Order>(_response.Content);
+            {
+                _result.result = privateClient.DeserializeObject<UMyOrderItem>(_response.Content);
                 _result.SetSuccess();
             }
             else
@@ -218,9 +217,9 @@ namespace CCXT.Collector.Upbit.Private
         /// <param name="price">유닛당 주문 가격</param>
         /// <param name="sideType">주문 타입</param>
         /// <returns></returns>
-        public async Task<ApiResult<Order>> PutOrder(string baseId, string quoteId, decimal quantity, decimal price, SideType sideType)
+        public async Task<ApiResult<UMyOrderItem>> PutOrder(string baseId, string quoteId, decimal quantity, decimal price, SideType sideType)
         {
-            var _result = new ApiResult<Order>();
+            var _result = new ApiResult<UMyOrderItem>();
 
             var _params = new Dictionary<string, object>();
             {
@@ -234,7 +233,7 @@ namespace CCXT.Collector.Upbit.Private
             var _response = await privateClient.CallApiPost2Async("/orders", _params);
             if (_response.IsSuccessful == true)
             {
-                _result.result = privateClient.DeserializeObject<Order>(_response.Content);
+                _result.result = privateClient.DeserializeObject<UMyOrderItem>(_response.Content);
                 _result.SetSuccess();
             }
             else
@@ -251,9 +250,9 @@ namespace CCXT.Collector.Upbit.Private
         /// </summary>
         /// <param name="currencyId">Currency 코드</param>
         /// <returns></returns>
-        public async Task<ApiResult<List<Transfer>>> GetWithdraws(string currencyId)
+        public async Task<ApiResult<List<UTransferItem>>> GetWithdraws(string currencyId)
         {
-            var _result = new ApiResult<List<Transfer>>();
+            var _result = new ApiResult<List<UTransferItem>>();
 
             var _params = new Dictionary<string, object>();
             {
@@ -263,7 +262,7 @@ namespace CCXT.Collector.Upbit.Private
             var _response = await privateClient.CallApiGet2Async("/withdraws", _params);
             if (_response.IsSuccessful == true)
             {
-                _result.result = privateClient.DeserializeObject<List<Transfer>>(_response.Content);
+                _result.result = privateClient.DeserializeObject<List<UTransferItem>>(_response.Content);
                 _result.SetSuccess();
             }
             else
@@ -280,9 +279,9 @@ namespace CCXT.Collector.Upbit.Private
         /// </summary>
         /// <param name="withdrawId"></param>
         /// <returns></returns>
-        public async Task<ApiResult<Transfer>> GetWithdraw(string withdrawId)
+        public async Task<ApiResult<UTransferItem>> GetWithdraw(string withdrawId)
         {
-            var _result = new ApiResult<Transfer>();
+            var _result = new ApiResult<UTransferItem>();
 
             var _params = new Dictionary<string, object>();
             {
@@ -292,7 +291,7 @@ namespace CCXT.Collector.Upbit.Private
             var _response = await privateClient.CallApiGet2Async("/withdraw", _params);
             if (_response.IsSuccessful == true)
             {
-                _result.result = privateClient.DeserializeObject<Transfer>(_response.Content);
+                _result.result = privateClient.DeserializeObject<UTransferItem>(_response.Content);
                 _result.SetSuccess();
             }
             else
@@ -340,9 +339,9 @@ namespace CCXT.Collector.Upbit.Private
         /// <param name="amount">출금 코인 수량</param>
         /// <param name="address">출금 지갑 주소</param>
         /// <returns></returns>
-        public async Task<ApiResult<Transfer>> WithdrawsCoin(string currencyId, decimal amount, string address)
+        public async Task<ApiResult<UTransferItem>> WithdrawsCoin(string currencyId, decimal amount, string address)
         {
-            var _result = new ApiResult<Transfer>();
+            var _result = new ApiResult<UTransferItem>();
 
             var _params = new Dictionary<string, object>();
             {
@@ -354,7 +353,7 @@ namespace CCXT.Collector.Upbit.Private
             var _response = await privateClient.CallApiPost2Async("/withdraws/coin", _params);
             if (_response.IsSuccessful == true)
             {
-                _result.result = privateClient.DeserializeObject<Transfer>(_response.Content);
+                _result.result = privateClient.DeserializeObject<UTransferItem>(_response.Content);
                 _result.SetSuccess();
             }
             else
@@ -371,9 +370,9 @@ namespace CCXT.Collector.Upbit.Private
         /// </summary>
         /// <param name="amount"></param>
         /// <returns></returns>
-        public async Task<ApiResult<Transfer>> WithdrawsKrw(decimal amount)
+        public async Task<ApiResult<UTransferItem>> WithdrawsKrw(decimal amount)
         {
-            var _result = new ApiResult<Transfer>();
+            var _result = new ApiResult<UTransferItem>();
 
             var _params = new Dictionary<string, object>();
             {
@@ -383,7 +382,7 @@ namespace CCXT.Collector.Upbit.Private
             var _response = await privateClient.CallApiPost2Async("/withdraws/krw", _params);
             if (_response.IsSuccessful == true)
             {
-                _result.result = privateClient.DeserializeObject<Transfer>(_response.Content);
+                _result.result = privateClient.DeserializeObject<UTransferItem>(_response.Content);
                 _result.SetSuccess();
             }
             else
@@ -400,9 +399,9 @@ namespace CCXT.Collector.Upbit.Private
         /// </summary>
         /// <param name="currencyId"></param>
         /// <returns></returns>
-        public async Task<ApiResult<List<Transfer>>> GetDeposits(string currencyId)
+        public async Task<ApiResult<List<UTransferItem>>> GetDeposits(string currencyId)
         {
-            var _result = new ApiResult<List<Transfer>>();
+            var _result = new ApiResult<List<UTransferItem>>();
 
             var _params = new Dictionary<string, object>();
             {
@@ -412,7 +411,7 @@ namespace CCXT.Collector.Upbit.Private
             var _response = await privateClient.CallApiGet2Async("/deposits", _params);
             if (_response.IsSuccessful == true)
             {
-                _result.result = privateClient.DeserializeObject<List<Transfer>>(_response.Content);
+                _result.result = privateClient.DeserializeObject<List<UTransferItem>>(_response.Content);
                 _result.SetSuccess();
             }
             else
@@ -429,9 +428,9 @@ namespace CCXT.Collector.Upbit.Private
         /// </summary>
         /// <param name="depositId"></param>
         /// <returns></returns>
-        public async Task<ApiResult<Transfer>> GetDeposit(string depositId)
+        public async Task<ApiResult<UTransferItem>> GetDeposit(string depositId)
         {
-            var _result = new ApiResult<Transfer>();
+            var _result = new ApiResult<UTransferItem>();
 
             var _params = new Dictionary<string, object>();
             {
@@ -441,7 +440,7 @@ namespace CCXT.Collector.Upbit.Private
             var _response = await privateClient.CallApiGet2Async("/deposit", _params);
             if (_response.IsSuccessful == true)
             {
-                _result.result = privateClient.DeserializeObject<Transfer>(_response.Content);
+                _result.result = privateClient.DeserializeObject<UTransferItem>(_response.Content);
                 _result.SetSuccess();
             }
             else

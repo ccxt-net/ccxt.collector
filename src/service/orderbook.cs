@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace CCXT.Collector.Service
 {
-    public class OrderbookQ : FactoryQ
+    public class OrderbookQ : FactoryX
     {
         public OrderbookQ(
              string host_name = null, string ip_address = null, string virtual_host = null,
@@ -45,7 +45,7 @@ namespace CCXT.Collector.Service
 
         public async Task Start(CancellationTokenSource tokenSource)
         {
-            LoggerQ.WriteO($"orderbook service start...", FactoryQ.RootQName);
+            LoggerQ.WriteO($"orderbook service start...", FactoryX.RootQName);
 
             var _processing = Task.Run(async () =>
             {
@@ -99,7 +99,7 @@ namespace CCXT.Collector.Service
 
             await Task.WhenAll(_processing);
 
-            LoggerQ.WriteO($"orderbook service stopped...", FactoryQ.RootQName);
+            LoggerQ.WriteO($"orderbook service stopped...", FactoryX.RootQName);
         }
     }
 }

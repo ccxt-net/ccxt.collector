@@ -6,7 +6,7 @@ using System.Collections.Concurrent;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace CCXT.Collector.Upbit.Orderbook
+namespace CCXT.Collector.Upbit.Public
 {
     public partial class Processing
     {

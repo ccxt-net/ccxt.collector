@@ -1,6 +1,6 @@
 ﻿using CCXT.Collector.Library;
 using CCXT.Collector.Library.Types;
-using CCXT.NET.Configuration;
+using OdinSdk.BaseLib.Configuration;
 using System;
 using System.Collections.Concurrent;
 using System.Net.WebSockets;
@@ -8,7 +8,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace CCXT.Collector.Binance.Orderbook
+namespace CCXT.Collector.Binance.Public
 {
     /*
      * 1. wss://stream.binance.com:9443/ws/bnbbtc@depth 스트림을 엽니다.
@@ -23,7 +23,7 @@ namespace CCXT.Collector.Binance.Orderbook
      */
 
     /// <summary>
-    /// 
+    ///
     /// </summary>
     public partial class WebSocket
     {

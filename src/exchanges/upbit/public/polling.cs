@@ -1,18 +1,15 @@
 ﻿using CCXT.Collector.Library;
 using CCXT.Collector.Library.Types;
 using CCXT.Collector.Upbit.Types;
-using CCXT.NET.Coin.Public;
-using CCXT.NET.Configuration;
-using CCXT.NET.Upbit.Public;
+using OdinSdk.BaseLib.Configuration;
 using Newtonsoft.Json;
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace CCXT.Collector.Upbit.Orderbook
+namespace CCXT.Collector.Upbit.Public
 {
     public class Polling : KRestClient
     {
@@ -213,7 +210,7 @@ namespace CCXT.Collector.Upbit.Orderbook
                                 exchange = UPLogger.exchange_name,
                                 stream = "bookticker",
                                 sequential_id = _last_limit_milli_secs,
-                                data = _b_json_data.Select(o => 
+                                data = _b_json_data.Select(o =>
                                 {
                                     var _ask = o.orderbook_units.OrderBy(a => a.ask_price).First();
                                     var _bid = o.orderbook_units.OrderBy(a => a.bid_price).Last();
@@ -275,7 +272,7 @@ namespace CCXT.Collector.Upbit.Orderbook
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         public static UExchangeItem LastExchange
         {
@@ -305,7 +302,7 @@ namespace CCXT.Collector.Upbit.Orderbook
                     {
                         await Task.Delay(0);
 
-                        var _waiting_milli_secs = (CUnixTime.NowMilli - 0) / (600  * 1000);
+                        var _waiting_milli_secs = (CUnixTime.NowMilli - 0) / (600 * 1000);
                         if (_waiting_milli_secs == _last_limit_milli_secs)
                         {
                             var _waiting = tokenSource.Token.WaitHandle.WaitOne(0);

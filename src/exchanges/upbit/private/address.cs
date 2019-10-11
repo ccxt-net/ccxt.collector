@@ -34,7 +34,7 @@
     }
 
     /// <summary>
-    /// 
+    ///
     /// </summary>
     public class GenerateAddress : Address
     {

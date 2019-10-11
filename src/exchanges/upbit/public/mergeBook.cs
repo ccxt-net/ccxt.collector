@@ -1,6 +1,6 @@
 ﻿using CCXT.Collector.Library;
-using CCXT.Collector.Service;
 using CCXT.Collector.Library.Types;
+using CCXT.Collector.Service;
 using CCXT.Collector.Upbit.Types;
 using Newtonsoft.Json;
 using System.Collections.Concurrent;
@@ -8,7 +8,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace CCXT.Collector.Upbit.Orderbook
+namespace CCXT.Collector.Upbit.Public
 {
     public partial class Processing
     {
@@ -34,7 +34,7 @@ namespace CCXT.Collector.Upbit.Orderbook
                         sequential_id = tradeItem.sequential_id
                     };
 
-                    _str.data.Add(new STradeItem
+                    _str.data.Add(new UTradeItem
                     {
                         ask_bid = tradeItem.ask_bid,
                         change = tradeItem.change,

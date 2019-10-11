@@ -1,6 +1,6 @@
 ﻿using CCXT.Collector.Library;
-using CCXT.NET.Configuration;
-using CCXT.NET.Extension;
+using OdinSdk.BaseLib.Configuration;
+using OdinSdk.BaseLib.Extension;
 using RabbitMQ.Client;
 using System;
 using System.Collections.Concurrent;
@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace CCXT.Collector.Service
 {
-    public class LoggerQ : FactoryQ
+    public class LoggerQ : FactoryX
     {
         internal class PLogger
         {
@@ -107,7 +107,7 @@ namespace CCXT.Collector.Service
 
         public async Task Start(CancellationTokenSource tokenSource)
         {
-            Console.Out.WriteLine($"{CUnixTime.UtcNow.ToLogDateTimeString()} {FactoryQ.RootQName} logger service start...");
+            Console.Out.WriteLine($"{CUnixTime.UtcNow.ToLogDateTimeString()} {FactoryX.RootQName} logger service start...");
 
             var _processing = Task.Run(async () =>
             {
@@ -172,7 +172,7 @@ namespace CCXT.Collector.Service
 
             await Task.WhenAll(_processing);
 
-            Console.Out.WriteLine($"{CUnixTime.UtcNow.ToLogDateTimeString()} {FactoryQ.RootQName} logger service stopped...");
+            Console.Out.WriteLine($"{CUnixTime.UtcNow.ToLogDateTimeString()} {FactoryX.RootQName} logger service stopped...");
         }
     }
 }

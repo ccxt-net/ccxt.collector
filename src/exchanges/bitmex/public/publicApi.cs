@@ -1,12 +1,12 @@
-﻿using CCXT.Collector.Library;
-using CCXT.NET.BitMEX.Public;
-using CCXT.NET.Coin.Public;
-using CCXT.NET.Converter;
+﻿using CCXT.Collector.BitMEX.Types;
+using CCXT.Collector.Library;
 using Newtonsoft.Json;
+using OdinSdk.BaseLib.Coin.Public;
+using OdinSdk.BaseLib.Converter;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace CCXT.Collector.Bitmex
+namespace CCXT.Collector.BitMEX.Public
 {
     public class PublicApi : KRestClient
     {
@@ -103,7 +103,7 @@ namespace CCXT.Collector.Bitmex
                     var _tick_size = _m.tickSize;
                     var _max_price = _m.maxPrice;
 
-                    _m.limit = new MarketLimits
+                    _m.limits = new MarketLimits
                     {
                         quantity = new MarketMinMax
                         {

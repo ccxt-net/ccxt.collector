@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace CCXT.Collector.Bitmex.Types
+namespace CCXT.Collector.BitMEX.Types
 {
     /// <summary>
     ///

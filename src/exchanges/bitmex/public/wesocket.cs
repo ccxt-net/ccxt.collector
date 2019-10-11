@@ -1,6 +1,6 @@
 ﻿using CCXT.Collector.Library;
 using CCXT.Collector.Library.Types;
-using CCXT.NET.Configuration;
+using OdinSdk.BaseLib.Configuration;
 using System;
 using System.Collections.Concurrent;
 using System.Net.WebSockets;
@@ -8,7 +8,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace CCXT.Collector.Bitmex.Orderbook
+namespace CCXT.Collector.BitMEX.Public
 {
     public partial class WebSocket
     {

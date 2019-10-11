@@ -1,67 +1,32 @@
-﻿using System.Collections.Generic;
-
-namespace CCXT.Collector.Upbit.Types
+﻿namespace CCXT.Collector.Upbit.Public
 {
-    /// <summary>
-    /// item of orderbook
-    /// </summary>
-    public class UOrderBookItem
-    {
-        /// <summary>
-        ///
-        /// </summary>
-        public virtual decimal ask_price
-        {
-            get;
-            set;
-        }
-
-        /// <summary>
-        ///
-        /// </summary>
-        public virtual decimal ask_size
-        {
-            get;
-            set;
-        }
-
-        /// <summary>
-        ///
-        /// </summary>
-        public virtual decimal bid_price
-        {
-            get;
-            set;
-        }
-
-        /// <summary>
-        ///
-        /// </summary>
-        public virtual decimal bid_size
-        {
-            get;
-            set;
-        }
-    }
-
     /// <summary>
     ///
     /// </summary>
-    public class UOrderBook
+    public class UTradeItem
     {
-        /// <summary>
-        ///
-        /// </summary>
-        public virtual string type
-        {
-            get;
-            set;
-        }
-
         /// <summary>
         ///
         /// </summary>
         public virtual string symbol
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        ///
+        /// </summary>
+        public virtual string trade_date
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        ///
+        /// </summary>
+        public virtual string trade_time
         {
             get;
             set;
@@ -79,7 +44,7 @@ namespace CCXT.Collector.Upbit.Types
         /// <summary>
         ///
         /// </summary>
-        public virtual decimal total_ask_size
+        public virtual long trade_timestamp
         {
             get;
             set;
@@ -88,7 +53,7 @@ namespace CCXT.Collector.Upbit.Types
         /// <summary>
         ///
         /// </summary>
-        public virtual decimal total_bid_size
+        public virtual decimal trade_price
         {
             get;
             set;
@@ -97,7 +62,52 @@ namespace CCXT.Collector.Upbit.Types
         /// <summary>
         ///
         /// </summary>
-        public virtual List<UOrderBookItem> orderbook_units
+        public virtual decimal trade_volume
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        ///
+        /// </summary>
+        public virtual decimal prev_closing_price
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        ///
+        /// </summary>
+        public virtual string change
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        ///
+        /// </summary>
+        public virtual decimal change_price
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        ///
+        /// </summary>
+        public virtual string ask_bid
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        ///
+        /// </summary>
+        public virtual long sequential_id
         {
             get;
             set;

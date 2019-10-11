@@ -5,7 +5,7 @@ using System.Collections.Generic;
 namespace CCXT.Collector.KebHana.Types
 {
     /// <summary>
-    /// 
+    ///
     /// </summary>
     public class KebExchange
     {
@@ -20,7 +20,7 @@ namespace CCXT.Collector.KebHana.Types
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         public long sequential_id
         {
@@ -37,11 +37,10 @@ namespace CCXT.Collector.KebHana.Types
             get;
             set;
         }
-
     }
 
     /// <summary>
-    /// 
+    ///
     /// </summary>
     public class KebExchangeItem
     {
@@ -53,7 +52,7 @@ namespace CCXT.Collector.KebHana.Types
             get;
             set;
         }
-        
+
         /// <summary>
         /// 통화명 (미국 USD)
         /// </summary>
@@ -83,7 +82,6 @@ namespace CCXT.Collector.KebHana.Types
             set;
         }
 
-
         /// <summary>
         /// 현찰파실떄
         /// </summary>
@@ -93,7 +91,6 @@ namespace CCXT.Collector.KebHana.Types
             get;
             set;
         }
-
 
         /// <summary>
         /// 송금_전신환보내실떄
@@ -105,7 +102,6 @@ namespace CCXT.Collector.KebHana.Types
             set;
         }
 
-
         /// <summary>
         /// 송금_전신환받으실떄
         /// </summary>
@@ -115,7 +111,6 @@ namespace CCXT.Collector.KebHana.Types
             get;
             set;
         }
-
 
         /// <summary>
         /// 매매기준율
@@ -127,9 +122,8 @@ namespace CCXT.Collector.KebHana.Types
             set;
         }
 
-
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <param name="통화명"></param>
         /// <param name="현찰사실때"></param>

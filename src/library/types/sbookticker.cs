@@ -3,7 +3,7 @@
 namespace CCXT.Collector.Library.Types
 {
     /// <summary>
-    /// 
+    ///
     /// </summary>
     public class SBookTickerItem
     {

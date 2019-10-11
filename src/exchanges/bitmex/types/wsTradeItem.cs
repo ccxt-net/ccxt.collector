@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
 
-namespace CCXT.Collector.Bitmex.Types
+namespace CCXT.Collector.BitMEX.Types
 {
     //{
     //    "e": "aggTrade",  // Event type

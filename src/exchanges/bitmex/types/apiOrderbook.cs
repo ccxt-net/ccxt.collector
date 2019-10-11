@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
 
-namespace CCXT.Collector.Bitmex.Types
+namespace CCXT.Collector.BitMEX.Types
 {
     //{
     //    "lastUpdateId": 482182248,

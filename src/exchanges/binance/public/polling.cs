@@ -1,7 +1,7 @@
 ﻿using CCXT.Collector.Binance.Types;
 using CCXT.Collector.Library;
 using CCXT.Collector.Library.Types;
-using CCXT.NET.Configuration;
+using OdinSdk.BaseLib.Configuration;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -9,7 +9,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace CCXT.Collector.Binance.Orderbook
+namespace CCXT.Collector.Binance.Public
 {
     // "rateLimits": [
     //    {

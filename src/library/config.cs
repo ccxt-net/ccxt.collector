@@ -1,4 +1,4 @@
-﻿using CCXT.NET.Configuration;
+﻿using OdinSdk.BaseLib.Configuration;
 using Microsoft.Extensions.Configuration;
 using System.IO;
 
@@ -12,6 +12,7 @@ namespace CCXT.Collector.Library
         public static CConfig CConfig = new CConfig();
 
         #region Binance
+
         public static bool BinanceUsePollingBookticker
         {
             get
@@ -43,9 +44,11 @@ namespace CCXT.Collector.Library
                 return __binance_websocket_retry.Value;
             }
         }
-        #endregion
 
-        #region Bitmex
+        #endregion Binance
+
+        #region BitMEX
+
         public static bool BitmexUsePollingBookticker
         {
             get
@@ -77,9 +80,11 @@ namespace CCXT.Collector.Library
                 return __bitmex_websocket_retry.Value;
             }
         }
-        #endregion
+
+        #endregion BitMEX
 
         #region Upbit
+
         private static int? __upbit_websocket_retry = null;
 
         public static int UpbitWebSocketRetry
@@ -127,9 +132,11 @@ namespace CCXT.Collector.Library
                 return __upbit_polling_sleep.Value;
             }
         }
-        #endregion
+
+        #endregion Upbit
 
         #region Common
+
         public static string CollectorVersion
         {
             get
@@ -193,9 +200,11 @@ namespace CCXT.Collector.Library
                 return __polling_term_time.Value;
             }
         }
-        #endregion
+
+        #endregion Common
 
         #region Arbitrage
+
         public static bool UsePollingArbitrage
         {
             get
@@ -219,9 +228,11 @@ namespace CCXT.Collector.Library
                 return CConfig.GetAppString("arbitrage.quote.names");
             }
         }
-        #endregion
+
+        #endregion Arbitrage
 
         #region Creator
+
         private static IConfigurationBuilder __config_builder = null;
         private static IConfigurationRoot __config_root = null;
 
@@ -236,6 +247,7 @@ namespace CCXT.Collector.Library
 
             CConfig.SetConfigRoot(__config_root);
         }
-        #endregion
+
+        #endregion Creator
     }
 }

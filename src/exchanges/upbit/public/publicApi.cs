@@ -1,12 +1,11 @@
 ﻿using CCXT.Collector.Library;
-using CCXT.NET.Coin.Public;
-using CCXT.NET.Upbit.Public;
 using Newtonsoft.Json;
+using OdinSdk.BaseLib.Coin.Public;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace CCXT.Collector.Upbit
+namespace CCXT.Collector.Upbit.Public
 {
     public class PublicApi : KRestClient
     {
@@ -51,7 +50,7 @@ namespace CCXT.Collector.Upbit
                     _market.takerFee = (_market.quoteId != "KRW" ? 0.25m : 0.05m) / 100;
                     _market.makerFee = (_market.quoteId != "KRW" ? 0.25m : 0.05m) / 100;
 
-                    _market.limit = new MarketLimits
+                    _market.limits = new MarketLimits
                     {
                         quantity = new MarketMinMax
                         {

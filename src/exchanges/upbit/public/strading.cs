@@ -1,15 +1,7 @@
-﻿using CCXT.Collector.Upbit.Types;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
-namespace CCXT.Collector.Library
+namespace CCXT.Collector.Upbit.Public
 {
-    /// <summary>
-    /// 
-    /// </summary>
-    public class STradeItem : UTradeItem
-    {
-    }
-
     /// <summary>
     ///
     /// </summary>
@@ -24,7 +16,7 @@ namespace CCXT.Collector.Library
             this.stream = stream;
             this.symbol = symbol;
 
-            this.data = new List<STradeItem>();
+            this.data = new List<UTradeItem>();
         }
 
         /// <summary>
@@ -66,7 +58,7 @@ namespace CCXT.Collector.Library
         /// <summary>
         ///
         /// </summary>
-        public List<STradeItem> data
+        public List<UTradeItem> data
         {
             get;
             set;

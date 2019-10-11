@@ -1,4 +1,4 @@
-﻿using CCXT.Collector.Bitmex.Types;
+﻿using CCXT.Collector.BitMEX.Types;
 using CCXT.Collector.Library.Types;
 using Newtonsoft.Json;
 using System;
@@ -6,7 +6,7 @@ using System.Collections.Concurrent;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace CCXT.Collector.Bitmex.Orderbook
+namespace CCXT.Collector.BitMEX.Public
 {
     public partial class Processing
     {

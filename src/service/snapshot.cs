@@ -1,8 +1,8 @@
-﻿using CCXT.Collector.Binance.Orderbook;
-using CCXT.Collector.Bitmex.Orderbook;
+﻿using CCXT.Collector.Binance.Public;
+using CCXT.Collector.BitMEX.Public;
 using CCXT.Collector.Library;
 using CCXT.Collector.Library.Types;
-using CCXT.Collector.Upbit.Orderbook;
+using CCXT.Collector.Upbit.Public;
 using Newtonsoft.Json;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
@@ -14,7 +14,7 @@ using System.Threading.Tasks;
 
 namespace CCXT.Collector.Service
 {
-    public class SnapshotQ : FactoryQ
+    public class SnapshotQ : FactoryX
     {
         private static string __last_exchange = "";
         private static string __last_symbol = "";
@@ -85,14 +85,14 @@ namespace CCXT.Collector.Service
                         if (String.IsNullOrEmpty(_s) == true)
                             continue;
 
-                        SnapshotTasks.Add((new Upbit.Orderbook.WebSocket()).Start(SSTokenSource, _s));
-                        SnapshotTasks.Add((new Upbit.Orderbook.Polling()).OStart(SSTokenSource, _s));
+                        SnapshotTasks.Add((new Upbit.Public.WebSocket()).Start(SSTokenSource, _s));
+                        SnapshotTasks.Add((new Upbit.Public.Polling()).OStart(SSTokenSource, _s));
                     }
                 }
                 else
-                    SnapshotTasks.Add((new Upbit.Orderbook.Polling()).BStart(SSTokenSource, _symbols));
+                    SnapshotTasks.Add((new Upbit.Public.Polling()).BStart(SSTokenSource, _symbols));
 
-                SnapshotTasks.Add((new Upbit.Orderbook.Processing()).Start(SSTokenSource));
+                SnapshotTasks.Add((new Upbit.Public.Processing()).Start(SSTokenSource));
             }
             else if (exchange == BNLogger.exchange_name)
             {
@@ -103,14 +103,14 @@ namespace CCXT.Collector.Service
                         if (String.IsNullOrEmpty(_s) == true)
                             continue;
 
-                        SnapshotTasks.Add((new Binance.Orderbook.WebSocket()).Start(SSTokenSource, _s));
-                        SnapshotTasks.Add((new Binance.Orderbook.Polling()).OStart(SSTokenSource, _s));
+                        SnapshotTasks.Add((new Binance.Public.WebSocket()).Start(SSTokenSource, _s));
+                        SnapshotTasks.Add((new Binance.Public.Polling()).OStart(SSTokenSource, _s));
                     }
                 }
                 else
-                    SnapshotTasks.Add((new Binance.Orderbook.Polling()).BStart(SSTokenSource, _symbols));
+                    SnapshotTasks.Add((new Binance.Public.Polling()).BStart(SSTokenSource, _symbols));
 
-                SnapshotTasks.Add((new Binance.Orderbook.Processing()).Start(SSTokenSource));
+                SnapshotTasks.Add((new Binance.Public.Processing()).Start(SSTokenSource));
             }
             else if (exchange == BMLogger.exchange_name)
             {
@@ -121,14 +121,14 @@ namespace CCXT.Collector.Service
                         if (String.IsNullOrEmpty(_s) == true)
                             continue;
 
-                        SnapshotTasks.Add((new Binance.Orderbook.WebSocket()).Start(SSTokenSource, _s));
-                        SnapshotTasks.Add((new Binance.Orderbook.Polling()).OStart(SSTokenSource, _s));
+                        SnapshotTasks.Add((new Binance.Public.WebSocket()).Start(SSTokenSource, _s));
+                        SnapshotTasks.Add((new Binance.Public.Polling()).OStart(SSTokenSource, _s));
                     }
                 }
                 else
-                    SnapshotTasks.Add((new Binance.Orderbook.Polling()).BStart(SSTokenSource, _symbols));
+                    SnapshotTasks.Add((new Binance.Public.Polling()).BStart(SSTokenSource, _symbols));
 
-                SnapshotTasks.Add((new Binance.Orderbook.Processing()).Start(SSTokenSource));
+                SnapshotTasks.Add((new Binance.Public.Processing()).Start(SSTokenSource));
             }
 
             LoggerQ.WriteO($"snapshot restart: symbol => {baseIds}", exchange);
@@ -149,7 +149,7 @@ namespace CCXT.Collector.Service
 
         public async Task Start(CancellationTokenSource tokenSource, int sleep_seconds = 1)
         {
-            LoggerQ.WriteO($"snapshot service start...", FactoryQ.RootQName);
+            LoggerQ.WriteO($"snapshot service start...", FactoryX.RootQName);
 
             if (KConfig.UseAutoStart == true)
                 await StartNewSymbol(KConfig.StartExchangeName, KConfig.StartSymbolNames);
@@ -190,17 +190,17 @@ namespace CCXT.Collector.Service
                                         if (_selector.exchange == BNLogger.exchange_name)
                                         {
                                             if (KConfig.BinanceUsePollingBookticker == false)
-                                                Binance.Orderbook.Processing.SendReceiveQ(_q_message);
+                                                Binance.Public.Processing.SendReceiveQ(_q_message);
                                         }
                                         else if (_selector.exchange == BMLogger.exchange_name)
                                         {
                                             if (KConfig.BitmexUsePollingBookticker == false)
-                                                Bitmex.Orderbook.Processing.SendReceiveQ(_q_message);
+                                                BitMEX.Public.Processing.SendReceiveQ(_q_message);
                                         }
                                         else if (_selector.exchange == UPLogger.exchange_name)
                                         {
                                             if (KConfig.UpbitUsePollingBookticker == false)
-                                                Upbit.Orderbook.Processing.SendReceiveQ(_q_message);
+                                                Upbit.Public.Processing.SendReceiveQ(_q_message);
                                         }
                                     }
                                 }
@@ -256,7 +256,7 @@ namespace CCXT.Collector.Service
 
             await Task.WhenAll(_processing);
 
-            LoggerQ.WriteO($"snapshot service stopped...", FactoryQ.RootQName);
+            LoggerQ.WriteO($"snapshot service stopped...", FactoryX.RootQName);
         }
     }
 }

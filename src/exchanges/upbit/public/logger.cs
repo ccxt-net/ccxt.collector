@@ -1,6 +1,6 @@
 ﻿using CCXT.Collector.Service;
 
-namespace CCXT.Collector.Upbit.Orderbook
+namespace CCXT.Collector.Upbit.Public
 {
     /// <summary>
     /// upbit

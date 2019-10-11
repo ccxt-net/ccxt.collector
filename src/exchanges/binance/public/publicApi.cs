@@ -1,6 +1,6 @@
 ﻿using CCXT.Collector.Library;
-using CCXT.NET.Coin.Public;
-using CCXT.NET.Converter;
+using OdinSdk.BaseLib.Coin.Public;
+using OdinSdk.BaseLib.Converter;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
@@ -8,7 +8,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace CCXT.Collector.Binance
+namespace CCXT.Collector.Binance.Public
 {
     public class PublicApi : KRestClient
     {
@@ -90,7 +90,7 @@ namespace CCXT.Collector.Binance
                         makerFee = _maker_fee,
 
                         precision = _precision,
-                        limit = _limits
+                        limits = _limits
                     };
 
                     var _filters = _market["filters"];
@@ -99,22 +99,22 @@ namespace CCXT.Collector.Binance
                         if (_price_filter != null)
                         {
                             _entry.precision.price = Numerical.PrecisionFromString(_price_filter["tickSize"].ToString());
-                            _entry.limit.price.min = _price_filter["minPrice"].Value<decimal>();
-                            _entry.limit.price.max = _price_filter["maxPrice"].Value<decimal>();
+                            _entry.limits.price.min = _price_filter["minPrice"].Value<decimal>();
+                            _entry.limits.price.max = _price_filter["maxPrice"].Value<decimal>();
                         }
 
                         var _lot_size = _filters.SingleOrDefault(f => f["filterType"].ToString() == "LOT_SIZE");
                         if (_lot_size != null)
                         {
                             _entry.precision.quantity = Numerical.PrecisionFromString(_lot_size["stepSize"].ToString());
-                            _entry.limit.quantity.min = _lot_size["minQty"].Value<decimal>();
-                            _entry.limit.quantity.max = _lot_size["maxQty"].Value<decimal>();
+                            _entry.limits.quantity.min = _lot_size["minQty"].Value<decimal>();
+                            _entry.limits.quantity.max = _lot_size["maxQty"].Value<decimal>();
                         }
 
                         var _min_notional = _filters.SingleOrDefault(f => f["filterType"].ToString() == "MIN_NOTIONAL");
                         if (_min_notional != null)
                         {
-                            _entry.limit.amount.min = _min_notional["minNotional"].Value<decimal>();
+                            _entry.limits.amount.min = _min_notional["minNotional"].Value<decimal>();
                         }
                     }
 

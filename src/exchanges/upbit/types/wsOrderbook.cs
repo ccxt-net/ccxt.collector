@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using CCXT.Collector.Upbit.Public;
+using Newtonsoft.Json;
 
 namespace CCXT.Collector.Upbit.Types
 {

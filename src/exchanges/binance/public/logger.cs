@@ -1,13 +1,13 @@
 ﻿using CCXT.Collector.Service;
 
-namespace CCXT.Collector.KebHana.Collector
+namespace CCXT.Collector.Binance.Public
 {
     /// <summary>
-    /// kebhana
+    /// binance
     /// </summary>
-    public class KELogger
+    public class BNLogger
     {
-        public const string exchange_name = "kebhana";
+        public const string exchange_name = "binance";
 
         /// <summary>
         ///

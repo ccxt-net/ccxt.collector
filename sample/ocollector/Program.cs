@@ -61,10 +61,10 @@ namespace CCXT.OCollector
             try
             {
 #if DEBUG
-                FactoryQ.RootQName = "odin";
+                FactoryX.RootQName = "odin";
 #endif
 
-                Console.Out.WriteLine($"{FactoryQ.RootQName} collector {KConfig.CollectorVersion} start...");
+                Console.Out.WriteLine($"{FactoryX.RootQName} collector {KConfig.CollectorVersion} start...");
 
                 if (KConfig.CConfig.IsWindows == false)
                 {
@@ -76,7 +76,7 @@ namespace CCXT.OCollector
 
                     Task.WaitAll(MainTasks.ToArray(), MainTokenSource.Token);
 
-                    Console.Out.WriteLine($"{FactoryQ.RootQName} collector {KConfig.CollectorVersion} stop...");
+                    Console.Out.WriteLine($"{FactoryX.RootQName} collector {KConfig.CollectorVersion} stop...");
                 }
                 else
                 {

@@ -1,17 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using Newtonsoft.Json;
+using OdinSdk.BaseLib.Coin.Public;
 
-namespace CCXT.Collector.Upbit.Types
+namespace CCXT.Collector.BitMEX.Types
 {
     /// <summary>
     ///
     /// </summary>
-    public class UExchange
+    public class BMarketItem : OdinSdk.BaseLib.Coin.Public.MarketItem, IMarketItem
     {
         /// <summary>
         ///
         /// </summary>
-        public long sequential_id
+        public string state
         {
             get;
             set;
@@ -20,58 +20,8 @@ namespace CCXT.Collector.Upbit.Types
         /// <summary>
         ///
         /// </summary>
-        public List<UExchangeItem> data
-        {
-            get;
-            set;
-        }
-    }
-
-    /// <summary>
-    ///
-    /// </summary>
-    public class UExchangeItem
-    {
-        /// <summary>
-        /// KRWUSD
-        /// </summary>
-        public string code
-        {
-            get;
-            set;
-        }
-
-        /// <summary>
-        /// USD
-        /// </summary>
-        public string currencyCode
-        {
-            get;
-            set;
-        }
-
-        /// <summary>
-        /// 달러
-        /// </summary>
-        public string currencyName
-        {
-            get;
-            set;
-        }
-
-        /// <summary>
-        /// 미국
-        /// </summary>
-        public string country
-        {
-            get;
-            set;
-        }
-
-        /// <summary>
-        /// 미국(KRW/USD)
-        /// </summary>
-        public string name
+        [JsonProperty(PropertyName = "symbol")]
+        public override string symbol
         {
             get;
             set;
@@ -80,7 +30,7 @@ namespace CCXT.Collector.Upbit.Types
         /// <summary>
         ///
         /// </summary>
-        public string date
+        public string rootSymbol
         {
             get;
             set;
@@ -89,7 +39,16 @@ namespace CCXT.Collector.Upbit.Types
         /// <summary>
         ///
         /// </summary>
-        public string time
+        public string underlying
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// 포지션 계약 단위 (무기한 일때 값 없음)
+        /// </summary>
+        public string positionCurrency
         {
             get;
             set;
@@ -98,16 +57,7 @@ namespace CCXT.Collector.Upbit.Types
         /// <summary>
         ///
         /// </summary>
-        public int recurrenceCount
-        {
-            get;
-            set;
-        }
-
-        /// <summary>
-        /// 매매기준율
-        /// </summary>
-        public decimal basePrice
+        public string quoteCurrency
         {
             get;
             set;
@@ -116,7 +66,7 @@ namespace CCXT.Collector.Upbit.Types
         /// <summary>
         ///
         /// </summary>
-        public decimal openingPrice
+        public string settlCurrency
         {
             get;
             set;
@@ -125,7 +75,7 @@ namespace CCXT.Collector.Upbit.Types
         /// <summary>
         ///
         /// </summary>
-        public decimal highPrice
+        public string orderBase
         {
             get;
             set;
@@ -134,7 +84,7 @@ namespace CCXT.Collector.Upbit.Types
         /// <summary>
         ///
         /// </summary>
-        public decimal lowPrice
+        public string orderQuote
         {
             get;
             set;
@@ -143,7 +93,7 @@ namespace CCXT.Collector.Upbit.Types
         /// <summary>
         ///
         /// </summary>
-        public string change
+        public decimal maxOrderQty
         {
             get;
             set;
@@ -152,43 +102,7 @@ namespace CCXT.Collector.Upbit.Types
         /// <summary>
         ///
         /// </summary>
-        public decimal changePrice
-        {
-            get;
-            set;
-        }
-
-        /// <summary>
-        /// 현찰사실때
-        /// </summary>
-        public decimal cashBuyingPrice
-        {
-            get;
-            set;
-        }
-
-        /// <summary>
-        /// 현찰파실떄
-        /// </summary>
-        public decimal cashSellingPrice
-        {
-            get;
-            set;
-        }
-
-        /// <summary>
-        /// 송금_전신환받으실떄
-        /// </summary>
-        public decimal ttBuyingPrice
-        {
-            get;
-            set;
-        }
-
-        /// <summary>
-        /// 송금_전신환보내실떄
-        /// </summary>
-        public decimal ttSellingPrice
+        public decimal maxPrice
         {
             get;
             set;
@@ -197,7 +111,7 @@ namespace CCXT.Collector.Upbit.Types
         /// <summary>
         ///
         /// </summary>
-        public decimal tcBuyingPrice
+        public decimal lastPrice
         {
             get;
             set;
@@ -206,7 +120,7 @@ namespace CCXT.Collector.Upbit.Types
         /// <summary>
         ///
         /// </summary>
-        public decimal fcSellingPrice
+        public decimal lotSize
         {
             get;
             set;
@@ -215,7 +129,7 @@ namespace CCXT.Collector.Upbit.Types
         /// <summary>
         ///
         /// </summary>
-        public decimal exchangeCommission
+        public decimal tickSize
         {
             get;
             set;
@@ -224,7 +138,7 @@ namespace CCXT.Collector.Upbit.Types
         /// <summary>
         ///
         /// </summary>
-        public decimal usDollarRate
+        public decimal multiplier
         {
             get;
             set;
@@ -233,7 +147,7 @@ namespace CCXT.Collector.Upbit.Types
         /// <summary>
         ///
         /// </summary>
-        public decimal high52wPrice
+        public decimal initMargin
         {
             get;
             set;
@@ -242,7 +156,7 @@ namespace CCXT.Collector.Upbit.Types
         /// <summary>
         ///
         /// </summary>
-        public string high52wDate
+        public decimal maintMargin
         {
             get;
             set;
@@ -251,7 +165,7 @@ namespace CCXT.Collector.Upbit.Types
         /// <summary>
         ///
         /// </summary>
-        public decimal low52wPrice
+        public decimal riskLimit
         {
             get;
             set;
@@ -260,7 +174,7 @@ namespace CCXT.Collector.Upbit.Types
         /// <summary>
         ///
         /// </summary>
-        public string low52wDate
+        public decimal riskStep
         {
             get;
             set;
@@ -269,7 +183,7 @@ namespace CCXT.Collector.Upbit.Types
         /// <summary>
         ///
         /// </summary>
-        public decimal currencyUnit
+        public decimal settlementFee
         {
             get;
             set;
@@ -278,7 +192,7 @@ namespace CCXT.Collector.Upbit.Types
         /// <summary>
         ///
         /// </summary>
-        public string provider
+        public decimal insuranceFee
         {
             get;
             set;
@@ -287,7 +201,8 @@ namespace CCXT.Collector.Upbit.Types
         /// <summary>
         ///
         /// </summary>
-        public long timestamp
+        [JsonProperty(PropertyName = "takerFee")]
+        public override decimal takerFee
         {
             get;
             set;
@@ -296,7 +211,8 @@ namespace CCXT.Collector.Upbit.Types
         /// <summary>
         ///
         /// </summary>
-        public int id
+        [JsonProperty(PropertyName = "makerFee")]
+        public override decimal makerFee
         {
             get;
             set;
@@ -305,7 +221,7 @@ namespace CCXT.Collector.Upbit.Types
         /// <summary>
         ///
         /// </summary>
-        public DateTime createdAt
+        public bool future
         {
             get;
             set;
@@ -314,7 +230,7 @@ namespace CCXT.Collector.Upbit.Types
         /// <summary>
         ///
         /// </summary>
-        public DateTime modifiedAt
+        public bool prediction
         {
             get;
             set;
@@ -323,7 +239,7 @@ namespace CCXT.Collector.Upbit.Types
         /// <summary>
         ///
         /// </summary>
-        public decimal changeRate
+        public string type
         {
             get;
             set;
@@ -332,7 +248,7 @@ namespace CCXT.Collector.Upbit.Types
         /// <summary>
         ///
         /// </summary>
-        public decimal signedChangePrice
+        public bool swap
         {
             get;
             set;
@@ -341,7 +257,7 @@ namespace CCXT.Collector.Upbit.Types
         /// <summary>
         ///
         /// </summary>
-        public decimal signedChangeRate
+        public int maxLeverage
         {
             get;
             set;
