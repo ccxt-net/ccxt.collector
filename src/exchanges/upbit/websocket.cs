@@ -1,5 +1,6 @@
 ﻿using CCXT.Collector.Library;
 using CCXT.Collector.Library.Types;
+using CCXT.Collector.Upbit.Public;
 using OdinSdk.BaseLib.Configuration;
 using System;
 using System.Collections.Concurrent;
@@ -8,7 +9,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace CCXT.Collector.Upbit.Public
+namespace CCXT.Collector.Upbit
 {
     public class WebSocket
     {

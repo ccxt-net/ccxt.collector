@@ -1,12 +1,13 @@
-﻿using CCXT.Collector.Library.Types;
-using CCXT.Collector.Upbit.Types;
+﻿using CCXT.Collector.BitMEX.Public;
+using CCXT.Collector.BitMEX.Types;
+using CCXT.Collector.Library.Types;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Concurrent;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace CCXT.Collector.Upbit.Public
+namespace CCXT.Collector.BitMEX
 {
     public partial class Processing
     {
@@ -37,7 +38,7 @@ namespace CCXT.Collector.Upbit.Public
 
         public async Task Start(CancellationTokenSource tokenSource)
         {
-            UPLogger.WriteO($"processing service start...");
+            BMLogger.WriteO($"processing service start...");
 
             var _processing = Task.Run(async () =>
             {
@@ -61,33 +62,32 @@ namespace CCXT.Collector.Upbit.Public
                         var _json_data = JsonConvert.DeserializeObject<QSelector>(_message.json);
                         if (_message.command == "WS")
                         {
-                            if (_json_data.type == "trade")
+                            var _stream = _json_data.stream.Split('@');
+                            if (_stream.Length > 1)
                             {
-                                var _trade = JsonConvert.DeserializeObject<UWTradeItem>(_message.json);
-                                await mergeTradeItem(_trade);
-                            }
-                            else if (_json_data.type == "orderbook")
-                            {
-                                var _orderbook = JsonConvert.DeserializeObject<UWOrderBook>(_message.json);
-                                await mergeOrderbook(_orderbook);
+                                if (_stream[1] == "aggTrade")
+                                {
+                                    var _trade = JsonConvert.DeserializeObject<BWTrade>(_message.json);
+                                    await mergeTradeItem(_trade.data);
+                                }
+                                //else if (_stream[1] == "depth")
+                                //{
+                                //    var _orderbook = JsonConvert.DeserializeObject<BWOrderBook>(_message.json);
+                                //    await compareOrderbook(_orderbook);
+                                //}
                             }
                         }
                         else if (_message.command == "AP")
                         {
-                            if (_json_data.type == "trades")
+                            if (_json_data.stream == "trades")
                             {
-                                var _trades = JsonConvert.DeserializeObject<UATrade>(_message.json);
+                                var _trades = JsonConvert.DeserializeObject<BATrade>(_message.json);
                                 await mergeTradeItems(_trades);
                             }
-                            else if (_json_data.type == "orderbooks")
+                            else if (_json_data.stream == "arderbook")
                             {
-                                var _orderbook = JsonConvert.DeserializeObject<UAOrderBook>(_message.json);
+                                var _orderbook = JsonConvert.DeserializeObject<BAOrderBook>(_message.json);
                                 await mergeOrderbook(_orderbook);
-                            }
-                            else if (_json_data.stream == "bookticker")
-                            {
-                                var _bookticker = JsonConvert.DeserializeObject<SBookTicker>(_message.json);
-                                await publishBookticker(_bookticker);
                             }
                         }
                         else if (_message.command == "SS")
@@ -97,7 +97,7 @@ namespace CCXT.Collector.Upbit.Public
                         }
 #if DEBUG
                         else
-                            UPLogger.WriteO(_message.json);
+                            BMLogger.WriteO(_message.json);
 #endif
                         if (tokenSource.IsCancellationRequested == true)
                             break;
@@ -107,16 +107,16 @@ namespace CCXT.Collector.Upbit.Public
                     }
                     catch (Exception ex)
                     {
-                        UPLogger.WriteX(ex.ToString());
+                        BMLogger.WriteX(ex.ToString());
                     }
                 }
             },
-            tokenSource.Token
-            );
+           tokenSource.Token
+           );
 
             await Task.WhenAll(_processing);
 
-            UPLogger.WriteO($"processing service stopped...");
+            BMLogger.WriteO($"processing service stopped...");
         }
     }
 }

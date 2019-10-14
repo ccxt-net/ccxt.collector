@@ -1,4 +1,5 @@
-﻿using CCXT.Collector.Library;
+﻿using CCXT.Collector.Binance.Public;
+using CCXT.Collector.Library;
 using CCXT.Collector.Library.Types;
 using OdinSdk.BaseLib.Configuration;
 using System;
@@ -8,7 +9,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace CCXT.Collector.Binance.Public
+namespace CCXT.Collector.Binance
 {
     /*
      * 1. wss://stream.binance.com:9443/ws/bnbbtc@depth 스트림을 엽니다.

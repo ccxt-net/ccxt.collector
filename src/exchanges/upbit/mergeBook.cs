@@ -1,6 +1,7 @@
 ﻿using CCXT.Collector.Library;
 using CCXT.Collector.Library.Types;
 using CCXT.Collector.Service;
+using CCXT.Collector.Upbit.Public;
 using CCXT.Collector.Upbit.Types;
 using Newtonsoft.Json;
 using System.Collections.Concurrent;
@@ -8,7 +9,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace CCXT.Collector.Upbit.Public
+namespace CCXT.Collector.Upbit
 {
     public partial class Processing
     {
@@ -514,7 +515,7 @@ namespace CCXT.Collector.Upbit.Public
             if (str != null)
             {
                 var _json_data = JsonConvert.SerializeObject(str);
-                OrderbookQ.Write(_json_data);
+                TradingQ.Write(_json_data);
             }
         }
 

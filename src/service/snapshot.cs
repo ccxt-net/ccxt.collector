@@ -85,14 +85,14 @@ namespace CCXT.Collector.Service
                         if (String.IsNullOrEmpty(_s) == true)
                             continue;
 
-                        SnapshotTasks.Add((new Upbit.Public.WebSocket()).Start(SSTokenSource, _s));
-                        SnapshotTasks.Add((new Upbit.Public.Polling()).OStart(SSTokenSource, _s));
+                        SnapshotTasks.Add((new Upbit.WebSocket()).Start(SSTokenSource, _s));
+                        SnapshotTasks.Add((new Upbit.Polling()).OStart(SSTokenSource, _s));
                     }
                 }
                 else
-                    SnapshotTasks.Add((new Upbit.Public.Polling()).BStart(SSTokenSource, _symbols));
+                    SnapshotTasks.Add((new Upbit.Polling()).BStart(SSTokenSource, _symbols));
 
-                SnapshotTasks.Add((new Upbit.Public.Processing()).Start(SSTokenSource));
+                SnapshotTasks.Add((new Upbit.Processing()).Start(SSTokenSource));
             }
             else if (exchange == BNLogger.exchange_name)
             {
@@ -103,14 +103,14 @@ namespace CCXT.Collector.Service
                         if (String.IsNullOrEmpty(_s) == true)
                             continue;
 
-                        SnapshotTasks.Add((new Binance.Public.WebSocket()).Start(SSTokenSource, _s));
-                        SnapshotTasks.Add((new Binance.Public.Polling()).OStart(SSTokenSource, _s));
+                        SnapshotTasks.Add((new Binance.WebSocket()).Start(SSTokenSource, _s));
+                        SnapshotTasks.Add((new Binance.Polling()).OStart(SSTokenSource, _s));
                     }
                 }
                 else
-                    SnapshotTasks.Add((new Binance.Public.Polling()).BStart(SSTokenSource, _symbols));
+                    SnapshotTasks.Add((new Binance.Polling()).BStart(SSTokenSource, _symbols));
 
-                SnapshotTasks.Add((new Binance.Public.Processing()).Start(SSTokenSource));
+                SnapshotTasks.Add((new Binance.Processing()).Start(SSTokenSource));
             }
             else if (exchange == BMLogger.exchange_name)
             {
@@ -121,14 +121,14 @@ namespace CCXT.Collector.Service
                         if (String.IsNullOrEmpty(_s) == true)
                             continue;
 
-                        SnapshotTasks.Add((new Binance.Public.WebSocket()).Start(SSTokenSource, _s));
-                        SnapshotTasks.Add((new Binance.Public.Polling()).OStart(SSTokenSource, _s));
+                        SnapshotTasks.Add((new Binance.WebSocket()).Start(SSTokenSource, _s));
+                        SnapshotTasks.Add((new Binance.Polling()).OStart(SSTokenSource, _s));
                     }
                 }
                 else
-                    SnapshotTasks.Add((new Binance.Public.Polling()).BStart(SSTokenSource, _symbols));
+                    SnapshotTasks.Add((new Binance.Polling()).BStart(SSTokenSource, _symbols));
 
-                SnapshotTasks.Add((new Binance.Public.Processing()).Start(SSTokenSource));
+                SnapshotTasks.Add((new Binance.Processing()).Start(SSTokenSource));
             }
 
             LoggerQ.WriteO($"snapshot restart: symbol => {baseIds}", exchange);
@@ -190,17 +190,17 @@ namespace CCXT.Collector.Service
                                         if (_selector.exchange == BNLogger.exchange_name)
                                         {
                                             if (KConfig.BinanceUsePollingBookticker == false)
-                                                Binance.Public.Processing.SendReceiveQ(_q_message);
+                                                Binance.Processing.SendReceiveQ(_q_message);
                                         }
                                         else if (_selector.exchange == BMLogger.exchange_name)
                                         {
                                             if (KConfig.BitmexUsePollingBookticker == false)
-                                                BitMEX.Public.Processing.SendReceiveQ(_q_message);
+                                                BitMEX.Processing.SendReceiveQ(_q_message);
                                         }
                                         else if (_selector.exchange == UPLogger.exchange_name)
                                         {
                                             if (KConfig.UpbitUsePollingBookticker == false)
-                                                Upbit.Public.Processing.SendReceiveQ(_q_message);
+                                                Upbit.Processing.SendReceiveQ(_q_message);
                                         }
                                     }
                                 }

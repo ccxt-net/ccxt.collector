@@ -1,4 +1,5 @@
-﻿using CCXT.Collector.Binance.Types;
+﻿using CCXT.Collector.Binance.Public;
+using CCXT.Collector.Binance.Types;
 using CCXT.Collector.Library.Types;
 using Newtonsoft.Json;
 using System;
@@ -6,7 +7,7 @@ using System.Collections.Concurrent;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace CCXT.Collector.Binance.Public
+namespace CCXT.Collector.Binance
 {
     public partial class Processing
     {

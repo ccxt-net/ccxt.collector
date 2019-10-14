@@ -1,4 +1,5 @@
-﻿using CCXT.Collector.BitMEX.Types;
+﻿using CCXT.Collector.Binance.Public;
+using CCXT.Collector.Binance.Types;
 using CCXT.Collector.Library;
 using CCXT.Collector.Library.Types;
 using CCXT.Collector.Service;
@@ -8,7 +9,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace CCXT.Collector.BitMEX.Public
+namespace CCXT.Collector.Binance
 {
     public partial class Processing
     {
@@ -48,7 +49,7 @@ namespace CCXT.Collector.BitMEX.Public
 
         private async Task<bool> updateTradeItem(SOrderBook qob, List<BTradeItem> tradeItems, string stream)
         {
-            var _rqo = new SOrderBook(BMLogger.exchange_name, stream, qob.symbol)
+            var _rqo = new SOrderBook(BNLogger.exchange_name, stream, qob.symbol)
             {
                 sequential_id = tradeItems.Max(t => t.timestamp)
             };
@@ -118,7 +119,7 @@ namespace CCXT.Collector.BitMEX.Public
                             _qox.quantity = 0;
                         }
 
-                        BMLogger.WriteQ($"nofnd-{stream}: timestamp => {_settings.last_trade_time}, symbol => {qob.symbol}, price => {_t.price}, quantity => {_t.quantity}");
+                        BNLogger.WriteQ($"nofnd-{stream}: timestamp => {_settings.last_trade_time}, symbol => {qob.symbol}, price => {_t.price}, quantity => {_t.quantity}");
                     }
                 }
 
@@ -129,7 +130,7 @@ namespace CCXT.Collector.BitMEX.Public
             if (_rqo.data.Count > 0)
             {
                 await publishOrderbook(_rqo);
-                _settings.orderbook_count = 0;
+                //_settings.orderbook_count = 0;
             }
 
             return true;
@@ -140,13 +141,13 @@ namespace CCXT.Collector.BitMEX.Public
             var _result = false;
 
             var _settings = __qSettings.ContainsKey(orderBook.data.symbol) ? __qSettings[orderBook.data.symbol]
-              : __qSettings[orderBook.data.symbol] = new Settings();
+                          : __qSettings[orderBook.data.symbol] = new Settings();
 
             if (__qOrderBooks.ContainsKey(orderBook.data.symbol) == false)
             {
                 _settings.last_orderbook_id = orderBook.data.lastId;
 
-                var _sqo = new SOrderBook(BMLogger.exchange_name, "snapshot", orderBook.data.symbol)
+                var _sqo = new SOrderBook(BNLogger.exchange_name, "snapshot", orderBook.data.symbol)
                 {
                     sequential_id = orderBook.data.lastId
                 };
@@ -200,22 +201,22 @@ namespace CCXT.Collector.BitMEX.Public
 #if DEBUG
                         // modified check
                         if (_current_ask_size != _settings.last_order_ask_size || _current_bid_size != _settings.last_order_bid_size)
-                            BMLogger.WriteQ($"diffb-{orderBook.stream}: timestamp => {_settings.last_orderbook_id}, symbol => {orderBook.data.symbol}, ask_size => {_current_ask_size}, {_settings.last_order_ask_size}, bid_size => {_current_bid_size}, {_settings.last_order_bid_size}");
+                            BNLogger.WriteQ($"diffb-{orderBook.stream}: timestamp => {_settings.last_orderbook_id}, symbol => {orderBook.data.symbol}, ask_size => {_current_ask_size}, {_settings.last_order_ask_size}, bid_size => {_current_bid_size}, {_settings.last_order_bid_size}");
 
-                        if (_qob.data.Count != 200)
+                        if (_qob.data.Count != 40)
                         {
                             var _ask_count = _qob.data.Where(o => o.side == "ask").Count();
                             var _bid_count = _qob.data.Where(o => o.side == "bid").Count();
 
-                            BMLogger.WriteQ($"diffb-{orderBook.stream}: timestamp => {_settings.last_orderbook_id}, symbol => {orderBook.data.symbol}, ask_count => {_ask_count}, bid_count => {_bid_count}");
+                            BNLogger.WriteQ($"diffb-{orderBook.stream}: timestamp => {_settings.last_orderbook_id}, symbol => {orderBook.data.symbol}, ask_count => {_ask_count}, bid_count => {_bid_count}");
                         }
 #endif
                     }
                     else
-                        BMLogger.WriteQ($"trade-{orderBook.stream}: timestamp => {_settings.last_orderbook_id}, symbol => {orderBook.data.symbol}, ask_size => {_current_ask_size}, bid_size => {_current_bid_size}");
+                        BNLogger.WriteQ($"trade-{orderBook.stream}: timestamp => {_settings.last_orderbook_id}, symbol => {orderBook.data.symbol}, ask_size => {_current_ask_size}, bid_size => {_current_bid_size}");
                 }
                 else
-                    BMLogger.WriteQ($"equal-{orderBook.stream}: timestamp => {_settings.last_orderbook_id}, symbol => {orderBook.data.symbol}, ask_size => {_current_ask_size}, bid_size => {_current_bid_size}");
+                    BNLogger.WriteQ($"equal-{orderBook.stream}: timestamp => {_settings.last_orderbook_id}, symbol => {orderBook.data.symbol}, ask_size => {_current_ask_size}, bid_size => {_current_bid_size}");
             }
             //else
             //    BLogger.WriteQ($"pastb-{orderBook.stream}: timestamp => {_settings.last_orderbook_id}, symbol => {orderBook.data.symbol}, ask_size => {_settings.last_order_ask_size}, bid_size => {_settings.last_order_bid_size}");
@@ -225,7 +226,7 @@ namespace CCXT.Collector.BitMEX.Public
 
         private async Task<bool> updateOrderbook(SOrderBook qob, Settings settings, BAOrderBook orderBook)
         {
-            var _dqo = new SOrderBook(BMLogger.exchange_name, "diffbooks", orderBook.data.symbol)
+            var _dqo = new SOrderBook(BNLogger.exchange_name, "diffbooks", orderBook.data.symbol)
             {
                 sequential_id = orderBook.data.lastId
             };
@@ -333,8 +334,10 @@ namespace CCXT.Collector.BitMEX.Public
                 qob.data.RemoveAll(o => o.quantity == 0);
             }
 
-            if (++settings.orderbook_count == 2)
+            if (++settings.orderbook_count == KConfig.BinanceOrderBookCounter)
             {
+                settings.orderbook_count = 0;
+
                 qob.sequential_id = orderBook.data.lastId;
                 await snapshotOrderbook(_dqo.exchange, _dqo.symbol);
             }
@@ -346,7 +349,7 @@ namespace CCXT.Collector.BitMEX.Public
 
         private async Task snapshotOrderbook(string exchange, string symbol)
         {
-            if (exchange == BMLogger.exchange_name)
+            if (exchange == BNLogger.exchange_name)
             {
                 var _sob = (SOrderBook)null;
 
@@ -372,6 +375,17 @@ namespace CCXT.Collector.BitMEX.Public
             {
                 var _json_data = JsonConvert.SerializeObject(qob);
                 OrderbookQ.Write(_json_data);
+            }
+        }
+
+        private async Task snapshotBookticker(SBookTicker sbt)
+        {
+            await Task.Delay(0);
+
+            if (sbt.data.Count > 0)
+            {
+                var _json_data = JsonConvert.SerializeObject(sbt);
+                BooktickerQ.Write(_json_data);
             }
         }
     }

@@ -1,7 +1,8 @@
-﻿using CCXT.Collector.KebHana.Types;
+﻿using CCXT.Collector.KebHana.Public;
+using CCXT.Collector.KebHana.Types;
 using CCXT.Collector.Library;
-using OdinSdk.BaseLib.Configuration;
 using Newtonsoft.Json;
+using OdinSdk.BaseLib.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,7 +10,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace CCXT.Collector.KebHana.Public
+namespace CCXT.Collector.KebHana
 {
     // var exView = {
     //"날짜": "2019년 07월 22일 14:49",

@@ -1,4 +1,5 @@
-﻿using CCXT.Collector.BitMEX.Types;
+﻿using CCXT.Collector.BitMEX.Public;
+using CCXT.Collector.BitMEX.Types;
 using CCXT.Collector.Library;
 using CCXT.Collector.Library.Types;
 using Newtonsoft.Json;
@@ -7,7 +8,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace CCXT.Collector.BitMEX.Public
+namespace CCXT.Collector.BitMEX
 {
     public class Polling : KRestClient
     {

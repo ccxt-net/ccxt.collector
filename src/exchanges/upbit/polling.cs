@@ -1,15 +1,16 @@
 ﻿using CCXT.Collector.Library;
 using CCXT.Collector.Library.Types;
+using CCXT.Collector.Upbit.Public;
 using CCXT.Collector.Upbit.Types;
-using OdinSdk.BaseLib.Configuration;
 using Newtonsoft.Json;
+using OdinSdk.BaseLib.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace CCXT.Collector.Upbit.Public
+namespace CCXT.Collector.Upbit
 {
     public class Polling : KRestClient
     {

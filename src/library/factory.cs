@@ -48,6 +48,14 @@ namespace CCXT.Collector.Library
             }
         }
 
+        public static string TradingQName
+        {
+            get
+            {
+                return RootQName + "_trading_exchange";
+            }
+        }
+
         public static string BooktickerQName
         {
             get
@@ -72,6 +80,5 @@ namespace CCXT.Collector.Library
             : base(host_name, ip_address, virtual_host, user_name, password, queue_name)
         {
         }
-
     }
 }

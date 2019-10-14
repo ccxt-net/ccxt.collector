@@ -1,4 +1,5 @@
-﻿using CCXT.Collector.Library;
+﻿using CCXT.Collector.BitMEX.Public;
+using CCXT.Collector.Library;
 using CCXT.Collector.Library.Types;
 using OdinSdk.BaseLib.Configuration;
 using System;
@@ -8,7 +9,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace CCXT.Collector.BitMEX.Public
+namespace CCXT.Collector.BitMEX
 {
     public partial class WebSocket
     {

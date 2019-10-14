@@ -1,12 +1,13 @@
-﻿using CCXT.Collector.BitMEX.Types;
-using CCXT.Collector.Library.Types;
+﻿using CCXT.Collector.Library.Types;
+using CCXT.Collector.Upbit.Public;
+using CCXT.Collector.Upbit.Types;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Concurrent;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace CCXT.Collector.BitMEX.Public
+namespace CCXT.Collector.Upbit
 {
     public partial class Processing
     {
@@ -37,7 +38,7 @@ namespace CCXT.Collector.BitMEX.Public
 
         public async Task Start(CancellationTokenSource tokenSource)
         {
-            BMLogger.WriteO($"processing service start...");
+            UPLogger.WriteO($"processing service start...");
 
             var _processing = Task.Run(async () =>
             {
@@ -61,32 +62,33 @@ namespace CCXT.Collector.BitMEX.Public
                         var _json_data = JsonConvert.DeserializeObject<QSelector>(_message.json);
                         if (_message.command == "WS")
                         {
-                            var _stream = _json_data.stream.Split('@');
-                            if (_stream.Length > 1)
+                            if (_json_data.type == "trade")
                             {
-                                if (_stream[1] == "aggTrade")
-                                {
-                                    var _trade = JsonConvert.DeserializeObject<BWTrade>(_message.json);
-                                    await mergeTradeItem(_trade.data);
-                                }
-                                //else if (_stream[1] == "depth")
-                                //{
-                                //    var _orderbook = JsonConvert.DeserializeObject<BWOrderBook>(_message.json);
-                                //    await compareOrderbook(_orderbook);
-                                //}
+                                var _trade = JsonConvert.DeserializeObject<UWTradeItem>(_message.json);
+                                await mergeTradeItem(_trade);
+                            }
+                            else if (_json_data.type == "orderbook")
+                            {
+                                var _orderbook = JsonConvert.DeserializeObject<UWOrderBook>(_message.json);
+                                await mergeOrderbook(_orderbook);
                             }
                         }
                         else if (_message.command == "AP")
                         {
-                            if (_json_data.stream == "trades")
+                            if (_json_data.type == "trades")
                             {
-                                var _trades = JsonConvert.DeserializeObject<BATrade>(_message.json);
+                                var _trades = JsonConvert.DeserializeObject<UATrade>(_message.json);
                                 await mergeTradeItems(_trades);
                             }
-                            else if (_json_data.stream == "arderbook")
+                            else if (_json_data.type == "orderbooks")
                             {
-                                var _orderbook = JsonConvert.DeserializeObject<BAOrderBook>(_message.json);
+                                var _orderbook = JsonConvert.DeserializeObject<UAOrderBook>(_message.json);
                                 await mergeOrderbook(_orderbook);
+                            }
+                            else if (_json_data.stream == "bookticker")
+                            {
+                                var _bookticker = JsonConvert.DeserializeObject<SBookTicker>(_message.json);
+                                await publishBookticker(_bookticker);
                             }
                         }
                         else if (_message.command == "SS")
@@ -96,7 +98,7 @@ namespace CCXT.Collector.BitMEX.Public
                         }
 #if DEBUG
                         else
-                            BMLogger.WriteO(_message.json);
+                            UPLogger.WriteO(_message.json);
 #endif
                         if (tokenSource.IsCancellationRequested == true)
                             break;
@@ -106,16 +108,16 @@ namespace CCXT.Collector.BitMEX.Public
                     }
                     catch (Exception ex)
                     {
-                        BMLogger.WriteX(ex.ToString());
+                        UPLogger.WriteX(ex.ToString());
                     }
                 }
             },
-           tokenSource.Token
-           );
+            tokenSource.Token
+            );
 
             await Task.WhenAll(_processing);
 
-            BMLogger.WriteO($"processing service stopped...");
+            UPLogger.WriteO($"processing service stopped...");
         }
     }
 }
