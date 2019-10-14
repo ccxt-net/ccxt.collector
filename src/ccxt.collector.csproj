@@ -47,7 +47,7 @@
   </ItemGroup>
   
   <ItemGroup>
-    <ProjectReference Include="..\..\..\..\odinsoft-git\public\open-sdk\src\OdinSdk.BaseLib\odinsdk.baselib.csproj" />
+    <ProjectReference Include="..\..\..\..\odinsoft-git\public\open-sdk\src\OdinSdk.BaseLib\OdinSdk.BaseLib.csproj" />
   </ItemGroup>
 
 </Project>
