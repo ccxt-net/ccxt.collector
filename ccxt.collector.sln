@@ -32,7 +32,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "shells", "shells", "{BDE3F4
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "nuget", "nuget", "{CFB58272-8CAF-4A71-A582-6D86DE9356A0}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OdinSdk.BaseLib", "..\..\..\odinsoft-git\public\open-sdk\src\OdinSdk.BaseLib\OdinSdk.BaseLib.csproj", "{EE0379FA-F42B-4623-8A63-34A845808D15}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "odinsdk.baselib", "..\..\..\odinsoft-git\public\open-sdk\src\OdinSdk.BaseLib\odinsdk.baselib.csproj", "{EE0379FA-F42B-4623-8A63-34A845808D15}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
