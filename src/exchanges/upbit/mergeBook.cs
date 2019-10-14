@@ -35,22 +35,24 @@ namespace CCXT.Collector.Upbit
                         sequential_id = tradeItem.sequential_id
                     };
 
-                    _str.data.Add(new UTradeItem
-                    {
-                        ask_bid = tradeItem.ask_bid,
-                        change = tradeItem.change,
-                        change_price = tradeItem.change_price,
-                        prev_closing_price = tradeItem.prev_closing_price,
-                        sequential_id = tradeItem.sequential_id,
-                        stream_type = tradeItem.stream_type,
-                        symbol = tradeItem.symbol,
-                        timestamp = tradeItem.timestamp,
-                        trade_date = tradeItem.trade_date,
-                        trade_price = tradeItem.trade_price,
-                        trade_time = tradeItem.trade_time,
-                        trade_timestamp = tradeItem.trade_timestamp,
-                        trade_volume = tradeItem.trade_volume
-                    });
+                    _str.data.Add(tradeItem);
+
+                    //_str.data.Add(new UTradeItem
+                    //{
+                    //    ask_bid = tradeItem.ask_bid,
+                    //    change = tradeItem.change,
+                    //    change_price = tradeItem.change_price,
+                    //    prev_closing_price = tradeItem.prev_closing_price,
+                    //    sequential_id = tradeItem.sequential_id,
+                    //    stream_type = tradeItem.stream_type,
+                    //    symbol = tradeItem.symbol,
+                    //    timestamp = tradeItem.timestamp,
+                    //    trade_date = tradeItem.trade_date,
+                    //    trade_price = tradeItem.trade_price,
+                    //    trade_time = tradeItem.trade_time,
+                    //    trade_timestamp = tradeItem.trade_timestamp,
+                    //    trade_volume = tradeItem.trade_volume
+                    //});
 
                     await publishTrading(_str);
                 }
