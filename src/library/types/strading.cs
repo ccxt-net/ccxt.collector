@@ -1,28 +1,41 @@
-﻿using System.Collections.Generic;
+﻿using OdinSdk.BaseLib.Coin.Public;
+using System.Collections.Generic;
 
-namespace CCXT.Collector.Upbit.Public
+namespace CCXT.Collector.Library.Types
 {
     /// <summary>
-    ///
+    /// 
     /// </summary>
-    public class STrading
+    public class STrade : OdinSdk.BaseLib.Coin.Public.CompleteOrderItem, ICompleteOrderItem
     {
         /// <summary>
-        ///
+        /// 
         /// </summary>
-        public STrading(string exchange, string stream, string symbol)
+        public virtual string symbol
         {
-            this.exchange = exchange;
-            this.stream = stream;
-            this.symbol = symbol;
-
-            this.data = new List<UTradeItem>();
+            get;
+            set;
         }
 
         /// <summary>
         ///
         /// </summary>
-        public string exchange
+        public virtual long sequential_id
+        {
+            get;
+            set;
+        }
+    }
+
+    /// <summary>
+    ///
+    /// </summary>
+    public class STrades
+    {
+        /// <summary>
+        ///
+        /// </summary>
+        public virtual string exchange
         {
             get;
             set;
@@ -31,16 +44,7 @@ namespace CCXT.Collector.Upbit.Public
         /// <summary>
         /// S, R
         /// </summary>
-        public string stream
-        {
-            get;
-            set;
-        }
-
-        /// <summary>
-        /// string symbol of the market ('BTCUSD', 'ETHBTC', ...)
-        /// </summary>
-        public string symbol
+        public virtual string stream
         {
             get;
             set;
@@ -49,7 +53,7 @@ namespace CCXT.Collector.Upbit.Public
         /// <summary>
         ///
         /// </summary>
-        public long sequential_id
+        public virtual string symbol
         {
             get;
             set;
@@ -58,7 +62,7 @@ namespace CCXT.Collector.Upbit.Public
         /// <summary>
         ///
         /// </summary>
-        public List<UTradeItem> data
+        public virtual List<STrade> data
         {
             get;
             set;

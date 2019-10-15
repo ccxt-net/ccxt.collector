@@ -13,7 +13,7 @@ namespace CCXT.Collector.Binance
 {
     public partial class Processing
     {
-        private static ConcurrentDictionary<string, SOrderBook> __qOrderBooks = new ConcurrentDictionary<string, SOrderBook>();
+        private static ConcurrentDictionary<string, SOrderBooks> __qOrderBooks = new ConcurrentDictionary<string, SOrderBooks>();
         private static ConcurrentDictionary<string, Settings> __qSettings = new ConcurrentDictionary<string, Settings>();
 
         private async Task<bool> mergeTradeItem(BTradeItem tradeItem, string stream = "wsctrades")
@@ -47,9 +47,9 @@ namespace CCXT.Collector.Binance
             return _result;
         }
 
-        private async Task<bool> updateTradeItem(SOrderBook qob, List<BTradeItem> tradeItems, string stream)
+        private async Task<bool> updateTradeItem(SOrderBooks qob, List<BTradeItem> tradeItems, string stream)
         {
-            var _rqo = new SOrderBook(BNLogger.exchange_name, stream, qob.symbol)
+            var _rqo = new SOrderBooks(BNLogger.exchange_name, stream, qob.symbol)
             {
                 sequential_id = tradeItems.Max(t => t.timestamp)
             };
@@ -74,7 +74,7 @@ namespace CCXT.Collector.Binance
                     {
                         if (_qoi.quantity <= _t.quantity)
                         {
-                            var _aoi = new SOrderBookItem
+                            var _aoi = new SOrderBook
                             {
                                 action = "delete",
                                 side = _qoi.side,
@@ -89,7 +89,7 @@ namespace CCXT.Collector.Binance
                         {
                             _qoi.quantity -= _t.quantity;
 
-                            var _aoi = new SOrderBookItem
+                            var _aoi = new SOrderBook
                             {
                                 action = "update",
                                 side = _qoi.side,
@@ -107,7 +107,7 @@ namespace CCXT.Collector.Binance
                     {
                         foreach (var _qox in _strange_levels)
                         {
-                            var _aoi = new SOrderBookItem
+                            var _aoi = new SOrderBook
                             {
                                 action = "delete",
                                 side = _qox.side,
@@ -147,14 +147,14 @@ namespace CCXT.Collector.Binance
             {
                 _settings.last_orderbook_id = orderBook.data.lastId;
 
-                var _sqo = new SOrderBook(BNLogger.exchange_name, "snapshot", orderBook.data.symbol)
+                var _sqo = new SOrderBooks(BNLogger.exchange_name, "snapshot", orderBook.data.symbol)
                 {
                     sequential_id = orderBook.data.lastId
                 };
 
                 foreach (var _oi in orderBook.data.asks)
                 {
-                    _sqo.data.Add(new SOrderBookItem
+                    _sqo.data.Add(new SOrderBook
                     {
                         action = "insert",
                         side = "ask",
@@ -165,7 +165,7 @@ namespace CCXT.Collector.Binance
 
                 foreach (var _oi in orderBook.data.bids)
                 {
-                    _sqo.data.Add(new SOrderBookItem
+                    _sqo.data.Add(new SOrderBook
                     {
                         action = "insert",
                         side = "bid",
@@ -224,9 +224,9 @@ namespace CCXT.Collector.Binance
             return _result;
         }
 
-        private async Task<bool> updateOrderbook(SOrderBook qob, Settings settings, BAOrderBook orderBook)
+        private async Task<bool> updateOrderbook(SOrderBooks qob, Settings settings, BAOrderBook orderBook)
         {
-            var _dqo = new SOrderBook(BNLogger.exchange_name, "diffbooks", orderBook.data.symbol)
+            var _dqo = new SOrderBooks(BNLogger.exchange_name, "diffbooks", orderBook.data.symbol)
             {
                 sequential_id = orderBook.data.lastId
             };
@@ -238,7 +238,7 @@ namespace CCXT.Collector.Binance
                     var _ask = qob.data.Where(o => o.side == "ask" && o.price == _oi[0]).SingleOrDefault();
                     if (_ask == null)
                     {
-                        var _aoi = new SOrderBookItem
+                        var _aoi = new SOrderBook
                         {
                             action = "insert",
                             side = "ask",
@@ -251,7 +251,7 @@ namespace CCXT.Collector.Binance
                     }
                     else if (_ask.quantity != _oi[1])
                     {
-                        var _aoi = new SOrderBookItem
+                        var _aoi = new SOrderBook
                         {
                             action = "update",
                             side = "ask",
@@ -269,7 +269,7 @@ namespace CCXT.Collector.Binance
                     var _bid = qob.data.Where(o => o.side == "bid" && o.price == _oi[0]).SingleOrDefault();
                     if (_bid == null)
                     {
-                        var _boi = new SOrderBookItem
+                        var _boi = new SOrderBook
                         {
                             action = "insert",
                             side = "bid",
@@ -282,7 +282,7 @@ namespace CCXT.Collector.Binance
                     }
                     else if (_bid.quantity != _oi[1])
                     {
-                        var _boi = new SOrderBookItem
+                        var _boi = new SOrderBook
                         {
                             action = "update",
                             side = "bid",
@@ -302,7 +302,7 @@ namespace CCXT.Collector.Binance
                         var _ask = orderBook.data.asks.Where(o => o[0] == _qi.price).SingleOrDefault();
                         if (_ask == null)
                         {
-                            _dqo.data.Add(new SOrderBookItem
+                            _dqo.data.Add(new SOrderBook
                             {
                                 action = "delete",
                                 side = _qi.side,
@@ -318,7 +318,7 @@ namespace CCXT.Collector.Binance
                         var _bid = orderBook.data.bids.Where(o => o[0] == _qi.price).SingleOrDefault();
                         if (_bid == null)
                         {
-                            _dqo.data.Add(new SOrderBookItem
+                            _dqo.data.Add(new SOrderBook
                             {
                                 action = "delete",
                                 side = _qi.side,
@@ -351,7 +351,7 @@ namespace CCXT.Collector.Binance
         {
             if (exchange == BNLogger.exchange_name)
             {
-                var _sob = (SOrderBook)null;
+                var _sob = (SOrderBooks)null;
 
                 lock (__qOrderBooks)
                 {
@@ -367,18 +367,18 @@ namespace CCXT.Collector.Binance
             }
         }
 
-        private async Task publishOrderbook(SOrderBook qob)
+        private async Task publishOrderbook(SOrderBooks sob)
         {
             await Task.Delay(0);
 
-            if (qob.data.Count > 0)
+            if (sob.data.Count > 0)
             {
-                var _json_data = JsonConvert.SerializeObject(qob);
+                var _json_data = JsonConvert.SerializeObject(sob);
                 OrderbookQ.Write(_json_data);
             }
         }
 
-        private async Task snapshotBookticker(SBookTicker sbt)
+        private async Task publishBookticker(SBookTickers sbt)
         {
             await Task.Delay(0);
 

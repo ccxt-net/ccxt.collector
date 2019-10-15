@@ -1,6 +1,6 @@
-﻿using CCXT.Collector.Upbit.Public;
+﻿using CCXT.Collector.Library.Types;
 using Newtonsoft.Json;
-using System.Collections.Generic;
+using OdinSdk.BaseLib.Coin.Types;
 
 namespace CCXT.Collector.Upbit.Types
 {
@@ -20,10 +20,10 @@ namespace CCXT.Collector.Upbit.Types
     /// <summary>
     ///
     /// </summary>
-    public class UATradeItem : UTradeItem
+    public class UATrade : STrade
     {
         /// <summary>
-        ///
+        /// 마켓 구분 코드
         /// </summary>
         [JsonProperty(PropertyName = "market")]
         public override string symbol
@@ -33,10 +33,10 @@ namespace CCXT.Collector.Upbit.Types
         }
 
         /// <summary>
-        ///
+        /// 체결 타임스탬프
         /// </summary>
-        [JsonProperty(PropertyName = "trade_date_utc")]
-        public override string trade_date
+        [JsonProperty(PropertyName = "timestamp")]
+        public override long timestamp
         {
             get;
             set;
@@ -45,23 +45,8 @@ namespace CCXT.Collector.Upbit.Types
         /// <summary>
         ///
         /// </summary>
-        [JsonProperty(PropertyName = "trade_time_utc")]
-        public override string trade_time
-        {
-            get;
-            set;
-        }
-    }
-
-    /// <summary>
-    ///
-    /// </summary>
-    public class UATrade
-    {
-        /// <summary>
-        ///
-        /// </summary>
-        public string type
+        [JsonProperty(PropertyName = "trade_volume")]
+        public override decimal quantity
         {
             get;
             set;
@@ -70,7 +55,8 @@ namespace CCXT.Collector.Upbit.Types
         /// <summary>
         ///
         /// </summary>
-        public string symbol
+        [JsonProperty(PropertyName = "trade_price")]
+        public override decimal price
         {
             get;
             set;
@@ -79,10 +65,33 @@ namespace CCXT.Collector.Upbit.Types
         /// <summary>
         ///
         /// </summary>
-        public List<UATradeItem> data
+        [JsonProperty(PropertyName = "prev_closing_price")]
+        public decimal prevPrice
         {
             get;
             set;
+        }
+
+        /// <summary>
+        ///
+        /// </summary>
+        [JsonProperty(PropertyName = "change_price")]
+        public decimal changePrice
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        ///
+        /// </summary>
+        [JsonProperty(PropertyName = "ask_bid")]
+        private string sideValue
+        {
+            set
+            {
+                sideType = SideTypeConverter.FromString(value);
+            }
         }
     }
 }

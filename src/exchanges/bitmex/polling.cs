@@ -44,6 +44,7 @@ namespace CCXT.Collector.BitMEX
 
                             var _trades = new BATrade
                             {
+                                exchange = BMLogger.exchange_name,
                                 stream = "trades",
                                 symbol = symbol,
                                 data = _t_json_data

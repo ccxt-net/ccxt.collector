@@ -194,9 +194,9 @@ namespace CCXT.Collector.Binance
                             var _b_json_value = await RestExecuteAsync(_client, _b_request);
                             if (_b_json_value.IsSuccessful && _b_json_value.Content[0] == '[')
                             {
-                                var _b_json_data = JsonConvert.DeserializeObject<List<SBookTickerItem>>(_b_json_value.Content);
+                                var _b_json_data = JsonConvert.DeserializeObject<List<SBookTicker>>(_b_json_value.Content);
 
-                                var _bookticker = new SBookTicker
+                                var _bookticker = new SBookTickers
                                 {
                                     exchange = BNLogger.exchange_name,
                                     stream = "bookticker",

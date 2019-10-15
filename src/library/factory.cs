@@ -56,6 +56,14 @@ namespace CCXT.Collector.Library
             }
         }
 
+        public static string CompleteQName
+        {
+            get
+            {
+                return RootQName + "_complete_exchange";
+            }
+        }
+
         public static string BooktickerQName
         {
             get

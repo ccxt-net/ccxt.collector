@@ -110,6 +110,15 @@ namespace CCXT.Collector.BitMEX.Types
         /// <summary>
         ///
         /// </summary>
+        public string exchange
+        {
+            get;
+            set;
+        }
+        
+        /// <summary>
+        ///
+        /// </summary>
         public string stream
         {
             get;

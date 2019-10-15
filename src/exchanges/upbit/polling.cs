@@ -42,13 +42,14 @@ namespace CCXT.Collector.Upbit
                         var _t_json_value = await RestExecuteAsync(_client, _t_request);
                         if (_t_json_value.IsSuccessful && _t_json_value.Content[0] == '[')
                         {
-                            var _t_json_data = JsonConvert.DeserializeObject<List<UATradeItem>>(_t_json_value.Content);
+                            var _t_json_data = JsonConvert.DeserializeObject<List<UATrade>>(_t_json_value.Content);
 
-                            var _trades = new UATrade
+                            var _trades = new STrades
                             {
-                                type = "trades",
+                                exchange = UPLogger.exchange_name,
+                                stream = "trades",
                                 symbol = symbol,
-                                data = _t_json_data
+                                data = _t_json_data.ToList<STrade>()
                             };
 
                             var _t_json_content = JsonConvert.SerializeObject(_trades);
@@ -206,7 +207,7 @@ namespace CCXT.Collector.Upbit
                         {
                             var _b_json_data = JsonConvert.DeserializeObject<List<UAOrderBook>>(_b_json_value.Content);
 
-                            var _bookticker = new SBookTicker
+                            var _bookticker = new SBookTickers
                             {
                                 exchange = UPLogger.exchange_name,
                                 stream = "bookticker",
@@ -216,7 +217,7 @@ namespace CCXT.Collector.Upbit
                                     var _ask = o.orderbook_units.OrderBy(a => a.ask_price).First();
                                     var _bid = o.orderbook_units.OrderBy(a => a.bid_price).Last();
 
-                                    return new SBookTickerItem
+                                    return new SBookTicker
                                     {
                                         symbol = o.symbol,
                                         askPrice = _ask.ask_price,

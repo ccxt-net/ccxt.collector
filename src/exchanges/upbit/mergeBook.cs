@@ -13,10 +13,10 @@ namespace CCXT.Collector.Upbit
 {
     public partial class Processing
     {
-        private static ConcurrentDictionary<string, SOrderBook> __qOrderBooks = new ConcurrentDictionary<string, SOrderBook>();
+        private static ConcurrentDictionary<string, SOrderBooks> __qOrderBooks = new ConcurrentDictionary<string, SOrderBooks>();
         private static ConcurrentDictionary<string, Settings> __qSettings = new ConcurrentDictionary<string, Settings>();
 
-        private async Task<bool> mergeTradeItem(UTradeItem tradeItem, string stream = "wscorders")
+        private async Task<bool> mergeTradeItem(STrade tradeItem, string stream = "wscorders")
         {
             var _result = false;
 
@@ -25,43 +25,24 @@ namespace CCXT.Collector.Upbit
                 var _qob = __qOrderBooks[tradeItem.symbol];
                 _qob.stream = stream;
 
-                var _trade_items = new List<UTradeItem> { tradeItem };
-                _result = await updateTradeItem(_qob, _trade_items, stream);
+                var _trades = new STrades
+                {
+                    exchange = UPLogger.exchange_name,
+                    stream = "wsctrades",
+                    symbol = tradeItem.symbol,
+                    data = new List<STrade> { tradeItem }
+                };
+
+                _result = await updateTradeItem(_qob, _trades, stream);
 
                 if (KConfig.UpbitUsePublishTrade == true)
-                {
-                    var _str = new STrading(UPLogger.exchange_name, "wsctrades", tradeItem.symbol)
-                    {
-                        sequential_id = tradeItem.sequential_id
-                    };
-
-                    _str.data.Add(tradeItem);
-
-                    //_str.data.Add(new UTradeItem
-                    //{
-                    //    ask_bid = tradeItem.ask_bid,
-                    //    change = tradeItem.change,
-                    //    change_price = tradeItem.change_price,
-                    //    prev_closing_price = tradeItem.prev_closing_price,
-                    //    sequential_id = tradeItem.sequential_id,
-                    //    stream_type = tradeItem.stream_type,
-                    //    symbol = tradeItem.symbol,
-                    //    timestamp = tradeItem.timestamp,
-                    //    trade_date = tradeItem.trade_date,
-                    //    trade_price = tradeItem.trade_price,
-                    //    trade_time = tradeItem.trade_time,
-                    //    trade_timestamp = tradeItem.trade_timestamp,
-                    //    trade_volume = tradeItem.trade_volume
-                    //});
-
-                    await publishTrading(_str);
-                }
+                    await publishTrading(_trades);
             }
 
             return _result;
         }
 
-        private async Task<bool> mergeTradeItems(UATrade tradeItems, string stream = "apiorders")
+        private async Task<bool> mergeTradeItems(STrades tradeItems, string stream = "apiorders")
         {
             var _result = false;
 
@@ -71,17 +52,17 @@ namespace CCXT.Collector.Upbit
                 _qob.stream = stream;
 
                 if (tradeItems.data != null)
-                    _result = await updateTradeItem(_qob, tradeItems.data.ToList<UTradeItem>(), stream);
+                    _result = await updateTradeItem(_qob, tradeItems, stream);
             }
 
             return _result;
         }
 
-        private async Task<bool> updateTradeItem(SOrderBook lob, List<UTradeItem> tradeItems, string stream)
+        private async Task<bool> updateTradeItem(SOrderBooks lob, STrades tradeItems, string stream)
         {
-            var _nob = new SOrderBook(UPLogger.exchange_name, stream, lob.symbol)
+            var _nob = new SOrderBooks(UPLogger.exchange_name, stream, lob.symbol)
             {
-                sequential_id = tradeItems.Max(t => t.sequential_id)
+                sequential_id = tradeItems.data.Max(t => t.sequential_id)
             };
 
             var _settings = __qSettings.ContainsKey(lob.symbol) ? __qSettings[lob.symbol]
@@ -92,19 +73,19 @@ namespace CCXT.Collector.Upbit
                 _settings.before_trade_ask_size = lob.data.Where(o => o.side == "ask").Sum(o => o.quantity);
                 _settings.before_trade_bid_size = lob.data.Where(o => o.side == "bid").Sum(o => o.quantity);
 
-                foreach (var _t in tradeItems.OrderBy(t => t.sequential_id))
+                foreach (var _t in tradeItems.data.OrderBy(t => t.sequential_id))
                 {
                     if (_settings.last_trade_id >= _t.sequential_id)
                         continue;
 
                     _settings.last_trade_id = _t.sequential_id;
 
-                    var _qoi = lob.data.Where(o => o.price == _t.trade_price).SingleOrDefault();
+                    var _qoi = lob.data.Where(o => o.price == _t.price).SingleOrDefault();
                     if (_qoi != null)
                     {
-                        if (_qoi.quantity <= _t.trade_volume)
+                        if (_qoi.quantity <= _t.quantity)
                         {
-                            var _aoi = new SOrderBookItem
+                            var _aoi = new SOrderBook
                             {
                                 action = "delete",
                                 side = _qoi.side,
@@ -117,9 +98,9 @@ namespace CCXT.Collector.Upbit
                         }
                         else
                         {
-                            _qoi.quantity -= _t.trade_volume;
+                            _qoi.quantity -= _t.quantity;
 
-                            var _aoi = new SOrderBookItem
+                            var _aoi = new SOrderBook
                             {
                                 action = "update",
                                 side = _qoi.side,
@@ -131,7 +112,7 @@ namespace CCXT.Collector.Upbit
                         }
                     }
 
-                    cleanOrderbook(lob, _nob, _t.trade_volume, _t.trade_price);
+                    cleanOrderbook(lob, _nob, _t.quantity, _t.price);
                 }
 
                 lob.sequential_id = _nob.sequential_id;
@@ -238,9 +219,9 @@ namespace CCXT.Collector.Upbit
             return _result;
         }
 
-        private async Task<bool> updateOrderbook(SOrderBook lob, Settings settings, SOrderBook cob)
+        private async Task<bool> updateOrderbook(SOrderBooks lob, Settings settings, SOrderBooks cob)
         {
-            var _dqo = new SOrderBook(UPLogger.exchange_name, "diffbooks", cob.symbol)
+            var _dqo = new SOrderBooks(UPLogger.exchange_name, "diffbooks", cob.symbol)
             {
                 sequential_id = cob.sequential_id
             };
@@ -252,7 +233,7 @@ namespace CCXT.Collector.Upbit
                     var _oi = lob.data.Where(o => o.side == _coi.side && o.price == _coi.price).SingleOrDefault();
                     if (_oi == null)
                     {
-                        var _ioi = new SOrderBookItem
+                        var _ioi = new SOrderBook
                         {
                             action = "insert",
                             side = _coi.side,
@@ -265,7 +246,7 @@ namespace CCXT.Collector.Upbit
                     }
                     else if (_oi.quantity != _coi.quantity)
                     {
-                        _dqo.data.Add(new SOrderBookItem
+                        _dqo.data.Add(new SOrderBook
                         {
                             action = "update",
                             side = _coi.side,
@@ -282,7 +263,7 @@ namespace CCXT.Collector.Upbit
                     var _oi = cob.data.Where(o => o.side == _loi.side && o.price == _loi.price).SingleOrDefault();
                     if (_oi == null)
                     {
-                        _dqo.data.Add(new SOrderBookItem
+                        _dqo.data.Add(new SOrderBook
                         {
                             action = "delete",
                             side = _loi.side,
@@ -308,9 +289,9 @@ namespace CCXT.Collector.Upbit
             return true;
         }
 
-        private async Task<bool> updateOrderbook_old(SOrderBook qob, Settings settings, UOrderBook orderBook)
+        private async Task<bool> updateOrderbook_old(SOrderBooks qob, Settings settings, UOrderBook orderBook)
         {
-            var _dqo = new SOrderBook(UPLogger.exchange_name, "diffbooks", orderBook.symbol)
+            var _dqo = new SOrderBooks(UPLogger.exchange_name, "diffbooks", orderBook.symbol)
             {
                 sequential_id = orderBook.timestamp
             };
@@ -322,7 +303,7 @@ namespace CCXT.Collector.Upbit
                     var _ask = qob.data.Where(o => o.side == "ask" && o.price == _oi.ask_price).SingleOrDefault();
                     if (_ask == null)
                     {
-                        var _aoi = new SOrderBookItem
+                        var _aoi = new SOrderBook
                         {
                             action = "insert",
                             side = "ask",
@@ -335,7 +316,7 @@ namespace CCXT.Collector.Upbit
                     }
                     else if (_ask.quantity != _oi.ask_size)
                     {
-                        var _aoi = new SOrderBookItem
+                        var _aoi = new SOrderBook
                         {
                             action = "update",
                             side = "ask",
@@ -350,7 +331,7 @@ namespace CCXT.Collector.Upbit
                     var _bid = qob.data.Where(o => o.side == "bid" && o.price == _oi.bid_price).SingleOrDefault();
                     if (_bid == null)
                     {
-                        var _boi = new SOrderBookItem
+                        var _boi = new SOrderBook
                         {
                             action = "insert",
                             side = "bid",
@@ -363,7 +344,7 @@ namespace CCXT.Collector.Upbit
                     }
                     else if (_bid.quantity != _oi.bid_size)
                     {
-                        var _boi = new SOrderBookItem
+                        var _boi = new SOrderBook
                         {
                             action = "update",
                             side = "bid",
@@ -383,7 +364,7 @@ namespace CCXT.Collector.Upbit
                         var _ask = orderBook.orderbook_units.Where(o => o.ask_price == _qi.price).SingleOrDefault();
                         if (_ask == null)
                         {
-                            _dqo.data.Add(new SOrderBookItem
+                            _dqo.data.Add(new SOrderBook
                             {
                                 action = "delete",
                                 side = _qi.side,
@@ -399,7 +380,7 @@ namespace CCXT.Collector.Upbit
                         var _bid = orderBook.orderbook_units.Where(o => o.bid_price == _qi.price).SingleOrDefault();
                         if (_bid == null)
                         {
-                            _dqo.data.Add(new SOrderBookItem
+                            _dqo.data.Add(new SOrderBook
                             {
                                 action = "delete",
                                 side = _qi.side,
@@ -426,7 +407,7 @@ namespace CCXT.Collector.Upbit
             return true;
         }
 
-        private void cleanOrderbook(SOrderBook lob, SOrderBook nob, decimal quantity, decimal price)
+        private void cleanOrderbook(SOrderBooks lob, SOrderBooks nob, decimal quantity, decimal price)
         {
             // orderbook에 해당 하는 price-level 보다 안쪽에 위치한 level들은 삭제 해야 한다.
             var _strange_levels = lob.data.Where(o => (o.side == "ask" && o.price < price) || (o.side == "bid" && o.price > price));
@@ -434,7 +415,7 @@ namespace CCXT.Collector.Upbit
             {
                 foreach (var _qox in _strange_levels)
                 {
-                    var _aoi = new SOrderBookItem
+                    var _aoi = new SOrderBook
                     {
                         action = "delete",
                         side = _qox.side,
@@ -450,16 +431,16 @@ namespace CCXT.Collector.Upbit
             }
         }
 
-        private async Task<SOrderBook> convertOrderbook(UOrderBook orderBook, string stream)
+        private async Task<SOrderBooks> convertOrderbook(UOrderBook orderBook, string stream)
         {
-            var _sob = new SOrderBook(UPLogger.exchange_name, stream, orderBook.symbol)
+            var _sob = new SOrderBooks(UPLogger.exchange_name, stream, orderBook.symbol)
             {
                 sequential_id = orderBook.timestamp
             };
 
             foreach (var _oi in orderBook.orderbook_units)
             {
-                _sob.data.Add(new SOrderBookItem
+                _sob.data.Add(new SOrderBook
                 {
                     action = "insert",
                     side = "ask",
@@ -467,7 +448,7 @@ namespace CCXT.Collector.Upbit
                     quantity = _oi.ask_size
                 });
 
-                _sob.data.Add(new SOrderBookItem
+                _sob.data.Add(new SOrderBook
                 {
                     action = "insert",
                     side = "bid",
@@ -483,7 +464,7 @@ namespace CCXT.Collector.Upbit
         {
             if (exchange == UPLogger.exchange_name)
             {
-                var _sob = (SOrderBook)null;
+                var _sob = (SOrderBooks)null;
 
                 lock (__qOrderBooks)
                 {
@@ -499,7 +480,7 @@ namespace CCXT.Collector.Upbit
             }
         }
 
-        private async Task publishOrderbook(SOrderBook sob)
+        private async Task publishOrderbook(SOrderBooks sob)
         {
             await Task.Delay(0);
 
@@ -510,7 +491,7 @@ namespace CCXT.Collector.Upbit
             }
         }
 
-        private async Task publishTrading(STrading str)
+        private async Task publishTrading(STrades str)
         {
             await Task.Delay(0);
 
@@ -521,7 +502,7 @@ namespace CCXT.Collector.Upbit
             }
         }
 
-        private async Task publishBookticker(SBookTicker sbt)
+        private async Task publishBookticker(SBookTickers sbt)
         {
             await Task.Delay(0);
 

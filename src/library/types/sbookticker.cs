@@ -5,7 +5,7 @@ namespace CCXT.Collector.Library.Types
     /// <summary>
     ///
     /// </summary>
-    public class SBookTickerItem
+    public class SBookTicker
     {
         /// <summary>
         /// symbol
@@ -56,7 +56,7 @@ namespace CCXT.Collector.Library.Types
     /// <summary>
     ///
     /// </summary>
-    public class SBookTicker
+    public class SBookTickers
     {
         /// <summary>
         /// exchange
@@ -88,7 +88,7 @@ namespace CCXT.Collector.Library.Types
         /// <summary>
         /// data
         /// </summary>
-        public virtual List<SBookTickerItem> data
+        public virtual List<SBookTicker> data
         {
             get;
             set;

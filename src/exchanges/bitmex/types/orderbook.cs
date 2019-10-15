@@ -5,31 +5,7 @@ namespace CCXT.Collector.BitMEX.Types
     /// <summary>
     ///
     /// </summary>
-    public class BOrderBook
-    {
-        /// <summary>
-        ///
-        /// </summary>
-        public virtual string stream
-        {
-            get;
-            set;
-        }
-
-        /// <summary>
-        ///
-        /// </summary>
-        public virtual BOrderBookData data
-        {
-            get;
-            set;
-        }
-    }
-
-    /// <summary>
-    ///
-    /// </summary>
-    public class BOrderBookData
+    public class BOrderBookItem
     {
         /// <summary>
         /// Symbol
@@ -71,6 +47,30 @@ namespace CCXT.Collector.BitMEX.Types
         ///
         /// </summary>
         public virtual List<decimal[]> bids
+        {
+            get;
+            set;
+        }
+    }
+
+    /// <summary>
+    ///
+    /// </summary>
+    public class BOrderBook
+    {
+        /// <summary>
+        ///
+        /// </summary>
+        public virtual string stream
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        ///
+        /// </summary>
+        public virtual BOrderBookItem data
         {
             get;
             set;

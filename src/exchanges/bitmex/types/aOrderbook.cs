@@ -43,7 +43,7 @@ namespace CCXT.Collector.BitMEX.Types
     /// <summary>
     ///
     /// </summary>
-    public class BAOrderBookData : BOrderBookData
+    public class BAOrderBookData : BOrderBookItem
     {
         /// <summary>
         ///

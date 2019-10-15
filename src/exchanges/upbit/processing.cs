@@ -64,7 +64,7 @@ namespace CCXT.Collector.Upbit
                         {
                             if (_json_data.type == "trade")
                             {
-                                var _trade = JsonConvert.DeserializeObject<UWTradeItem>(_message.json);
+                                var _trade = JsonConvert.DeserializeObject<UWTrade>(_message.json);
                                 await mergeTradeItem(_trade);
                             }
                             else if (_json_data.type == "orderbook")
@@ -77,7 +77,7 @@ namespace CCXT.Collector.Upbit
                         {
                             if (_json_data.type == "trades")
                             {
-                                var _trades = JsonConvert.DeserializeObject<UATrade>(_message.json);
+                                var _trades = JsonConvert.DeserializeObject<STrades>(_message.json);
                                 await mergeTradeItems(_trades);
                             }
                             else if (_json_data.type == "orderbooks")
@@ -87,7 +87,7 @@ namespace CCXT.Collector.Upbit
                             }
                             else if (_json_data.stream == "bookticker")
                             {
-                                var _bookticker = JsonConvert.DeserializeObject<SBookTicker>(_message.json);
+                                var _bookticker = JsonConvert.DeserializeObject<SBookTickers>(_message.json);
                                 await publishBookticker(_bookticker);
                             }
                         }

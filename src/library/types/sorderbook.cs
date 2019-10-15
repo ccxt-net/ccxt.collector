@@ -5,12 +5,12 @@ namespace CCXT.Collector.Library.Types
     /// <summary>
     /// item of orderbook
     /// </summary>
-    public class SOrderBookItem
+    public class SOrderBook
     {
         /// <summary>
         /// I,U,D
         /// </summary>
-        public string action
+        public virtual string action
         {
             get;
             set;
@@ -19,7 +19,7 @@ namespace CCXT.Collector.Library.Types
         /// <summary>
         ///
         /// </summary>
-        public string side
+        public virtual string side
         {
             get;
             set;
@@ -28,7 +28,7 @@ namespace CCXT.Collector.Library.Types
         /// <summary>
         /// quantity
         /// </summary>
-        public decimal quantity
+        public virtual decimal quantity
         {
             get;
             set;
@@ -37,7 +37,7 @@ namespace CCXT.Collector.Library.Types
         /// <summary>
         /// price
         /// </summary>
-        public decimal price
+        public virtual decimal price
         {
             get;
             set;
@@ -47,24 +47,24 @@ namespace CCXT.Collector.Library.Types
     /// <summary>
     ///
     /// </summary>
-    public class SOrderBook
+    public class SOrderBooks
     {
         /// <summary>
         ///
         /// </summary>
-        public SOrderBook(string exchange, string stream, string symbol)
+        public SOrderBooks(string exchange, string stream, string symbol)
         {
             this.exchange = exchange;
             this.stream = stream;
             this.symbol = symbol;
 
-            this.data = new List<SOrderBookItem>();
+            this.data = new List<SOrderBook>();
         }
 
         /// <summary>
         ///
         /// </summary>
-        public string exchange
+        public virtual string exchange
         {
             get;
             set;
@@ -73,7 +73,7 @@ namespace CCXT.Collector.Library.Types
         /// <summary>
         /// S, R
         /// </summary>
-        public string stream
+        public virtual string stream
         {
             get;
             set;
@@ -82,7 +82,7 @@ namespace CCXT.Collector.Library.Types
         /// <summary>
         /// string symbol of the market ('BTCUSD', 'ETHBTC', ...)
         /// </summary>
-        public string symbol
+        public virtual string symbol
         {
             get;
             set;
@@ -91,7 +91,7 @@ namespace CCXT.Collector.Library.Types
         /// <summary>
         ///
         /// </summary>
-        public long sequential_id
+        public virtual long sequential_id
         {
             get;
             set;
@@ -100,7 +100,7 @@ namespace CCXT.Collector.Library.Types
         /// <summary>
         ///
         /// </summary>
-        public List<SOrderBookItem> data
+        public virtual List<SOrderBook> data
         {
             get;
             set;

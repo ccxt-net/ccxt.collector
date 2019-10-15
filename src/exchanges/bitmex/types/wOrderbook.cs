@@ -58,7 +58,7 @@ namespace CCXT.Collector.BitMEX.Types
     /// <summary>
     ///
     /// </summary>
-    public class BWOrderBookData : BOrderBookData
+    public class BWOrderBookData : BOrderBookItem
     {
         /// <summary>
         ///
