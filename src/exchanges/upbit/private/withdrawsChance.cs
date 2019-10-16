@@ -1,4 +1,6 @@
-﻿namespace CCXT.Collector.Upbit.Private
+﻿using OdinSdk.BaseLib.Coin;
+
+namespace CCXT.Collector.Upbit.Private
 {
     /// <summary>
     /// 사용자의 보안등급 정보
@@ -307,5 +309,30 @@
             get;
             set;
         }
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public class MyWithdrawsChance : ApiResult<WithdrawsChance>
+    {
+        /// <summary>
+        ///
+        /// </summary>
+        public MyWithdrawsChance()
+        {
+            this.result = new WithdrawsChance();
+        }
+
+#if DEBUG
+        /// <summary>
+        ///
+        /// </summary>
+        public string rawJson
+        {
+            get;
+            set;
+        }
+#endif
     }
 }

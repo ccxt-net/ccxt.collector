@@ -106,5 +106,23 @@ namespace CCXT.Collector.Upbit.Types
                 sideType = SideTypeConverter.FromString(value);
             }
         }
+        
+        /// <summary>
+        ///
+        /// </summary>
+        public string change
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        ///
+        /// </summary>
+        public string stream_type
+        {
+            get;
+            set;
+        }
     }
 }

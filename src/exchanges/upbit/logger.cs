@@ -1,13 +1,13 @@
 ﻿using CCXT.Collector.Service;
 
-namespace CCXT.Collector.BitMEX.Public
+namespace CCXT.Collector.Upbit
 {
     /// <summary>
-    /// bitmex
+    /// upbit
     /// </summary>
-    public class BMLogger
+    public class UPLogger
     {
-        public const string exchange_name = "bitmex";
+        public const string exchange_name = "upbit";
 
         /// <summary>
         ///

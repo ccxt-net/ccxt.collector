@@ -1,8 +1,8 @@
-﻿using CCXT.Collector.Binance.Public;
-using CCXT.Collector.BitMEX.Public;
+﻿using CCXT.Collector.Binance;
+using CCXT.Collector.BitMEX;
 using CCXT.Collector.Library;
 using CCXT.Collector.Library.Types;
-using CCXT.Collector.Upbit.Public;
+using CCXT.Collector.Upbit;
 using Newtonsoft.Json;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
@@ -121,14 +121,14 @@ namespace CCXT.Collector.Service
                         if (String.IsNullOrEmpty(_s) == true)
                             continue;
 
-                        SnapshotTasks.Add((new Binance.WebSocket()).Start(SSTokenSource, _s));
-                        SnapshotTasks.Add((new Binance.Polling()).OStart(SSTokenSource, _s));
+                        SnapshotTasks.Add((new BitMEX.WebSocket()).Start(SSTokenSource, _s));
+                        SnapshotTasks.Add((new BitMEX.Polling()).Start(SSTokenSource, _s));
                     }
                 }
                 else
-                    SnapshotTasks.Add((new Binance.Polling()).BStart(SSTokenSource, _symbols));
+                    SnapshotTasks.Add((new BitMEX.Polling()).Start(SSTokenSource, _symbols[0]));
 
-                SnapshotTasks.Add((new Binance.Processing()).Start(SSTokenSource));
+                SnapshotTasks.Add((new BitMEX.Processing()).Start(SSTokenSource));
             }
 
             LoggerQ.WriteO($"snapshot restart: symbol => {baseIds}", exchange);

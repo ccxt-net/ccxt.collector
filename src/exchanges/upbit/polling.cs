@@ -1,6 +1,5 @@
 ﻿using CCXT.Collector.Library;
 using CCXT.Collector.Library.Types;
-using CCXT.Collector.Upbit.Public;
 using CCXT.Collector.Upbit.Types;
 using Newtonsoft.Json;
 using OdinSdk.BaseLib.Configuration;
@@ -14,13 +13,24 @@ namespace CCXT.Collector.Upbit
 {
     public class Polling : KRestClient
     {
+        private CCXT.Collector.Upbit.Public.PublicApi __public_api = null;
+        private CCXT.Collector.Upbit.Public.PublicApi publicApi
+        {
+            get
+            {
+                if (__public_api == null)
+                    __public_api = new CCXT.Collector.Upbit.Public.PublicApi();
+                return __public_api;
+            }
+        }
+
         public async Task OStart(CancellationTokenSource tokenSource, string symbol, int limit = 32)
         {
             UPLogger.WriteO($"polling service start: symbol => {symbol}...");
 
             var _t_polling = Task.Run(async () =>
             {
-                var _client = CreateJsonClient(PublicApi.PublicUrl);
+                var _client = CreateJsonClient(publicApi.publicClient.ApiUrl);
 
                 var _t_params = new Dictionary<string, object>();
                 {
@@ -95,7 +105,7 @@ namespace CCXT.Collector.Upbit
 
             var _o_polling = Task.Run(async () =>
             {
-                var _client = CreateJsonClient(PublicApi.PublicUrl);
+                var _client = CreateJsonClient(publicApi.publicClient.ApiUrl);
 
                 var _o_params = new Dictionary<string, object>();
                 {
@@ -172,7 +182,7 @@ namespace CCXT.Collector.Upbit
             var _b_polling = Task.Run(async () =>
             {
                 var _symbols = String.Join(",", symbols);
-                var _client = CreateJsonClient(PublicApi.PublicUrl);
+                var _client = CreateJsonClient(publicApi.publicClient.ApiUrl);
 
                 var _b_params = new Dictionary<string, object>();
                 {
@@ -214,16 +224,16 @@ namespace CCXT.Collector.Upbit
                                 sequential_id = _last_limit_milli_secs,
                                 data = _b_json_data.Select(o =>
                                 {
-                                    var _ask = o.orderbook_units.OrderBy(a => a.ask_price).First();
-                                    var _bid = o.orderbook_units.OrderBy(a => a.bid_price).Last();
+                                    var _ask = o.asks.OrderBy(a => a.price).First();
+                                    var _bid = o.bids.OrderBy(a => a.price).Last();
 
                                     return new SBookTicker
                                     {
                                         symbol = o.symbol,
-                                        askPrice = _ask.ask_price,
-                                        askQty = _ask.ask_size,
-                                        bidPrice = _bid.bid_price,
-                                        bidQty = _bid.bid_size
+                                        askPrice = _ask.price,
+                                        askQty = _ask.quantity,
+                                        bidPrice = _bid.price,
+                                        bidQty = _bid.quantity
                                     };
                                 })
                                 .ToList()
@@ -286,16 +296,18 @@ namespace CCXT.Collector.Upbit
         {
             UPLogger.WriteO($"epolling service start..");
 
+            var _dunamu_url = publicApi.publicClient.ExchangeInfo.GetApiUrl("dunamu");
+
             var _b_polling = Task.Run(async () =>
             {
-                var _client = CreateJsonClient(PublicApi.DunamuUrl);
+                var _client = CreateJsonClient(_dunamu_url);
 
                 var _b_params = new Dictionary<string, object>();
                 {
                     _b_params.Add("codes", "FRX.KRWUSD");
                 }
 
-                var _b_request = CreateJsonRequest($"/forex/recent", _b_params);
+                var _b_request = CreateJsonRequest($"/recent", _b_params);
                 var _last_limit_milli_secs = 0L;
 
                 while (true)

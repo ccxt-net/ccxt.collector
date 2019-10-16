@@ -32,5 +32,14 @@ namespace CCXT.Collector.Upbit.Types
             get;
             set;
         }
+
+        /// <summary>
+        ///
+        /// </summary>
+        public string stream_type
+        {
+            get;
+            set;
+        }
     }
 }

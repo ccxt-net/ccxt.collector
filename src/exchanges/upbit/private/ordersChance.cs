@@ -1,4 +1,6 @@
-﻿namespace CCXT.Collector.Upbit.Private
+﻿using OdinSdk.BaseLib.Coin;
+
+namespace CCXT.Collector.Upbit.Private
 {
     /// <summary>
     /// 매수/매도 시 제약사항
@@ -146,7 +148,7 @@
         /// <summary>
         /// 매수 시 사용하는 화폐의 계좌 상태
         /// </summary>
-        public Accounts bid_account
+        public UBalanceItem bid_account
         {
             get;
             set;
@@ -155,10 +157,35 @@
         /// <summary>
         /// 매도 시 사용하는 화폐의 계좌 상태
         /// </summary>
-        public Accounts ask_account
+        public UBalanceItem ask_account
         {
             get;
             set;
         }
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public class MyOrdersChance : ApiResult<OrdersChance>
+    {
+        /// <summary>
+        ///
+        /// </summary>
+        public MyOrdersChance()
+        {
+            this.result = new OrdersChance();
+        }
+
+#if DEBUG
+        /// <summary>
+        ///
+        /// </summary>
+        public string rawJson
+        {
+            get;
+            set;
+        }
+#endif
     }
 }

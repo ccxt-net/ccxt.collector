@@ -2,7 +2,6 @@
 using CCXT.Collector.Library.Types;
 using CCXT.Collector.Service;
 using CCXT.Collector.Upbit.Public;
-using CCXT.Collector.Upbit.Types;
 using Newtonsoft.Json;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -155,8 +154,8 @@ namespace CCXT.Collector.Upbit
 
                 var _tob = __qOrderBooks[orderbook.symbol];
 
-                var _current_ask_size = orderbook.total_ask_size;
-                var _current_bid_size = orderbook.total_bid_size;
+                var _current_ask_size = orderbook.totalAskQuantity;
+                var _current_bid_size = orderbook.totalBidQuantity;
 
                 if (_settings.last_order_ask_size != _current_ask_size || _settings.last_order_bid_size != _current_bid_size)
                 {
@@ -298,62 +297,65 @@ namespace CCXT.Collector.Upbit
 
             lock (__qOrderBooks)
             {
-                foreach (var _oi in orderBook.orderbook_units)
+                foreach (var _oi in orderBook.asks)
                 {
-                    var _ask = qob.data.Where(o => o.side == "ask" && o.price == _oi.ask_price).SingleOrDefault();
+                    var _ask = qob.data.Where(o => o.side == "ask" && o.price == _oi.price).SingleOrDefault();
                     if (_ask == null)
                     {
                         var _aoi = new SOrderBook
                         {
                             action = "insert",
                             side = "ask",
-                            price = _oi.ask_price,
-                            quantity = _oi.ask_size
+                            price = _oi.price,
+                            quantity = _oi.quantity
                         };
 
                         _dqo.data.Add(_aoi);
                         qob.data.Add(_aoi);
                     }
-                    else if (_ask.quantity != _oi.ask_size)
+                    else if (_ask.quantity != _oi.quantity)
                     {
                         var _aoi = new SOrderBook
                         {
                             action = "update",
                             side = "ask",
-                            price = _oi.ask_price,
-                            quantity = _oi.ask_size
+                            price = _oi.price,
+                            quantity = _oi.quantity
                         };
 
                         _dqo.data.Add(_aoi);
-                        _ask.quantity = _oi.ask_size;
+                        _ask.quantity = _oi.quantity;
                     }
+                }
 
-                    var _bid = qob.data.Where(o => o.side == "bid" && o.price == _oi.bid_price).SingleOrDefault();
+                foreach (var _oi in orderBook.bids)
+                {
+                    var _bid = qob.data.Where(o => o.side == "bid" && o.price == _oi.price).SingleOrDefault();
                     if (_bid == null)
                     {
                         var _boi = new SOrderBook
                         {
                             action = "insert",
                             side = "bid",
-                            price = _oi.bid_price,
-                            quantity = _oi.bid_size
+                            price = _oi.price,
+                            quantity = _oi.quantity
                         };
 
                         qob.data.Add(_boi);
                         _dqo.data.Add(_boi);
                     }
-                    else if (_bid.quantity != _oi.bid_size)
+                    else if (_bid.quantity != _oi.quantity)
                     {
                         var _boi = new SOrderBook
                         {
                             action = "update",
                             side = "bid",
-                            price = _oi.bid_price,
-                            quantity = _oi.bid_size
+                            price = _oi.price,
+                            quantity = _oi.quantity
                         };
 
                         _dqo.data.Add(_boi);
-                        _bid.quantity = _oi.bid_size;
+                        _bid.quantity = _oi.quantity;
                     }
                 }
 
@@ -361,7 +363,7 @@ namespace CCXT.Collector.Upbit
                 {
                     if (_qi.side == "ask")
                     {
-                        var _ask = orderBook.orderbook_units.Where(o => o.ask_price == _qi.price).SingleOrDefault();
+                        var _ask = orderBook.asks.Where(o => o.price == _qi.price).SingleOrDefault();
                         if (_ask == null)
                         {
                             _dqo.data.Add(new SOrderBook
@@ -377,7 +379,7 @@ namespace CCXT.Collector.Upbit
                     }
                     else
                     {
-                        var _bid = orderBook.orderbook_units.Where(o => o.bid_price == _qi.price).SingleOrDefault();
+                        var _bid = orderBook.bids.Where(o => o.price == _qi.price).SingleOrDefault();
                         if (_bid == null)
                         {
                             _dqo.data.Add(new SOrderBook
@@ -438,22 +440,25 @@ namespace CCXT.Collector.Upbit
                 sequential_id = orderBook.timestamp
             };
 
-            foreach (var _oi in orderBook.orderbook_units)
+            foreach (var _oi in orderBook.asks)
             {
                 _sob.data.Add(new SOrderBook
                 {
                     action = "insert",
                     side = "ask",
-                    price = _oi.ask_price,
-                    quantity = _oi.ask_size
+                    price = _oi.price,
+                    quantity = _oi.quantity
                 });
-
+            }
+            
+            foreach (var _oi in orderBook.bids)
+            {
                 _sob.data.Add(new SOrderBook
                 {
                     action = "insert",
                     side = "bid",
-                    price = _oi.bid_price,
-                    quantity = _oi.bid_size
+                    price = _oi.price,
+                    quantity = _oi.quantity
                 });
             }
 

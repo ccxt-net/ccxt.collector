@@ -1,4 +1,4 @@
-﻿using OdinSdk.BaseLib.Coin.Public;
+﻿using OdinSdk.BaseLib.Coin.Types;
 using System.Collections.Generic;
 
 namespace CCXT.Collector.Library.Types
@@ -6,7 +6,7 @@ namespace CCXT.Collector.Library.Types
     /// <summary>
     /// 
     /// </summary>
-    public class STrade : OdinSdk.BaseLib.Coin.Public.CompleteOrderItem, ICompleteOrderItem
+    public class STrade 
     {
         /// <summary>
         /// 
@@ -20,7 +20,43 @@ namespace CCXT.Collector.Library.Types
         /// <summary>
         ///
         /// </summary>
+        public virtual long timestamp
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        ///
+        /// </summary>
         public virtual long sequential_id
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        ///
+        /// </summary>
+        public virtual decimal quantity
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        ///
+        /// </summary>
+        public virtual decimal price
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// sell or buy
+        /// </summary>
+        public virtual SideType sideType
         {
             get;
             set;

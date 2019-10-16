@@ -1,14 +1,17 @@
-﻿namespace CCXT.Collector.Upbit.Private
+﻿using Newtonsoft.Json;
+using OdinSdk.BaseLib.Coin.Private;
+
+namespace CCXT.Collector.Upbit.Private
 {
     /// <summary>
     /// 입금 주소
     /// </summary>
-    public class Address
+    public class UAddress : OdinSdk.BaseLib.Coin.Private.AddressItem, IAddressItem
     {
         /// <summary>
         /// 화폐를 의미하는 영문 대문자 코드
         /// </summary>
-        public string currency
+        public override string currency
         {
             get;
             set;
@@ -17,7 +20,8 @@
         /// <summary>
         /// 입금 주소
         /// </summary>
-        public string deposit_address
+        [JsonProperty(PropertyName = "deposit_address")]
+        public override string address
         {
             get;
             set;
@@ -26,7 +30,8 @@
         /// <summary>
         /// 2차 입금 주소
         /// </summary>
-        public string secondary_address
+        [JsonProperty(PropertyName = "secondary_address")]
+        public override string tag
         {
             get;
             set;
@@ -36,12 +41,12 @@
     /// <summary>
     ///
     /// </summary>
-    public class GenerateAddress : Address
+    public class GenerateAddress : UAddress
     {
         /// <summary>
         /// 요청 성공 여부
         /// </summary>
-        public bool success
+        public override bool success
         {
             get;
             set;

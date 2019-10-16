@@ -12,7 +12,16 @@ namespace CCXT.Collector.BitMEX
 {
     public class Polling : KRestClient
     {
-        private const string __bitmex_api_rul = "https://www.bitmex.com";
+        private CCXT.Collector.BitMEX.Public.PublicApi __public_api = null;
+        private CCXT.Collector.BitMEX.Public.PublicApi publicApi
+        {
+            get
+            {
+                if (__public_api == null)
+                    __public_api = new CCXT.Collector.BitMEX.Public.PublicApi();
+                return __public_api;
+            }
+        }
 
         public async Task Start(CancellationTokenSource tokenSource, string symbol, int limit = 32)
         {
@@ -20,7 +29,7 @@ namespace CCXT.Collector.BitMEX
 
             var _t_polling = Task.Run(async () =>
             {
-                var _client = CreateJsonClient(__bitmex_api_rul);
+                var _client = CreateJsonClient(publicApi.publicClient.ApiUrl);
 
                 var _t_params = new Dictionary<string, object>();
                 {
@@ -79,7 +88,7 @@ namespace CCXT.Collector.BitMEX
 
             var _o_polling = Task.Run(async () =>
             {
-                var _client = CreateJsonClient(__bitmex_api_rul);
+                var _client = CreateJsonClient(publicApi.publicClient.ApiUrl);
 
                 var _o_params = new Dictionary<string, object>();
                 {

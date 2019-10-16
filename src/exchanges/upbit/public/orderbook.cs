@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using Newtonsoft.Json;
+using OdinSdk.BaseLib.Coin.Public;
+using System.Collections.Generic;
 
 namespace CCXT.Collector.Upbit.Public
 {
@@ -47,7 +49,7 @@ namespace CCXT.Collector.Upbit.Public
     /// <summary>
     ///
     /// </summary>
-    public class UOrderBook
+    public class UOrderBook : OdinSdk.BaseLib.Coin.Public.OrderBook, IOrderBook
     {
         /// <summary>
         ///
@@ -59,57 +61,65 @@ namespace CCXT.Collector.Upbit.Public
         }
 
         /// <summary>
-        ///
+        /// 마켓 코드
         /// </summary>
-        public virtual string symbol
+        [JsonProperty(PropertyName = "market")]
+        public override string symbol
         {
             get;
             set;
         }
 
         /// <summary>
-        ///
+        /// 호가 매도 총 잔량
         /// </summary>
-        public virtual long timestamp
+        [JsonProperty(PropertyName = "total_ask_size")]
+        public decimal totalAskQuantity
         {
             get;
             set;
         }
 
         /// <summary>
-        ///
+        /// 호가 매수 총 잔량
         /// </summary>
-        public virtual decimal total_ask_size
+        [JsonProperty(PropertyName = "total_bid_size")]
+        public decimal totalBidQuantity
         {
             get;
             set;
         }
 
         /// <summary>
-        ///
+        /// 호가
         /// </summary>
-        public virtual decimal total_bid_size
+        [JsonProperty(PropertyName = "orderbook_units")]
+        private List<UOrderBookItem> orderbooks
         {
-            get;
-            set;
-        }
+            set
+            {
+                this.asks = new List<IOrderBookItem>();
+                this.bids = new List<IOrderBookItem>();
 
-        /// <summary>
-        ///
-        /// </summary>
-        public virtual List<UOrderBookItem> orderbook_units
-        {
-            get;
-            set;
-        }
+                foreach (var _o in value)
+                {
+                    this.asks.Add(new OrderBookItem
+                    {
+                        quantity = _o.ask_size,
+                        price = _o.ask_price,
+                        amount = _o.ask_size * _o.ask_price,
+                        count = 1
+                    });
 
-        /// <summary>
-        ///
-        /// </summary>
-        public virtual string stream_type
-        {
-            get;
-            set;
+                    this.bids.Add(new OrderBookItem
+                    {
+                        quantity = _o.bid_size,
+                        price = _o.bid_price,
+                        amount = _o.bid_size * _o.bid_price,
+                        count = 1
+                    });
+                }
+            }
         }
     }
 }

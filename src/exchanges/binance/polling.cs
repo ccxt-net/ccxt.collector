@@ -54,6 +54,17 @@ namespace CCXT.Collector.Binance
                 __polling_tasks = value;
             }
         }
+        
+        private CCXT.Collector.Binance.Public.PublicApi __public_api = null;
+        private CCXT.Collector.Binance.Public.PublicApi publicApi
+        {
+            get
+            {
+                if (__public_api == null)
+                    __public_api = new CCXT.Collector.Binance.Public.PublicApi();
+                return __public_api;
+            }
+        }
 
         public async Task OStart(CancellationTokenSource tokenSource, string symbol)
         {
@@ -63,7 +74,7 @@ namespace CCXT.Collector.Binance
             {
                 PollingTasks.Add(Task.Run(async () =>
                 {
-                    var _client = CreateJsonClient(PublicApi.PublicUrl);
+                    var _client = CreateJsonClient(publicApi.publicClient.ApiUrl);
 
                     var _o_params = new Dictionary<string, object>();
                     {
@@ -165,7 +176,7 @@ namespace CCXT.Collector.Binance
             {
                 PollingTasks.Add(Task.Run(async () =>
                 {
-                    var _client = CreateJsonClient(PublicApi.PublicUrl);
+                    var _client = CreateJsonClient(publicApi.publicClient.ApiUrl);
 
                     var _b_params = new Dictionary<string, object>();
                     var _b_request = CreateJsonRequest($"/ticker/bookTicker", _b_params);
