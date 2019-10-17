@@ -72,8 +72,8 @@ namespace CCXT.Collector.Upbit.Private
         /// <summary>
         /// 주문 가능 정보: 마켓별 주문 가능 정보를 확인한다.
         /// </summary>
-        /// <param name="base_name">코인명</param>
-        /// <param name="quote_name">화폐명</param>
+        /// <param name="base_name">The type of trading base-currency of which information you want to query for.</param>
+        /// <param name="quote_name">The type of trading quote-currency of which information you want to query for.</param>
         /// <returns></returns>
         public async Task<MyOrdersChance> GetOrdersChance(string base_name, string quote_name)
         {
@@ -141,8 +141,8 @@ namespace CCXT.Collector.Upbit.Private
         /// <summary>
         /// 주문 리스트 조회: 주문 리스트를 조회한다.
         /// </summary>
-        /// <param name="base_name">코인명</param>
-        /// <param name="quote_name">화폐명</param>
+        /// <param name="base_name">The type of trading base-currency of which information you want to query for.</param>
+        /// <param name="quote_name">The type of trading quote-currency of which information you want to query for.</param>
         /// <returns></returns>
         public async Task<MyOrders> GetOrders(string base_name, string quote_name)
         {
@@ -182,8 +182,8 @@ namespace CCXT.Collector.Upbit.Private
         /// <summary>
         /// 주문 리스트 조회: 주문 리스트를 조회한다.
         /// </summary>
-        /// <param name="base_name">코인명</param>
-        /// <param name="quote_name">화폐명</param>
+        /// <param name="base_name">The type of trading base-currency of which information you want to query for.</param>
+        /// <param name="quote_name">The type of trading quote-currency of which information you want to query for.</param>
         /// <returns></returns>
         public async Task<MyTrades> GetTrades(string base_name, string quote_name)
         {
@@ -297,13 +297,13 @@ namespace CCXT.Collector.Upbit.Private
         /// <summary>
         /// 주문하기: 주문 요청을 한다.
         /// </summary>
-        /// <param name="base_name">코인명</param>
-        /// <param name="quote_name">화폐명</param>
+        /// <param name="base_name">The type of trading base-currency of which information you want to query for.</param>
+        /// <param name="quote_name">The type of trading quote-currency of which information you want to query for.</param>
         /// <param name="quantity">주문 수량</param>
         /// <param name="price">유닛당 주문 가격</param>
         /// <param name="sideType">주문 타입</param>
         /// <returns></returns>
-        public async Task<MyOrder> PutOrder(string base_name, string quote_name, decimal quantity, decimal price, SideType sideType)
+        public async Task<MyOrder> CreateLimitOrder(string base_name, string quote_name, decimal quantity, decimal price, SideType sideType)
         {
             var _result = new MyOrder();
 
@@ -324,7 +324,9 @@ namespace CCXT.Collector.Upbit.Private
             {
                 var _order = privateClient.DeserializeObject<UPlaceOrderItem>(_response.Content);
                 {
+                    _order.orderType = OrderType.Limit;
                     _order.amount = _order.quantity * _order.price;
+
                     _result.result = _order;
                 }
                 _result.SetSuccess();
