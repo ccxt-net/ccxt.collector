@@ -3,6 +3,7 @@ using OdinSdk.BaseLib.Coin.Public;
 using OdinSdk.BaseLib.Coin.Types;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace CCXT.Collector.Upbit.Public
@@ -33,73 +34,119 @@ namespace CCXT.Collector.Upbit.Public
         /// <summary>
         /// Fetch symbols, market ids and exchanger's information
         /// </summary>
-        /// <param name="args">Add additional attributes for each exchange</param>
         /// <returns></returns>
         public override async Task<Markets> FetchMarkets(Dictionary<string, object> args = null)
         {
             var _result = new Markets();
 
-            publicClient.ExchangeInfo.ApiCallWait(TradeType.Public);
-            {
-                var _params = publicClient.MergeParamsAndArgs(args);
-
-                var _json_value = await publicClient.CallApiGet1Async("/market/all", _params);
+            var _response = await publicClient.CallApiGet2Async("/market/all");
 #if DEBUG
-                _result.rawJson = _json_value.Content;
+            _result.rawJson = _response.Content;
 #endif
-                var _json_result = publicClient.GetResponseMessage(_json_value.Response);
-                if (_json_result.success == true)
+            if (_response.IsSuccessful == true)
+            {
+                var _markets = publicClient.DeserializeObject<List<UMarketItem>>(_response.Content);
+
+                foreach (var _market in _markets)
                 {
-                    var _markets = publicClient.DeserializeObject<List<UMarketItem>>(_json_value.Content);
-                    foreach (var _market in _markets)
+                    var _symbol = _market.symbol;
+
+                    _market.baseId = _symbol.Split('-')[1];
+                    _market.quoteId = _symbol.Split('-')[0];
+
+                    _market.baseName = publicClient.ExchangeInfo.GetCommonCurrencyName(_market.baseId);
+                    _market.quoteName = publicClient.ExchangeInfo.GetCommonCurrencyName(_market.quoteId);
+
+                    _market.marketId = _market.baseName + "/" + _market.quoteName;
+
+                    _market.precision = new MarketPrecision
                     {
-                        var _symbol = _market.symbol;
+                        quantity = 8,
+                        price = 8,
+                        amount = 8
+                    };
 
-                        _market.baseId = _symbol.Split('-')[1];
-                        _market.quoteId = _symbol.Split('-')[0];
+                    _market.lot = 1.0m;
+                    _market.active = true;
 
-                        _market.baseName = publicClient.ExchangeInfo.GetCommonCurrencyName(_market.baseId);
-                        _market.quoteName = publicClient.ExchangeInfo.GetCommonCurrencyName(_market.quoteId);
+                    _market.takerFee = 0.05m / 100;
+                    _market.makerFee = 0.05m / 100;
 
-                        _market.marketId = _market.baseName + "/" + _market.quoteName;
-
-                        _market.precision = new MarketPrecision
+                    _market.limits = new MarketLimits
+                    {
+                        quantity = new MarketMinMax
                         {
-                            quantity = 8,
-                            price = 8,
-                            amount = 8
-                        };
-
-                        _market.lot = 1.0m;
-                        _market.active = true;
-
-                        _market.takerFee = 0.05m / 100;
-                        _market.makerFee = 0.05m / 100;
-
-                        _market.limits = new MarketLimits
+                            min = (decimal)Math.Pow(10, -_market.precision.quantity),
+                            max = decimal.MaxValue
+                        },
+                        price = new MarketMinMax
                         {
-                            quantity = new MarketMinMax
-                            {
-                                min = (decimal)Math.Pow(10, -_market.precision.quantity),
-                                max = decimal.MaxValue
-                            },
-                            price = new MarketMinMax
-                            {
-                                min = (decimal)Math.Pow(10, -_market.precision.price),
-                                max = decimal.MaxValue
-                            },
-                            amount = new MarketMinMax
-                            {
-                                min = _market.lot,
-                                max = decimal.MaxValue
-                            }
-                        };
+                            min = (decimal)Math.Pow(10, -_market.precision.price),
+                            max = decimal.MaxValue
+                        },
+                        amount = new MarketMinMax
+                        {
+                            min = _market.lot,
+                            max = decimal.MaxValue
+                        }
+                    };
 
-                        _result.result.Add(_market.marketId, _market);
-                    }
+                    _result.result.Add(_market.marketId, _market);
                 }
 
-                _result.SetResult(_json_result);
+                _result.SetSuccess();
+            }
+            else
+            {
+                var _message = publicClient.GetResponseMessage(_response);
+                _result.SetFailure(_message.message);
+            }
+
+            return _result;
+        }
+
+        /// <summary>
+        /// Fetch array of recent trades data
+        /// </summary>
+        /// <param name="base_name">The type of trading base-currency of which information you want to query for.</param>
+        /// <param name="quote_name">The type of trading quote-currency of which information you want to query for.</param>
+        /// <param name="limits">maximum number of items (optional): default 20</param>
+        /// <returns></returns>
+        public async Task<CompleteOrders> GetCompleteOrders(string base_name, string quote_name, int limits = 20)
+        {
+            var _result = new CompleteOrders(base_name, quote_name);
+
+            var _params = new Dictionary<string, object>();
+            {
+                _params.Add("market", $"{quote_name}-{base_name}");
+                _params.Add("count", limits);
+            }
+
+            var _response = await publicClient.CallApiGet2Async($"/trades/ticks", _params);
+#if DEBUG
+            _result.rawJson = _response.Content;
+#endif
+            if (_response.IsSuccessful == true)
+            {
+                var _orders = publicClient.DeserializeObject<List<UCompleteOrderItem>>(_response.Content);
+                {
+                    foreach (var _o in _orders)
+                    {
+                        _o.transactionId = (_o.timestamp * 1000).ToString();
+
+                        _o.fillType = FillType.Fill;
+                        _o.orderType = OrderType.Limit;
+
+                        _o.amount = _o.quantity * _o.price;
+                    }
+                    _result.result = _orders.ToList<ICompleteOrderItem>();
+                }
+                _result.SetSuccess();
+            }
+            else
+            {
+                var _message = publicClient.GetResponseMessage(_response);
+                _result.SetFailure(_message.message);
             }
 
             return _result;
