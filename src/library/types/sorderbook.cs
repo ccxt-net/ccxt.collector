@@ -1,16 +1,17 @@
-﻿using System.Collections.Generic;
+﻿using OdinSdk.BaseLib.Coin.Public;
+using System.Collections.Generic;
 
 namespace CCXT.Collector.Library.Types
 {
     /// <summary>
     /// item of orderbook
     /// </summary>
-    public class SOrderBook
+    public class SOrderBook : OdinSdk.BaseLib.Coin.Public.OrderBookItem, IOrderBookItem
     {
         /// <summary>
         /// I,U,D
         /// </summary>
-        public virtual string action
+        public string action
         {
             get;
             set;
@@ -19,25 +20,7 @@ namespace CCXT.Collector.Library.Types
         /// <summary>
         ///
         /// </summary>
-        public virtual string side
-        {
-            get;
-            set;
-        }
-
-        /// <summary>
-        /// quantity
-        /// </summary>
-        public virtual decimal quantity
-        {
-            get;
-            set;
-        }
-
-        /// <summary>
-        /// price
-        /// </summary>
-        public virtual decimal price
+        public string side
         {
             get;
             set;
@@ -64,7 +47,7 @@ namespace CCXT.Collector.Library.Types
         /// <summary>
         ///
         /// </summary>
-        public virtual string exchange
+        public string exchange
         {
             get;
             set;
@@ -73,7 +56,7 @@ namespace CCXT.Collector.Library.Types
         /// <summary>
         /// S, R
         /// </summary>
-        public virtual string stream
+        public string stream
         {
             get;
             set;
@@ -82,7 +65,7 @@ namespace CCXT.Collector.Library.Types
         /// <summary>
         /// string symbol of the market ('BTCUSD', 'ETHBTC', ...)
         /// </summary>
-        public virtual string symbol
+        public string symbol
         {
             get;
             set;
@@ -91,7 +74,7 @@ namespace CCXT.Collector.Library.Types
         /// <summary>
         ///
         /// </summary>
-        public virtual long sequential_id
+        public long sequential_id
         {
             get;
             set;
@@ -100,7 +83,7 @@ namespace CCXT.Collector.Library.Types
         /// <summary>
         ///
         /// </summary>
-        public virtual List<SOrderBook> data
+        public List<SOrderBook> data
         {
             get;
             set;

@@ -1,6 +1,5 @@
 ﻿using OdinSdk.BaseLib.Coin;
 using OdinSdk.BaseLib.Coin.Public;
-using OdinSdk.BaseLib.Coin.Types;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -128,7 +127,7 @@ namespace CCXT.Collector.Upbit.Public
 #endif
             if (_response.IsSuccessful == true)
             {
-                var _orders = publicClient.DeserializeObject<List<UCompleteOrderItem>>(_response.Content);
+                var _orders = publicClient.DeserializeObject<List<UACompleteOrder>>(_response.Content);
                 {
                     _result.result = _orders.ToList<ICompleteOrderItem>();
                 }

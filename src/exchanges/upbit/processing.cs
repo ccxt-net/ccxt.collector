@@ -1,4 +1,5 @@
 ﻿using CCXT.Collector.Library.Types;
+using CCXT.Collector.Upbit.Public;
 using CCXT.Collector.Upbit.Types;
 using Newtonsoft.Json;
 using System;
@@ -63,7 +64,7 @@ namespace CCXT.Collector.Upbit
                         {
                             if (_json_data.type == "trade")
                             {
-                                var _trade = JsonConvert.DeserializeObject<UWTrade>(_message.json);
+                                var _trade = JsonConvert.DeserializeObject<UWCompleteOrder>(_message.json);
                                 await mergeTradeItem(_trade);
                             }
                             else if (_json_data.type == "orderbook")
@@ -76,7 +77,7 @@ namespace CCXT.Collector.Upbit
                         {
                             if (_json_data.type == "trades")
                             {
-                                var _trades = JsonConvert.DeserializeObject<STrades>(_message.json);
+                                var _trades = JsonConvert.DeserializeObject<SCompleteOrders>(_message.json);
                                 await mergeTradeItems(_trades);
                             }
                             else if (_json_data.type == "orderbooks")

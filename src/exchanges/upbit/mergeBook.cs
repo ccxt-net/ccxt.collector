@@ -15,7 +15,7 @@ namespace CCXT.Collector.Upbit
         private static ConcurrentDictionary<string, SOrderBooks> __qOrderBooks = new ConcurrentDictionary<string, SOrderBooks>();
         private static ConcurrentDictionary<string, Settings> __qSettings = new ConcurrentDictionary<string, Settings>();
 
-        private async Task<bool> mergeTradeItem(STrade tradeItem, string stream = "wscorders")
+        private async Task<bool> mergeTradeItem(SCompleteOrder tradeItem, string stream = "wscorders")
         {
             var _result = false;
 
@@ -24,12 +24,12 @@ namespace CCXT.Collector.Upbit
                 var _qob = __qOrderBooks[tradeItem.symbol];
                 _qob.stream = stream;
 
-                var _trades = new STrades
+                var _trades = new SCompleteOrders
                 {
                     exchange = UPLogger.exchange_name,
                     stream = "wsctrades",
                     symbol = tradeItem.symbol,
-                    data = new List<STrade> { tradeItem }
+                    data = new List<SCompleteOrder> { tradeItem }
                 };
 
                 _result = await updateTradeItem(_qob, _trades, stream);
@@ -41,7 +41,7 @@ namespace CCXT.Collector.Upbit
             return _result;
         }
 
-        private async Task<bool> mergeTradeItems(STrades tradeItems, string stream = "apiorders")
+        private async Task<bool> mergeTradeItems(SCompleteOrders tradeItems, string stream = "apiorders")
         {
             var _result = false;
 
@@ -57,7 +57,7 @@ namespace CCXT.Collector.Upbit
             return _result;
         }
 
-        private async Task<bool> updateTradeItem(SOrderBooks lob, STrades tradeItems, string stream)
+        private async Task<bool> updateTradeItem(SOrderBooks lob, SCompleteOrders tradeItems, string stream)
         {
             var _nob = new SOrderBooks(UPLogger.exchange_name, stream, lob.symbol)
             {
@@ -496,7 +496,7 @@ namespace CCXT.Collector.Upbit
             }
         }
 
-        private async Task publishTrading(STrades str)
+        private async Task publishTrading(SCompleteOrders str)
         {
             await Task.Delay(0);
 

@@ -1,5 +1,6 @@
 ﻿using CCXT.Collector.Library;
 using CCXT.Collector.Library.Types;
+using CCXT.Collector.Upbit.Public;
 using CCXT.Collector.Upbit.Types;
 using Newtonsoft.Json;
 using OdinSdk.BaseLib.Configuration;
@@ -52,14 +53,14 @@ namespace CCXT.Collector.Upbit
                         var _t_json_value = await RestExecuteAsync(_client, _t_request);
                         if (_t_json_value.IsSuccessful && _t_json_value.Content[0] == '[')
                         {
-                            var _t_json_data = JsonConvert.DeserializeObject<List<UATrade>>(_t_json_value.Content);
+                            var _t_json_data = JsonConvert.DeserializeObject<List<UACompleteOrder>>(_t_json_value.Content);
 
-                            var _trades = new STrades
+                            var _trades = new SCompleteOrders
                             {
                                 exchange = UPLogger.exchange_name,
                                 stream = "trades",
                                 symbol = symbol,
-                                data = _t_json_data.ToList<STrade>()
+                                data = _t_json_data.ToList<SCompleteOrder>()
                             };
 
                             var _t_json_content = JsonConvert.SerializeObject(_trades);
