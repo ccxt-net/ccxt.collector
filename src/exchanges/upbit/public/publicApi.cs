@@ -130,18 +130,49 @@ namespace CCXT.Collector.Upbit.Public
             {
                 var _orders = publicClient.DeserializeObject<List<UCompleteOrderItem>>(_response.Content);
                 {
-                    foreach (var _o in _orders)
-                    {
-                        _o.transactionId = (_o.timestamp * 1000).ToString();
-
-                        _o.fillType = FillType.Fill;
-                        _o.orderType = OrderType.Limit;
-
-                        _o.amount = _o.quantity * _o.price;
-                    }
                     _result.result = _orders.ToList<ICompleteOrderItem>();
                 }
                 _result.SetSuccess();
+            }
+            else
+            {
+                var _message = publicClient.GetResponseMessage(_response);
+                _result.SetFailure(_message.message);
+            }
+
+            return _result;
+        }
+
+        /// <summary>
+        /// Fetch pending or registered order details
+        /// </summary>
+        /// <param name="base_name">The type of trading base-currency of which information you want to query for.</param>
+        /// <param name="quote_name">The type of trading quote-currency of which information you want to query for.</param>
+        /// <returns></returns>
+        public async Task<OrderBooks> GetOrderBooks(string base_name, string quote_name)
+        {
+            var _result = new OrderBooks(base_name, quote_name);
+
+            var _params = new Dictionary<string, object>();
+            {
+                _params.Add("market", $"{quote_name}-{base_name}");
+            }
+
+            var _response = await publicClient.CallApiGet2Async("/orderbook", _params);
+#if DEBUG
+            _result.rawJson = _response.Content;
+#endif
+            if (_response.IsSuccessful == true)
+            {
+                var _orderbooks = publicClient.DeserializeObject<List<UOrderBook>>(_response.Content);
+                {
+                    var _orderbook = _orderbooks.FirstOrDefault();
+                    if (_orderbook != null)
+                    {
+                        _result.result = _orderbook;
+                        _result.SetSuccess();
+                    }
+                }
             }
             else
             {
