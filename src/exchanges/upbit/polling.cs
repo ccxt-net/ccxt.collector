@@ -1,7 +1,6 @@
 ﻿using CCXT.Collector.Library;
 using CCXT.Collector.Library.Types;
 using CCXT.Collector.Upbit.Public;
-using CCXT.Collector.Upbit.Types;
 using Newtonsoft.Json;
 using OdinSdk.BaseLib.Configuration;
 using System;
@@ -128,9 +127,23 @@ namespace CCXT.Collector.Upbit
                         if (_o_json_value.IsSuccessful && _o_json_value.Content[0] == '[')
                         {
                             var _o_json_data = JsonConvert.DeserializeObject<List<UAOrderBook>>(_o_json_value.Content);
-                            _o_json_data[0].type = "orderbooks";
+                            var _aorder = _o_json_data[0];
 
-                            var _o_json_content = JsonConvert.SerializeObject(_o_json_data[0]);
+                            var _sorder = new SOrderBook
+                            {
+                                symbol = _aorder.symbol,
+                                type = "orderbooks",
+
+                                totalAskQuantity = _aorder.totalAskQuantity,
+                                totalBidQuantity = _aorder.totalBidQuantity,
+                                
+                                timestamp = _aorder.timestamp,
+
+                                asks = _aorder.asks,
+                                bids = _aorder.bids
+                            };
+
+                            var _o_json_content = JsonConvert.SerializeObject(_sorder);
                             Processing.SendReceiveQ(new QMessage { command = "AP", json = _o_json_content });
                         }
                         else

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace CCXT.Collector.Upbit.Types
+namespace CCXT.Collector.Upbit.Public
 {
     /// <summary>
     ///

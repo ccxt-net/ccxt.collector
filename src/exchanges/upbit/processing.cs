@@ -1,6 +1,5 @@
 ﻿using CCXT.Collector.Library.Types;
 using CCXT.Collector.Upbit.Public;
-using CCXT.Collector.Upbit.Types;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Concurrent;
@@ -82,7 +81,7 @@ namespace CCXT.Collector.Upbit
                             }
                             else if (_json_data.type == "orderbooks")
                             {
-                                var _orderbook = JsonConvert.DeserializeObject<UAOrderBook>(_message.json);
+                                var _orderbook = JsonConvert.DeserializeObject<SOrderBook>(_message.json);
                                 await mergeOrderbook(_orderbook);
                             }
                             else if (_json_data.stream == "bookticker")

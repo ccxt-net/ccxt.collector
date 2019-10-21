@@ -73,7 +73,7 @@ namespace CCXT.Collector.BitMEX
                     {
                         if (_qoi.quantity <= _t.quantity)
                         {
-                            var _aoi = new SOrderBook
+                            var _aoi = new SOrderBookItem
                             {
                                 action = "delete",
                                 side = _qoi.side,
@@ -88,7 +88,7 @@ namespace CCXT.Collector.BitMEX
                         {
                             _qoi.quantity -= _t.quantity;
 
-                            var _aoi = new SOrderBook
+                            var _aoi = new SOrderBookItem
                             {
                                 action = "update",
                                 side = _qoi.side,
@@ -106,7 +106,7 @@ namespace CCXT.Collector.BitMEX
                     {
                         foreach (var _qox in _strange_levels)
                         {
-                            var _aoi = new SOrderBook
+                            var _aoi = new SOrderBookItem
                             {
                                 action = "delete",
                                 side = _qox.side,
@@ -153,7 +153,7 @@ namespace CCXT.Collector.BitMEX
 
                 foreach (var _oi in orderBook.data.asks)
                 {
-                    _sqo.data.Add(new SOrderBook
+                    _sqo.data.Add(new SOrderBookItem
                     {
                         action = "insert",
                         side = "ask",
@@ -164,7 +164,7 @@ namespace CCXT.Collector.BitMEX
 
                 foreach (var _oi in orderBook.data.bids)
                 {
-                    _sqo.data.Add(new SOrderBook
+                    _sqo.data.Add(new SOrderBookItem
                     {
                         action = "insert",
                         side = "bid",
@@ -237,7 +237,7 @@ namespace CCXT.Collector.BitMEX
                     var _ask = qob.data.Where(o => o.side == "ask" && o.price == _oi[0]).SingleOrDefault();
                     if (_ask == null)
                     {
-                        var _aoi = new SOrderBook
+                        var _aoi = new SOrderBookItem
                         {
                             action = "insert",
                             side = "ask",
@@ -250,7 +250,7 @@ namespace CCXT.Collector.BitMEX
                     }
                     else if (_ask.quantity != _oi[1])
                     {
-                        var _aoi = new SOrderBook
+                        var _aoi = new SOrderBookItem
                         {
                             action = "update",
                             side = "ask",
@@ -268,7 +268,7 @@ namespace CCXT.Collector.BitMEX
                     var _bid = qob.data.Where(o => o.side == "bid" && o.price == _oi[0]).SingleOrDefault();
                     if (_bid == null)
                     {
-                        var _boi = new SOrderBook
+                        var _boi = new SOrderBookItem
                         {
                             action = "insert",
                             side = "bid",
@@ -281,7 +281,7 @@ namespace CCXT.Collector.BitMEX
                     }
                     else if (_bid.quantity != _oi[1])
                     {
-                        var _boi = new SOrderBook
+                        var _boi = new SOrderBookItem
                         {
                             action = "update",
                             side = "bid",
@@ -301,7 +301,7 @@ namespace CCXT.Collector.BitMEX
                         var _ask = orderBook.data.asks.Where(o => o[0] == _qi.price).SingleOrDefault();
                         if (_ask == null)
                         {
-                            _dqo.data.Add(new SOrderBook
+                            _dqo.data.Add(new SOrderBookItem
                             {
                                 action = "delete",
                                 side = _qi.side,
@@ -317,7 +317,7 @@ namespace CCXT.Collector.BitMEX
                         var _bid = orderBook.data.bids.Where(o => o[0] == _qi.price).SingleOrDefault();
                         if (_bid == null)
                         {
-                            _dqo.data.Add(new SOrderBook
+                            _dqo.data.Add(new SOrderBookItem
                             {
                                 action = "delete",
                                 side = _qi.side,

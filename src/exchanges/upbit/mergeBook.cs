@@ -84,7 +84,7 @@ namespace CCXT.Collector.Upbit
                     {
                         if (_qoi.quantity <= _t.quantity)
                         {
-                            var _aoi = new SOrderBook
+                            var _aoi = new SOrderBookItem
                             {
                                 action = "delete",
                                 side = _qoi.side,
@@ -99,7 +99,7 @@ namespace CCXT.Collector.Upbit
                         {
                             _qoi.quantity -= _t.quantity;
 
-                            var _aoi = new SOrderBook
+                            var _aoi = new SOrderBookItem
                             {
                                 action = "update",
                                 side = _qoi.side,
@@ -129,7 +129,7 @@ namespace CCXT.Collector.Upbit
             return true;
         }
 
-        private async Task<bool> mergeOrderbook(UOrderBook orderbook)
+        private async Task<bool> mergeOrderbook(SOrderBook orderbook)
         {
             var _result = false;
 
@@ -232,7 +232,7 @@ namespace CCXT.Collector.Upbit
                     var _oi = lob.data.Where(o => o.side == _coi.side && o.price == _coi.price).SingleOrDefault();
                     if (_oi == null)
                     {
-                        var _ioi = new SOrderBook
+                        var _ioi = new SOrderBookItem
                         {
                             action = "insert",
                             side = _coi.side,
@@ -245,7 +245,7 @@ namespace CCXT.Collector.Upbit
                     }
                     else if (_oi.quantity != _coi.quantity)
                     {
-                        _dqo.data.Add(new SOrderBook
+                        _dqo.data.Add(new SOrderBookItem
                         {
                             action = "update",
                             side = _coi.side,
@@ -262,7 +262,7 @@ namespace CCXT.Collector.Upbit
                     var _oi = cob.data.Where(o => o.side == _loi.side && o.price == _loi.price).SingleOrDefault();
                     if (_oi == null)
                     {
-                        _dqo.data.Add(new SOrderBook
+                        _dqo.data.Add(new SOrderBookItem
                         {
                             action = "delete",
                             side = _loi.side,
@@ -302,7 +302,7 @@ namespace CCXT.Collector.Upbit
                     var _ask = qob.data.Where(o => o.side == "ask" && o.price == _oi.price).SingleOrDefault();
                     if (_ask == null)
                     {
-                        var _aoi = new SOrderBook
+                        var _aoi = new SOrderBookItem
                         {
                             action = "insert",
                             side = "ask",
@@ -315,7 +315,7 @@ namespace CCXT.Collector.Upbit
                     }
                     else if (_ask.quantity != _oi.quantity)
                     {
-                        var _aoi = new SOrderBook
+                        var _aoi = new SOrderBookItem
                         {
                             action = "update",
                             side = "ask",
@@ -333,7 +333,7 @@ namespace CCXT.Collector.Upbit
                     var _bid = qob.data.Where(o => o.side == "bid" && o.price == _oi.price).SingleOrDefault();
                     if (_bid == null)
                     {
-                        var _boi = new SOrderBook
+                        var _boi = new SOrderBookItem
                         {
                             action = "insert",
                             side = "bid",
@@ -346,7 +346,7 @@ namespace CCXT.Collector.Upbit
                     }
                     else if (_bid.quantity != _oi.quantity)
                     {
-                        var _boi = new SOrderBook
+                        var _boi = new SOrderBookItem
                         {
                             action = "update",
                             side = "bid",
@@ -366,7 +366,7 @@ namespace CCXT.Collector.Upbit
                         var _ask = orderBook.asks.Where(o => o.price == _qi.price).SingleOrDefault();
                         if (_ask == null)
                         {
-                            _dqo.data.Add(new SOrderBook
+                            _dqo.data.Add(new SOrderBookItem
                             {
                                 action = "delete",
                                 side = _qi.side,
@@ -382,7 +382,7 @@ namespace CCXT.Collector.Upbit
                         var _bid = orderBook.bids.Where(o => o.price == _qi.price).SingleOrDefault();
                         if (_bid == null)
                         {
-                            _dqo.data.Add(new SOrderBook
+                            _dqo.data.Add(new SOrderBookItem
                             {
                                 action = "delete",
                                 side = _qi.side,
@@ -417,7 +417,7 @@ namespace CCXT.Collector.Upbit
             {
                 foreach (var _qox in _strange_levels)
                 {
-                    var _aoi = new SOrderBook
+                    var _aoi = new SOrderBookItem
                     {
                         action = "delete",
                         side = _qox.side,
@@ -433,7 +433,7 @@ namespace CCXT.Collector.Upbit
             }
         }
 
-        private async Task<SOrderBooks> convertOrderbook(UOrderBook orderBook, string stream)
+        private async Task<SOrderBooks> convertOrderbook(SOrderBook orderBook, string stream)
         {
             var _sob = new SOrderBooks(UPLogger.exchange_name, stream, orderBook.symbol)
             {
@@ -442,7 +442,7 @@ namespace CCXT.Collector.Upbit
 
             foreach (var _oi in orderBook.asks)
             {
-                _sob.data.Add(new SOrderBook
+                _sob.data.Add(new SOrderBookItem
                 {
                     action = "insert",
                     side = "ask",
@@ -453,7 +453,7 @@ namespace CCXT.Collector.Upbit
             
             foreach (var _oi in orderBook.bids)
             {
-                _sob.data.Add(new SOrderBook
+                _sob.data.Add(new SOrderBookItem
                 {
                     action = "insert",
                     side = "bid",

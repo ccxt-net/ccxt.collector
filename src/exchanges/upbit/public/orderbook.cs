@@ -49,32 +49,13 @@ namespace CCXT.Collector.Upbit.Public
     /// <summary>
     ///
     /// </summary>
-    public class UOrderBook : OdinSdk.BaseLib.Coin.Public.OrderBook, IOrderBook
+    public class UOrderBook : CCXT.Collector.Library.Types.SOrderBook
     {
-        /// <summary>
-        ///
-        /// </summary>
-        public virtual string type
-        {
-            get;
-            set;
-        }
-
-        /// <summary>
-        /// 마켓 코드
-        /// </summary>
-        [JsonProperty(PropertyName = "market")]
-        public override string symbol
-        {
-            get;
-            set;
-        }
-
         /// <summary>
         /// 호가 매도 총 잔량
         /// </summary>
         [JsonProperty(PropertyName = "total_ask_size")]
-        public decimal totalAskQuantity
+        public override decimal totalAskQuantity
         {
             get;
             set;
@@ -84,7 +65,7 @@ namespace CCXT.Collector.Upbit.Public
         /// 호가 매수 총 잔량
         /// </summary>
         [JsonProperty(PropertyName = "total_bid_size")]
-        public decimal totalBidQuantity
+        public override decimal totalBidQuantity
         {
             get;
             set;
@@ -98,8 +79,8 @@ namespace CCXT.Collector.Upbit.Public
         {
             set
             {
-                this.asks = new List<IOrderBookItem>();
-                this.bids = new List<IOrderBookItem>();
+                this.asks = new List<OrderBookItem>();
+                this.bids = new List<OrderBookItem>();
 
                 foreach (var _o in value)
                 {
@@ -120,6 +101,74 @@ namespace CCXT.Collector.Upbit.Public
                     });
                 }
             }
+        }
+    }
+
+    //{
+    //  "market": "KRW-BTC",
+    //  "timestamp": 1529910247984,
+    //  "total_ask_size": 8.83621228,
+    //  "total_bid_size": 2.43976741,
+    //  "orderbook_units": [{
+    //      "ask_price": 6956000,
+    //      "bid_price": 6954000,
+    //      "ask_size": 0.24078656,
+    //      "bid_size": 0.00718341
+    //  }]
+    //}
+
+    /// <summary>
+    ///
+    /// </summary>
+    public class UAOrderBook : UOrderBook
+    {
+        /// <summary>
+        ///
+        /// </summary>
+        [JsonProperty(PropertyName = "market")]
+        public override string symbol
+        {
+            get;
+            set;
+        }
+    }
+
+    //{
+    //    "code": "KRW-BTC",
+    //    "timestamp": 1553853571184,
+    //    "total_ask_size": 36.90715747,
+    //    "total_bid_size": 29.12064978,
+    //    "orderbook_units": [{
+    //        "ask_price": 4627000.0,
+    //        "bid_price": 4626000.0,
+    //        "ask_size": 1.40706623,
+    //        "bid_size": 3.57203617
+    //            }],
+    //    "stream_type": "SNAPSHOT"
+    //}
+
+    /// <summary>
+    ///
+    /// </summary>
+    public class UWOrderBook : UOrderBook
+    {
+        /// <summary>
+        ///
+        /// </summary>
+        [JsonProperty(PropertyName = "code")]
+        public override string symbol
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        ///
+        /// </summary>
+        public string stream_type
+        {
+            get;
+            set;
         }
     }
 }

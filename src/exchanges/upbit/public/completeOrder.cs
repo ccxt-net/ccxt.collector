@@ -3,7 +3,7 @@ using OdinSdk.BaseLib.Coin.Types;
 
 namespace CCXT.Collector.Upbit.Public
 {
-    //{
+    //[{
     //    "market": "KRW-BTC",
     //    "timestamp": 1554047009000,
     //    "trade_date_utc": "2019-03-31",
@@ -14,7 +14,7 @@ namespace CCXT.Collector.Upbit.Public
     //    "change_price": 20000.00000000,
     //    "ask_bid": "BID",
     //    "sequential_id": 1554047009000005
-    //}
+    //}]
 
     /// <summary>
     ///
@@ -110,6 +110,7 @@ namespace CCXT.Collector.Upbit.Public
     //    "change": "RISE",
     //    "stream_type": "SNAPSHOT"
     //}
+
 
     /// <summary>
     ///
