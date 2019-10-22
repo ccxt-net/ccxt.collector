@@ -1,8 +1,11 @@
-﻿using CCXT.Collector.Library.Types;
+﻿using CCXT.Collector.Library;
+using CCXT.Collector.Library.Types;
 using CCXT.Collector.Upbit.Public;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -58,15 +61,14 @@ namespace CCXT.Collector.Upbit
                             continue;
                         }
 
-                        var _json_data = JsonConvert.DeserializeObject<QSelector>(_message.json);
                         if (_message.command == "WS")
                         {
-                            if (_json_data.type == "trade")
+                            if (_message.stream == "trade")
                             {
                                 var _trade = JsonConvert.DeserializeObject<UWCompleteOrder>(_message.json);
                                 await mergeTradeItem(_trade);
                             }
-                            else if (_json_data.type == "orderbook")
+                            else if (_message.stream == "orderbook")
                             {
                                 var _orderbook = JsonConvert.DeserializeObject<UWOrderBook>(_message.json);
                                 await mergeOrderbook(_orderbook);
@@ -74,26 +76,54 @@ namespace CCXT.Collector.Upbit
                         }
                         else if (_message.command == "AP")
                         {
-                            if (_json_data.type == "trades")
+                            if (_message.stream == "trades")
                             {
-                                var _trades = JsonConvert.DeserializeObject<SCompleteOrders>(_message.json);
-                                await mergeTradeItems(_trades);
+                                var _t_json_data = JsonConvert.DeserializeObject<List<UACompleteOrder>>(_message.json);
+                                
+                                await mergeTradeItems(new SCompleteOrders
+                                {
+                                    exchange = _message.exchange,
+                                    stream = _message.stream,
+                                    symbol = _message.symbol,
+                                    data = _t_json_data.ToList<SCompleteOrder>()
+                                });
                             }
-                            else if (_json_data.type == "orderbooks")
+                            else if (_message.stream == "orderbooks")
                             {
-                                var _orderbook = JsonConvert.DeserializeObject<SOrderBook>(_message.json);
-                                await mergeOrderbook(_orderbook);
+                                var _o_json_data = JsonConvert.DeserializeObject<List<UAOrderBook>>(_message.json);
+                                _o_json_data[0].type = _message.stream;
+                                await mergeOrderbook(_o_json_data[0]);
                             }
-                            else if (_json_data.stream == "bookticker")
+                            else if (_message.stream == "bookticker")
                             {
-                                var _bookticker = JsonConvert.DeserializeObject<SBookTickers>(_message.json);
-                                await publishBookticker(_bookticker);
+                                var _b_json_data = JsonConvert.DeserializeObject<List<UAOrderBook>>(_message.json);
+
+                                await publishBookticker(new SBookTickers
+                                {
+                                    exchange = _message.exchange,
+                                    stream = _message.stream,
+                                    sequential_id = _message.sequential_id,
+                                    data = _b_json_data.Select(o =>
+                                    {
+                                        var _ask = o.asks.OrderBy(a => a.price).First();
+                                        var _bid = o.bids.OrderBy(a => a.price).Last();
+
+                                        return new SBookTicker
+                                        {
+                                            symbol = o.symbol,
+                                            askPrice = _ask.price,
+                                            askQty = _ask.quantity,
+                                            bidPrice = _bid.price,
+                                            bidQty = _bid.quantity
+                                        };
+                                    })
+                                    .ToList()
+                                });
                             }
                         }
                         else if (_message.command == "SS")
                         {
-                            _json_data.type = _message.command;
-                            await snapshotOrderbook(_json_data.exchange, _json_data.symbol);
+                            await snapshotOrderbook(_message.exchange, _message.symbol);
                         }
 #if DEBUG
                         else

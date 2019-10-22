@@ -1,4 +1,4 @@
-﻿namespace CCXT.Collector.Library.Types
+﻿namespace CCXT.Collector.Library
 {
     public class QMessage
     {
@@ -14,7 +14,7 @@
         /// <summary>
         ///
         /// </summary>
-        public int type
+        public string exchange
         {
             get;
             set;
@@ -23,7 +23,34 @@
         /// <summary>
         ///
         /// </summary>
-        public string id
+        public string symbol
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// sequential id
+        /// </summary>
+        public long sequential_id
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        ///
+        /// </summary>
+        public string type
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        ///
+        /// </summary>
+        public string stream
         {
             get;
             set;
@@ -60,6 +87,15 @@
         ///
         /// </summary>
         public string json
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        ///
+        /// </summary>
+        public object value
         {
             get;
             set;

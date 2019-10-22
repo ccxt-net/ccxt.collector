@@ -1,6 +1,7 @@
 ﻿using CCXT.Collector.Binance.Public;
 using CCXT.Collector.Library;
 using CCXT.Collector.Library.Types;
+using Newtonsoft.Json;
 using OdinSdk.BaseLib.Configuration;
 using System;
 using System.Collections.Concurrent;
@@ -177,8 +178,21 @@ namespace CCXT.Collector.Binance
 
                             if (_result.MessageType == WebSocketMessageType.Text)
                             {
-                                var _data = Encoding.UTF8.GetString(_buffer, 0, _offset);
-                                Processing.SendReceiveQ(new QMessage { command = "WS", json = _data });
+                                var _json = Encoding.UTF8.GetString(_buffer, 0, _offset);
+                                var _selector = JsonConvert.DeserializeObject<QSelector>(_json);
+                                
+                                var _stream = _selector.stream.Split('@')[1];
+                                if (_stream == "aggTrade")
+                                    _stream = "trade";
+                                else if (_stream == "depth")
+                                    _stream = "orderbook";
+
+                                Processing.SendReceiveQ(new QMessage 
+                                { 
+                                    command = "WS", 
+                                    stream = _stream,
+                                    json = _json 
+                                });
                             }
                             else if (_result.MessageType == WebSocketMessageType.Binary)
                             {

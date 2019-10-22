@@ -134,6 +134,7 @@ namespace CCXT.Collector.Upbit.Public
     }
 
     //{
+    //    "type":"orderbook",
     //    "code": "KRW-BTC",
     //    "timestamp": 1553853571184,
     //    "total_ask_size": 36.90715747,

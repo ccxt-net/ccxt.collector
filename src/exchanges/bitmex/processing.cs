@@ -1,6 +1,5 @@
-﻿using CCXT.Collector.BitMEX.Public;
-using CCXT.Collector.BitMEX.Types;
-using CCXT.Collector.Library.Types;
+﻿using CCXT.Collector.BitMEX.Types;
+using CCXT.Collector.Library;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Concurrent;
@@ -92,8 +91,7 @@ namespace CCXT.Collector.BitMEX
                         }
                         else if (_message.command == "SS")
                         {
-                            _json_data.type = _message.command;
-                            await snapshotOrderbook(_json_data.exchange, _json_data.symbol);
+                            await snapshotOrderbook(_message.exchange, _message.symbol);
                         }
 #if DEBUG
                         else

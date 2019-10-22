@@ -1,4 +1,4 @@
-﻿namespace CCXT.Collector.Library.Types
+﻿namespace CCXT.Collector.Library
 {
     public class QSelector
     {

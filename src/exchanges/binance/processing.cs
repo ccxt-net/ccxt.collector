@@ -1,5 +1,5 @@
-﻿using CCXT.Collector.Binance.Public;
-using CCXT.Collector.Binance.Types;
+﻿using CCXT.Collector.Binance.Types;
+using CCXT.Collector.Library;
 using CCXT.Collector.Library.Types;
 using Newtonsoft.Json;
 using System;
@@ -59,37 +59,33 @@ namespace CCXT.Collector.Binance
                             continue;
                         }
 
-                        var _json_data = JsonConvert.DeserializeObject<QSelector>(_message.json);
+                        //var _json_data = JsonConvert.DeserializeObject<QSelector>(_message.json);
                         if (_message.command == "WS")
                         {
-                            var _stream = _json_data.stream.Split('@');
-                            if (_stream.Length > 1)
+                            if (_message.stream == "trade")
                             {
-                                if (_stream[1] == "aggTrade")
-                                {
-                                    var _trade = JsonConvert.DeserializeObject<BWTrade>(_message.json);
-                                    await mergeTradeItem(_trade.data);
-                                }
-                                //else if (_stream[1] == "depth")
-                                //{
-                                //    var _orderbook = JsonConvert.DeserializeObject<BWOrderBook>(_message.json);
-                                //    await compareOrderbook(_orderbook);
-                                //}
+                                var _trade = JsonConvert.DeserializeObject<BWTrade>(_message.json);
+                                await mergeTradeItem(_trade.data);
                             }
+                            //else if (_message.stream == "orderbook")
+                            //{
+                            //    var _orderbook = JsonConvert.DeserializeObject<BWOrderBook>(_message.json);
+                            //    await mergeOrderbook(_orderbook);
+                            //}
                         }
                         else if (_message.command == "AP")
                         {
-                            if (_json_data.stream == "trades")
+                            if (_message.stream == "trades")
                             {
                                 var _trades = JsonConvert.DeserializeObject<BATrade>(_message.json);
                                 await mergeTradeItems(_trades);
                             }
-                            else if (_json_data.stream == "arderbook")
+                            else if (_message.stream == "arderbook")
                             {
                                 var _orderbook = JsonConvert.DeserializeObject<BAOrderBook>(_message.json);
                                 await mergeOrderbook(_orderbook);
                             }
-                            else if (_json_data.stream == "bookticker")
+                            else if (_message.stream == "bookticker")
                             {
                                 var _bookticker = JsonConvert.DeserializeObject<SBookTickers>(_message.json);
                                 await publishBookticker(_bookticker);
@@ -97,8 +93,7 @@ namespace CCXT.Collector.Binance
                         }
                         else if (_message.command == "SS")
                         {
-                            _json_data.type = _message.command;
-                            await snapshotOrderbook(_json_data.exchange, _json_data.symbol);
+                            await snapshotOrderbook(_message.exchange, _message.symbol);
                         }
 #if DEBUG
                         else

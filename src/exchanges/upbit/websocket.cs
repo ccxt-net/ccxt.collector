@@ -1,6 +1,5 @@
 ﻿using CCXT.Collector.Library;
-using CCXT.Collector.Library.Types;
-using CCXT.Collector.Upbit.Public;
+using Newtonsoft.Json;
 using OdinSdk.BaseLib.Configuration;
 using System;
 using System.Collections.Concurrent;
@@ -167,8 +166,17 @@ namespace CCXT.Collector.Upbit
                             }
                             else if (_result.MessageType == WebSocketMessageType.Binary)
                             {
-                                var _data = Encoding.UTF8.GetString(_buffer, 0, _offset);
-                                Processing.SendReceiveQ(new QMessage { command = "WS", json = _data });
+                                var _json = Encoding.UTF8.GetString(_buffer, 0, _offset);
+                                var _selector = JsonConvert.DeserializeObject<QSelector>(_json);
+
+                                Processing.SendReceiveQ(new QMessage 
+                                { 
+                                    command = "WS",
+                                    exchange = UPLogger.exchange_name,
+                                    symbol = symbol,
+                                    stream = _selector.type, 
+                                    json = _json 
+                                });
                             }
                             else if (_result.MessageType == WebSocketMessageType.Close)
                             {

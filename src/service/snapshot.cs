@@ -175,16 +175,13 @@ namespace CCXT.Collector.Service
                                 var _selector = JsonConvert.DeserializeObject<QSelector>(_message);
                                 if (__last_exchange == _selector.exchange && __last_symbol == _selector.symbol)
                                 {
-                                    foreach (var _s in _selector.symbol.Split(';'))
+                                    foreach (var _symbol in _selector.symbol.Split(';'))
                                     {
-                                        var _q_message = new QMessage
-                                        {
-                                            command = "SS",
-                                            json = JsonConvert.SerializeObject(new QSelector
-                                            {
-                                                exchange = _selector.exchange,
-                                                symbol = _s
-                                            })
+                                        var _q_message = new QMessage 
+                                        { 
+                                            command = "SS", 
+                                            exchange = _selector.exchange, 
+                                            symbol = _symbol 
                                         };
 
                                         if (_selector.exchange == BNLogger.exchange_name)

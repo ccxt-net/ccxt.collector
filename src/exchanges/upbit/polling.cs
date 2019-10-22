@@ -52,18 +52,14 @@ namespace CCXT.Collector.Upbit
                         var _t_json_value = await RestExecuteAsync(_client, _t_request);
                         if (_t_json_value.IsSuccessful && _t_json_value.Content[0] == '[')
                         {
-                            var _t_json_data = JsonConvert.DeserializeObject<List<UACompleteOrder>>(_t_json_value.Content);
-
-                            var _trades = new SCompleteOrders
-                            {
+                            Processing.SendReceiveQ(new QMessage 
+                            { 
+                                command = "AP",
                                 exchange = UPLogger.exchange_name,
                                 stream = "trades",
                                 symbol = symbol,
-                                data = _t_json_data.ToList<SCompleteOrder>()
-                            };
-
-                            var _t_json_content = JsonConvert.SerializeObject(_trades);
-                            Processing.SendReceiveQ(new QMessage { command = "AP", json = _t_json_content });
+                                json = _t_json_value.Content
+                            });
                         }
                         else
                         {
@@ -126,25 +122,14 @@ namespace CCXT.Collector.Upbit
                         var _o_json_value = await RestExecuteAsync(_client, _o_request);
                         if (_o_json_value.IsSuccessful && _o_json_value.Content[0] == '[')
                         {
-                            var _o_json_data = JsonConvert.DeserializeObject<List<UAOrderBook>>(_o_json_value.Content);
-                            var _aorder = _o_json_data[0];
-
-                            var _sorder = new SOrderBook
+                            Processing.SendReceiveQ(new QMessage
                             {
-                                symbol = _aorder.symbol,
-                                type = "orderbooks",
-
-                                totalAskQuantity = _aorder.totalAskQuantity,
-                                totalBidQuantity = _aorder.totalBidQuantity,
-                                
-                                timestamp = _aorder.timestamp,
-
-                                asks = _aorder.asks,
-                                bids = _aorder.bids
-                            };
-
-                            var _o_json_content = JsonConvert.SerializeObject(_sorder);
-                            Processing.SendReceiveQ(new QMessage { command = "AP", json = _o_json_content });
+                                command = "AP",
+                                exchange = UPLogger.exchange_name,
+                                stream = "orderbooks",
+                                symbol = symbol,
+                                json = _o_json_value.Content
+                            });
                         }
                         else
                         {
@@ -229,32 +214,14 @@ namespace CCXT.Collector.Upbit
                         var _b_json_value = await RestExecuteAsync(_client, _b_request);
                         if (_b_json_value.IsSuccessful && _b_json_value.Content[0] == '[')
                         {
-                            var _b_json_data = JsonConvert.DeserializeObject<List<UAOrderBook>>(_b_json_value.Content);
-
-                            var _bookticker = new SBookTickers
+                            Processing.SendReceiveQ(new QMessage
                             {
+                                command = "AP",
                                 exchange = UPLogger.exchange_name,
                                 stream = "bookticker",
                                 sequential_id = _last_limit_milli_secs,
-                                data = _b_json_data.Select(o =>
-                                {
-                                    var _ask = o.asks.OrderBy(a => a.price).First();
-                                    var _bid = o.bids.OrderBy(a => a.price).Last();
-
-                                    return new SBookTicker
-                                    {
-                                        symbol = o.symbol,
-                                        askPrice = _ask.price,
-                                        askQty = _ask.quantity,
-                                        bidPrice = _bid.price,
-                                        bidQty = _bid.quantity
-                                    };
-                                })
-                                .ToList()
-                            };
-
-                            var _b_json_content = JsonConvert.SerializeObject(_bookticker);
-                            Processing.SendReceiveQ(new QMessage { command = "AP", json = _b_json_content });
+                                json = _b_json_value.Content
+                            });
                         }
                         else
                         {
