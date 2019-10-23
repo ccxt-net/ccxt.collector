@@ -56,7 +56,7 @@ namespace CCXT.Collector.Upbit
                             { 
                                 command = "AP",
                                 exchange = UPLogger.exchange_name,
-                                stream = "trades",
+                                stream = "trade",
                                 symbol = symbol,
                                 json = _t_json_value.Content
                             });
@@ -126,7 +126,7 @@ namespace CCXT.Collector.Upbit
                             {
                                 command = "AP",
                                 exchange = UPLogger.exchange_name,
-                                stream = "orderbooks",
+                                stream = "orderbook",
                                 symbol = symbol,
                                 json = _o_json_value.Content
                             });

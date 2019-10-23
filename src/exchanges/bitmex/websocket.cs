@@ -162,8 +162,8 @@ namespace CCXT.Collector.BitMEX
 
                             if (_result.MessageType == WebSocketMessageType.Text)
                             {
-                                var _data = Encoding.UTF8.GetString(_buffer, 0, _offset);
-                                Processing.SendReceiveQ(new QMessage { command = "WS", json = _data });
+                                var _json = Encoding.UTF8.GetString(_buffer, 0, _offset);
+                                Processing.SendReceiveQ(new QMessage { command = "WS", json = _json });
                             }
                             else if (_result.MessageType == WebSocketMessageType.Binary)
                             {

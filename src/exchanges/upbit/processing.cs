@@ -76,7 +76,7 @@ namespace CCXT.Collector.Upbit
                         }
                         else if (_message.command == "AP")
                         {
-                            if (_message.stream == "trades")
+                            if (_message.stream == "trade")
                             {
                                 var _t_json_data = JsonConvert.DeserializeObject<List<UACompleteOrder>>(_message.json);
                                 
@@ -88,7 +88,7 @@ namespace CCXT.Collector.Upbit
                                     data = _t_json_data.ToList<SCompleteOrder>()
                                 });
                             }
-                            else if (_message.stream == "orderbooks")
+                            else if (_message.stream == "orderbook")
                             {
                                 var _o_json_data = JsonConvert.DeserializeObject<List<UAOrderBook>>(_message.json);
                                 _o_json_data[0].type = _message.stream;
