@@ -1,5 +1,4 @@
 ﻿using CCXT.Collector.BitMEX.Public;
-using CCXT.Collector.BitMEX.Types;
 using CCXT.Collector.Library;
 using CCXT.Collector.Library.Types;
 using CCXT.Collector.Service;

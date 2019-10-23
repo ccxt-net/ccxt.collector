@@ -1,4 +1,4 @@
-﻿using CCXT.Collector.Binance.Types;
+﻿using CCXT.Collector.Binance.Public;
 using CCXT.Collector.Library;
 using CCXT.Collector.Library.Types;
 using Newtonsoft.Json;

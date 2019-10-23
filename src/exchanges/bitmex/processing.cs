@@ -1,4 +1,4 @@
-﻿using CCXT.Collector.BitMEX.Types;
+﻿using CCXT.Collector.BitMEX.Public;
 using CCXT.Collector.Library;
 using Newtonsoft.Json;
 using System;
