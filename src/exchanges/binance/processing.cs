@@ -87,7 +87,7 @@ namespace CCXT.Collector.Binance
                             }
                             else if (_message.stream == "bookticker")
                             {
-                                var _bookticker = JsonConvert.DeserializeObject<SBookTickers>(_message.json);
+                                var _bookticker = JsonConvert.DeserializeObject<STickers>(_message.json);
                                 await publishBookticker(_bookticker);
                             }
                         }

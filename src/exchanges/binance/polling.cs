@@ -204,14 +204,14 @@ namespace CCXT.Collector.Binance
                             var _b_json_value = await RestExecuteAsync(_client, _b_request);
                             if (_b_json_value.IsSuccessful && _b_json_value.Content[0] == '[')
                             {
-                                var _b_json_data = JsonConvert.DeserializeObject<List<SBookTicker>>(_b_json_value.Content);
+                                var _b_json_data = JsonConvert.DeserializeObject<List<BTickerItem>>(_b_json_value.Content);
 
-                                var _bookticker = new SBookTickers
+                                var _bookticker = new STickers
                                 {
                                     exchange = BNLogger.exchange_name,
                                     stream = "bookticker",
                                     sequential_id = _last_limit_milli_secs,
-                                    data = _b_json_data.Where(t => symbols.Contains(t.symbol)).ToList()
+                                    data = _b_json_data.Where(t => symbols.Contains(t.symbol)).ToList<STickerItem>()
                                 };
 
                                 var _b_json_content = JsonConvert.SerializeObject(_bookticker);

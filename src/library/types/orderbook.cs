@@ -68,18 +68,6 @@ namespace CCXT.Collector.Library.Types
         /// <summary>
         ///
         /// </summary>
-        public SOrderBooks(string exchange, string stream, string symbol)
-        {
-            this.exchange = exchange;
-            this.stream = stream;
-            this.symbol = symbol;
-
-            this.data = new List<SOrderBookItem>();
-        }
-
-        /// <summary>
-        ///
-        /// </summary>
         public virtual string exchange
         {
             get;

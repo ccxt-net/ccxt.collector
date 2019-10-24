@@ -98,7 +98,7 @@ namespace CCXT.Collector.Upbit
                             {
                                 var _b_json_data = JsonConvert.DeserializeObject<List<UAOrderBook>>(_message.json);
 
-                                await publishBookticker(new SBookTickers
+                                await publishBookticker(new STickers
                                 {
                                     exchange = _message.exchange,
                                     stream = _message.stream,
@@ -108,13 +108,13 @@ namespace CCXT.Collector.Upbit
                                         var _ask = o.asks.OrderBy(a => a.price).First();
                                         var _bid = o.bids.OrderBy(a => a.price).Last();
 
-                                        return new SBookTicker
+                                        return new STickerItem
                                         {
                                             symbol = o.symbol,
                                             askPrice = _ask.price,
-                                            askQty = _ask.quantity,
+                                            askQuantity = _ask.quantity,
                                             bidPrice = _bid.price,
-                                            bidQty = _bid.quantity
+                                            bidQuantity = _bid.quantity
                                         };
                                     })
                                     .ToList()

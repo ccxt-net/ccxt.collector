@@ -59,9 +59,13 @@ namespace CCXT.Collector.Upbit
 
         private async Task<bool> updateTradeItem(SOrderBooks lob, SCompleteOrders tradeItems, string stream)
         {
-            var _nob = new SOrderBooks(UPLogger.exchange_name, stream, lob.symbol)
+            var _nob = new SOrderBooks
             {
-                sequential_id = tradeItems.data.Max(t => t.sequential_id)
+                exchange = UPLogger.exchange_name,
+                stream = stream,
+                symbol = lob.symbol,
+                sequential_id = tradeItems.data.Max(t => t.sequential_id),
+                data = new List<SOrderBookItem>()
             };
 
             var _settings = __qSettings.ContainsKey(lob.symbol) ? __qSettings[lob.symbol]
@@ -220,9 +224,13 @@ namespace CCXT.Collector.Upbit
 
         private async Task<bool> updateOrderbook(SOrderBooks lob, Settings settings, SOrderBooks cob)
         {
-            var _dqo = new SOrderBooks(UPLogger.exchange_name, "diffbooks", cob.symbol)
+            var _dqo = new SOrderBooks
             {
-                sequential_id = cob.sequential_id
+                exchange = UPLogger.exchange_name,
+                stream = "diffbooks",
+                symbol = cob.symbol,
+                sequential_id = cob.sequential_id,
+                data = new List<SOrderBookItem>()
             };
 
             lock (__qOrderBooks)
@@ -290,9 +298,13 @@ namespace CCXT.Collector.Upbit
 
         private async Task<bool> updateOrderbook_old(SOrderBooks qob, Settings settings, UOrderBook orderBook)
         {
-            var _dqo = new SOrderBooks(UPLogger.exchange_name, "diffbooks", orderBook.symbol)
+            var _dqo = new SOrderBooks
             {
-                sequential_id = orderBook.timestamp
+                exchange = UPLogger.exchange_name,
+                stream = "diffbooks",
+                symbol = orderBook.symbol,
+                sequential_id = orderBook.timestamp,
+                data = new List<SOrderBookItem>()
             };
 
             lock (__qOrderBooks)
@@ -435,9 +447,13 @@ namespace CCXT.Collector.Upbit
 
         private async Task<SOrderBooks> convertOrderbook(SOrderBook orderBook, string stream)
         {
-            var _sob = new SOrderBooks(UPLogger.exchange_name, stream, orderBook.symbol)
+            var _sob = new SOrderBooks
             {
-                sequential_id = orderBook.timestamp
+                exchange = UPLogger.exchange_name,
+                stream = stream,
+                symbol = orderBook.symbol,
+                sequential_id = orderBook.timestamp,
+                data = new List<SOrderBookItem>()
             };
 
             foreach (var _oi in orderBook.asks)
@@ -507,7 +523,7 @@ namespace CCXT.Collector.Upbit
             }
         }
 
-        private async Task publishBookticker(SBookTickers sbt)
+        private async Task publishBookticker(STickers sbt)
         {
             await Task.Delay(0);
 

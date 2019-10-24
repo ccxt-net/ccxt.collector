@@ -48,9 +48,13 @@ namespace CCXT.Collector.BitMEX
 
         private async Task<bool> updateTradeItem(SOrderBooks qob, List<BTradeItem> tradeItems, string stream)
         {
-            var _rqo = new SOrderBooks(BMLogger.exchange_name, stream, qob.symbol)
+            var _rqo = new SOrderBooks
             {
-                sequential_id = tradeItems.Max(t => t.timestamp)
+                exchange = BMLogger.exchange_name,
+                stream = stream,
+                symbol = qob.symbol,
+                sequential_id = tradeItems.Max(t => t.timestamp),
+                data = new List<SOrderBookItem>()
             };
 
             var _settings = __qSettings.ContainsKey(qob.symbol) ? __qSettings[qob.symbol]
@@ -146,9 +150,13 @@ namespace CCXT.Collector.BitMEX
             {
                 _settings.last_orderbook_id = orderBook.data.lastId;
 
-                var _sqo = new SOrderBooks(BMLogger.exchange_name, "snapshot", orderBook.data.symbol)
+                var _sqo = new SOrderBooks
                 {
-                    sequential_id = orderBook.data.lastId
+                    exchange = BMLogger.exchange_name,
+                    stream = "snapshot",
+                    symbol = orderBook.data.symbol,
+                    sequential_id = orderBook.data.lastId,
+                    data = new List<SOrderBookItem>()
                 };
 
                 foreach (var _oi in orderBook.data.asks)
@@ -225,9 +233,13 @@ namespace CCXT.Collector.BitMEX
 
         private async Task<bool> updateOrderbook(SOrderBooks qob, Settings settings, BAOrderBook orderBook)
         {
-            var _dqo = new SOrderBooks(BMLogger.exchange_name, "diffbooks", orderBook.data.symbol)
+            var _dqo = new SOrderBooks
             {
-                sequential_id = orderBook.data.lastId
+                exchange = BMLogger.exchange_name,
+                stream = "diffbooks",
+                symbol = orderBook.data.symbol,
+                sequential_id = orderBook.data.lastId,
+                data = new List<SOrderBookItem>()
             };
 
             lock (__qOrderBooks)
