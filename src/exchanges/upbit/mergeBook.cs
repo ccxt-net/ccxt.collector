@@ -523,14 +523,14 @@ namespace CCXT.Collector.Upbit
             }
         }
 
-        private async Task publishBookticker(STickers sbt)
+        private async Task publishTicker(STickers sbt)
         {
             await Task.Delay(0);
 
             if (sbt.data.Count > 0)
             {
                 var _json_data = JsonConvert.SerializeObject(sbt);
-                BooktickerQ.Write(_json_data);
+                TickerQ.Write(_json_data);
             }
         }
     }

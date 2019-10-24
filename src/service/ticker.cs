@@ -8,13 +8,13 @@ using System.Threading.Tasks;
 
 namespace CCXT.Collector.Service
 {
-    public class BooktickerQ : FactoryX
+    public class TickerQ : FactoryX
     {
-        public BooktickerQ(
+        public TickerQ(
              string host_name = null, string ip_address = null, string virtual_host = null,
              string user_name = null, string password = null
          )
-         : base(host_name, ip_address, virtual_host, user_name, password, BooktickerQName)
+         : base(host_name, ip_address, virtual_host, user_name, password, TickerQName)
         {
         }
 
@@ -23,7 +23,7 @@ namespace CCXT.Collector.Service
         /// <summary>
         ///
         /// </summary>
-        private static ConcurrentQueue<string> QBookticker
+        private static ConcurrentQueue<string> QTicker
         {
             get
             {
@@ -40,12 +40,12 @@ namespace CCXT.Collector.Service
         /// <param name="jsonMessage"></param>
         public static void Write(string jsonMessage)
         {
-            QBookticker.Enqueue(jsonMessage);
+            QTicker.Enqueue(jsonMessage);
         }
 
         public async Task Start(CancellationTokenSource tokenSource)
         {
-            LoggerQ.WriteO($"bookticker service start...", FactoryX.RootQName);
+            LoggerQ.WriteO($"ticker service start...", FactoryX.RootQName);
 
             var _processing = Task.Run(async () =>
             {
@@ -62,7 +62,7 @@ namespace CCXT.Collector.Service
                                 await Task.Delay(0);
 
                                 var _json_message = (string)null;
-                                if (QBookticker.TryDequeue(out _json_message) == false)
+                                if (QTicker.TryDequeue(out _json_message) == false)
                                 {
                                     var _cancelled = tokenSource.Token.WaitHandle.WaitOne(0);
                                     if (_cancelled == true)
@@ -99,7 +99,7 @@ namespace CCXT.Collector.Service
 
             await Task.WhenAll(_processing);
 
-            LoggerQ.WriteO($"bookticker service stopped...", FactoryX.RootQName);
+            LoggerQ.WriteO($"ticker service stopped...", FactoryX.RootQName);
         }
     }
 }

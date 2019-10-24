@@ -78,7 +78,7 @@ namespace CCXT.Collector.Service
             var _symbols = baseIds.Split(';');
             if (exchange == UPLogger.exchange_name)
             {
-                if (KConfig.UpbitUsePollingBookticker == false)
+                if (KConfig.UpbitUsePollingTicker == false)
                 {
                     foreach (var _s in _symbols)
                     {
@@ -96,7 +96,7 @@ namespace CCXT.Collector.Service
             }
             else if (exchange == BNLogger.exchange_name)
             {
-                if (KConfig.BinanceUsePollingBookticker == false)
+                if (KConfig.BinanceUsePollingTicker == false)
                 {
                     foreach (var _s in _symbols)
                     {
@@ -114,7 +114,7 @@ namespace CCXT.Collector.Service
             }
             else if (exchange == BMLogger.exchange_name)
             {
-                if (KConfig.BitmexUsePollingBookticker == false)
+                if (KConfig.BitmexUsePollingTicker == false)
                 {
                     foreach (var _s in _symbols)
                     {
@@ -186,17 +186,17 @@ namespace CCXT.Collector.Service
 
                                         if (_selector.exchange == BNLogger.exchange_name)
                                         {
-                                            if (KConfig.BinanceUsePollingBookticker == false)
+                                            if (KConfig.BinanceUsePollingTicker == false)
                                                 Binance.Processing.SendReceiveQ(_q_message);
                                         }
                                         else if (_selector.exchange == BMLogger.exchange_name)
                                         {
-                                            if (KConfig.BitmexUsePollingBookticker == false)
+                                            if (KConfig.BitmexUsePollingTicker == false)
                                                 BitMEX.Processing.SendReceiveQ(_q_message);
                                         }
                                         else if (_selector.exchange == UPLogger.exchange_name)
                                         {
-                                            if (KConfig.UpbitUsePollingBookticker == false)
+                                            if (KConfig.UpbitUsePollingTicker == false)
                                                 Upbit.Processing.SendReceiveQ(_q_message);
                                         }
                                     }

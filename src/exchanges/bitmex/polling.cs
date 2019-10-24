@@ -52,7 +52,7 @@ namespace CCXT.Collector.BitMEX
                             var _trades = new BATrade
                             {
                                 exchange = BMLogger.exchange_name,
-                                stream = "trades",
+                                stream = "trade",
                                 symbol = symbol,
                                 data = _t_json_data
                             };
@@ -111,7 +111,7 @@ namespace CCXT.Collector.BitMEX
 
                             var _orderbook = new BAOrderBook
                             {
-                                stream = "arderbook",
+                                stream = "orderbook",
                                 data = _o_json_data
                             };
 

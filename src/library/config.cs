@@ -13,11 +13,11 @@ namespace CCXT.Collector.Library
 
         #region Binance
 
-        public static bool BinanceUsePollingBookticker
+        public static bool BinanceUsePollingTicker
         {
             get
             {
-                return CConfig.GetAppBoolean("binance.use.polling.bookticker");
+                return CConfig.GetAppBoolean("binance.use.polling.ticker");
             }
         }
 
@@ -49,11 +49,11 @@ namespace CCXT.Collector.Library
 
         #region BitMEX
 
-        public static bool BitmexUsePollingBookticker
+        public static bool BitmexUsePollingTicker
         {
             get
             {
-                return CConfig.GetAppBoolean("bitmex.use.polling.bookticker");
+                return CConfig.GetAppBoolean("bitmex.use.polling.ticker");
             }
         }
 
@@ -97,15 +97,15 @@ namespace CCXT.Collector.Library
             }
         }
 
-        private static bool? __upbit_use_polling_bookticker = null;
+        private static bool? __upbit_use_polling_ticker = null;
 
-        public static bool UpbitUsePollingBookticker
+        public static bool UpbitUsePollingTicker
         {
             get
             {
-                if (__upbit_use_polling_bookticker == null)
-                    __upbit_use_polling_bookticker = CConfig.GetAppBoolean("upbit.use.polling.bookticker");
-                return __upbit_use_polling_bookticker.Value;
+                if (__upbit_use_polling_ticker == null)
+                    __upbit_use_polling_ticker = CConfig.GetAppBoolean("upbit.use.polling.ticker");
+                return __upbit_use_polling_ticker.Value;
             }
         }
 
@@ -184,7 +184,7 @@ namespace CCXT.Collector.Library
             get
             {
                 if (__polling_prev_time == null)
-                    __polling_prev_time = CConfig.GetAppInteger64("polling.bookticker.prev.millisconds");
+                    __polling_prev_time = CConfig.GetAppInteger64("polling.ticker.prev.millisconds");
                 return __polling_prev_time.Value;
             }
         }
@@ -196,7 +196,7 @@ namespace CCXT.Collector.Library
             get
             {
                 if (__polling_term_time == null)
-                    __polling_term_time = CConfig.GetAppInteger64("polling.bookticker.term.millisconds");
+                    __polling_term_time = CConfig.GetAppInteger64("polling.ticker.term.millisconds");
                 return __polling_term_time.Value;
             }
         }

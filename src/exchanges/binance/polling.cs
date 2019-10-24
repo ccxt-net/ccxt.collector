@@ -69,7 +69,7 @@ namespace CCXT.Collector.Binance
         {
             BNLogger.WriteO($"polling service start: symbol => {symbol}...");
 
-            if (KConfig.BinanceUsePollingBookticker == false)
+            if (KConfig.BinanceUsePollingTicker == false)
             {
                 PollingTasks.Add(Task.Run(async () =>
                 {
@@ -115,7 +115,7 @@ namespace CCXT.Collector.Binance
 
                                     var _orderbook = new BAOrderBook
                                     {
-                                        stream = "arderbook",
+                                        stream = "orderbook",
                                         data = _o_json_data
                                     };
 
@@ -171,7 +171,7 @@ namespace CCXT.Collector.Binance
         {
             BNLogger.WriteO($"bpolling service start...");
 
-            if (KConfig.BinanceUsePollingBookticker == true)
+            if (KConfig.BinanceUsePollingTicker == true)
             {
                 PollingTasks.Add(Task.Run(async () =>
                 {
@@ -200,21 +200,21 @@ namespace CCXT.Collector.Binance
 
                             _last_limit_milli_secs = _waiting_milli_secs;
 
-                            // bookticker
+                            // ticker
                             var _b_json_value = await RestExecuteAsync(_client, _b_request);
                             if (_b_json_value.IsSuccessful && _b_json_value.Content[0] == '[')
                             {
                                 var _b_json_data = JsonConvert.DeserializeObject<List<BTickerItem>>(_b_json_value.Content);
 
-                                var _bookticker = new STickers
+                                var _tickers = new STickers
                                 {
                                     exchange = BNLogger.exchange_name,
-                                    stream = "bookticker",
+                                    stream = "ticker",
                                     sequential_id = _last_limit_milli_secs,
                                     data = _b_json_data.Where(t => symbols.Contains(t.symbol)).ToList<STickerItem>()
                                 };
 
-                                var _b_json_content = JsonConvert.SerializeObject(_bookticker);
+                                var _b_json_content = JsonConvert.SerializeObject(_tickers);
                                 Processing.SendReceiveQ(new QMessage { command = "AP", json = _b_json_content });
                             }
                             else

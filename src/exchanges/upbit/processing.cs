@@ -94,11 +94,11 @@ namespace CCXT.Collector.Upbit
                                 _o_json_data[0].type = _message.stream;
                                 await mergeOrderbook(_o_json_data[0]);
                             }
-                            else if (_message.stream == "bookticker")
+                            else if (_message.stream == "ticker")
                             {
                                 var _b_json_data = JsonConvert.DeserializeObject<List<UAOrderBook>>(_message.json);
 
-                                await publishBookticker(new STickers
+                                await publishTicker(new STickers
                                 {
                                     exchange = _message.exchange,
                                     stream = _message.stream,

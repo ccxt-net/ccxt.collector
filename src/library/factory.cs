@@ -64,11 +64,11 @@ namespace CCXT.Collector.Library
             }
         }
 
-        public static string BooktickerQName
+        public static string TickerQName
         {
             get
             {
-                return RootQName + "_bookticker_exchange";
+                return RootQName + "_ticker_exchange";
             }
         }
 

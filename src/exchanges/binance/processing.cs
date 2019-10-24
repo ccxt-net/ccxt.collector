@@ -75,20 +75,20 @@ namespace CCXT.Collector.Binance
                         }
                         else if (_message.command == "AP")
                         {
-                            if (_message.stream == "trades")
+                            if (_message.stream == "trade")
                             {
                                 var _trades = JsonConvert.DeserializeObject<BATrade>(_message.json);
                                 await mergeTradeItems(_trades);
                             }
-                            else if (_message.stream == "arderbook")
+                            else if (_message.stream == "orderbook")
                             {
                                 var _orderbook = JsonConvert.DeserializeObject<BAOrderBook>(_message.json);
                                 await mergeOrderbook(_orderbook);
                             }
-                            else if (_message.stream == "bookticker")
+                            else if (_message.stream == "ticker")
                             {
-                                var _bookticker = JsonConvert.DeserializeObject<STickers>(_message.json);
-                                await publishBookticker(_bookticker);
+                                var _ticker = JsonConvert.DeserializeObject<STickers>(_message.json);
+                                await publishTicker(_ticker);
                             }
                         }
                         else if (_message.command == "SS")

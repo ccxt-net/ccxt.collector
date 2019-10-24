@@ -78,12 +78,12 @@ namespace CCXT.Collector.BitMEX
                         }
                         else if (_message.command == "AP")
                         {
-                            if (_json_data.stream == "trades")
+                            if (_json_data.stream == "trade")
                             {
                                 var _trades = JsonConvert.DeserializeObject<BATrade>(_message.json);
                                 await mergeTradeItems(_trades);
                             }
-                            else if (_json_data.stream == "arderbook")
+                            else if (_json_data.stream == "orderbook")
                             {
                                 var _orderbook = JsonConvert.DeserializeObject<BAOrderBook>(_message.json);
                                 await mergeOrderbook(_orderbook);
