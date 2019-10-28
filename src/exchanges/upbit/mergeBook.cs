@@ -3,6 +3,7 @@ using CCXT.Collector.Library.Types;
 using CCXT.Collector.Service;
 using CCXT.Collector.Upbit.Public;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
@@ -466,7 +467,7 @@ namespace CCXT.Collector.Upbit
                     quantity = _oi.quantity
                 });
             }
-            
+
             foreach (var _oi in orderBook.bids)
             {
                 _sob.data.Add(new SOrderBookItem
@@ -512,13 +513,25 @@ namespace CCXT.Collector.Upbit
             }
         }
 
+        private JsonSerializerSettings __json_settings = new JsonSerializerSettings
+        {
+            ContractResolver = new DefaultContractResolver
+            {
+                NamingStrategy = new CamelCaseNamingStrategy
+                {
+                    OverrideSpecifiedNames = false
+                }
+            },
+            Formatting = Formatting.Indented
+        };
+
         private async Task publishTrading(SCompleteOrders str)
         {
             await Task.Delay(0);
 
             if (str != null)
             {
-                var _json_data = JsonConvert.SerializeObject(str);
+                var _json_data = JsonConvert.SerializeObject(str, __json_settings);
                 TradingQ.Write(_json_data);
             }
         }
