@@ -16,7 +16,7 @@ namespace CCXT.Collector.Upbit
         private static ConcurrentDictionary<string, SOrderBooks> __qOrderBooks = new ConcurrentDictionary<string, SOrderBooks>();
         private static ConcurrentDictionary<string, Settings> __qSettings = new ConcurrentDictionary<string, Settings>();
 
-        private async Task<bool> mergeTradeItem(SCompleteOrder tradeItem, string stream = "wscorders")
+        private async Task<bool> mergeTradeItem(SCompleteOrderItem tradeItem, string stream = "wscorders")
         {
             var _result = false;
 
@@ -30,7 +30,7 @@ namespace CCXT.Collector.Upbit
                     exchange = UPLogger.exchange_name,
                     stream = "wsctrades",
                     symbol = tradeItem.symbol,
-                    data = new List<SCompleteOrder> { tradeItem }
+                    data = new List<SCompleteOrderItem> { tradeItem }
                 };
 
                 _result = await updateTradeItem(_qob, _trades, stream);
@@ -531,7 +531,7 @@ namespace CCXT.Collector.Upbit
 
             if (str != null)
             {
-                var _json_data = JsonConvert.SerializeObject(str, __json_settings);
+                var _json_data = JsonConvert.SerializeObject(str);
                 TradingQ.Write(_json_data);
             }
         }

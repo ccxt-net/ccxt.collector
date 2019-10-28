@@ -6,7 +6,7 @@ namespace CCXT.Collector.Upbit.Public
     /// <summary>
     ///
     /// </summary>
-    public class UCompleteOrder : CCXT.Collector.Library.Types.SCompleteOrder
+    public class UCompleteOrderItem : CCXT.Collector.Library.Types.SCompleteOrderItem
     {
         /// <summary>
         ///
@@ -26,17 +26,6 @@ namespace CCXT.Collector.Upbit.Public
         {
             get;
             set;
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public override decimal amount
-        {
-            get
-            {
-                return price * quantity;
-            }
         }
 
         /// <summary>
@@ -88,7 +77,7 @@ namespace CCXT.Collector.Upbit.Public
     /// <summary>
     ///
     /// </summary>
-    public class UACompleteOrder : UCompleteOrder
+    public class UACompleteOrderItem : UCompleteOrderItem
     {
         /// <summary>
         /// 마켓 구분 코드
@@ -131,7 +120,7 @@ namespace CCXT.Collector.Upbit.Public
     /// <summary>
     ///
     /// </summary>
-    public class UWCompleteOrder : UCompleteOrder
+    public class UWCompleteOrderItem : UCompleteOrderItem
     {
         /// <summary>
         ///

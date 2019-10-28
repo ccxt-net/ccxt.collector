@@ -1,4 +1,5 @@
-﻿using OdinSdk.BaseLib.Coin;
+﻿using CCXT.Collector.Library.Types;
+using OdinSdk.BaseLib.Coin;
 using OdinSdk.BaseLib.Coin.Public;
 using System;
 using System.Collections.Generic;
@@ -111,9 +112,9 @@ namespace CCXT.Collector.Upbit.Public
         /// <param name="quote_name">The type of trading quote-currency of which information you want to query for.</param>
         /// <param name="limits">maximum number of items (optional): default 20</param>
         /// <returns></returns>
-        public async Task<CompleteOrders> GetCompleteOrders(string base_name, string quote_name, int limits = 20)
+        public async Task<SCompleteOrders> GetCompleteOrders(string base_name, string quote_name, int limits = 20)
         {
-            var _result = new CompleteOrders(base_name, quote_name);
+            var _result = new SCompleteOrders();
 
             var _params = new Dictionary<string, object>();
             {
@@ -127,9 +128,9 @@ namespace CCXT.Collector.Upbit.Public
 #endif
             if (_response.IsSuccessful == true)
             {
-                var _orders = publicClient.DeserializeObject<List<UACompleteOrder>>(_response.Content);
+                var _orders = publicClient.DeserializeObject<List<UACompleteOrderItem>>(_response.Content);
                 {
-                    _result.result = _orders.ToList<ICompleteOrderItem>();
+                    _result.result = _orders;
                 }
                 _result.SetSuccess();
             }
@@ -148,9 +149,9 @@ namespace CCXT.Collector.Upbit.Public
         /// <param name="base_name">The type of trading base-currency of which information you want to query for.</param>
         /// <param name="quote_name">The type of trading quote-currency of which information you want to query for.</param>
         /// <returns></returns>
-        public async Task<OrderBooks> GetOrderBooks(string base_name, string quote_name)
+        public async Task<SOrderBooks> GetOrderBooks(string base_name, string quote_name)
         {
-            var _result = new OrderBooks(base_name, quote_name);
+            var _result = new SOrderBooks();
 
             var _params = new Dictionary<string, object>();
             {

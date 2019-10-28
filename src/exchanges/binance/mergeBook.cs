@@ -3,6 +3,7 @@ using CCXT.Collector.Library;
 using CCXT.Collector.Library.Types;
 using CCXT.Collector.Service;
 using Newtonsoft.Json;
+using OdinSdk.BaseLib.Coin.Types;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
@@ -54,16 +55,17 @@ namespace CCXT.Collector.Binance
                 stream = stream, 
                 symbol = qob.symbol,
                 sequential_id = tradeItems.Max(t => t.timestamp),
-                data = new List<SOrderBookItem>()
+                result = new SOrderBook()
             };
 
-            var _settings = __qSettings.ContainsKey(qob.symbol) ? __qSettings[qob.symbol]
+            var _settings = __qSettings.ContainsKey(qob.symbol) 
+                          ? __qSettings[qob.symbol]
                           : __qSettings[qob.symbol] = new Settings();
 
             lock (__qOrderBooks)
             {
-                _settings.before_trade_ask_size = qob.data.Where(o => o.side == "ask").Sum(o => o.quantity);
-                _settings.before_trade_bid_size = qob.data.Where(o => o.side == "bid").Sum(o => o.quantity);
+                _settings.before_trade_ask_size = qob.result.asks.Sum(o => o.quantity);
+                _settings.before_trade_bid_size = qob.result.bids.Sum(o => o.quantity);
 
                 foreach (var _t in tradeItems.OrderBy(t => t.timestamp))
                 {
@@ -71,36 +73,68 @@ namespace CCXT.Collector.Binance
                         continue;
 
                     _settings.last_trade_time = _t.timestamp;
-
-                    var _qoi = qob.data.Where(o => o.price == _t.price).SingleOrDefault();
-                    if (_qoi != null)
+                    
+                    var _ask = qob.result.asks.Where(o => o.price == _t.price).SingleOrDefault();
+                    if (_ask != null)
                     {
-                        if (_qoi.quantity <= _t.quantity)
+                        if (_ask.quantity <= _t.quantity)
                         {
                             var _aoi = new SOrderBookItem
                             {
                                 action = "delete",
-                                side = _qoi.side,
-                                price = _qoi.price,
-                                quantity = _qoi.quantity
+                                side = "ask",
+                                price = _ask.price,
+                                quantity = _ask.quantity
                             };
 
-                            _rqo.data.Add(_aoi);
-                            _qoi.quantity = 0;
+                            _rqo.result.asks.Add(_aoi);
+                            _ask.quantity = 0;
                         }
                         else
                         {
-                            _qoi.quantity -= _t.quantity;
+                            _ask.quantity -= _t.quantity;
 
                             var _aoi = new SOrderBookItem
                             {
                                 action = "update",
-                                side = _qoi.side,
-                                price = _qoi.price,
-                                quantity = _qoi.quantity
+                                side = "ask",
+                                price = _ask.price,
+                                quantity = _ask.quantity
                             };
 
-                            _rqo.data.Add(_aoi);
+                            _rqo.result.asks.Add(_aoi);
+                        }
+                    }
+
+                    var _bid = qob.result.bids.Where(o => o.price == _t.price).SingleOrDefault();
+                    if (_bid != null)
+                    {
+                        if (_bid.quantity <= _t.quantity)
+                        {
+                            var _aoi = new SOrderBookItem
+                            {
+                                action = "delete",
+                                side = "bid",
+                                price = _bid.price,
+                                quantity = _bid.quantity
+                            };
+
+                            _rqo.result.bids.Add(_aoi);
+                            _bid.quantity = 0;
+                        }
+                        else
+                        {
+                            _bid.quantity -= _t.quantity;
+
+                            var _aoi = new SOrderBookItem
+                            {
+                                action = "update",
+                                side = "bid",
+                                price = _bid.price,
+                                quantity = _bid.quantity
+                            };
+
+                            _rqo.result.bids.Add(_aoi);
                         }
                     }
 
@@ -127,10 +161,11 @@ namespace CCXT.Collector.Binance
                 }
 
                 qob.sequential_id = _rqo.sequential_id;
-                qob.data.RemoveAll(o => o.quantity == 0);
+                qob.result.asks.RemoveAll(o => o.quantity == 0);
+                qob.result.bids.RemoveAll(o => o.quantity == 0);
             }
 
-            if (_rqo.data.Count > 0)
+            if (_rqo.result.asks.Count + _rqo.result.bids.Count > 0)
             {
                 await publishOrderbook(_rqo);
                 //_settings.orderbook_count = 0;
@@ -239,7 +274,7 @@ namespace CCXT.Collector.Binance
                 stream = "diffbooks",
                 symbol = orderBook.data.symbol,
                 sequential_id = orderBook.data.lastId,
-                data = new List<SOrderBookItem>()
+                result = new SOrderBook()
             };
 
             lock (__qOrderBooks)
@@ -382,7 +417,7 @@ namespace CCXT.Collector.Binance
         {
             await Task.Delay(0);
 
-            if (sob.data.Count > 0)
+            if (sob.result.asks.Count + sob.result.bids.Count > 0)
             {
                 var _json_data = JsonConvert.SerializeObject(sob);
                 OrderbookQ.Write(_json_data);
@@ -393,7 +428,7 @@ namespace CCXT.Collector.Binance
         {
             await Task.Delay(0);
 
-            if (sbt.data.Count > 0)
+            if (sbt.result.Count > 0)
             {
                 var _json_data = JsonConvert.SerializeObject(sbt);
                 TickerQ.Write(_json_data);

@@ -65,7 +65,7 @@ namespace CCXT.Collector.Upbit
                         {
                             if (_message.stream == "trade")
                             {
-                                var _trade = JsonConvert.DeserializeObject<UWCompleteOrder>(_message.json);
+                                var _trade = JsonConvert.DeserializeObject<UWCompleteOrderItem>(_message.json);
                                 await mergeTradeItem(_trade);
                             }
                             else if (_message.stream == "orderbook")
@@ -78,14 +78,14 @@ namespace CCXT.Collector.Upbit
                         {
                             if (_message.stream == "trade")
                             {
-                                var _t_json_data = JsonConvert.DeserializeObject<List<UACompleteOrder>>(_message.json);
+                                var _t_json_data = JsonConvert.DeserializeObject<List<UACompleteOrderItem>>(_message.json);
                                 
                                 await mergeTradeItems(new SCompleteOrders
                                 {
                                     exchange = _message.exchange,
                                     stream = _message.stream,
                                     symbol = _message.symbol,
-                                    data = _t_json_data.ToList<SCompleteOrder>()
+                                    data = _t_json_data.ToList<SCompleteOrderItem>()
                                 });
                             }
                             else if (_message.stream == "orderbook")
@@ -103,7 +103,7 @@ namespace CCXT.Collector.Upbit
                                     exchange = _message.exchange,
                                     stream = _message.stream,
                                     sequential_id = _message.sequential_id,
-                                    data = _b_json_data.Select(o =>
+                                    result = _b_json_data.Select(o =>
                                     {
                                         var _ask = o.asks.OrderBy(a => a.price).First();
                                         var _bid = o.bids.OrderBy(a => a.price).Last();
