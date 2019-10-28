@@ -519,10 +519,10 @@ namespace CCXT.Collector.Upbit
             {
                 NamingStrategy = new CamelCaseNamingStrategy
                 {
-                    OverrideSpecifiedNames = false
+                    OverrideSpecifiedNames = true
                 }
             },
-            Formatting = Formatting.Indented
+            Formatting = Formatting.None
         };
 
         private async Task publishTrading(SCompleteOrders str)
