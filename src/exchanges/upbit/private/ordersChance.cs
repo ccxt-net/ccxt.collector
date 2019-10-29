@@ -1,4 +1,5 @@
-﻿using OdinSdk.BaseLib.Coin;
+﻿using Newtonsoft.Json;
+using OdinSdk.BaseLib.Coin;
 
 namespace CCXT.Collector.Upbit.Private
 {
@@ -116,7 +117,58 @@ namespace CCXT.Collector.Upbit.Private
     /// <summary>
     ///
     /// </summary>
-    public class OrdersChance
+    public interface IOrdersChance
+    {
+        /// <summary>
+        /// 매수 수수료 비율
+        /// </summary>
+        decimal bid_fee
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// 매도 수수료 비율
+        /// </summary>
+        decimal ask_fee
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// 마켓에 대한 정보
+        /// </summary>
+        OrderMarketInfo market
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// 매수 시 사용하는 화폐의 계좌 상태
+        /// </summary>
+        UBalanceItem bid_account
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// 매도 시 사용하는 화폐의 계좌 상태
+        /// </summary>
+        UBalanceItem ask_account
+        {
+            get;
+            set;
+        }
+    }
+
+    /// <summary>
+    ///
+    /// </summary>
+    public class OrdersChance : IOrdersChance
     {
         /// <summary>
         /// 매수 수수료 비율
@@ -165,9 +217,28 @@ namespace CCXT.Collector.Upbit.Private
     }
 
     /// <summary>
+    ///
+    /// </summary>
+    public interface IMyOrdersChance : IApiResult<IOrdersChance>
+    {
+#if DEBUG
+
+        /// <summary>
+        ///
+        /// </summary>
+        string rawJson
+        {
+            get;
+            set;
+        }
+
+#endif
+    }
+
+    /// <summary>
     /// 
     /// </summary>
-    public class MyOrdersChance : ApiResult<OrdersChance>
+    public class MyOrdersChance : ApiResult<IOrdersChance>, IMyOrdersChance
     {
         /// <summary>
         ///
@@ -181,7 +252,8 @@ namespace CCXT.Collector.Upbit.Private
         /// <summary>
         ///
         /// </summary>
-        public string rawJson
+        [JsonIgnore]
+        public virtual string rawJson
         {
             get;
             set;

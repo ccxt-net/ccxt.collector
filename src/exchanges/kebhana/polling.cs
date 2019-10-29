@@ -120,7 +120,7 @@ namespace CCXT.Collector.KebHana
                             _json_view = _json_view.Substring(_json_view.IndexOf('{'));
 
                             var _k_json_data = JsonConvert.DeserializeObject<KebExchange>(_json_view);
-                            _k_json_data.sequential_id = _last_limit_milli_secs;
+                            _k_json_data.sequentialId = _last_limit_milli_secs;
 
                             LastExchange = _k_json_data;
                         }

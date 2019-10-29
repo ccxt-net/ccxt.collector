@@ -32,7 +32,7 @@
         /// <summary>
         /// sequential id
         /// </summary>
-        public long sequential_id
+        public long sequentialId
         {
             get;
             set;

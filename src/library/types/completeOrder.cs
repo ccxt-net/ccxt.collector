@@ -1,6 +1,6 @@
-﻿using OdinSdk.BaseLib.Coin;
+﻿using Newtonsoft.Json;
+using OdinSdk.BaseLib.Coin;
 using OdinSdk.BaseLib.Coin.Types;
-using OdinSdk.BaseLib.Configuration;
 using System.Collections.Generic;
 
 namespace CCXT.Collector.Library.Types
@@ -8,16 +8,69 @@ namespace CCXT.Collector.Library.Types
     /// <summary>
     /// 
     /// </summary>
-    public class SCompleteOrderItem //: OdinSdk.BaseLib.Coin.Public.CompleteOrderItem, ICompleteOrderItem
+    public interface ISCompleteOrderItem
     {
+        ///// <summary>
+        ///// 
+        ///// </summary>
+        //string symbol
+        //{
+        //    get;
+        //    set;
+        //}
+
         /// <summary>
-        /// 
+        ///
         /// </summary>
-        public virtual string symbol
+        long timestamp
         {
             get;
             set;
         }
+
+        decimal quantity
+        {
+            get;
+            set;
+        }
+
+        decimal price
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// sell or buy
+        /// </summary>
+        string side
+        {
+            get;
+        }
+
+        /// <summary>
+        /// sell or buy
+        /// </summary>
+        SideType sideType
+        {
+            get;
+            set;
+        }
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public class SCompleteOrderItem : ISCompleteOrderItem
+    {
+        ///// <summary>
+        ///// 
+        ///// </summary>
+        //public virtual string symbol
+        //{
+        //    get;
+        //    set;
+        //}
 
         /// <summary>
         ///
@@ -26,17 +79,6 @@ namespace CCXT.Collector.Library.Types
         {
             get;
             set;
-        }
-
-        /// <summary>
-        /// ISO 8601 datetime string with milliseconds
-        /// </summary>
-        public virtual string datetime
-        {
-            get
-            {
-                return CUnixTime.ConvertToUtcTimeMilli(timestamp).ToString("o");
-            }
         }
 
         public virtual decimal quantity
@@ -54,27 +96,19 @@ namespace CCXT.Collector.Library.Types
         /// <summary>
         /// 
         /// </summary>
-        public virtual decimal amount
+        public string side
         {
             get
             {
-                return price * quantity;
+                return sideType.ToString();
             }
-        }
-
-        /// <summary>
-        ///
-        /// </summary>
-        public virtual long sequential_id
-        {
-            get;
-            set;
         }
 
         /// <summary>
         /// sell or buy
         /// </summary>
-        public virtual SideType sideType
+        [JsonIgnore]
+        public SideType sideType
         {
             get;
             set;
@@ -84,8 +118,126 @@ namespace CCXT.Collector.Library.Types
     /// <summary>
     ///
     /// </summary>
-    public class SCompleteOrders : ApiResult<List<SCompleteOrderItem>>
+    public interface ISCompleteOrders : IApiResult<List<ISCompleteOrderItem>>
     {
+        /// <summary>
+        ///
+        /// </summary>
+        string exchange
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// S, R
+        /// </summary>
+        string stream
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        ///
+        /// </summary>
+        string symbol
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        ///
+        /// </summary>
+        long sequentialId
+        {
+            get;
+            set;
+        }
+
+#if DEBUG
+        /// <summary>
+        ///
+        /// </summary>
+        string rawJson
+        {
+            get;
+            set;
+        }
+#endif
+    }
+
+    /// <summary>
+    ///
+    /// </summary>
+    public class SCompleteOrders : ApiResult<List<ISCompleteOrderItem>>, ISCompleteOrders
+    {
+        /// <summary>
+        /// 
+        /// </summary>
+        public SCompleteOrders()
+        {
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public SCompleteOrders(string base_name, string quote_name)
+        {
+            this.symbol = $"{quote_name}-{base_name}";
+        }
+
+        /// <summary>
+        /// is success calling
+        /// </summary>
+        [JsonIgnore]
+        public override bool success
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// error or success message
+        /// </summary>
+        [JsonIgnore]
+        public override string message
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// status, error code
+        /// </summary>
+        [JsonIgnore]
+        public override int statusCode
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        ///
+        /// </summary>
+        [JsonIgnore]
+        public override ErrorCode errorCode
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// check implemented
+        /// </summary>
+        [JsonIgnore]
+        public override bool supported
+        {
+            get;
+            set;
+        }
+
         /// <summary>
         ///
         /// </summary>
@@ -113,19 +265,20 @@ namespace CCXT.Collector.Library.Types
             set;
         }
 
-        ///// <summary>
-        /////
-        ///// </summary>
-        //public virtual List<SCompleteOrderItem> data
-        //{
-        //    get;
-        //    set;
-        //}
+        /// <summary>
+        ///
+        /// </summary>
+        public virtual long sequentialId
+        {
+            get;
+            set;
+        }
 
 #if DEBUG
         /// <summary>
         ///
         /// </summary>
+        [JsonIgnore]
         public virtual string rawJson
         {
             get;

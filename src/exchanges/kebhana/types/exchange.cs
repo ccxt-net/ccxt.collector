@@ -22,7 +22,7 @@ namespace CCXT.Collector.KebHana.Types
         /// <summary>
         ///
         /// </summary>
-        public long sequential_id
+        public long sequentialId
         {
             get;
             set;

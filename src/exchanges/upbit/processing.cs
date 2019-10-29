@@ -65,8 +65,25 @@ namespace CCXT.Collector.Upbit
                         {
                             if (_message.stream == "trade")
                             {
-                                var _trade = JsonConvert.DeserializeObject<UWCompleteOrderItem>(_message.json);
-                                await mergeTradeItem(_trade);
+                                var _w_trade_data = JsonConvert.DeserializeObject<UWCompleteOrderItem>(_message.json);
+
+                                await mergeTradeItem(new SCompleteOrders
+                                {
+                                    exchange = _message.exchange,
+                                    stream = $"{_message.command.ToLower()}.{_message.stream.ToLower()}",
+                                    symbol = _w_trade_data.symbol,
+                                    sequentialId = _w_trade_data.sequential_id,
+                                    result = new List<ISCompleteOrderItem>
+                                    {
+                                        new SCompleteOrderItem
+                                        {
+                                            timestamp = _w_trade_data.timestamp,
+                                            sideType = _w_trade_data.sideType,
+                                            price = _w_trade_data.price,
+                                            quantity = _w_trade_data.quantity
+                                        }
+                                    }
+                                });
                             }
                             else if (_message.stream == "orderbook")
                             {
@@ -78,32 +95,47 @@ namespace CCXT.Collector.Upbit
                         {
                             if (_message.stream == "trade")
                             {
-                                var _t_json_data = JsonConvert.DeserializeObject<List<UACompleteOrderItem>>(_message.json);
-                                
-                                await mergeTradeItems(new SCompleteOrders
+                                var _a_trade_data = JsonConvert.DeserializeObject<List<UACompleteOrderItem>>(_message.json);
+
+                                var _trades = new SCompleteOrders
                                 {
                                     exchange = _message.exchange,
-                                    stream = _message.stream,
+                                    stream = $"{_message.command.ToLower()}.{_message.stream.ToLower()}",
                                     symbol = _message.symbol,
-                                    data = _t_json_data.ToList<SCompleteOrderItem>()
-                                });
+                                    sequentialId = _a_trade_data.Max(t => t.sequential_id),
+                                    result = _a_trade_data.Select(t => 
+                                    {
+                                        return new SCompleteOrderItem
+                                        {
+                                            timestamp = t.timestamp,
+                                            sideType = t.sideType,
+                                            price = t.price,
+                                            quantity = t.quantity
+                                        };
+                                    })
+                                    .ToList<ISCompleteOrderItem>()
+                                };
+
+                                _trades.SetSuccess();
+
+                                await mergeTradeItems(_trades);
                             }
                             else if (_message.stream == "orderbook")
                             {
-                                var _o_json_data = JsonConvert.DeserializeObject<List<UAOrderBook>>(_message.json);
-                                _o_json_data[0].type = _message.stream;
-                                await mergeOrderbook(_o_json_data[0]);
+                                var _a_book_data = JsonConvert.DeserializeObject<List<UAOrderBook>>(_message.json);
+                                _a_book_data[0].type = _message.stream;
+                                await mergeOrderbook(_a_book_data[0]);
                             }
                             else if (_message.stream == "ticker")
                             {
-                                var _b_json_data = JsonConvert.DeserializeObject<List<UAOrderBook>>(_message.json);
+                                var _a_ticker_data = JsonConvert.DeserializeObject<List<UAOrderBook>>(_message.json);
 
                                 await publishTicker(new STickers
                                 {
                                     exchange = _message.exchange,
                                     stream = _message.stream,
-                                    sequential_id = _message.sequential_id,
-                                    result = _b_json_data.Select(o =>
+                                    sequentialId = _message.sequentialId,
+                                    result = _a_ticker_data.Select(o =>
                                     {
                                         var _ask = o.asks.OrderBy(a => a.price).First();
                                         var _bid = o.bids.OrderBy(a => a.price).Last();
@@ -117,7 +149,7 @@ namespace CCXT.Collector.Upbit
                                             bidQuantity = _bid.quantity
                                         };
                                     })
-                                    .ToList()
+                                    .ToList<ISTickerItem>()
                                 });
                             }
                         }

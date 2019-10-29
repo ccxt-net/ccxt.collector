@@ -173,8 +173,8 @@ namespace CCXT.Collector.Upbit
                                 { 
                                     command = "WS",
                                     exchange = UPLogger.exchange_name,
+                                    stream = _selector.type,
                                     symbol = symbol,
-                                    stream = _selector.type, 
                                     json = _json 
                                 });
                             }

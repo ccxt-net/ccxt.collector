@@ -1,4 +1,5 @@
-﻿using OdinSdk.BaseLib.Coin;
+﻿using Newtonsoft.Json;
+using OdinSdk.BaseLib.Coin;
 
 namespace CCXT.Collector.Upbit.Private
 {
@@ -272,7 +273,49 @@ namespace CCXT.Collector.Upbit.Private
     /// <summary>
     /// 출금 가능 정보: 해당 통화의 가능한 출금 정보를 확인한다.
     /// </summary>
-    public class WithdrawsChance
+    public interface IWithdrawsChance
+    {
+        /// <summary>
+        /// 사용자의 보안등급 정보
+        /// </summary>
+        WithdrawMemberLevel member_level
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// 화폐 정보
+        /// </summary>
+        WithdrawCurrency currency
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// 사용자의 계좌 정보
+        /// </summary>
+        WithdrawAccount account
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// 출금 제약 정보
+        /// </summary>
+        WithdrawLimit withdraw_limit
+        {
+            get;
+            set;
+        }
+    }
+
+    /// <summary>
+    /// 출금 가능 정보: 해당 통화의 가능한 출금 정보를 확인한다.
+    /// </summary>
+    public class WithdrawsChance : IWithdrawsChance
     {
         /// <summary>
         /// 사용자의 보안등급 정보
@@ -314,7 +357,24 @@ namespace CCXT.Collector.Upbit.Private
     /// <summary>
     /// 
     /// </summary>
-    public class MyWithdrawsChance : ApiResult<WithdrawsChance>
+    public interface IMyWithdrawsChance : IApiResult<IWithdrawsChance>
+    {
+#if DEBUG
+        /// <summary>
+        ///
+        /// </summary>
+        string rawJson
+        {
+            get;
+            set;
+        }
+#endif
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public class MyWithdrawsChance : ApiResult<IWithdrawsChance>, IMyWithdrawsChance
     {
         /// <summary>
         ///
@@ -328,7 +388,8 @@ namespace CCXT.Collector.Upbit.Private
         /// <summary>
         ///
         /// </summary>
-        public string rawJson
+        [JsonIgnore]
+        public virtual string rawJson
         {
             get;
             set;

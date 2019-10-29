@@ -114,11 +114,11 @@ namespace CCXT.Collector.Upbit.Public
         /// <returns></returns>
         public async Task<SCompleteOrders> GetCompleteOrders(string base_name, string quote_name, int limits = 20)
         {
-            var _result = new SCompleteOrders();
+            var _result = new SCompleteOrders(base_name, quote_name);
 
             var _params = new Dictionary<string, object>();
             {
-                _params.Add("market", $"{quote_name}-{base_name}");
+                _params.Add("market", _result.symbol);
                 _params.Add("count", limits);
             }
 
@@ -128,10 +128,22 @@ namespace CCXT.Collector.Upbit.Public
 #endif
             if (_response.IsSuccessful == true)
             {
-                var _orders = publicClient.DeserializeObject<List<UACompleteOrderItem>>(_response.Content);
+                var _trades = publicClient.DeserializeObject<List<UACompleteOrderItem>>(_response.Content);
                 {
-                    _result.result = _orders;
+                    _result.sequentialId = _trades.Max(t => t.sequential_id);
+                    _result.result = _trades.Select(t =>
+                    {
+                        return new SCompleteOrderItem
+                        {
+                            timestamp = t.timestamp,
+                            sideType = t.sideType,
+                            price = t.price,
+                            quantity = t.quantity
+                        };
+                    })
+                    .ToList<ISCompleteOrderItem>();
                 }
+
                 _result.SetSuccess();
             }
             else

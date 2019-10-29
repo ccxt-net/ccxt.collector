@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using CCXT.Collector.Library.Types;
+using Newtonsoft.Json;
 using OdinSdk.BaseLib.Coin.Public;
 using System.Collections.Generic;
 
@@ -79,12 +80,12 @@ namespace CCXT.Collector.Upbit.Public
         {
             set
             {
-                this.asks = new List<OrderBookItem>();
-                this.bids = new List<OrderBookItem>();
+                this.asks = new List<SOrderBookItem>();
+                this.bids = new List<SOrderBookItem>();
 
                 foreach (var _o in value)
                 {
-                    this.asks.Add(new OrderBookItem
+                    this.asks.Add(new SOrderBookItem
                     {
                         quantity = _o.ask_size,
                         price = _o.ask_price,
@@ -92,7 +93,7 @@ namespace CCXT.Collector.Upbit.Public
                         count = 1
                     });
 
-                    this.bids.Add(new OrderBookItem
+                    this.bids.Add(new SOrderBookItem
                     {
                         quantity = _o.bid_size,
                         price = _o.bid_price,

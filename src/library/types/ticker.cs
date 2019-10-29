@@ -1,4 +1,5 @@
-﻿using OdinSdk.BaseLib.Coin;
+﻿using Newtonsoft.Json;
+using OdinSdk.BaseLib.Coin;
 using OdinSdk.BaseLib.Configuration;
 using System.Collections.Generic;
 
@@ -7,7 +8,75 @@ namespace CCXT.Collector.Library.Types
     /// <summary>
     ///
     /// </summary>
-    public class STickerItem //: OdinSdk.BaseLib.Coin.Public.TickerItem, ITickerItem
+    public interface ISTickerItem
+    {
+        /// <summary>
+        /// string symbol of the market ('BTCUSD', 'ETHBTC', ...)
+        /// </summary>
+        string symbol
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// 64-bit Unix Timestamp in milliseconds since Epoch 1 Jan 1970
+        /// </summary>
+        long timestamp
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// ISO 8601 datetime string with milliseconds
+        /// </summary>
+        string datetime
+        {
+            get;
+        }
+
+        /// <summary>
+        /// current best bid (buy) price
+        /// </summary>
+        decimal bidPrice
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// current best bid (buy) amount (may be missing or undefined)
+        /// </summary>
+        decimal bidQuantity
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// current best ask (sell) price
+        /// </summary>
+        decimal askPrice
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// current best ask (sell) amount (may be missing or undefined)
+        /// </summary>
+        decimal askQuantity
+        {
+            get;
+            set;
+        }
+    }
+
+    /// <summary>
+    ///
+    /// </summary>
+    public class STickerItem : ISTickerItem
     {
         /// <summary>
         /// string symbol of the market ('BTCUSD', 'ETHBTC', ...)
@@ -78,7 +147,59 @@ namespace CCXT.Collector.Library.Types
     /// <summary>
     ///
     /// </summary>
-    public class STickers : ApiResult<List<STickerItem>>
+    public interface ISTickers : IApiResult<List<ISTickerItem>>
+    {
+        /// <summary>
+        /// exchange
+        /// </summary>
+        string exchange
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// stream
+        /// </summary>
+        string stream
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// symbol
+        /// </summary>
+        string symbol
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// sequential id
+        /// </summary>
+        long sequentialId
+        {
+            get;
+            set;
+        }
+#if DEBUG
+        /// <summary>
+        ///
+        /// </summary>
+        string rawJson
+        {
+            get;
+            set;
+        }
+#endif
+    }
+
+    /// <summary>
+    ///
+    /// </summary>
+    public class STickers : ApiResult<List<ISTickerItem>>, ISTickers
     {
         /// <summary>
         /// exchange
@@ -110,24 +231,16 @@ namespace CCXT.Collector.Library.Types
         /// <summary>
         /// sequential id
         /// </summary>
-        public virtual long sequential_id
+        public virtual long sequentialId
         {
             get;
             set;
         }
-
-        ///// <summary>
-        ///// data
-        ///// </summary>
-        //public virtual List<STickerItem> data
-        //{
-        //    get;
-        //    set;
-        //}
 #if DEBUG
         /// <summary>
         ///
         /// </summary>
+        [JsonIgnore]
         public virtual string rawJson
         {
             get;

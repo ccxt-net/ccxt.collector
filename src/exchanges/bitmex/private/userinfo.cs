@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json.Linq;
+﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using OdinSdk.BaseLib.Coin;
 using System;
 using System.Collections.Generic;
@@ -637,6 +638,7 @@ namespace CCXT.Collector.BitMEX.Private
         /// <summary>
         ///
         /// </summary>
+        [JsonIgnore]
         public virtual string rawJson
         {
             get;

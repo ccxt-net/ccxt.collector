@@ -83,7 +83,7 @@ namespace CCXT.Collector.Upbit.Public
         /// 마켓 구분 코드
         /// </summary>
         [JsonProperty(PropertyName = "market")]
-        public override string symbol
+        public string symbol
         {
             get;
             set;
@@ -94,6 +94,15 @@ namespace CCXT.Collector.Upbit.Public
         /// </summary>
         [JsonProperty(PropertyName = "timestamp")]
         public override long timestamp
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public long sequential_id
         {
             get;
             set;
@@ -135,7 +144,7 @@ namespace CCXT.Collector.Upbit.Public
         ///
         /// </summary>
         [JsonProperty(PropertyName = "code")]
-        public override string symbol
+        public string symbol
         {
             get;
             set;
@@ -146,6 +155,15 @@ namespace CCXT.Collector.Upbit.Public
         /// </summary>
         [JsonProperty(PropertyName = "trade_timestamp")]
         public override long timestamp
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public long sequential_id
         {
             get;
             set;

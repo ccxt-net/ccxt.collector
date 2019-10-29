@@ -219,7 +219,7 @@ namespace CCXT.Collector.Upbit
                                 command = "AP",
                                 exchange = UPLogger.exchange_name,
                                 stream = "ticker",
-                                sequential_id = _last_limit_milli_secs,
+                                sequentialId = _last_limit_milli_secs,
                                 json = _b_json_value.Content
                             });
                         }

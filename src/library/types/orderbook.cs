@@ -1,5 +1,5 @@
-﻿using OdinSdk.BaseLib.Coin;
-using OdinSdk.BaseLib.Coin.Public;
+﻿using Newtonsoft.Json;
+using OdinSdk.BaseLib.Coin;
 using OdinSdk.BaseLib.Configuration;
 using System.Collections.Generic;
 
@@ -8,7 +8,7 @@ namespace CCXT.Collector.Library.Types
     /// <summary>
     /// item of orderbook
     /// </summary>
-    public class SOrderBookItem //: OdinSdk.BaseLib.Coin.Public.OrderBookItem, IOrderBookItem
+    public class SOrderBookItem
     {
         /// <summary>
         /// I,U,D
@@ -19,14 +19,15 @@ namespace CCXT.Collector.Library.Types
             set;
         }
 
-        /// <summary>
-        ///
-        /// </summary>
-        public string side
-        {
-            get;
-            set;
-        }
+        ///// <summary>
+        /////
+        ///// </summary>
+        //public string side
+        //{
+        //    get;
+        //    set;
+        //}
+
         /// <summary>
         /// quantity
         /// </summary>
@@ -67,8 +68,17 @@ namespace CCXT.Collector.Library.Types
     /// <summary>
     ///
     /// </summary>
-    public class SOrderBook //: OdinSdk.BaseLib.Coin.Public.OrderBook, IOrderBook
+    public class SOrderBook
     {
+        /// <summary>
+        /// 
+        /// </summary>
+        public SOrderBook()
+        {
+            this.asks = new List<SOrderBookItem>();
+            this.bids = new List<SOrderBookItem>();
+        }
+
         /// <summary>
         /// 
         /// </summary>
@@ -179,26 +189,16 @@ namespace CCXT.Collector.Library.Types
         /// <summary>
         ///
         /// </summary>
-        public virtual long sequential_id
+        public virtual long sequentialId
         {
             get;
             set;
         }
-
-        ///// <summary>
-        /////
-        ///// </summary>
-        //public virtual List<SOrderBookItem> data
-        //{
-        //    get;
-        //    set;
-        //}
-
 #if DEBUG
-
         /// <summary>
         ///
         /// </summary>
+        [JsonIgnore]
         public virtual string rawJson
         {
             get;
