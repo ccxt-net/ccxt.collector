@@ -41,7 +41,7 @@ namespace CCXT.Collector.Upbit.Private
         /// 전체 계좌 조회: 내가 보유한 자산 리스트를 보여줍니다.
         /// </summary>
         /// <returns></returns>
-        public async Task<Balances> GetBalances()
+        public async ValueTask<Balances> GetBalances()
         {
             var _result = new Balances();
 
@@ -75,7 +75,7 @@ namespace CCXT.Collector.Upbit.Private
         /// <param name="base_name">The type of trading base-currency of which information you want to query for.</param>
         /// <param name="quote_name">The type of trading quote-currency of which information you want to query for.</param>
         /// <returns></returns>
-        public async Task<MyOrdersChance> GetOrdersChance(string base_name, string quote_name)
+        public async ValueTask<MyOrdersChance> GetOrdersChance(string base_name, string quote_name)
         {
             var _result = new MyOrdersChance();
 
@@ -107,7 +107,7 @@ namespace CCXT.Collector.Upbit.Private
         /// </summary>
         /// <param name="order_id">주문 UUID</param>
         /// <returns></returns>
-        public async Task<MyOrder> GetOrder(string order_id)
+        public async ValueTask<MyOrder> GetOrder(string order_id)
         {
             var _result = new MyOrder();
 
@@ -144,7 +144,7 @@ namespace CCXT.Collector.Upbit.Private
         /// <param name="base_name">The type of trading base-currency of which information you want to query for.</param>
         /// <param name="quote_name">The type of trading quote-currency of which information you want to query for.</param>
         /// <returns></returns>
-        public async Task<MyOrders> GetOrders(string base_name, string quote_name)
+        public async ValueTask<MyOrders> GetOrders(string base_name, string quote_name)
         {
             var _result = new MyOrders();
 
@@ -185,7 +185,7 @@ namespace CCXT.Collector.Upbit.Private
         /// <param name="base_name">The type of trading base-currency of which information you want to query for.</param>
         /// <param name="quote_name">The type of trading quote-currency of which information you want to query for.</param>
         /// <returns></returns>
-        public async Task<MyTrades> GetTrades(string base_name, string quote_name)
+        public async ValueTask<MyTrades> GetTrades(string base_name, string quote_name)
         {
             var _result = new MyTrades();
 
@@ -224,7 +224,7 @@ namespace CCXT.Collector.Upbit.Private
         /// 전체 주문 리스트 조회: 전체 주문 리스트를 조회한다.
         /// </summary>
         /// <returns></returns>
-        public async Task<MyOrders> GetAllOrders()
+        public async ValueTask<MyOrders> GetAllOrders()
         {
             var _result = new MyOrders();
 
@@ -263,7 +263,7 @@ namespace CCXT.Collector.Upbit.Private
         /// </summary>
         /// <param name="order_id">주문 UUID</param>
         /// <returns></returns>
-        public async Task<MyOrder> CancelOrder(string order_id)
+        public async ValueTask<MyOrder> CancelOrder(string order_id)
         {
             var _result = new MyOrder();
 
@@ -303,7 +303,7 @@ namespace CCXT.Collector.Upbit.Private
         /// <param name="price">유닛당 주문 가격</param>
         /// <param name="sideType">주문 타입</param>
         /// <returns></returns>
-        public async Task<MyOrder> CreateLimitOrder(string base_name, string quote_name, decimal quantity, decimal price, SideType sideType)
+        public async ValueTask<MyOrder> CreateLimitOrder(string base_name, string quote_name, decimal quantity, decimal price, SideType sideType)
         {
             var _result = new MyOrder();
 
@@ -346,7 +346,7 @@ namespace CCXT.Collector.Upbit.Private
         /// <param name="currency_id">Currency 코드</param>
         /// <param name="limits">You can set the maximum number of transactions you want to get with this parameter</param>
         /// <returns></returns>
-        public async Task<Transfers> GetWithdraws(string currency_id, int limits = 20)
+        public async ValueTask<Transfers> GetWithdraws(string currency_id, int limits = 20)
         {
             var _result = new Transfers();
 
@@ -382,7 +382,7 @@ namespace CCXT.Collector.Upbit.Private
         /// </summary>
         /// <param name="limits">You can set the maximum number of transactions you want to get with this parameter</param>
         /// <returns></returns>
-        public async Task<Transfers> GetAllWithdraws(int limits = 20)
+        public async ValueTask<Transfers> GetAllWithdraws(int limits = 20)
         {
             var _result = new Transfers();
 
@@ -417,7 +417,7 @@ namespace CCXT.Collector.Upbit.Private
         /// </summary>
         /// <param name="withdrawId"></param>
         /// <returns></returns>
-        public async Task<Transfer> GetWithdraw(string withdrawId)
+        public async ValueTask<Transfer> GetWithdraw(string withdrawId)
         {
             var _result = new Transfer();
 
@@ -449,7 +449,7 @@ namespace CCXT.Collector.Upbit.Private
         /// </summary>
         /// <param name="currency_id">Currency 코드</param>
         /// <returns></returns>
-        public async Task<MyWithdrawsChance> GetWithdrawsChance(string currency_id)
+        public async ValueTask<MyWithdrawsChance> GetWithdrawsChance(string currency_id)
         {
             var _result = new MyWithdrawsChance();
 
@@ -484,7 +484,7 @@ namespace CCXT.Collector.Upbit.Private
         /// <param name="address">출금 지갑 주소</param>
         /// <param name="tag">Secondary address identifier for coins like XRP,XMR etc.</param>
         /// <returns></returns>
-        public async Task<Transfer> WithdrawsCoin(string currency_id, decimal amount, string address, string tag = "")
+        public async ValueTask<Transfer> WithdrawsCoin(string currency_id, decimal amount, string address, string tag = "")
         {
             var _result = new Transfer();
 
@@ -526,7 +526,7 @@ namespace CCXT.Collector.Upbit.Private
         /// </summary>
         /// <param name="amount"></param>
         /// <returns></returns>
-        public async Task<Transfer> WithdrawsKrw(decimal amount)
+        public async ValueTask<Transfer> WithdrawsKrw(decimal amount)
         {
             var _result = new Transfer();
 
@@ -558,7 +558,7 @@ namespace CCXT.Collector.Upbit.Private
         /// </summary>
         /// <param name="currency_id"></param>
         /// <returns></returns>
-        public async Task<Transfers> GetDeposits(string currency_id)
+        public async ValueTask<Transfers> GetDeposits(string currency_id)
         {
             var _result = new Transfers();
 
@@ -593,7 +593,7 @@ namespace CCXT.Collector.Upbit.Private
         /// </summary>
         /// <param name="depositId"></param>
         /// <returns></returns>
-        public async Task<Transfer> GetDeposit(string depositId)
+        public async ValueTask<Transfer> GetDeposit(string depositId)
         {
             var _result = new Transfer();
 
@@ -625,7 +625,7 @@ namespace CCXT.Collector.Upbit.Private
         /// </summary>
         /// <param name="currency_id"></param>
         /// <returns></returns>
-        public async Task<Address> DepositsGenerateCoinAddress(string currency_id)
+        public async ValueTask<Address> DepositsGenerateCoinAddress(string currency_id)
         {
             var _result = new Address();
 
@@ -664,7 +664,7 @@ namespace CCXT.Collector.Upbit.Private
         /// 전체 입금 주소 조회: 내가 보유한 자산 리스트를 보여줍니다.
         /// </summary>
         /// <returns></returns>
-        public async Task<Addresses> GetDepositsCoinAddresses()
+        public async ValueTask<Addresses> GetDepositsCoinAddresses()
         {
             var _result = new Addresses();
 
@@ -694,7 +694,7 @@ namespace CCXT.Collector.Upbit.Private
         /// </summary>
         /// <param name="currency_id"></param>
         /// <returns></returns>
-        public async Task<Address> GetDepositsCoinAddress(string currency_id)
+        public async ValueTask<Address> GetDepositsCoinAddress(string currency_id)
         {
             var _result = new Address();
 

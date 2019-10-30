@@ -16,7 +16,7 @@ namespace CCXT.Collector.Binance
         private static ConcurrentDictionary<string, SOrderBooks> __qOrderBooks = new ConcurrentDictionary<string, SOrderBooks>();
         private static ConcurrentDictionary<string, Settings> __qSettings = new ConcurrentDictionary<string, Settings>();
 
-        private async Task<bool> mergeTradeItem(BTradeItem tradeItem, string stream = "wsctrades")
+        private async ValueTask<bool> mergeTradeItem(BTradeItem tradeItem, string stream = "wsctrades")
         {
             var _result = false;
 
@@ -31,7 +31,7 @@ namespace CCXT.Collector.Binance
             return _result;
         }
 
-        private async Task<bool> mergeTradeItems(BATrade tradeItems, string stream = "apitrades")
+        private async ValueTask<bool> mergeTradeItems(BATrade tradeItems, string stream = "apitrades")
         {
             var _result = false;
 
@@ -47,7 +47,7 @@ namespace CCXT.Collector.Binance
             return _result;
         }
 
-        private async Task<bool> updateTradeItem(SOrderBooks qob, List<BTradeItem> tradeItems, string stream)
+        private async ValueTask<bool> updateTradeItem(SOrderBooks qob, List<BTradeItem> tradeItems, string stream)
         {
             var _rqo = new SOrderBooks
             {
@@ -197,7 +197,7 @@ namespace CCXT.Collector.Binance
             return true;
         }
 
-        private async Task<bool> mergeOrderbook(BAOrderBook orderBook)
+        private async ValueTask<bool> mergeOrderbook(BAOrderBook orderBook)
         {
             var _result = false;
 
@@ -292,7 +292,7 @@ namespace CCXT.Collector.Binance
             return _result;
         }
 
-        private async Task<bool> updateOrderbook(SOrderBooks qob, Settings settings, BAOrderBook orderBook)
+        private async ValueTask<bool> updateOrderbook(SOrderBooks qob, Settings settings, BAOrderBook orderBook)
         {
             var _dqo = new SOrderBooks
             {

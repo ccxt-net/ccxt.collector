@@ -10,14 +10,14 @@ namespace CCXT.Collector.Library.Types
     /// </summary>
     public interface ISTickerItem
     {
-        /// <summary>
-        /// string symbol of the market ('BTCUSD', 'ETHBTC', ...)
-        /// </summary>
-        string symbol
-        {
-            get;
-            set;
-        }
+        ///// <summary>
+        ///// string symbol of the market ('BTCUSD', 'ETHBTC', ...)
+        ///// </summary>
+        //string symbol
+        //{
+        //    get;
+        //    set;
+        //}
 
         /// <summary>
         /// 64-bit Unix Timestamp in milliseconds since Epoch 1 Jan 1970
@@ -99,6 +99,7 @@ namespace CCXT.Collector.Library.Types
         /// <summary>
         /// ISO 8601 datetime string with milliseconds
         /// </summary>
+        [JsonIgnore]
         public virtual string datetime
         {
             get
@@ -201,6 +202,56 @@ namespace CCXT.Collector.Library.Types
     /// </summary>
     public class STickers : ApiResult<List<ISTickerItem>>, ISTickers
     {
+        /// <summary>
+        /// is success calling
+        /// </summary>
+        [JsonIgnore]
+        public override bool success
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// error or success message
+        /// </summary>
+        [JsonIgnore]
+        public override string message
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// status, error code
+        /// </summary>
+        [JsonIgnore]
+        public override int statusCode
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        ///
+        /// </summary>
+        [JsonIgnore]
+        public override ErrorCode errorCode
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// check implemented
+        /// </summary>
+        [JsonIgnore]
+        public override bool supported
+        {
+            get;
+            set;
+        }
+
         /// <summary>
         /// exchange
         /// </summary>

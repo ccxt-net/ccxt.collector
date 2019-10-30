@@ -54,7 +54,7 @@ namespace CCXT.Collector.BitMEX.Private
         /// </summary>
         /// <param name="quote_name">The type of trading quote-currency of which information you want to query for.</param>
         /// <returns></returns>
-        public async Task<Address> GetDepositAddress(string quote_name)
+        public async ValueTask<Address> GetDepositAddress(string quote_name)
         {
             var _result = new Address();
 
@@ -89,7 +89,7 @@ namespace CCXT.Collector.BitMEX.Private
         /// <param name="address">coin address for send</param>
         /// <param name="quantity">amount of coin</param>
         /// <returns></returns>
-        public async Task<Transfer> RequestWithdrawal(string quote_name, string address, decimal quantity)
+        public async ValueTask<Transfer> RequestWithdrawal(string quote_name, string address, decimal quantity)
         {
             var _result = new Transfer();
 
@@ -135,7 +135,7 @@ namespace CCXT.Collector.BitMEX.Private
         /// </summary>
         /// <param name="quote_name">The type of trading quote-currency of which information you want to query for.</param>
         /// <returns></returns>
-        public async Task<Transfers> GetWalletHistory(string quote_name)
+        public async ValueTask<Transfers> GetWalletHistory(string quote_name)
         {
             var _result = new Transfers();
 
@@ -188,7 +188,7 @@ namespace CCXT.Collector.BitMEX.Private
         /// </summary>
         /// <param name="base_name">The type of trading base-currency of which information you want to query for.</param>
         /// <returns></returns>
-        public async Task<Balance> GetUserMargin(string base_name)
+        public async ValueTask<Balance> GetUserMargin(string base_name)
         {
             var _result = new Balance();
 
@@ -223,7 +223,7 @@ namespace CCXT.Collector.BitMEX.Private
         /// Get your account's margin status.
         /// </summary>
         /// <returns></returns>
-        public async Task<Balances> GetUserMargins()
+        public async ValueTask<Balances> GetUserMargins()
         {
             var _result = new Balances();
 
@@ -260,7 +260,7 @@ namespace CCXT.Collector.BitMEX.Private
         /// Get your account's information.
         /// </summary>
         /// <returns></returns>
-        public async Task<BUserInfo> GetUserInfo()
+        public async ValueTask<BUserInfo> GetUserInfo()
         {
             var _result = new BUserInfo();
 
@@ -291,7 +291,7 @@ namespace CCXT.Collector.BitMEX.Private
         /// <param name="base_name">The type of trading base-currency of which information you want to query for.</param>
         /// <param name="quote_name">The type of trading quote-currency of which information you want to query for.</param>
         /// <returns></returns>
-        public async Task<MyOrders> GetOrders(string base_name, string quote_name)
+        public async ValueTask<MyOrders> GetOrders(string base_name, string quote_name)
         {
             var _result = new MyOrders(base_name, quote_name);
 
@@ -342,7 +342,7 @@ namespace CCXT.Collector.BitMEX.Private
         /// Get all open orders on a symbol. Careful when accessing this with no symbol.
         /// </summary>
         /// <returns></returns>
-        public async Task<MyOrders> GetAllOrders()
+        public async ValueTask<MyOrders> GetAllOrders()
         {
             var _result = new MyOrders();
 
@@ -394,7 +394,7 @@ namespace CCXT.Collector.BitMEX.Private
         /// <param name="base_name">The type of trading base-currency of which information you want to query for.</param>
         /// <param name="quote_name">The type of trading quote-currency of which information you want to query for.</param>
         /// <returns></returns>
-        public async Task<MyPositions> GetPositions(string base_name, string quote_name)
+        public async ValueTask<MyPositions> GetPositions(string base_name, string quote_name)
         {
             var _result = new MyPositions(base_name, quote_name);
 
@@ -446,7 +446,7 @@ namespace CCXT.Collector.BitMEX.Private
         /// Get open positions
         /// </summary>
         /// <returns></returns>
-        public async Task<MyPositions> GetAllPositions()
+        public async ValueTask<MyPositions> GetAllPositions()
         {
             var _result = new MyPositions();
 
@@ -489,7 +489,7 @@ namespace CCXT.Collector.BitMEX.Private
         /// <param name="since">return committed data since given time (milli-seconds) (optional): default 0</param>
         /// <param name="limits">maximum number of items (optional): default 20</param>
         /// <returns></returns>
-        public async Task<MyTrades> GetTrades(string base_name, string quote_name, long since = 0, int limits = 20)
+        public async ValueTask<MyTrades> GetTrades(string base_name, string quote_name, long since = 0, int limits = 20)
         {
             var _result = new MyTrades(base_name, quote_name);
 
@@ -536,7 +536,7 @@ namespace CCXT.Collector.BitMEX.Private
         /// <param name="price">price of coin</param>
         /// <param name="sideType">type of buy(bid) or sell(ask)</param>
         /// <returns></returns>
-        public async Task<MyOrder> CreateLimitOrder(string base_name, string quote_name, decimal quantity, decimal price, SideType sideType)
+        public async ValueTask<MyOrder> CreateLimitOrder(string base_name, string quote_name, decimal quantity, decimal price, SideType sideType)
         {
             var _result = new MyOrder(base_name, quote_name);
 
@@ -583,7 +583,7 @@ namespace CCXT.Collector.BitMEX.Private
         /// <param name="quantity">amount of coin</param>
         /// <param name="sideType">type of buy(bid) or sell(ask)</param>
         /// <returns></returns>
-        public async Task<MyOrder> CreateMarketOrder(string base_name, string quote_name, decimal quantity, SideType sideType)
+        public async ValueTask<MyOrder> CreateMarketOrder(string base_name, string quote_name, decimal quantity, SideType sideType)
         {
             var _result = new MyOrder(base_name, quote_name);
 
@@ -623,7 +623,7 @@ namespace CCXT.Collector.BitMEX.Private
         /// </summary>
         /// <param name="orders"></param>
         /// <returns></returns>
-        public async Task<MyOrders> CreateBulkOrder(List<BBulkOrderItem> orders)
+        public async ValueTask<MyOrders> CreateBulkOrder(List<BBulkOrderItem> orders)
         {
             var _result = new MyOrders();
 
@@ -661,7 +661,7 @@ namespace CCXT.Collector.BitMEX.Private
         /// <param name="orderType">The type of order is limit, market or position</param>
         /// <param name="price">price of coin</param>
         /// <returns></returns>
-        public async Task<MyOrder> ClosePosition(string base_name, string quote_name, OrderType orderType, decimal price = 0.0m)
+        public async ValueTask<MyOrder> ClosePosition(string base_name, string quote_name, OrderType orderType, decimal price = 0.0m)
         {
             var _result = new MyOrder(base_name, quote_name);
 
@@ -705,7 +705,7 @@ namespace CCXT.Collector.BitMEX.Private
         /// <param name="price">price of coin</param>
         /// <param name="sideType">type of buy(bid) or sell(ask)</param>
         /// <returns></returns>
-        public async Task<MyOrder> UpdateOrder(string base_name, string quote_name, string order_id, decimal quantity, decimal price, SideType sideType)
+        public async ValueTask<MyOrder> UpdateOrder(string base_name, string quote_name, string order_id, decimal quantity, decimal price, SideType sideType)
         {
             var _result = new MyOrder(base_name, quote_name);
 
@@ -747,7 +747,7 @@ namespace CCXT.Collector.BitMEX.Private
         /// <param name="price">price of coin</param>
         /// <param name="sideType">type of buy(bid) or sell(ask)</param>
         /// <returns></returns>
-        public async Task<MyOrder> CancelOrder(string base_name, string quote_name, string order_id, decimal quantity, decimal price, SideType sideType)
+        public async ValueTask<MyOrder> CancelOrder(string base_name, string quote_name, string order_id, decimal quantity, decimal price, SideType sideType)
         {
             var _result = new MyOrder(base_name, quote_name);
 
@@ -784,7 +784,7 @@ namespace CCXT.Collector.BitMEX.Private
         /// <param name="quote_name">The type of trading quote-currency of which information you want to query for.</param>
         /// <param name="order_ids"></param>
         /// <returns></returns>
-        public async Task<MyOrders> CancelOrders(string base_name, string quote_name, string[] order_ids)
+        public async ValueTask<MyOrders> CancelOrders(string base_name, string quote_name, string[] order_ids)
         {
             var _result = new MyOrders(base_name, quote_name);
 
@@ -818,7 +818,7 @@ namespace CCXT.Collector.BitMEX.Private
         /// Cancels all of your orders.
         /// </summary>
         /// <returns></returns>
-        public async Task<MyOrders> CancelAllOrders()
+        public async ValueTask<MyOrders> CancelAllOrders()
         {
             var _result = new MyOrders();
 

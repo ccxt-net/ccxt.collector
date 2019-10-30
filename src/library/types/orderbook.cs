@@ -68,7 +68,84 @@ namespace CCXT.Collector.Library.Types
     /// <summary>
     ///
     /// </summary>
-    public class SOrderBook
+    public interface ISOrderBook
+    {
+        /// <summary>
+        /// 
+        /// </summary>
+        string symbol
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        ///
+        /// </summary>
+        string type
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// 호가 매도 총 잔량
+        /// </summary>
+        decimal totalAskQuantity
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// 호가 매수 총 잔량
+        /// </summary>
+        decimal totalBidQuantity
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// 64-bit Unix Timestamp in milliseconds since Epoch 1 Jan 1970
+        /// </summary>
+        long timestamp
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// ISO 8601 datetime string with milliseconds
+        /// </summary>
+        string datetime
+        {
+            get;
+        }
+
+        /// <summary>
+        /// buy array
+        /// </summary>
+        List<SOrderBookItem> bids
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// sell array
+        /// </summary>
+        List<SOrderBookItem> asks
+        {
+            get;
+            set;
+        }
+    }
+
+    /// <summary>
+    ///
+    /// </summary>
+    public class SOrderBook : ISOrderBook
     {
         /// <summary>
         /// 
@@ -127,6 +204,7 @@ namespace CCXT.Collector.Library.Types
         /// <summary>
         /// ISO 8601 datetime string with milliseconds
         /// </summary>
+        [JsonIgnore]
         public virtual string datetime
         {
             get
@@ -157,8 +235,110 @@ namespace CCXT.Collector.Library.Types
     /// <summary>
     ///
     /// </summary>
-    public class SOrderBooks : ApiResult<SOrderBook>
+    public interface ISOrderBooks : IApiResult<ISOrderBook>
     {
+        /// <summary>
+        ///
+        /// </summary>
+        string exchange
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// S, R
+        /// </summary>
+        string stream
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// string symbol of the market ('BTCUSD', 'ETHBTC', ...)
+        /// </summary>
+        string symbol
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        ///
+        /// </summary>
+        long sequentialId
+        {
+            get;
+            set;
+        }
+#if DEBUG
+        /// <summary>
+        ///
+        /// </summary>
+        string rawJson
+        {
+            get;
+            set;
+        }
+#endif
+    }
+
+    /// <summary>
+    ///
+    /// </summary>
+    public class SOrderBooks : ApiResult<ISOrderBook>, ISOrderBooks
+    {
+        /// <summary>
+        /// is success calling
+        /// </summary>
+        [JsonIgnore]
+        public override bool success
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// error or success message
+        /// </summary>
+        [JsonIgnore]
+        public override string message
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// status, error code
+        /// </summary>
+        [JsonIgnore]
+        public override int statusCode
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        ///
+        /// </summary>
+        [JsonIgnore]
+        public override ErrorCode errorCode
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// check implemented
+        /// </summary>
+        [JsonIgnore]
+        public override bool supported
+        {
+            get;
+            set;
+        }
+
         /// <summary>
         ///
         /// </summary>
@@ -204,6 +384,6 @@ namespace CCXT.Collector.Library.Types
             get;
             set;
         }
-    }
 #endif
+    }
 }

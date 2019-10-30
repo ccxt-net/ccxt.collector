@@ -8,15 +8,6 @@ namespace CCXT.Collector.Binance.Public
     public class BTickerItem : CCXT.Collector.Library.Types.STickerItem
     {
         /// <summary>
-        /// symbol
-        /// </summary>
-        public override string symbol
-        {
-            get;
-            set;
-        }
-
-        /// <summary>
         /// ask price
         /// </summary>
         public override decimal askPrice

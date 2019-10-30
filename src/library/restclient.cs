@@ -73,7 +73,7 @@ namespace CCXT.Collector.Library
         /// <param name="max_retry"></param>
         /// <param name="delay_milliseconds"></param>
         /// <returns></returns>
-        public async Task<IRestResponse> RestExecuteAsync(IRestClient client, IRestRequest request, int max_retry = 3, int delay_milliseconds = 1000)
+        public async ValueTask<IRestResponse> RestExecuteAsync(IRestClient client, IRestRequest request, int max_retry = 3, int delay_milliseconds = 1000)
         {
             var _result = (IRestResponse)null;
 
@@ -105,7 +105,7 @@ namespace CCXT.Collector.Library
         /// <param name="max_retry"></param>
         /// <param name="delay_milliseconds"></param>
         /// <returns></returns>
-        public async Task<byte[]> RestExecuteBytesAsync(IRestClient client, IRestRequest request, int max_retry = 3, int delay_milliseconds = 1000)
+        public async ValueTask<byte[]> RestExecuteBytesAsync(IRestClient client, IRestRequest request, int max_retry = 3, int delay_milliseconds = 1000)
         {
             var _result = (byte[])null;
 

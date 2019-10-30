@@ -35,7 +35,7 @@ namespace CCXT.Collector.Upbit.Public
         /// Fetch symbols, market ids and exchanger's information
         /// </summary>
         /// <returns></returns>
-        public override async Task<Markets> FetchMarkets(Dictionary<string, object> args = null)
+        public override async ValueTask<Markets> FetchMarkets(Dictionary<string, object> args = null)
         {
             var _result = new Markets();
 
@@ -112,9 +112,12 @@ namespace CCXT.Collector.Upbit.Public
         /// <param name="quote_name">The type of trading quote-currency of which information you want to query for.</param>
         /// <param name="limits">maximum number of items (optional): default 20</param>
         /// <returns></returns>
-        public async Task<SCompleteOrders> GetCompleteOrders(string base_name, string quote_name, int limits = 20)
+        public async ValueTask<SCompleteOrders> GetCompleteOrders(string base_name, string quote_name, int limits = 20)
         {
-            var _result = new SCompleteOrders(base_name, quote_name);
+            var _result = new SCompleteOrders
+            {
+                symbol = $"{quote_name}-{base_name}"
+            };
 
             var _params = new Dictionary<string, object>();
             {
@@ -161,7 +164,7 @@ namespace CCXT.Collector.Upbit.Public
         /// <param name="base_name">The type of trading base-currency of which information you want to query for.</param>
         /// <param name="quote_name">The type of trading quote-currency of which information you want to query for.</param>
         /// <returns></returns>
-        public async Task<SOrderBooks> GetOrderBooks(string base_name, string quote_name)
+        public async ValueTask<SOrderBooks> GetOrderBooks(string base_name, string quote_name)
         {
             var _result = new SOrderBooks();
 

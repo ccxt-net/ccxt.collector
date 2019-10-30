@@ -174,21 +174,6 @@ namespace CCXT.Collector.Library.Types
     public class SCompleteOrders : ApiResult<List<ISCompleteOrderItem>>, ISCompleteOrders
     {
         /// <summary>
-        /// 
-        /// </summary>
-        public SCompleteOrders()
-        {
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public SCompleteOrders(string base_name, string quote_name)
-        {
-            this.symbol = $"{quote_name}-{base_name}";
-        }
-
-        /// <summary>
         /// is success calling
         /// </summary>
         [JsonIgnore]

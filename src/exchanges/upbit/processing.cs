@@ -65,25 +65,32 @@ namespace CCXT.Collector.Upbit
                         {
                             if (_message.stream == "trade")
                             {
-                                var _w_trade_data = JsonConvert.DeserializeObject<UWCompleteOrderItem>(_message.json);
+                                var _wt = JsonConvert.DeserializeObject<UWCompleteOrderItem>(_message.json);
 
-                                await mergeTradeItem(new SCompleteOrders
+                                var _trades = new SCompleteOrders
                                 {
                                     exchange = _message.exchange,
                                     stream = $"{_message.command.ToLower()}.{_message.stream.ToLower()}",
-                                    symbol = _w_trade_data.symbol,
-                                    sequentialId = _w_trade_data.sequential_id,
+                                    symbol = _wt.symbol,
+                                    sequentialId = _wt.sequential_id,
                                     result = new List<ISCompleteOrderItem>
                                     {
                                         new SCompleteOrderItem
                                         {
-                                            timestamp = _w_trade_data.timestamp,
-                                            sideType = _w_trade_data.sideType,
-                                            price = _w_trade_data.price,
-                                            quantity = _w_trade_data.quantity
+                                            timestamp = _wt.timestamp,
+                                            sideType = _wt.sideType,
+                                            price = _wt.price,
+                                            quantity = _wt.quantity
                                         }
                                     }
-                                });
+                                };
+
+                                _trades.SetSuccess();
+
+                                await mergeTradeItems(_trades);
+
+                                if (KConfig.UpbitUsePublishTrade == true)
+                                    await publishTrading(_trades);
                             }
                             else if (_message.stream == "orderbook")
                             {
@@ -133,7 +140,8 @@ namespace CCXT.Collector.Upbit
                                 await publishTicker(new STickers
                                 {
                                     exchange = _message.exchange,
-                                    stream = _message.stream,
+                                    stream = $"{_message.command.ToLower()}.{_message.stream.ToLower()}",
+                                    symbol = _message.symbol,
                                     sequentialId = _message.sequentialId,
                                     result = _a_ticker_data.Select(o =>
                                     {
