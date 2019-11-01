@@ -1,11 +1,9 @@
 ﻿using CCXT.Collector.Library;
-using CCXT.Collector.Library.Types;
 using CCXT.Collector.Upbit.Public;
 using Newtonsoft.Json;
 using OdinSdk.BaseLib.Configuration;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -219,6 +217,7 @@ namespace CCXT.Collector.Upbit
                                 command = "AP",
                                 exchange = UPLogger.exchange_name,
                                 stream = "ticker",
+                                symbol = _symbols,
                                 sequentialId = _last_limit_milli_secs,
                                 json = _b_json_value.Content
                             });

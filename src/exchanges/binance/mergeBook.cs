@@ -197,28 +197,28 @@ namespace CCXT.Collector.Binance
             return true;
         }
 
-        private async ValueTask<bool> mergeOrderbook(BAOrderBook orderBook)
+        private async ValueTask<bool> mergeOrderbook(BAOrderBook orderbook)
         {
             var _result = false;
 
-            var _settings = __qSettings.ContainsKey(orderBook.data.symbol) 
-                          ? __qSettings[orderBook.data.symbol]
-                          : __qSettings[orderBook.data.symbol] = new Settings();
+            var _settings = __qSettings.ContainsKey(orderbook.data.symbol) 
+                          ? __qSettings[orderbook.data.symbol]
+                          : __qSettings[orderbook.data.symbol] = new Settings();
 
-            if (__qOrderBooks.ContainsKey(orderBook.data.symbol) == false)
+            if (__qOrderBooks.ContainsKey(orderbook.data.symbol) == false)
             {
-                _settings.last_orderbook_id = orderBook.data.lastId;
+                _settings.last_orderbook_id = orderbook.data.lastId;
 
                 var _sqo = new SOrderBooks
                 {
                     exchange = BNLogger.exchange_name,
                     stream = "snapshot",
-                    symbol = orderBook.data.symbol,
-                    sequentialId = orderBook.data.lastId,
+                    symbol = orderbook.data.symbol,
+                    sequentialId = orderbook.data.lastId,
                     result = new SOrderBook()
                 };
 
-                foreach (var _oi in orderBook.data.asks)
+                foreach (var _oi in orderbook.data.asks)
                 {
                     _sqo.result.asks.Add(new SOrderBookItem
                     {
@@ -230,7 +230,7 @@ namespace CCXT.Collector.Binance
                     });
                 }
 
-                foreach (var _oi in orderBook.data.bids)
+                foreach (var _oi in orderbook.data.bids)
                 {
                     _sqo.result.bids.Add(new SOrderBookItem
                     {
@@ -249,63 +249,61 @@ namespace CCXT.Collector.Binance
 
                 _result = true;
             }
-            else if (_settings.last_orderbook_id < orderBook.data.lastId)
+            else if (_settings.last_orderbook_id < orderbook.data.lastId)
             {
-                _settings.last_orderbook_id = orderBook.data.lastId;
+                _settings.last_orderbook_id = orderbook.data.lastId;
 
-                var _qob = __qOrderBooks[orderBook.data.symbol];
+                var _qob = __qOrderBooks[orderbook.data.symbol];
 
-                var _current_ask_size = orderBook.data.asks.Sum(o => o[1]);
-                var _current_bid_size = orderBook.data.bids.Sum(o => o[1]);
+                var _current_ask_size = orderbook.data.asks.Sum(o => o[1]);
+                var _current_bid_size = orderbook.data.bids.Sum(o => o[1]);
 
                 if (_settings.last_order_ask_size != _current_ask_size || _settings.last_order_bid_size != _current_bid_size)
                 {
                     if (_settings.before_trade_ask_size != _current_ask_size || _settings.before_trade_bid_size != _current_bid_size)
                     {
-                        _result = await updateOrderbook(_qob, _settings, orderBook);
+                        _result = await updateOrderbook(_qob, orderbook, _settings);
 
                         _settings.last_order_ask_size = _qob.result.asks.Sum(o => o.quantity);
                         _settings.last_order_bid_size = _qob.result.bids.Sum(o => o.quantity);
 #if DEBUG
                         // modified check
                         if (_current_ask_size != _settings.last_order_ask_size || _current_bid_size != _settings.last_order_bid_size)
-                            BNLogger.WriteQ($"diffb-{orderBook.stream}: timestamp => {_settings.last_orderbook_id}, symbol => {orderBook.data.symbol}, ask_size => {_current_ask_size}, {_settings.last_order_ask_size}, bid_size => {_current_bid_size}, {_settings.last_order_bid_size}");
+                            BNLogger.WriteQ($"diffb-{orderbook.stream}: timestamp => {_settings.last_orderbook_id}, symbol => {orderbook.data.symbol}, ask_size => {_current_ask_size}, {_settings.last_order_ask_size}, bid_size => {_current_bid_size}, {_settings.last_order_bid_size}");
 
                         if (_qob.result.asks.Count + _qob.result.bids.Count != 40)
                         {
                             var _ask_count = _qob.result.asks.Count();
                             var _bid_count = _qob.result.bids.Count();
 
-                            BNLogger.WriteQ($"diffb-{orderBook.stream}: timestamp => {_settings.last_orderbook_id}, symbol => {orderBook.data.symbol}, ask_count => {_ask_count}, bid_count => {_bid_count}");
+                            BNLogger.WriteQ($"diffb-{orderbook.stream}: timestamp => {_settings.last_orderbook_id}, symbol => {orderbook.data.symbol}, ask_count => {_ask_count}, bid_count => {_bid_count}");
                         }
 #endif
                     }
                     else
-                        BNLogger.WriteQ($"trade-{orderBook.stream}: timestamp => {_settings.last_orderbook_id}, symbol => {orderBook.data.symbol}, ask_size => {_current_ask_size}, bid_size => {_current_bid_size}");
+                        BNLogger.WriteQ($"trade-{orderbook.stream}: timestamp => {_settings.last_orderbook_id}, symbol => {orderbook.data.symbol}, ask_size => {_current_ask_size}, bid_size => {_current_bid_size}");
                 }
                 else
-                    BNLogger.WriteQ($"equal-{orderBook.stream}: timestamp => {_settings.last_orderbook_id}, symbol => {orderBook.data.symbol}, ask_size => {_current_ask_size}, bid_size => {_current_bid_size}");
+                    BNLogger.WriteQ($"equal-{orderbook.stream}: timestamp => {_settings.last_orderbook_id}, symbol => {orderbook.data.symbol}, ask_size => {_current_ask_size}, bid_size => {_current_bid_size}");
             }
-            //else
-            //    BLogger.WriteQ($"pastb-{orderBook.stream}: timestamp => {_settings.last_orderbook_id}, symbol => {orderBook.data.symbol}, ask_size => {_settings.last_order_ask_size}, bid_size => {_settings.last_order_bid_size}");
 
             return _result;
         }
 
-        private async ValueTask<bool> updateOrderbook(SOrderBooks qob, Settings settings, BAOrderBook orderBook)
+        private async ValueTask<bool> updateOrderbook(SOrderBooks qob, BAOrderBook orderbook, Settings settings)
         {
             var _dqo = new SOrderBooks
             {
                 exchange = BNLogger.exchange_name,
                 stream = "diffbooks",
-                symbol = orderBook.data.symbol,
-                sequentialId = orderBook.data.lastId,
+                symbol = orderbook.data.symbol,
+                sequentialId = orderbook.data.lastId,
                 result = new SOrderBook()
             };
 
             lock (__qOrderBooks)
             {
-                foreach (var _oi in orderBook.data.asks)
+                foreach (var _oi in orderbook.data.asks)
                 {
                     var _ask = qob.result.asks.Where(o => o.price == _oi[0]).SingleOrDefault();
                     if (_ask == null)
@@ -338,7 +336,7 @@ namespace CCXT.Collector.Binance
                     }
                 }
 
-                foreach (var _oi in orderBook.data.bids)
+                foreach (var _oi in orderbook.data.bids)
                 {
                     var _bid = qob.result.bids.Where(o => o.price == _oi[0]).SingleOrDefault();
                     if (_bid == null)
@@ -373,7 +371,7 @@ namespace CCXT.Collector.Binance
 
                 foreach (var _qi in qob.result.asks)
                 {
-                    var _ask = orderBook.data.asks.Where(o => o[0] == _qi.price).SingleOrDefault();
+                    var _ask = orderbook.data.asks.Where(o => o[0] == _qi.price).SingleOrDefault();
                     if (_ask == null)
                     {
                         _dqo.result.asks.Add(new SOrderBookItem
@@ -391,7 +389,7 @@ namespace CCXT.Collector.Binance
 
                 foreach (var _qi in qob.result.bids)
                 {
-                    var _bid = orderBook.data.bids.Where(o => o[0] == _qi.price).SingleOrDefault();
+                    var _bid = orderbook.data.bids.Where(o => o[0] == _qi.price).SingleOrDefault();
                     if (_bid == null)
                     {
                         _dqo.result.bids.Add(new SOrderBookItem
@@ -415,7 +413,7 @@ namespace CCXT.Collector.Binance
             {
                 settings.orderbook_count = 0;
 
-                qob.sequentialId = orderBook.data.lastId;
+                qob.sequentialId = orderbook.data.lastId;
                 await snapshotOrderbook(_dqo.exchange, _dqo.symbol);
             }
             else

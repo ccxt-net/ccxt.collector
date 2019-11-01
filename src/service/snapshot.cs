@@ -78,7 +78,7 @@ namespace CCXT.Collector.Service
             var _symbols = baseIds.Split(';');
             if (exchange == UPLogger.exchange_name)
             {
-                if (KConfig.UpbitUsePollingTicker == false)
+                if (KConfig.UsePollingTicker == false)
                 {
                     foreach (var _s in _symbols)
                     {
@@ -96,7 +96,7 @@ namespace CCXT.Collector.Service
             }
             else if (exchange == BNLogger.exchange_name)
             {
-                if (KConfig.BinanceUsePollingTicker == false)
+                if (KConfig.UsePollingTicker == false)
                 {
                     foreach (var _s in _symbols)
                     {
@@ -114,7 +114,7 @@ namespace CCXT.Collector.Service
             }
             else if (exchange == BMLogger.exchange_name)
             {
-                if (KConfig.BitmexUsePollingTicker == false)
+                if (KConfig.UsePollingTicker == false)
                 {
                     foreach (var _s in _symbols)
                     {
@@ -154,7 +154,7 @@ namespace CCXT.Collector.Service
             if (KConfig.UseAutoStart == true)
                 await StartNewSymbol(KConfig.StartExchangeName, KConfig.StartSymbolNames);
 
-            var _processing = Task.Run(async () =>
+            var _processing = Task.Run((Func<Task>)(async () =>
             {
                 using (var _connection = CFactory.CreateConnection())
                 {
@@ -177,26 +177,20 @@ namespace CCXT.Collector.Service
                                 {
                                     foreach (var _symbol in _selector.symbol.Split(';'))
                                     {
-                                        var _q_message = new QMessage 
+                                        var _q_message = new QMessage
                                         { 
                                             command = "SS", 
                                             exchange = _selector.exchange, 
                                             symbol = _symbol 
                                         };
 
-                                        if (_selector.exchange == BNLogger.exchange_name)
+                                        if (KConfig.UsePollingTicker == false)
                                         {
-                                            if (KConfig.BinanceUsePollingTicker == false)
+                                            if (_selector.exchange == BNLogger.exchange_name)
                                                 Binance.Processing.SendReceiveQ(_q_message);
-                                        }
-                                        else if (_selector.exchange == BMLogger.exchange_name)
-                                        {
-                                            if (KConfig.BitmexUsePollingTicker == false)
+                                            else if (_selector.exchange == BMLogger.exchange_name)
                                                 BitMEX.Processing.SendReceiveQ(_q_message);
-                                        }
-                                        else if (_selector.exchange == UPLogger.exchange_name)
-                                        {
-                                            if (KConfig.UpbitUsePollingTicker == false)
+                                            else if (_selector.exchange == UPLogger.exchange_name)
                                                 Upbit.Processing.SendReceiveQ(_q_message);
                                         }
                                     }
@@ -247,7 +241,7 @@ namespace CCXT.Collector.Service
                         }
                     }
                 }
-            },
+            }),
             tokenSource.Token
             );
 

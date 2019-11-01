@@ -90,16 +90,6 @@ namespace CCXT.Collector.Upbit.Public
         }
 
         /// <summary>
-        /// 체결 타임스탬프
-        /// </summary>
-        [JsonProperty(PropertyName = "timestamp")]
-        public override long timestamp
-        {
-            get;
-            set;
-        }
-
-        /// <summary>
         /// 
         /// </summary>
         public long sequential_id

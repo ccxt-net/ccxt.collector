@@ -131,6 +131,24 @@ namespace CCXT.Collector.BitMEX.Private
         }
 
         /// <summary>
+        /// 
+        /// </summary>
+        public string execInst
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public string text
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
         ///
         /// </summary>
         [JsonProperty(PropertyName = "side")]

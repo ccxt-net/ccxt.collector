@@ -66,5 +66,10 @@
   <ItemGroup>
     <ProjectReference Include="..\..\..\..\odinsoft-git\public\open-sdk\src\OdinSdk.BaseLib\OdinSdk.BaseLib.csproj" />
   </ItemGroup>
+  
+  <ItemGroup>
+    <Folder Include="exchanges\bithumb\public\" />
+    <Folder Include="exchanges\bithumb\private\" />
+  </ItemGroup>
 
 </Project>

@@ -70,28 +70,19 @@ namespace CCXT.Collector.Library.Types
     /// </summary>
     public interface ISOrderBook
     {
-        /// <summary>
-        /// 
-        /// </summary>
-        string symbol
-        {
-            get;
-            set;
-        }
-
-        /// <summary>
-        ///
-        /// </summary>
-        string type
-        {
-            get;
-            set;
-        }
+        ///// <summary>
+        ///// 
+        ///// </summary>
+        //string symbol
+        //{
+        //    get;
+        //    set;
+        //}
 
         /// <summary>
         /// 호가 매도 총 잔량
         /// </summary>
-        decimal totalAskQuantity
+        decimal askSumQty
         {
             get;
             set;
@@ -100,7 +91,7 @@ namespace CCXT.Collector.Library.Types
         /// <summary>
         /// 호가 매수 총 잔량
         /// </summary>
-        decimal totalBidQuantity
+        decimal bidSumQty
         {
             get;
             set;
@@ -156,28 +147,19 @@ namespace CCXT.Collector.Library.Types
             this.bids = new List<SOrderBookItem>();
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        public virtual string symbol
-        {
-            get;
-            set;
-        }
-
-        /// <summary>
-        ///
-        /// </summary>
-        public virtual string type
-        {
-            get;
-            set;
-        }
+        ///// <summary>
+        ///// 
+        ///// </summary>
+        //public virtual string symbol
+        //{
+        //    get;
+        //    set;
+        //}
 
         /// <summary>
         /// 호가 매도 총 잔량
         /// </summary>
-        public virtual decimal totalAskQuantity
+        public virtual decimal askSumQty
         {
             get;
             set;
@@ -186,7 +168,7 @@ namespace CCXT.Collector.Library.Types
         /// <summary>
         /// 호가 매수 총 잔량
         /// </summary>
-        public virtual decimal totalBidQuantity
+        public virtual decimal bidSumQty
         {
             get;
             set;

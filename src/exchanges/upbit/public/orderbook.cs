@@ -1,6 +1,5 @@
 ﻿using CCXT.Collector.Library.Types;
 using Newtonsoft.Json;
-using OdinSdk.BaseLib.Coin.Public;
 using System.Collections.Generic;
 
 namespace CCXT.Collector.Upbit.Public
@@ -13,7 +12,7 @@ namespace CCXT.Collector.Upbit.Public
         /// <summary>
         ///
         /// </summary>
-        public virtual decimal ask_price
+        public decimal ask_price
         {
             get;
             set;
@@ -22,7 +21,7 @@ namespace CCXT.Collector.Upbit.Public
         /// <summary>
         ///
         /// </summary>
-        public virtual decimal ask_size
+        public decimal ask_size
         {
             get;
             set;
@@ -31,7 +30,7 @@ namespace CCXT.Collector.Upbit.Public
         /// <summary>
         ///
         /// </summary>
-        public virtual decimal bid_price
+        public decimal bid_price
         {
             get;
             set;
@@ -40,7 +39,7 @@ namespace CCXT.Collector.Upbit.Public
         /// <summary>
         ///
         /// </summary>
-        public virtual decimal bid_size
+        public decimal bid_size
         {
             get;
             set;
@@ -56,7 +55,7 @@ namespace CCXT.Collector.Upbit.Public
         /// 호가 매도 총 잔량
         /// </summary>
         [JsonProperty(PropertyName = "total_ask_size")]
-        public override decimal totalAskQuantity
+        public override decimal askSumQty
         {
             get;
             set;
@@ -66,7 +65,7 @@ namespace CCXT.Collector.Upbit.Public
         /// 호가 매수 총 잔량
         /// </summary>
         [JsonProperty(PropertyName = "total_bid_size")]
-        public override decimal totalBidQuantity
+        public override decimal bidSumQty
         {
             get;
             set;
@@ -126,8 +125,7 @@ namespace CCXT.Collector.Upbit.Public
         /// <summary>
         ///
         /// </summary>
-        [JsonProperty(PropertyName = "market")]
-        public override string symbol
+        public string market
         {
             get;
             set;
@@ -157,8 +155,16 @@ namespace CCXT.Collector.Upbit.Public
         /// <summary>
         ///
         /// </summary>
-        [JsonProperty(PropertyName = "code")]
-        public override string symbol
+        public string type
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        ///
+        /// </summary>
+        public string code
         {
             get;
             set;

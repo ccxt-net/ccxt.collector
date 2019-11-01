@@ -11,15 +11,44 @@ namespace CCXT.Collector.Library
     {
         public static CConfig CConfig = new CConfig();
 
-        #region Binance
 
-        public static bool BinanceUsePollingTicker
+        private static bool? __use_polling_ticker = null;
+
+        public static bool UsePollingTicker
         {
             get
             {
-                return CConfig.GetAppBoolean("binance.use.polling.ticker");
+                if (__use_polling_ticker == null)
+                    __use_polling_ticker = CConfig.GetAppBoolean("use.polling.ticker");
+                return __use_polling_ticker.Value;
             }
         }
+
+        private static bool? __use_publish_trade = null;
+
+        public static bool UsePublishTrade
+        {
+            get
+            {
+                if (__use_publish_trade == null)
+                    __use_publish_trade = CConfig.GetAppBoolean("use.publish.trade");
+                return __use_publish_trade.Value;
+            }
+        }
+
+        private static int? __snapshot_skip_counter = null;
+
+        public static int SnapshotSkipCounter
+        {
+            get
+            {
+                if (__snapshot_skip_counter == null)
+                    __snapshot_skip_counter = CConfig.GetAppInteger("snapshot.skip.counter");
+                return __snapshot_skip_counter.Value;
+            }
+        }
+
+        #region Binance
 
         private static int? __binance_orderbook_counter = null;
 
@@ -49,15 +78,8 @@ namespace CCXT.Collector.Library
 
         #region BitMEX
 
-        public static bool BitmexUsePollingTicker
-        {
-            get
-            {
-                return CConfig.GetAppBoolean("bitmex.use.polling.ticker");
-            }
-        }
-
         private static int? __bitmex_orderbook_counter = null;
+
 
         public static int BitmexOrderBookCounter
         {
@@ -94,30 +116,6 @@ namespace CCXT.Collector.Library
                 if (__upbit_websocket_retry == null)
                     __upbit_websocket_retry = CConfig.GetAppInteger("websocket.retry.waiting.milliseconds");
                 return __upbit_websocket_retry.Value;
-            }
-        }
-
-        private static bool? __upbit_use_polling_ticker = null;
-
-        public static bool UpbitUsePollingTicker
-        {
-            get
-            {
-                if (__upbit_use_polling_ticker == null)
-                    __upbit_use_polling_ticker = CConfig.GetAppBoolean("upbit.use.polling.ticker");
-                return __upbit_use_polling_ticker.Value;
-            }
-        }
-
-        private static bool? __upbit_use_publish_trade = null;
-
-        public static bool UpbitUsePublishTrade
-        {
-            get
-            {
-                if (__upbit_use_publish_trade == null)
-                    __upbit_use_publish_trade = CConfig.GetAppBoolean("upbit.use.publish.trade");
-                return __upbit_use_publish_trade.Value;
             }
         }
 

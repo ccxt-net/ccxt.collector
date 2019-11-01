@@ -75,7 +75,7 @@ namespace CCXT.Collector.Service
                                 var _body = Encoding.UTF8.GetBytes(_json_message);
                                 _channel.BasicPublish(exchange: QueueName, routingKey: "", basicProperties: null, body: _body);
 #if DEBUG
-                                LoggerQ.WriteO(_json_message.Substring(0, _json_message.Length < 256 ? _json_message.Length : 256));
+                                LoggerQ.WriteO(_json_message);
 #endif
                                 if (_channel.IsClosed == true)
                                 {

@@ -2,7 +2,6 @@
 using OdinSdk.BaseLib.Coin.Private;
 using OdinSdk.BaseLib.Coin.Trade;
 using OdinSdk.BaseLib.Coin.Types;
-using OdinSdk.BaseLib.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -52,7 +51,7 @@ namespace CCXT.Collector.BitMEX.Private
         /// <summary>
         /// Get a deposit address.
         /// </summary>
-        /// <param name="quote_name">The type of trading quote-currency of which information you want to query for.</param>
+        /// <param name="quote_name">The type of trading quote-currency of which information you want to query for.</param>        
         /// <returns></returns>
         public async ValueTask<Address> GetDepositAddress(string quote_name)
         {
@@ -107,7 +106,7 @@ namespace CCXT.Collector.BitMEX.Private
             if (_response.IsSuccessful == true)
             {
                 var _withdraw = privateClient.DeserializeObject<BTransferItem>(_response.Content);
-                if (String.IsNullOrEmpty(_withdraw.transferId) == false)
+                if (_withdraw != null && String.IsNullOrEmpty(_withdraw.transferId) == false)
                 {
                     _withdraw.transactionType = TransactionType.Withdraw;
                     _withdraw.confirmations = 0;
@@ -115,10 +114,6 @@ namespace CCXT.Collector.BitMEX.Private
 
                     _result.result = _withdraw;
                     _result.SetSuccess();
-                }
-                else
-                {
-                    _result.SetFailure();
                 }
             }
             else
@@ -134,14 +129,18 @@ namespace CCXT.Collector.BitMEX.Private
         /// Get a history of all of your wallet transactions (deposits, withdrawals, PNL).
         /// </summary>
         /// <param name="quote_name">The type of trading quote-currency of which information you want to query for.</param>
+        /// <param name="count">Number of results to fetch.</param>
+        /// <param name="start">Starting point for results.</param>
         /// <returns></returns>
-        public async ValueTask<Transfers> GetWalletHistory(string quote_name)
+        public async ValueTask<Transfers> GetWalletHistory(string quote_name, long count, long start = 0)
         {
             var _result = new Transfers();
 
             var _params = new Dictionary<string, object>();
             {
                 _params.Add("currency", quote_name);
+                _params.Add("count", count);
+                _params.Add("start", start);
             }
 
             var _response = await privateClient.CallApiGet2Async("/api/v1/user/walletHistory", _params);
@@ -151,28 +150,30 @@ namespace CCXT.Collector.BitMEX.Private
             if (_response.IsSuccessful == true)
             {
                 var _transfers = privateClient.DeserializeObject<List<BTransferItem>>(_response.Content);
-
-                foreach (var _t in _transfers)
+                if (_transfers != null)
                 {
-                    _t.toAddress = String.IsNullOrEmpty(_t.toAddress) == false ? _t.toAddress : "undefined";
-
-                    if (_t.transactionType == TransactionType.Deposit)
+                    foreach (var _t in _transfers)
                     {
-                        _t.fromAddress = _t.toAddress;
-                        _t.fromTag = _t.toTag;
+                        _t.toAddress = String.IsNullOrEmpty(_t.toAddress) == false ? _t.toAddress : "undefined";
 
-                        _t.toAddress = "";
-                        _t.toTag = "";
+                        if (_t.transactionType == TransactionType.Deposit)
+                        {
+                            _t.fromAddress = _t.toAddress;
+                            _t.fromTag = _t.toTag;
+
+                            _t.toAddress = "";
+                            _t.toTag = "";
+                        }
+
+                        _t.transferType = TransferTypeConverter.FromString(_t.transactStatus);
+                        _t.isCompleted = (_t.transferType == TransferType.Done);
+
+                        _t.transactionId = (_t.timestamp * 1000).ToString();
                     }
 
-                    _t.transferType = TransferTypeConverter.FromString(_t.transactStatus);
-                    _t.isCompleted = (_t.transferType == TransferType.Done);
-
-                    _t.transactionId = (_t.timestamp * 1000).ToString();
+                    _result.result = _transfers.ToList<ITransferItem>();
+                    _result.SetSuccess();
                 }
-
-                _result.result = _transfers.ToList<ITransferItem>();
-                _result.SetSuccess();
             }
             else
             {
@@ -204,11 +205,13 @@ namespace CCXT.Collector.BitMEX.Private
             if (_response.IsSuccessful == true)
             {
                 var _balance = privateClient.DeserializeObject<BBalanceItem>(_response.Content);
+                if (_balance != null)
                 {
                     _balance.used = _balance.total - _balance.free;
+                    
                     _result.result = _balance;
+                    _result.SetSuccess();
                 }
-                _result.SetSuccess();
             }
             else
             {
@@ -239,13 +242,14 @@ namespace CCXT.Collector.BitMEX.Private
             if (_response.IsSuccessful == true)
             {
                 var _balances = privateClient.DeserializeObject<List<BBalanceItem>>(_response.Content);
+                if (_balances != null)
                 {
                     foreach (var _balance in _balances)
                         _balance.used = _balance.total - _balance.free;
 
                     _result.result = _balances.ToList<IBalanceItem>();
+                    _result.SetSuccess();
                 }
-                _result.SetSuccess();
             }
             else
             {
@@ -271,6 +275,7 @@ namespace CCXT.Collector.BitMEX.Private
             if (_response.IsSuccessful == true)
             {
                 var _user_info = privateClient.DeserializeObject<BUserInfoItem>(_response.Content);
+                if (_user_info != null)
                 {
                     _result.result = _user_info;
                     _result.SetSuccess();
@@ -288,16 +293,19 @@ namespace CCXT.Collector.BitMEX.Private
         /// <summary>
         /// To get open orders on a symbol.
         /// </summary>
-        /// <param name="base_name">The type of trading base-currency of which information you want to query for.</param>
-        /// <param name="quote_name">The type of trading quote-currency of which information you want to query for.</param>
+        /// <param name="quote_name">The type of trading quote-currency of which information you want to query for.</param>        
+        /// <param name="count">Number of results to fetch.</param>
+        /// <param name="start">Starting point for results.</param>
         /// <returns></returns>
-        public async ValueTask<MyOrders> GetOrders(string base_name, string quote_name)
+        public async ValueTask<MyOrders> GetOrders(string quote_name, long count, long start = 0)
         {
-            var _result = new MyOrders(base_name, quote_name);
+            var _result = new MyOrders();
 
             var _params = new Dictionary<string, object>();
             {
-                _params.Add("symbol", $"{base_name}{quote_name}");
+                _params.Add("symbol", quote_name);
+                _params.Add("count", count);
+                _params.Add("start", start);
                 _params.Add("reverse", true);
                 _params.Add("filter", new CArgument
                 {
@@ -316,6 +324,7 @@ namespace CCXT.Collector.BitMEX.Private
             if (_response.IsSuccessful == true)
             {
                 var _orders = privateClient.DeserializeObject<List<BMyOrderItem>>(_response.Content);
+                if (_orders != null)
                 {
                     foreach (var _o in _orders)
                     {
@@ -325,9 +334,10 @@ namespace CCXT.Collector.BitMEX.Private
                         _o.filled = Math.Max(_o.quantity - _o.remaining, 0);
                         _o.cost = _o.price * _o.filled;
                     }
+
                     _result.result = _orders.ToList<IMyOrderItem>();
+                    _result.SetSuccess();
                 }
-                _result.SetSuccess();
             }
             else
             {
@@ -341,13 +351,17 @@ namespace CCXT.Collector.BitMEX.Private
         /// <summary>
         /// Get all open orders on a symbol. Careful when accessing this with no symbol.
         /// </summary>
+        /// <param name="count">Number of results to fetch.</param>
+        /// <param name="start">Starting point for results.</param>
         /// <returns></returns>
-        public async ValueTask<MyOrders> GetAllOrders()
+        public async ValueTask<MyOrders> GetAllOrders(long count, long start = 0)
         {
             var _result = new MyOrders();
 
             var _params = new Dictionary<string, object>();
             {
+                _params.Add("count", count);
+                _params.Add("start", start);
                 _params.Add("reverse", true);
                 _params.Add("filter", new CArgument
                 {
@@ -366,6 +380,7 @@ namespace CCXT.Collector.BitMEX.Private
             if (_response.IsSuccessful == true)
             {
                 var _orders = privateClient.DeserializeObject<List<BMyOrderItem>>(_response.Content);
+                if (_orders != null)
                 {
                     foreach (var _o in _orders.Where(o => OrderStatusConverter.IsAlive(o.orderStatus) == true))
                     {
@@ -375,9 +390,10 @@ namespace CCXT.Collector.BitMEX.Private
                         _o.filled = Math.Max(_o.quantity - _o.remaining, 0);
                         _o.cost = _o.price * _o.filled;
                     }
+
                     _result.result = _orders.ToList<IMyOrderItem>();
+                    _result.SetSuccess();
                 }
-                _result.SetSuccess();
             }
             else
             {
@@ -391,21 +407,22 @@ namespace CCXT.Collector.BitMEX.Private
         /// <summary>
         /// To get open positions on a symbol.
         /// </summary>
-        /// <param name="base_name">The type of trading base-currency of which information you want to query for.</param>
-        /// <param name="quote_name">The type of trading quote-currency of which information you want to query for.</param>
+        /// <param name="symbol"></param>
+        /// <param name="count">Number of results to fetch.</param>
         /// <returns></returns>
-        public async ValueTask<MyPositions> GetPositions(string base_name, string quote_name)
+        public async ValueTask<MyPositions> GetPositions(string symbol, long count)
         {
-            var _result = new MyPositions(base_name, quote_name);
+            var _result = new MyPositions();
 
             var _params = new Dictionary<string, object>();
             {
+                _params.Add("count", count);
                 _params.Add("filter", new CArgument
                 {
                     isJson = true,
                     value = new Dictionary<string, object>
                         {
-                            { "symbol", $"{base_name}{quote_name}" }
+                            { "symbol", symbol }
                         }
                 });
             }
@@ -417,6 +434,7 @@ namespace CCXT.Collector.BitMEX.Private
             if (_response.IsSuccessful == true)
             {
                 var _positions = privateClient.DeserializeObject<List<BMyPositionItem>>(_response.Content);
+                if (_positions != null)
                 {
                     foreach (var _p in _positions)
                     {
@@ -430,8 +448,8 @@ namespace CCXT.Collector.BitMEX.Private
                     }
 
                     _result.result = _positions.ToList<IMyPositionItem>();
+                    _result.SetSuccess();
                 }
-                _result.SetSuccess();
             }
             else
             {
@@ -457,6 +475,7 @@ namespace CCXT.Collector.BitMEX.Private
             if (_response.IsSuccessful == true)
             {
                 var _positions = privateClient.DeserializeObject<List<BMyPositionItem>>(_response.Content);
+                if (_positions != null)
                 {
                     foreach (var _p in _positions)
                     {
@@ -468,9 +487,10 @@ namespace CCXT.Collector.BitMEX.Private
                         _p.quantity = Math.Abs(_p.quantity);
                         _p.amount = _p.price * _p.quantity;
                     }
+                    
                     _result.result = _positions.ToList<IMyPositionItem>();
+                    _result.SetSuccess();
                 }
-                _result.SetSuccess();
             }
             else
             {
@@ -484,23 +504,18 @@ namespace CCXT.Collector.BitMEX.Private
         /// <summary>
         /// Get all balance-affecting executions. This includes each trade, insurance charge, and settlement.
         /// </summary>
-        /// <param name="base_name">The type of trading base-currency of which information you want to query for.</param>
-        /// <param name="quote_name">The type of trading quote-currency of which information you want to query for.</param>
-        /// <param name="since">return committed data since given time (milli-seconds) (optional): default 0</param>
-        /// <param name="limits">maximum number of items (optional): default 20</param>
+        /// <param name="symbol"></param>
+        /// <param name="count">maximum number of items</param>
         /// <returns></returns>
-        public async ValueTask<MyTrades> GetTrades(string base_name, string quote_name, long since = 0, int limits = 20)
+        public async ValueTask<MyTrades> GetTrades(string symbol, int count)
         {
-            var _result = new MyTrades(base_name, quote_name);
+            var _result = new MyTrades();
 
             var _params = new Dictionary<string, object>();
             {
-                _params.Add("symbol", $"{base_name}{quote_name}");
-                _params.Add("count", limits);
+                _params.Add("symbol", symbol);
+                _params.Add("count", count);
                 _params.Add("reverse", true);
-
-                if (since > 0)
-                    _params.Add("startTime", CUnixTime.ConvertToUtcTimeMilli(since).ToString("yyyy-MM-dd HH:mm"));
             }
 
             var _response = await privateClient.CallApiGet2Async("/api/v1/execution/tradeHistory", _params);
@@ -510,13 +525,14 @@ namespace CCXT.Collector.BitMEX.Private
             if (_response.IsSuccessful == true)
             {
                 var _trades = privateClient.DeserializeObject<List<BMyTradeItem>>(_response.Content);
+                if (_trades != null)
                 {
                     foreach (var _t in _trades)
                         _t.amount = _t.price * _t.quantity;
 
                     _result.result = _trades.ToList<IMyTradeItem>();
+                    _result.SetSuccess();
                 }
-                _result.SetSuccess();
             }
             else
             {
@@ -530,19 +546,18 @@ namespace CCXT.Collector.BitMEX.Private
         /// <summary>
         /// Create a new limit order.
         /// </summary>
-        /// <param name="base_name">The type of trading base-currency of which information you want to query for.</param>
-        /// <param name="quote_name">The type of trading quote-currency of which information you want to query for.</param>
+        /// <param name="symbol"></param>
         /// <param name="quantity">amount of coin</param>
         /// <param name="price">price of coin</param>
         /// <param name="sideType">type of buy(bid) or sell(ask)</param>
         /// <returns></returns>
-        public async ValueTask<MyOrder> CreateLimitOrder(string base_name, string quote_name, decimal quantity, decimal price, SideType sideType)
+        public async ValueTask<MyOrder> CreateLimitOrder(string symbol, decimal quantity, decimal price, SideType sideType)
         {
-            var _result = new MyOrder(base_name, quote_name);
+            var _result = new MyOrder();
 
             var _params = new Dictionary<string, object>();
             {
-                _params.Add("symbol", $"{base_name}{quote_name}");
+                _params.Add("symbol", symbol);
                 _params.Add("side", sideType == SideType.Bid ? "Buy" : "Sell");
                 _params.Add("ordType", "Limit");
                 _params.Add("orderQty", quantity);
@@ -556,6 +571,7 @@ namespace CCXT.Collector.BitMEX.Private
             if (_response.IsSuccessful == true)
             {
                 var _order = privateClient.DeserializeObject<BPlaceOrderItem>(_response.Content);
+                if (_order != null)
                 {
                     _order.orderType = OrderType.Limit;
 
@@ -563,8 +579,8 @@ namespace CCXT.Collector.BitMEX.Private
                     _order.cost = _order.price * _order.filled;
 
                     _result.result = _order;
+                    _result.SetSuccess();
                 }
-                _result.SetSuccess();
             }
             else
             {
@@ -578,18 +594,17 @@ namespace CCXT.Collector.BitMEX.Private
         /// <summary>
         /// Create a new market order.
         /// </summary>
-        /// <param name="base_name">The type of trading base-currency of which information you want to query for.</param>
-        /// <param name="quote_name">The type of trading quote-currency of which information you want to query for.</param>
+        /// <param name="symbol"></param>
         /// <param name="quantity">amount of coin</param>
         /// <param name="sideType">type of buy(bid) or sell(ask)</param>
         /// <returns></returns>
-        public async ValueTask<MyOrder> CreateMarketOrder(string base_name, string quote_name, decimal quantity, SideType sideType)
+        public async ValueTask<MyOrder> CreateMarketOrder(string symbol, decimal quantity, SideType sideType)
         {
-            var _result = new MyOrder(base_name, quote_name);
+            var _result = new MyOrder();
 
             var _params = new Dictionary<string, object>();
             {
-                _params.Add("symbol", $"{base_name}{quote_name}");
+                _params.Add("symbol", symbol);
                 _params.Add("side", sideType == SideType.Bid ? "Buy" : "Sell");
                 _params.Add("ordType", "Market");
                 _params.Add("orderQty", quantity);
@@ -602,12 +617,13 @@ namespace CCXT.Collector.BitMEX.Private
             if (_response.IsSuccessful == true)
             {
                 var _order = privateClient.DeserializeObject<BPlaceOrderItem>(_response.Content);
+                if (_order != null)
                 {
                     _order.orderType = OrderType.Market;
 
                     _result.result = _order;
+                    _result.SetSuccess();
                 }
-                _result.SetSuccess();
             }
             else
             {
@@ -639,10 +655,13 @@ namespace CCXT.Collector.BitMEX.Private
             if (_response.IsSuccessful == true)
             {
                 var _orders = privateClient.DeserializeObject<List<BMyOrderItem>>(_response.Content);
+                if (_orders != null)
                 {
+                    _orders.ForEach(o => o.amount = o.quantity * o.price);
+
                     _result.result = _orders.ToList<IMyOrderItem>();
+                    _result.SetSuccess();
                 }
-                _result.SetSuccess();
             }
             else
             {
@@ -656,18 +675,17 @@ namespace CCXT.Collector.BitMEX.Private
         /// <summary>
         /// Close a position
         /// </summary>
-        /// <param name="base_name">The type of trading base-currency of which information you want to query for.</param>
-        /// <param name="quote_name">The type of trading quote-currency of which information you want to query for.</param>
+        /// <param name="symbol"></param>
         /// <param name="orderType">The type of order is limit, market or position</param>
         /// <param name="price">price of coin</param>
         /// <returns></returns>
-        public async ValueTask<MyOrder> ClosePosition(string base_name, string quote_name, OrderType orderType, decimal price = 0.0m)
+        public async ValueTask<MyOrder> ClosePosition(string symbol, OrderType orderType, decimal price = 0.0m)
         {
-            var _result = new MyOrder(base_name, quote_name);
+            var _result = new MyOrder();
 
             var _params = new Dictionary<string, object>();
             {
-                _params.Add("symbol", $"{base_name}{quote_name}");
+                _params.Add("symbol", symbol);
                 _params.Add("execInst", "Close");
 
                 if (orderType == OrderType.Limit)
@@ -681,10 +699,11 @@ namespace CCXT.Collector.BitMEX.Private
             if (_response.IsSuccessful == true)
             {
                 var _order = privateClient.DeserializeObject<BMyOrderItem>(_response.Content);
+                if (_order != null)
                 {
                     _result.result = _order;
+                    _result.SetSuccess();
                 }
-                _result.SetSuccess();
             }
             else
             {
@@ -698,16 +717,13 @@ namespace CCXT.Collector.BitMEX.Private
         /// <summary>
         /// Update an order.
         /// </summary>
-        /// <param name="base_name">The type of trading base-currency of which information you want to query for.</param>
-        /// <param name="quote_name">The type of trading quote-currency of which information you want to query for.</param>
         /// <param name="order_id">Order number registered for sale or purchase</param>
         /// <param name="quantity">amount of coin</param>
         /// <param name="price">price of coin</param>
-        /// <param name="sideType">type of buy(bid) or sell(ask)</param>
         /// <returns></returns>
-        public async ValueTask<MyOrder> UpdateOrder(string base_name, string quote_name, string order_id, decimal quantity, decimal price, SideType sideType)
+        public async ValueTask<MyOrder> UpdateOrder(string order_id, decimal quantity, decimal price)
         {
-            var _result = new MyOrder(base_name, quote_name);
+            var _result = new MyOrder();
 
             var _params = new Dictionary<string, object>();
             {
@@ -723,10 +739,11 @@ namespace CCXT.Collector.BitMEX.Private
             if (_response.IsSuccessful == true)
             {
                 var _order = privateClient.DeserializeObject<BPlaceOrderItem>(_response.Content);
+                if (_order != null)
                 {
                     _result.result = _order;
+                    _result.SetSuccess();
                 }
-                _result.SetSuccess();
             }
             else
             {
@@ -740,16 +757,11 @@ namespace CCXT.Collector.BitMEX.Private
         /// <summary>
         /// Cancel an order.
         /// </summary>
-        /// <param name="base_name">The type of trading base-currency of which information you want to query for.</param>
-        /// <param name="quote_name">The type of trading quote-currency of which information you want to query for.</param>
         /// <param name="order_id">Order number registered for sale or purchase</param>
-        /// <param name="quantity">amount of coin</param>
-        /// <param name="price">price of coin</param>
-        /// <param name="sideType">type of buy(bid) or sell(ask)</param>
         /// <returns></returns>
-        public async ValueTask<MyOrder> CancelOrder(string base_name, string quote_name, string order_id, decimal quantity, decimal price, SideType sideType)
+        public async ValueTask<MyOrder> CancelOrder(string order_id)
         {
-            var _result = new MyOrder(base_name, quote_name);
+            var _result = new MyOrder();
 
             var _params = new Dictionary<string, object>();
             {
@@ -763,10 +775,11 @@ namespace CCXT.Collector.BitMEX.Private
             if (_response.IsSuccessful == true)
             {
                 var _orders = privateClient.DeserializeObject<List<BPlaceOrderItem>>(_response.Content);
+                if (_orders != null)
                 {
                     _result.result = _orders.FirstOrDefault();
+                    _result.SetSuccess();
                 }
-                _result.SetSuccess();
             }
             else
             {
@@ -780,13 +793,11 @@ namespace CCXT.Collector.BitMEX.Private
         /// <summary>
         /// Cancel orders. Send multiple order IDs to cancel in bulk.
         /// </summary>
-        /// <param name="base_name">The type of trading base-currency of which information you want to query for.</param>
-        /// <param name="quote_name">The type of trading quote-currency of which information you want to query for.</param>
         /// <param name="order_ids"></param>
         /// <returns></returns>
-        public async ValueTask<MyOrders> CancelOrders(string base_name, string quote_name, string[] order_ids)
+        public async ValueTask<MyOrders> CancelOrders(string[] order_ids)
         {
-            var _result = new MyOrders(base_name, quote_name);
+            var _result = new MyOrders();
 
             var _params = new Dictionary<string, object>();
             {
@@ -800,10 +811,11 @@ namespace CCXT.Collector.BitMEX.Private
             if (_response.IsSuccessful == true)
             {
                 var _orders = privateClient.DeserializeObject<List<BPlaceOrderItem>>(_response.Content);
+                if (_orders != null)
                 {
                     _result.result.AddRange(_orders);
+                    _result.SetSuccess();
                 }
-                _result.SetSuccess();
             }
             else
             {
@@ -829,10 +841,11 @@ namespace CCXT.Collector.BitMEX.Private
             if (_response.IsSuccessful == true)
             {
                 var _orders = privateClient.DeserializeObject<List<BPlaceOrderItem>>(_response.Content);
+                if (_orders != null)
                 {
                     _result.result.AddRange(_orders);
+                    _result.SetSuccess();
                 }
-                _result.SetSuccess();
             }
             else
             {

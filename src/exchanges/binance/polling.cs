@@ -69,7 +69,7 @@ namespace CCXT.Collector.Binance
         {
             BNLogger.WriteO($"polling service start: symbol => {symbol}...");
 
-            if (KConfig.BinanceUsePollingTicker == false)
+            if (KConfig.UsePollingTicker == false)
             {
                 PollingTasks.Add(Task.Run(async () =>
                 {
@@ -171,7 +171,7 @@ namespace CCXT.Collector.Binance
         {
             BNLogger.WriteO($"bpolling service start...");
 
-            if (KConfig.BinanceUsePollingTicker == true)
+            if (KConfig.UsePollingTicker == true)
             {
                 PollingTasks.Add(Task.Run(async () =>
                 {
