@@ -208,6 +208,15 @@ namespace CCXT.Collector.BitMEX.Private
         /// <summary>
         ///
         /// </summary>
+        public string orderID
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        ///
+        /// </summary>
         public string symbol
         {
             get;

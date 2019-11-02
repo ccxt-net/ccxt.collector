@@ -146,7 +146,7 @@ namespace CCXT.Collector.BitMEX.Private
         /// Once markPrice reaches this price, this position will be liquidated.
         /// </summary>
         [JsonProperty(PropertyName = "LiquidationPrice")]
-        public override decimal liqPrice
+        public override decimal liquidationPrice
         {
             get;
             set;
@@ -860,6 +860,16 @@ namespace CCXT.Collector.BitMEX.Private
         /// </summary>
         [JsonProperty(PropertyName = "avgCostPrice")]
         public decimal avgCostPrice
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        ///
+        /// </summary>
+        [JsonProperty(PropertyName = "avgEntryPrice")]
+        public decimal avgEntryPrice
         {
             get;
             set;

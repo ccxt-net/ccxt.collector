@@ -139,7 +139,8 @@ namespace CCXT.Collector.BitMEX.Private
             var _params = new Dictionary<string, object>();
             {
                 _params.Add("currency", quote_name);
-                _params.Add("count", count);
+                if (count > 0)
+                    _params.Add("count", count);
                 _params.Add("start", start);
             }
 
@@ -304,7 +305,8 @@ namespace CCXT.Collector.BitMEX.Private
             var _params = new Dictionary<string, object>();
             {
                 _params.Add("symbol", quote_name);
-                _params.Add("count", count);
+                if (count > 0)
+                    _params.Add("count", count);
                 _params.Add("start", start);
                 _params.Add("reverse", true);
                 _params.Add("filter", new CArgument
@@ -360,7 +362,8 @@ namespace CCXT.Collector.BitMEX.Private
 
             var _params = new Dictionary<string, object>();
             {
-                _params.Add("count", count);
+                if (count > 0)
+                    _params.Add("count", count);
                 _params.Add("start", start);
                 _params.Add("reverse", true);
                 _params.Add("filter", new CArgument
@@ -416,7 +419,8 @@ namespace CCXT.Collector.BitMEX.Private
 
             var _params = new Dictionary<string, object>();
             {
-                _params.Add("count", count);
+                if (count > 0)
+                    _params.Add("count", count);
                 _params.Add("filter", new CArgument
                 {
                     isJson = true,
@@ -514,7 +518,8 @@ namespace CCXT.Collector.BitMEX.Private
             var _params = new Dictionary<string, object>();
             {
                 _params.Add("symbol", symbol);
-                _params.Add("count", count);
+                if (count > 0)
+                    _params.Add("count", count);
                 _params.Add("reverse", true);
             }
 
@@ -635,7 +640,7 @@ namespace CCXT.Collector.BitMEX.Private
         }
 
         /// <summary>
-        /// Create a new limit bulk order.
+        /// Create multiple new orders for the same symbol.
         /// </summary>
         /// <param name="orders"></param>
         /// <returns></returns>
@@ -715,7 +720,7 @@ namespace CCXT.Collector.BitMEX.Private
         }
 
         /// <summary>
-        /// Update an order.
+        /// Amend the quantity or price of an open order.
         /// </summary>
         /// <param name="order_id">Order number registered for sale or purchase</param>
         /// <param name="quantity">amount of coin</param>
@@ -742,6 +747,44 @@ namespace CCXT.Collector.BitMEX.Private
                 if (_order != null)
                 {
                     _result.result = _order;
+                    _result.SetSuccess();
+                }
+            }
+            else
+            {
+                var _message = privateClient.GetResponseMessage(_response);
+                _result.SetFailure(_message.message);
+            }
+
+            return _result;
+        }
+
+        /// <summary>
+        /// Amend multiple orders for the same symbol.
+        /// </summary>
+        /// <param name="order_id">Order number registered for sale or purchase</param>
+        /// <param name="quantity">amount of coin</param>
+        /// <param name="price">price of coin</param>
+        /// <returns></returns>
+        public async ValueTask<MyOrders> UpdateBulkOrder(List<BBulkOrderItem> orders)
+        {
+            var _result = new MyOrders();
+
+            var _params = new Dictionary<string, object>();
+            {
+                _params.Add("orders", orders);
+            }
+
+            var _response = await privateClient.CallApiPut2Async("/api/v1/order/bulk", _params);
+#if DEBUG
+            _result.rawJson = _response.Content;
+#endif
+            if (_response.IsSuccessful == true)
+            {
+                var _orders = privateClient.DeserializeObject<List<BPlaceOrderItem>>(_response.Content);
+                if (_orders != null)
+                {
+                    _result.result = _orders.ToList<IMyOrderItem>();
                     _result.SetSuccess();
                 }
             }
