@@ -1,8 +1,10 @@
 ﻿using OdinSdk.BaseLib.Coin;
 using OdinSdk.BaseLib.Coin.Public;
 using OdinSdk.BaseLib.Coin.Types;
+using OdinSdk.BaseLib.Configuration;
 using OdinSdk.BaseLib.Converter;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace CCXT.Collector.BitMEX.Public
@@ -169,6 +171,61 @@ namespace CCXT.Collector.BitMEX.Public
                 }
 
                 _result.SetResult(_json_result);
+            }
+
+            return _result;
+        }
+
+        /// <summary>
+        /// Fetch pending or registered order details
+        /// </summary>
+        /// <param name="symbol"></param>
+        /// <param name="count">maximum number of items (optional): default 25</param>
+        /// <returns></returns>
+        public async Task<OrderBooks> GetOrderBooks(string symbol, int count = 25)
+        {
+            var _result = new OrderBooks();
+
+            var _params = new Dictionary<string, object>();
+            {
+                _params.Add("symbol", symbol);
+                _params.Add("depth", count);
+            }
+
+            var _response = await publicClient.CallApiGet2Async("/api/v1/orderBook/L2", _params);
+#if DEBUG
+            _result.rawJson = _response.Content;
+#endif
+            if (_response.IsSuccessful == true)
+            {
+                var _orderbooks = publicClient.DeserializeObject<List<BOrderBookItem>>(_response.Content);
+                if (_orderbooks != null)
+                {
+                    _result.result.asks = new List<OrderBookItem>();
+                    _result.result.bids = new List<OrderBookItem>();
+
+                    foreach (var _o in _orderbooks)
+                    {
+                        _o.amount = _o.quantity * _o.price;
+                        _o.count = 1;
+
+                        if (_o.side.ToLower() == "sell")
+                            _result.result.asks.Add(_o);
+                        else
+                            _result.result.bids.Add(_o);
+                    }
+
+                    _result.result.symbol = symbol;
+                    _result.result.timestamp = CUnixTime.NowMilli;
+                    _result.result.nonce = CUnixTime.Now;
+
+                    _result.SetSuccess();
+                }
+            }
+            else
+            {
+                var _message = publicClient.GetResponseMessage(_response);
+                _result.SetFailure(_message.message);
             }
 
             return _result;

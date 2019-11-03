@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using OdinSdk.BaseLib.Coin.Public;
 using System.Collections.Generic;
 
 namespace CCXT.Collector.BitMEX.Public
@@ -6,7 +7,59 @@ namespace CCXT.Collector.BitMEX.Public
     /// <summary>
     ///
     /// </summary>
-    public class BOrderBookItem
+    public class BOrderBookItem : OdinSdk.BaseLib.Coin.Public.OrderBookItem, IOrderBookItem
+    {
+        /// <summary>
+        ///
+        /// </summary>
+        public string symbol
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        ///
+        /// </summary>
+        public long id
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        ///
+        /// </summary>
+        public string side
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        ///
+        /// </summary>
+        [JsonProperty(PropertyName = "size")]
+        public override decimal quantity
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        ///
+        /// </summary>
+        public override decimal price
+        {
+            get;
+            set;
+        }
+    }
+
+    /// <summary>
+    ///
+    /// </summary>
+    public class BOrderBookData
     {
         /// <summary>
         /// Symbol
@@ -54,30 +107,6 @@ namespace CCXT.Collector.BitMEX.Public
         }
     }
 
-    /// <summary>
-    ///
-    /// </summary>
-    public class BOrderBook
-    {
-        /// <summary>
-        ///
-        /// </summary>
-        public virtual string stream
-        {
-            get;
-            set;
-        }
-
-        /// <summary>
-        ///
-        /// </summary>
-        public virtual BOrderBookItem data
-        {
-            get;
-            set;
-        }
-    }
-
     //{
     //    "lastUpdateId": 482182248,
     //    "bids": [
@@ -119,7 +148,7 @@ namespace CCXT.Collector.BitMEX.Public
     /// <summary>
     ///
     /// </summary>
-    public class BAOrderBookData : BOrderBookItem
+    public class BAOrderBookData : BOrderBookData
     {
         /// <summary>
         ///
@@ -187,7 +216,7 @@ namespace CCXT.Collector.BitMEX.Public
     /// <summary>
     ///
     /// </summary>
-    public class BWOrderBookData : BOrderBookItem
+    public class BWOrderBookData : BOrderBookData
     {
         /// <summary>
         ///
