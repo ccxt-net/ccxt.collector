@@ -51,15 +51,15 @@ namespace CCXT.Collector.BitMEX.Private
         /// <summary>
         /// Get a deposit address.
         /// </summary>
-        /// <param name="quote_name">The type of trading quote-currency of which information you want to query for.</param>        
+        /// <param name="currency"></param>        
         /// <returns></returns>
-        public async ValueTask<Address> GetDepositAddress(string quote_name)
+        public async ValueTask<Address> GetDepositAddress(string currency)
         {
             var _result = new Address();
 
             var _params = new Dictionary<string, object>();
             {
-                _params.Add("currency", quote_name);
+                _params.Add("currency", currency);
             }
 
             var _response = await privateClient.CallApiGet2Async("/api/v1/user/depositAddress", _params);
@@ -68,7 +68,7 @@ namespace CCXT.Collector.BitMEX.Private
 #endif
             if (_response.IsSuccessful == true)
             {
-                _result.result.currency = quote_name;
+                _result.result.currency = currency;
                 _result.result.address = _response.Content;
                 _result.SetSuccess();
             }
@@ -84,17 +84,17 @@ namespace CCXT.Collector.BitMEX.Private
         /// <summary>
         /// Request a withdrawal to an external wallet.
         /// </summary>
-        /// <param name="quote_name">The type of trading quote-currency of which information you want to query for.</param>
+        /// <param name="currency"></param>
         /// <param name="address">coin address for send</param>
         /// <param name="quantity">amount of coin</param>
         /// <returns></returns>
-        public async ValueTask<Transfer> RequestWithdrawal(string quote_name, string address, decimal quantity)
+        public async ValueTask<Transfer> RequestWithdrawal(string currency, string address, decimal quantity)
         {
             var _result = new Transfer();
 
             var _params = new Dictionary<string, object>();
             {
-                _params.Add("currency", quote_name);
+                _params.Add("currency", currency);
                 _params.Add("address", address);
                 _params.Add("amount", quantity);
             }
@@ -128,17 +128,17 @@ namespace CCXT.Collector.BitMEX.Private
         /// <summary>
         /// Get a history of all of your wallet transactions (deposits, withdrawals, PNL).
         /// </summary>
-        /// <param name="quote_name">The type of trading quote-currency of which information you want to query for.</param>
+        /// <param name="currency"></param>
         /// <param name="count">Number of results to fetch.</param>
         /// <param name="start">Starting point for results.</param>
         /// <returns></returns>
-        public async ValueTask<Transfers> GetWalletHistory(string quote_name, long count, long start = 0)
+        public async ValueTask<Transfers> GetWalletHistory(string currency, long count, long start = 0)
         {
             var _result = new Transfers();
 
             var _params = new Dictionary<string, object>();
             {
-                _params.Add("currency", quote_name);
+                _params.Add("currency", currency);
                 if (count > 0)
                     _params.Add("count", count);
                 _params.Add("start", start);
@@ -294,17 +294,17 @@ namespace CCXT.Collector.BitMEX.Private
         /// <summary>
         /// To get open orders on a symbol.
         /// </summary>
-        /// <param name="quote_name">The type of trading quote-currency of which information you want to query for.</param>        
+        /// <param name="symbol">Instrument symbol. Send a bare series (e.g. XBT) to get data for the nearest expiring contract in that series.</param>        
         /// <param name="count">Number of results to fetch.</param>
         /// <param name="start">Starting point for results.</param>
         /// <returns></returns>
-        public async ValueTask<MyOrders> GetOrders(string quote_name, long count, long start = 0)
+        public async ValueTask<MyOrders> GetOrders(string symbol, long count, long start = 0)
         {
             var _result = new MyOrders();
 
             var _params = new Dictionary<string, object>();
             {
-                _params.Add("symbol", quote_name);
+                _params.Add("symbol", symbol);
                 if (count > 0)
                     _params.Add("count", count);
                 _params.Add("start", start);
@@ -410,7 +410,7 @@ namespace CCXT.Collector.BitMEX.Private
         /// <summary>
         /// To get open positions on a symbol.
         /// </summary>
-        /// <param name="symbol"></param>
+        /// <param name="symbol">The contract for this position.</param>
         /// <param name="count">Number of results to fetch.</param>
         /// <returns></returns>
         public async ValueTask<MyPositions> GetPositions(string symbol, long count)
@@ -508,7 +508,7 @@ namespace CCXT.Collector.BitMEX.Private
         /// <summary>
         /// Get all balance-affecting executions. This includes each trade, insurance charge, and settlement.
         /// </summary>
-        /// <param name="symbol"></param>
+        /// <param name="symbol">Instrument symbol. Send a bare series (e.g. XBT) to get data for the nearest expiring contract in that series.</param>
         /// <param name="count">maximum number of items</param>
         /// <returns></returns>
         public async ValueTask<MyTrades> GetTrades(string symbol, int count)
@@ -551,7 +551,7 @@ namespace CCXT.Collector.BitMEX.Private
         /// <summary>
         /// Create a new limit order.
         /// </summary>
-        /// <param name="symbol"></param>
+        /// <param name="symbol">Instrument symbol. e.g. 'XBTUSD'.</param>
         /// <param name="quantity">amount of coin</param>
         /// <param name="price">price of coin</param>
         /// <param name="sideType">type of buy(bid) or sell(ask)</param>
@@ -599,7 +599,7 @@ namespace CCXT.Collector.BitMEX.Private
         /// <summary>
         /// Create a new market order.
         /// </summary>
-        /// <param name="symbol"></param>
+        /// <param name="symbol">Instrument symbol. e.g. 'XBTUSD'.</param>
         /// <param name="quantity">amount of coin</param>
         /// <param name="sideType">type of buy(bid) or sell(ask)</param>
         /// <returns></returns>
@@ -680,7 +680,7 @@ namespace CCXT.Collector.BitMEX.Private
         /// <summary>
         /// Close a position
         /// </summary>
-        /// <param name="symbol"></param>
+        /// <param name="symbol">Instrument symbol. e.g. 'XBTUSD'.</param>
         /// <param name="orderType">The type of order is limit, market or position</param>
         /// <param name="price">price of coin</param>
         /// <returns></returns>
