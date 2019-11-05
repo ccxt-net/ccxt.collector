@@ -209,7 +209,7 @@ namespace CCXT.Collector.BitMEX.Private
                 if (_balance != null)
                 {
                     _balance.used = _balance.total - _balance.free;
-                    
+
                     _result.result = _balance;
                     _result.SetSuccess();
                 }
@@ -491,7 +491,7 @@ namespace CCXT.Collector.BitMEX.Private
                         _p.quantity = Math.Abs(_p.quantity);
                         _p.amount = _p.price * _p.quantity;
                     }
-                    
+
                     _result.result = _positions.ToList<IMyPositionItem>();
                     _result.SetSuccess();
                 }
@@ -887,6 +887,44 @@ namespace CCXT.Collector.BitMEX.Private
                 if (_orders != null)
                 {
                     _result.result.AddRange(_orders);
+                    _result.SetSuccess();
+                }
+            }
+            else
+            {
+                var _message = privateClient.GetResponseMessage(_response);
+                _result.SetFailure(_message.message);
+            }
+
+            return _result;
+        }
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="symbol">Symbol of position to adjust.</param>
+        /// <param name="leverage">Leverage value. Send a number between 0.01 and 100 to enable isolated margin with a fixed leverage. Send 0 to enable cross margin.</param>
+        /// <returns></returns>
+        public async ValueTask<MyPosition> ChooseLeverage(string symbol, decimal leverage)
+        {
+            var _result = new MyPosition();
+
+            var _params = new Dictionary<string, object>();
+            {
+                _params.Add("symbol", symbol);
+                _params.Add("leverage", leverage);
+            }
+
+            var _response = await privateClient.CallApiPost2Async("/api/v1/position/leverage", _params);
+#if DEBUG
+            _result.rawJson = _response.Content;
+#endif
+            if (_response.IsSuccessful == true)
+            {
+                var _position = privateClient.DeserializeObject<BMyPositionItem>(_response.Content);
+                if (_position != null)
+                {
+                    _result.result = _position;
                     _result.SetSuccess();
                 }
             }
