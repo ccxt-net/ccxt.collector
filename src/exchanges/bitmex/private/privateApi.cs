@@ -555,8 +555,9 @@ namespace CCXT.Collector.BitMEX.Private
         /// <param name="quantity">amount of coin</param>
         /// <param name="price">price of coin</param>
         /// <param name="sideType">type of buy(bid) or sell(ask)</param>
+        /// <param name="execInst">Optional execution instructions.</param>
         /// <returns></returns>
-        public async ValueTask<MyOrder> CreateLimitOrder(string symbol, decimal quantity, decimal price, SideType sideType)
+        public async ValueTask<MyOrder> CreateLimitOrder(string symbol, decimal quantity, decimal price, SideType sideType, string execInst = "")
         {
             var _result = new MyOrder();
 
@@ -567,6 +568,8 @@ namespace CCXT.Collector.BitMEX.Private
                 _params.Add("ordType", "Limit");
                 _params.Add("orderQty", quantity);
                 _params.Add("price", price);
+                if (String.IsNullOrEmpty(execInst) == false)
+                    _params.Add("execInst", execInst);
             }
 
             var _response = await privateClient.CallApiPost2Async("/api/v1/order", _params);
@@ -602,8 +605,9 @@ namespace CCXT.Collector.BitMEX.Private
         /// <param name="symbol">Instrument symbol. e.g. 'XBTUSD'.</param>
         /// <param name="quantity">amount of coin</param>
         /// <param name="sideType">type of buy(bid) or sell(ask)</param>
+        /// <param name="execInst">Optional execution instructions.</param>
         /// <returns></returns>
-        public async ValueTask<MyOrder> CreateMarketOrder(string symbol, decimal quantity, SideType sideType)
+        public async ValueTask<MyOrder> CreateMarketOrder(string symbol, decimal quantity, SideType sideType, string execInst = "")
         {
             var _result = new MyOrder();
 
@@ -613,6 +617,8 @@ namespace CCXT.Collector.BitMEX.Private
                 _params.Add("side", sideType == SideType.Bid ? "Buy" : "Sell");
                 _params.Add("ordType", "Market");
                 _params.Add("orderQty", quantity);
+                if (String.IsNullOrEmpty(execInst) == false)
+                    _params.Add("execInst", execInst);
             }
 
             var _response = await privateClient.CallApiPost2Async("/api/v1/order", _params);
@@ -725,8 +731,9 @@ namespace CCXT.Collector.BitMEX.Private
         /// <param name="order_id">Order number registered for sale or purchase</param>
         /// <param name="quantity">amount of coin</param>
         /// <param name="price">price of coin</param>
+        /// <param name="execInst">Optional execution instructions.</param>
         /// <returns></returns>
-        public async ValueTask<MyOrder> UpdateOrder(string order_id, decimal quantity, decimal price)
+        public async ValueTask<MyOrder> UpdateOrder(string order_id, decimal quantity, decimal price, string execInst = "")
         {
             var _result = new MyOrder();
 
@@ -735,6 +742,8 @@ namespace CCXT.Collector.BitMEX.Private
                 _params.Add("orderID", order_id);
                 _params.Add("orderQty", quantity);
                 _params.Add("price", price);
+                if (String.IsNullOrEmpty(execInst) == false)
+                    _params.Add("execInst", execInst);
             }
 
             var _response = await privateClient.CallApiPut2Async("/api/v1/order", _params);
