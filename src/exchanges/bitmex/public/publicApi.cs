@@ -230,5 +230,61 @@ namespace CCXT.Collector.BitMEX.Public
 
             return _result;
         }
+
+        /// <summary>
+        /// Fetch array of symbol name and OHLCVs data
+        /// </summary>
+        /// <param name="symbol">Instrument symbol.</param>
+        /// <param name="timeframe">Time interval to bucket by. Available options: [1m,5m,1h,1d].</param>
+        /// <param name="count">Number of results to fetch.</param>
+        /// <returns></returns>
+        public async Task<OHLCVs> GetOHLCVs(string symbol, string timeframe = "1h", int count = 12)
+        {
+            var _result = new OHLCVs();
+
+            var _params = new Dictionary<string, object>();
+            {
+                _params.Add("symbol", symbol);
+                _params.Add("binSize", timeframe);      // Time interval to bucket by. Available options: [1m,5m,1h,1d].
+                _params.Add("count", count);            // Number of results to fetch.
+                _params.Add("partial", false);          // If true, will send in-progress (incomplete) bins for the current time period.
+                _params.Add("reverse", true);           // If true, will sort results newest first.
+            }
+
+            var _response = await publicClient.CallApiGet2Async("/api/v1/trade/bucketed", _params);
+#if DEBUG
+            _result.rawJson = _response.Content;
+#endif
+            if (_response.IsSuccessful == true)
+            {
+                var _tickers = publicClient.DeserializeObject<List<BTickerItem>>(_response.Content);
+
+                _result.result.AddRange(
+                     _tickers
+                         .Select(x => new OHLCVItem
+                         {
+                             timestamp = x.timestamp,
+                             openPrice = x.openPrice,
+                             highPrice = x.highPrice,
+                             lowPrice = x.lowPrice,
+                             closePrice = x.closePrice,
+                             amount = x.quoteVolume,
+                             vwap = x.vwap,
+                             count = x.trades,
+                             volume = x.baseVolume
+                         })
+                         .OrderByDescending(o => o.timestamp)                         
+                     );
+
+                _result.SetSuccess();
+            }
+            else
+            {
+                var _message = publicClient.GetResponseMessage(_response);
+                _result.SetFailure(_message.message);
+            }
+
+            return _result;
+        }
     }
 }
