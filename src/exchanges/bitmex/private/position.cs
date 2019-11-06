@@ -43,7 +43,7 @@ namespace CCXT.Collector.BitMEX.Private
         /// <summary>
         ///
         /// </summary>
-        [JsonProperty(PropertyName = "Timestamp")]
+        [JsonProperty(PropertyName = "timestamp")]
         private DateTime timeValue
         {
             set
@@ -55,7 +55,7 @@ namespace CCXT.Collector.BitMEX.Private
         /// <summary>
         /// 1 / initMarginReq.
         /// </summary>
-        [JsonProperty(PropertyName = "Leverage")]
+        [JsonProperty(PropertyName = "leverage")]
         public decimal? leverage
         {
             get;
@@ -65,7 +65,7 @@ namespace CCXT.Collector.BitMEX.Private
         /// <summary>
         /// The current position amount in contracts.
         /// </summary>
-        [JsonProperty(PropertyName = "CurrentQty")]
+        [JsonProperty(PropertyName = "currentQty")]
         public override decimal quantity
         {
             get;
@@ -85,7 +85,7 @@ namespace CCXT.Collector.BitMEX.Private
         /// <summary>
         /// The mark price of the symbol in quoteCurrency.
         /// </summary>
-        [JsonProperty(PropertyName = "MarkPrice")]
+        [JsonProperty(PropertyName = "markPrice")]
         public decimal markPrice
         {
             get;
@@ -95,7 +95,7 @@ namespace CCXT.Collector.BitMEX.Private
         /// <summary>
         /// The currentQty at the mark price in the settlement currency of the symbol (currency).
         /// </summary>
-        [JsonProperty(PropertyName = "MarkValue")]
+        [JsonProperty(PropertyName = "markValue")]
         public decimal markValue
         {
             get;
@@ -105,7 +105,7 @@ namespace CCXT.Collector.BitMEX.Private
         /// <summary>
         /// unrealisedGrossPnl.
         /// </summary>
-        [JsonProperty(PropertyName = "UnrealisedPnl")]
+        [JsonProperty(PropertyName = "unrealisedPnl")]
         public decimal unrealisedPnl
         {
             get;
@@ -115,18 +115,8 @@ namespace CCXT.Collector.BitMEX.Private
         /// <summary>
         ///
         /// </summary>
-        [JsonProperty(PropertyName = "UnrealisedPnlPcnt")]
+        [JsonProperty(PropertyName = "unrealisedPnlPcnt")]
         public decimal unrealisedPnlPcnt
-        {
-            get;
-            set;
-        }
-
-        /// <summary>
-        /// AvgEntryPrice
-        /// </summary>
-        [JsonProperty(PropertyName = "AvgEntryPrice")]
-        public override decimal price
         {
             get;
             set;
@@ -135,7 +125,7 @@ namespace CCXT.Collector.BitMEX.Private
         /// <summary>
         ///
         /// </summary>
-        [JsonProperty(PropertyName = "BreakEvenPrice")]
+        [JsonProperty(PropertyName = "breakEvenPrice")]
         public decimal breakEvenPrice
         {
             get;
@@ -145,7 +135,7 @@ namespace CCXT.Collector.BitMEX.Private
         /// <summary>
         /// Once markPrice reaches this price, this position will be liquidated.
         /// </summary>
-        [JsonProperty(PropertyName = "LiquidationPrice")]
+        [JsonProperty(PropertyName = "liquidationPrice")]
         public override decimal liquidationPrice
         {
             get;
@@ -896,7 +886,7 @@ namespace CCXT.Collector.BitMEX.Private
         }
 
         /// <summary>
-        ///
+        /// The latest mark price for this contract.
         /// </summary>
         [JsonProperty(PropertyName = "lastPrice")]
         public decimal lastPrice
