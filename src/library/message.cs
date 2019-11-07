@@ -77,25 +77,7 @@
         /// <summary>
         ///
         /// </summary>
-        public object tag
-        {
-            get;
-            set;
-        }
-
-        /// <summary>
-        ///
-        /// </summary>
         public string json
-        {
-            get;
-            set;
-        }
-
-        /// <summary>
-        ///
-        /// </summary>
-        public object value
         {
             get;
             set;

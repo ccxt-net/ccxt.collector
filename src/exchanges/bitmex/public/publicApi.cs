@@ -3,6 +3,7 @@ using OdinSdk.BaseLib.Coin.Public;
 using OdinSdk.BaseLib.Coin.Types;
 using OdinSdk.BaseLib.Configuration;
 using OdinSdk.BaseLib.Converter;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -43,6 +44,14 @@ namespace CCXT.Collector.BitMEX.Public
 
                 return base.publicClient;
             }
+        }
+
+        public string GetWsUrl()
+        {
+            var _division = (IsLive == false ? "test." : "") + "public";
+
+            var _uri = new Uri(publicClient.ExchangeInfo.Urls.api[_division]);
+            return _uri.Host;
         }
 
         /// <summary>
