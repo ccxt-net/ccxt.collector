@@ -23,7 +23,7 @@
         /// <summary>
         ///
         /// </summary>
-        public virtual string exchange
+        public virtual string exchanges
         {
             get;
             set;
@@ -32,7 +32,7 @@
         /// <summary>
         ///
         /// </summary>
-        public virtual string symbol
+        public virtual string symbols
         {
             get;
             set;

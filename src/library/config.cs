@@ -69,7 +69,7 @@ namespace CCXT.Collector.Library
             get
             {
                 if (__binance_websocket_retry == null)
-                    __binance_websocket_retry = CConfig.GetAppInteger("websocket.retry.waiting.milliseconds");
+                    __binance_websocket_retry = CConfig.GetAppInteger("binance.websocket.retry.waiting.milliseconds");
                 return __binance_websocket_retry.Value;
             }
         }
@@ -98,7 +98,7 @@ namespace CCXT.Collector.Library
             get
             {
                 if (__bitmex_websocket_retry == null)
-                    __bitmex_websocket_retry = CConfig.GetAppInteger("websocket.retry.waiting.milliseconds");
+                    __bitmex_websocket_retry = CConfig.GetAppInteger("bitmex.websocket.retry.waiting.milliseconds");
                 return __bitmex_websocket_retry.Value;
             }
         }
@@ -114,7 +114,7 @@ namespace CCXT.Collector.Library
             get
             {
                 if (__upbit_websocket_retry == null)
-                    __upbit_websocket_retry = CConfig.GetAppInteger("websocket.retry.waiting.milliseconds");
+                    __upbit_websocket_retry = CConfig.GetAppInteger("upbit.websocket.retry.waiting.milliseconds");
                 return __upbit_websocket_retry.Value;
             }
         }
@@ -147,18 +147,18 @@ namespace CCXT.Collector.Library
         {
             get
             {
-                return CConfig.GetAppBoolean("use.auto.start");
+                return CConfig.GetAppBoolean("collector.auto.start");
             }
         }
 
         private static string __name_start_exchange = null;
 
-        public static string StartExchangeName
+        public static string StartExchangeNames
         {
             get
             {
                 if (__name_start_exchange == null)
-                    __name_start_exchange = CConfig.GetAppString("auto.start.exchange.name");
+                    __name_start_exchange = CConfig.GetAppString("auto.start.exchange.names");
                 return __name_start_exchange;
             }
         }

@@ -1,6 +1,7 @@
 ﻿using CCXT.Collector.BitMEX.Public;
 using CCXT.Collector.Library;
 using Newtonsoft.Json;
+using OdinSdk.BaseLib.Coin.Public;
 using System;
 using System.Collections.Generic;
 using System.Threading;
@@ -90,11 +91,11 @@ namespace CCXT.Collector.BitMEX
 
                 var _o_params = new Dictionary<string, object>();
                 {
-                    _o_params.Add("symbol", symbol.ToUpper());
-                    _o_params.Add("limit", 20);
+                    _o_params.Add("symbol", symbol);
+                    _o_params.Add("depth", 25);
                 }
 
-                var _o_request = CreateJsonRequest($"/depth", _o_params);
+                var _o_request = CreateJsonRequest($"/api/v1/orderBook/L2", _o_params);
 
                 while (true)
                 {
@@ -106,13 +107,30 @@ namespace CCXT.Collector.BitMEX
                         var _o_json_value = await RestExecuteAsync(_client, _o_request);
                         if (_o_json_value.IsSuccessful && _o_json_value.Content[0] == '{')
                         {
-                            var _o_json_data = JsonConvert.DeserializeObject<BAOrderBookData>(_o_json_value.Content);
-                            _o_json_data.symbol = symbol;
+                            var _orderbooks = JsonConvert.DeserializeObject<List<BOrderBookItem>>(_o_json_value.Content);
+                            
+                            var _asks = new List<OrderBookItem>();
+                            var _bids = new List<OrderBookItem>();
+
+                            foreach (var _o in _orderbooks)
+                            {
+                                _o.amount = _o.quantity * _o.price;
+                                _o.count = 1;
+
+                                if (_o.side.ToLower() == "sell")
+                                    _asks.Add(_o);
+                                else
+                                    _bids.Add(_o);
+                            }
 
                             var _orderbook = new BAOrderBook
                             {
                                 stream = "orderbook",
-                                data = _o_json_data
+                                data = new BAOrderBookData
+                                {
+                                    symbol = symbol,
+                                    
+                                }
                             };
 
                             var _o_json_content = JsonConvert.SerializeObject(_orderbook);

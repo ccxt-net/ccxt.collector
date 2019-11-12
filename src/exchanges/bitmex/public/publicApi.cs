@@ -191,7 +191,7 @@ namespace CCXT.Collector.BitMEX.Public
         /// <param name="symbol"></param>
         /// <param name="count">maximum number of items (optional): default 25</param>
         /// <returns></returns>
-        public async Task<OrderBooks> GetOrderBooks(string symbol, int count = 25)
+        public async ValueTask<OrderBooks> GetOrderBooks(string symbol, int count = 25)
         {
             var _result = new OrderBooks();
 
@@ -245,9 +245,9 @@ namespace CCXT.Collector.BitMEX.Public
         /// </summary>
         /// <param name="symbol">Instrument symbol.</param>
         /// <param name="timeframe">Time interval to bucket by. Available options: [1m,5m,1h,1d].</param>
-        /// <param name="count">Number of results to fetch.</param>
+        /// <param name="limits">Number of results to fetch.</param>
         /// <returns></returns>
-        public async Task<OHLCVs> GetOHLCVs(string symbol, string timeframe = "1h", int count = 12)
+        public async ValueTask<OHLCVs> GetOHLCVs(string symbol, string timeframe = "1h", int limits = 12)
         {
             var _result = new OHLCVs();
 
@@ -255,7 +255,7 @@ namespace CCXT.Collector.BitMEX.Public
             {
                 _params.Add("symbol", symbol);
                 _params.Add("binSize", timeframe);      // Time interval to bucket by. Available options: [1m,5m,1h,1d].
-                _params.Add("count", count);            // Number of results to fetch.
+                _params.Add("count", limits);            // Number of results to fetch.
                 _params.Add("partial", false);          // If true, will send in-progress (incomplete) bins for the current time period.
                 _params.Add("reverse", true);           // If true, will sort results newest first.
             }
@@ -282,8 +282,57 @@ namespace CCXT.Collector.BitMEX.Public
                              count = x.trades,
                              volume = x.baseVolume
                          })
-                         .OrderByDescending(o => o.timestamp)                         
+                         .OrderByDescending(o => o.timestamp)
                      );
+
+                _result.SetSuccess();
+            }
+            else
+            {
+                var _message = publicClient.GetResponseMessage(_response);
+                _result.SetFailure(_message.message);
+            }
+
+            return _result;
+        }
+
+        /// <summary>
+        /// Fetch array of recent trades data
+        /// </summary>
+        /// <param name="symbol">The type of trading base-currency of which information you want to query for.</param>
+        /// <param name="limits">maximum number of items (optional): default 25</param>
+        /// <returns></returns>
+        public async ValueTask<CompleteOrders> GetCompleteOrders(string symbol, int limits = 25)
+        {
+            var _result = new CompleteOrders();
+
+            var _params = new Dictionary<string, object>();
+            {
+                var _limits = limits <= 1 ? 1
+                            : limits <= 500 ? limits
+                            : 500;
+
+                _params.Add("symbol", symbol);
+                _params.Add("count", _limits);
+                _params.Add("reverse", true);
+            }
+
+            var _response = await publicClient.CallApiGet2Async("/api/v1/trade", _params);
+#if DEBUG
+            _result.rawJson = _response.Content;
+#endif
+            if (_response.IsSuccessful == true)
+            {
+                var _orders = publicClient.DeserializeObject<List<BCompleteOrderItem>>(_response.Content);
+
+                foreach (var _o in _orders)
+                {
+                    _o.orderType = OrderType.Limit;
+                    _o.fillType = FillType.Fill;
+
+                    _o.amount = _o.quantity * _o.price;
+                    _result.result.Add(_o);
+                }
 
                 _result.SetSuccess();
             }
