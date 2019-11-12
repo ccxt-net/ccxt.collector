@@ -41,7 +41,7 @@
         /// <summary>
         ///
         /// </summary>
-        public string type
+        public int type
         {
             get;
             set;
@@ -59,6 +59,15 @@
         /// <summary>
         ///
         /// </summary>
+        public string id
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        ///
+        /// </summary>
         public string topic
         {
             get;
@@ -68,7 +77,7 @@
         /// <summary>
         ///
         /// </summary>
-        public string table
+        public string payload
         {
             get;
             set;
@@ -77,7 +86,7 @@
         /// <summary>
         ///
         /// </summary>
-        public string json
+        public string table
         {
             get;
             set;

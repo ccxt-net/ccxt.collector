@@ -65,7 +65,7 @@ namespace CCXT.Collector.Upbit
                         {
                             if (_message.stream == "trade")
                             {
-                                var _wt = JsonConvert.DeserializeObject<UWCompleteOrderItem>(_message.json);
+                                var _wt = JsonConvert.DeserializeObject<UWCompleteOrderItem>(_message.payload);
 
                                 var _trades = new SCompleteOrders
                                 {
@@ -94,7 +94,7 @@ namespace CCXT.Collector.Upbit
                             }
                             else if (_message.stream == "orderbook")
                             {
-                                var _w_book_data = JsonConvert.DeserializeObject<UWOrderBook>(_message.json);
+                                var _w_book_data = JsonConvert.DeserializeObject<UWOrderBook>(_message.payload);
 
                                 var _orderbook = new SOrderBook
                                 {
@@ -112,7 +112,7 @@ namespace CCXT.Collector.Upbit
                         {
                             if (_message.stream == "trade")
                             {
-                                var _a_trade_data = JsonConvert.DeserializeObject<List<UACompleteOrderItem>>(_message.json);
+                                var _a_trade_data = JsonConvert.DeserializeObject<List<UACompleteOrderItem>>(_message.payload);
 
                                 var _trades = new SCompleteOrders
                                 {
@@ -139,7 +139,7 @@ namespace CCXT.Collector.Upbit
                             }
                             else if (_message.stream == "orderbook")
                             {
-                                var _a_book_data = JsonConvert.DeserializeObject<List<UAOrderBook>>(_message.json);
+                                var _a_book_data = JsonConvert.DeserializeObject<List<UAOrderBook>>(_message.payload);
 
                                 var _orderbook = new SOrderBook
                                 {
@@ -154,7 +154,7 @@ namespace CCXT.Collector.Upbit
                             }
                             else if (_message.stream == "ticker")
                             {
-                                var _a_ticker_data = JsonConvert.DeserializeObject<List<UAOrderBook>>(_message.json);
+                                var _a_ticker_data = JsonConvert.DeserializeObject<List<UAOrderBook>>(_message.payload);
 
                                 await publishTicker(new STickers
                                 {
@@ -186,7 +186,7 @@ namespace CCXT.Collector.Upbit
                         }
 #if DEBUG
                         else
-                            UPLogger.WriteO(_message.json);
+                            UPLogger.WriteO(_message.payload);
 #endif
                         if (tokenSource.IsCancellationRequested == true)
                             break;

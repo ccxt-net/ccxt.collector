@@ -68,7 +68,7 @@ namespace CCXT.OCollector
 
                 if (KConfig.CConfig.IsWindows == false)
                 {
-                    MainTasks.Add((new BooktickerQ()).Start(MainTokenSource));
+                    MainTasks.Add((new TickerQ()).Start(MainTokenSource));
                     MainTasks.Add((new OrderbookQ()).Start(MainTokenSource));
 
                     MainTasks.Add((new LoggerQ()).Start(MainTokenSource));
@@ -80,7 +80,7 @@ namespace CCXT.OCollector
                 }
                 else
                 {
-                    MainTasks.Add((new BooktickerQ()).Start(MainTokenSource));
+                    MainTasks.Add((new TickerQ()).Start(MainTokenSource));
                     MainTasks.Add((new OrderbookQ()).Start(MainTokenSource));
 
                     MainTasks.Add((new LoggerQ()).Start(MainTokenSource));

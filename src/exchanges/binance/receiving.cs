@@ -113,7 +113,7 @@ namespace CCXT.Collector.Binance
                             }
                             else
                             {
-                                await SendAsync(tokenSource, _cws, _message.json);
+                                await SendAsync(tokenSource, _cws, _message.payload);
                             }
                         }
                         catch (TaskCanceledException)
@@ -191,7 +191,7 @@ namespace CCXT.Collector.Binance
                                 { 
                                     command = "WS", 
                                     stream = _stream,
-                                    json = _json 
+                                    payload = _json 
                                 });
                             }
                             else if (_result.MessageType == WebSocketMessageType.Binary)

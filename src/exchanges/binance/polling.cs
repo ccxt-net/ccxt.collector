@@ -120,7 +120,7 @@ namespace CCXT.Collector.Binance
                                     };
 
                                     var _o_json_content = JsonConvert.SerializeObject(_orderbook);
-                                    Processing.SendReceiveQ(new QMessage { command = "AP", json = _o_json_content });
+                                    Processing.SendReceiveQ(new QMessage { command = "AP", payload = _o_json_content });
                                 }
                                 else
                                 {
@@ -215,7 +215,7 @@ namespace CCXT.Collector.Binance
                                 };
 
                                 var _b_json_content = JsonConvert.SerializeObject(_tickers);
-                                Processing.SendReceiveQ(new QMessage { command = "AP", json = _b_json_content });
+                                Processing.SendReceiveQ(new QMessage { command = "AP", payload = _b_json_content });
                             }
                             else
                             {

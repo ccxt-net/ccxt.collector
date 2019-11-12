@@ -1,8 +1,11 @@
 ﻿using CCXT.Collector.BitMEX.Public;
 using CCXT.Collector.Library;
+using CCXT.Collector.Library.Types;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -58,17 +61,17 @@ namespace CCXT.Collector.BitMEX
                             continue;
                         }
 
-                        var _json_data = JsonConvert.DeserializeObject<QSelector>(_message.json);
+                        var _json_data = JsonConvert.DeserializeObject<QSelector>(_message.payload);
                         if (_message.command == "WS")
                         {
                             var _stream = _json_data.stream.Split('@');
                             if (_stream.Length > 1)
                             {
-                                if (_stream[1] == "aggTrade")
-                                {
-                                    var _trade = JsonConvert.DeserializeObject<BWTrade>(_message.json);
-                                    await mergeTradeItem(_trade.data);
-                                }
+                                //if (_stream[1] == "aggTrade")
+                                //{
+                                //    var _trade = JsonConvert.DeserializeObject<BWTrade>(_message.json);
+                                //    await mergeTradeItem(_trade.data);
+                                //}
                                 //else if (_stream[1] == "depth")
                                 //{
                                 //    var _orderbook = JsonConvert.DeserializeObject<BWOrderBook>(_message.json);
@@ -80,22 +83,54 @@ namespace CCXT.Collector.BitMEX
                         {
                             if (_json_data.stream == "trade")
                             {
-                                var _trades = JsonConvert.DeserializeObject<BATrade>(_message.json);
+                                var _a_trade_data = JsonConvert.DeserializeObject<List<BCompleteOrderItem>>(_message.payload);
+
+                                var _trades = new SCompleteOrders
+                                {
+                                    exchange = _message.exchange,
+                                    stream = _message.stream,
+                                    symbol = _message.symbol,
+                                    sequentialId = _a_trade_data.Max(t => t.timestamp),
+                                    result = _a_trade_data.Select(t =>
+                                    {
+                                        return new SCompleteOrderItem
+                                        {
+                                            timestamp = t.timestamp,
+                                            sideType = t.sideType,
+                                            price = t.price,
+                                            quantity = t.quantity
+                                        };
+                                    })
+                                    .ToList<ISCompleteOrderItem>()
+                                };
+
+                                _trades.SetSuccess();
+
                                 await mergeTradeItems(_trades);
                             }
                             else if (_json_data.stream == "orderbook")
                             {
-                                var _orderbook = JsonConvert.DeserializeObject<BAOrderBook>(_message.json);
-                                await mergeOrderbook(_orderbook);
+                                var _a_book_data = JsonConvert.DeserializeObject<BOrderBook>(_message.payload);
+
+                                var _orderbook = new SOrderBook
+                                {
+                                    timestamp = _a_book_data.data.timestamp,
+                                    askSumQty = _a_book_data.data.askSumQty,
+                                    bidSumQty = _a_book_data.data.bidSumQty,
+                                    asks = _a_book_data.data.asks,
+                                    bids = _a_book_data.data.bids
+                                };
+
+                                await mergeOrderbook(_orderbook, _message.exchange, _message.symbol);
                             }
                         }
                         else if (_message.command == "SS")
                         {
-                            await snapshotOrderbook(_message.exchange, _message.symbol);
+                            await snapshotOrderbook(_message.exchange);
                         }
 #if DEBUG
                         else
-                            BMLogger.WriteO(_message.json);
+                            BMLogger.WriteO(_message.payload);
 #endif
                         if (tokenSource.IsCancellationRequested == true)
                             break;

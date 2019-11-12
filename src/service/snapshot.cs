@@ -16,7 +16,7 @@ namespace CCXT.Collector.Service
     public class SnapshotQ : FactoryX
     {
         private static string __last_exchanges = "";
-        private static string __last_symbols = "";
+        //private static string __last_symbols = "";
 
         private static CancellationTokenSource __ss_token_source;
 
@@ -65,81 +65,86 @@ namespace CCXT.Collector.Service
             SSTokenSource = null;
         }
 
-        private async Task StartNewSymbol(string exchanges, string symbols)
+        private async Task StartNewExchanges(string exchanges)
         {
             __change_symbol_flag = true;
 
             await CancelSnapshot();
 
-            if (String.IsNullOrEmpty(__last_symbols) == false)
-                LoggerQ.WriteO($"snapshot stopped: exchanges: {__last_exchanges}, symbol => {__last_symbols}");
-
-            var _symbols = symbols.Split(';');
+            if (String.IsNullOrEmpty(__last_exchanges) == false)
+                LoggerQ.WriteO($"snapshot stopped: exchanges: {__last_exchanges}");
 
             foreach (var _exchange in exchanges.Split(';'))
             {
-                if (_exchange == UPLogger.exchange_name)
-                {
-                    if (KConfig.UsePollingTicker == false)
-                    {
-                        foreach (var _s in _symbols)
-                        {
-                            if (String.IsNullOrEmpty(_s) == true)
-                                continue;
-
-                            SnapshotTasks.Add((new Upbit.WebSocket()).Start(SSTokenSource, _s));
-                            SnapshotTasks.Add((new Upbit.Polling()).OStart(SSTokenSource, _s));
-                        }
-                    }
-                    else
-                        SnapshotTasks.Add((new Upbit.Polling()).BStart(SSTokenSource, _symbols));
-
-                    SnapshotTasks.Add((new Upbit.Processing()).Start(SSTokenSource));
-                }
-                else if (_exchange == BNLogger.exchange_name)
-                {
-                    if (KConfig.UsePollingTicker == false)
-                    {
-                        foreach (var _s in _symbols)
-                        {
-                            if (String.IsNullOrEmpty(_s) == true)
-                                continue;
-
-                            SnapshotTasks.Add((new Binance.WebSocket()).Start(SSTokenSource, _s));
-                            SnapshotTasks.Add((new Binance.Polling()).OStart(SSTokenSource, _s));
-                        }
-                    }
-                    else
-                        SnapshotTasks.Add((new Binance.Polling()).BStart(SSTokenSource, _symbols));
-
-                    SnapshotTasks.Add((new Binance.Processing()).Start(SSTokenSource));
-                }
-                else if (_exchange == BMLogger.exchange_name)
-                {
-                    if (KConfig.UsePollingTicker == false)
-                    {
-                        foreach (var _s in _symbols)
-                        {
-                            if (String.IsNullOrEmpty(_s) == true)
-                                continue;
-
-                            SnapshotTasks.Add((new BitMEX.WebSocket()).Start(SSTokenSource, _s));
-                            SnapshotTasks.Add((new BitMEX.Polling()).Start(SSTokenSource, _s));
-                        }
-                    }
-                    else
-                        SnapshotTasks.Add((new BitMEX.Polling()).Start(SSTokenSource, _symbols[0]));
-
-                    SnapshotTasks.Add((new BitMEX.Processing()).Start(SSTokenSource));
-                }
+                var _symbols = KConfig.GetStartSymbolNames(_exchange.ToLower());
+                StartNewSymbols(_exchange, _symbols);
             }
 
             __last_exchanges = exchanges;
-            __last_symbols = symbols;
 
-            LoggerQ.WriteO($"snapshot restart: exchanges: {__last_exchanges}, symbol => {__last_symbols}");
+            LoggerQ.WriteO($"snapshot restart: exchanges: {__last_exchanges}");
 
             __change_symbol_flag = false;
+        }
+
+        private void StartNewSymbols(string exchange, string symbols)
+        {
+            var _symbols = symbols.Split(';');
+
+            if (exchange == UPLogger.exchange_name)
+            {
+                if (KConfig.UsePollingTicker == false)
+                {
+                    foreach (var _s in _symbols)
+                    {
+                        if (String.IsNullOrEmpty(_s) == true)
+                            continue;
+
+                        SnapshotTasks.Add((new Upbit.WebSocket()).Start(SSTokenSource, _s));
+                        SnapshotTasks.Add((new Upbit.Polling()).OStart(SSTokenSource, _s));
+                    }
+                }
+                else
+                    SnapshotTasks.Add((new Upbit.Polling()).BStart(SSTokenSource, _symbols));
+
+                SnapshotTasks.Add((new Upbit.Processing()).Start(SSTokenSource));
+            }
+            else if (exchange == BMLogger.exchange_name)
+            {
+                if (KConfig.UsePollingTicker == false)
+                {
+                    foreach (var _s in _symbols)
+                    {
+                        if (String.IsNullOrEmpty(_s) == true)
+                            continue;
+
+                        SnapshotTasks.Add((new BitMEX.WsBitMEX()).Start(SSTokenSource, _s));
+                        SnapshotTasks.Add((new BitMEX.Polling()).Start(SSTokenSource, _s));
+                    }
+                }
+                else
+                    SnapshotTasks.Add((new BitMEX.Polling()).Start(SSTokenSource, _symbols[0]));
+
+                SnapshotTasks.Add((new BitMEX.Processing()).Start(SSTokenSource));
+            }
+            else if (exchange == BNLogger.exchange_name)
+            {
+                if (KConfig.UsePollingTicker == false)
+                {
+                    foreach (var _s in _symbols)
+                    {
+                        if (String.IsNullOrEmpty(_s) == true)
+                            continue;
+
+                        SnapshotTasks.Add((new Binance.WebSocket()).Start(SSTokenSource, _s));
+                        SnapshotTasks.Add((new Binance.Polling()).OStart(SSTokenSource, _s));
+                    }
+                }
+                else
+                    SnapshotTasks.Add((new Binance.Polling()).BStart(SSTokenSource, _symbols));
+
+                SnapshotTasks.Add((new Binance.Processing()).Start(SSTokenSource));
+            }
         }
 
         public SnapshotQ(
@@ -155,7 +160,7 @@ namespace CCXT.Collector.Service
             LoggerQ.WriteO($"snapshot service start...", FactoryX.RootQName);
 
             if (KConfig.UseAutoStart == true)
-                await StartNewSymbol(KConfig.StartExchangeNames, KConfig.StartSymbolNames);
+                await StartNewExchanges(KConfig.StartExchangeNames);
 
             var _processing = Task.Run((Func<Task>)(async () =>
             {
@@ -176,7 +181,7 @@ namespace CCXT.Collector.Service
                             try
                             {
                                 var _selector = JsonConvert.DeserializeObject<QSelector>(_message);
-                                if (__last_exchanges == _selector.exchanges && __last_symbols == _selector.symbols)
+                                if (__last_exchanges == _selector.exchanges)
                                 {
                                     if (KConfig.UsePollingTicker == false)
                                     {
@@ -203,7 +208,7 @@ namespace CCXT.Collector.Service
                                 }
                                 else
                                 {
-                                    await StartNewSymbol(_selector.exchanges, _selector.symbols);
+                                    await StartNewExchanges(_selector.exchanges);
                                 }
                             }
                             catch (Exception ex)

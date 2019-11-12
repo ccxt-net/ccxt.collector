@@ -98,7 +98,7 @@ namespace CCXT.Collector.Upbit
                             }
                             else
                             {
-                                await SendAsync(tokenSource, _cws, _message.json);
+                                await SendAsync(tokenSource, _cws, _message.payload);
                             }
                         }
                         catch (TaskCanceledException)
@@ -175,7 +175,7 @@ namespace CCXT.Collector.Upbit
                                     exchange = UPLogger.exchange_name,
                                     stream = _selector.type,
                                     symbol = symbol,
-                                    json = _json 
+                                    payload = _json 
                                 });
                             }
                             else if (_result.MessageType == WebSocketMessageType.Close)

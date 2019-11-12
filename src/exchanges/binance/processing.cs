@@ -64,7 +64,7 @@ namespace CCXT.Collector.Binance
                         {
                             if (_message.stream == "trade")
                             {
-                                var _trade = JsonConvert.DeserializeObject<BWTrade>(_message.json);
+                                var _trade = JsonConvert.DeserializeObject<BWTrade>(_message.payload);
                                 await mergeTradeItem(_trade.data);
                             }
                             //else if (_message.stream == "orderbook")
@@ -77,17 +77,17 @@ namespace CCXT.Collector.Binance
                         {
                             if (_message.stream == "trade")
                             {
-                                var _trades = JsonConvert.DeserializeObject<BATrade>(_message.json);
+                                var _trades = JsonConvert.DeserializeObject<BATrade>(_message.payload);
                                 await mergeTradeItems(_trades);
                             }
                             else if (_message.stream == "orderbook")
                             {
-                                var _orderbook = JsonConvert.DeserializeObject<BAOrderBook>(_message.json);
+                                var _orderbook = JsonConvert.DeserializeObject<BAOrderBook>(_message.payload);
                                 await mergeOrderbook(_orderbook);
                             }
                             else if (_message.stream == "ticker")
                             {
-                                var _ticker = JsonConvert.DeserializeObject<STickers>(_message.json);
+                                var _ticker = JsonConvert.DeserializeObject<STickers>(_message.payload);
                                 await publishTicker(_ticker);
                             }
                         }
@@ -97,7 +97,7 @@ namespace CCXT.Collector.Binance
                         }
 #if DEBUG
                         else
-                            BNLogger.WriteO(_message.json);
+                            BNLogger.WriteO(_message.payload);
 #endif
                         if (tokenSource.IsCancellationRequested == true)
                             break;

@@ -19,15 +19,6 @@ namespace CCXT.Collector.Library.Types
             set;
         }
 
-        ///// <summary>
-        /////
-        ///// </summary>
-        //public string side
-        //{
-        //    get;
-        //    set;
-        //}
-
         /// <summary>
         /// quantity
         /// </summary>
@@ -70,15 +61,6 @@ namespace CCXT.Collector.Library.Types
     /// </summary>
     public interface ISOrderBook
     {
-        ///// <summary>
-        ///// 
-        ///// </summary>
-        //string symbol
-        //{
-        //    get;
-        //    set;
-        //}
-
         /// <summary>
         /// 호가 매도 총 잔량
         /// </summary>
@@ -146,15 +128,6 @@ namespace CCXT.Collector.Library.Types
             this.asks = new List<SOrderBookItem>();
             this.bids = new List<SOrderBookItem>();
         }
-
-        ///// <summary>
-        ///// 
-        ///// </summary>
-        //public virtual string symbol
-        //{
-        //    get;
-        //    set;
-        //}
 
         /// <summary>
         /// 호가 매도 총 잔량

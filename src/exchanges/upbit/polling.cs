@@ -56,7 +56,7 @@ namespace CCXT.Collector.Upbit
                                 exchange = UPLogger.exchange_name,
                                 stream = "trade",
                                 symbol = symbol,
-                                json = _t_json_value.Content
+                                payload = _t_json_value.Content
                             });
                         }
                         else
@@ -126,7 +126,7 @@ namespace CCXT.Collector.Upbit
                                 exchange = UPLogger.exchange_name,
                                 stream = "orderbook",
                                 symbol = symbol,
-                                json = _o_json_value.Content
+                                payload = _o_json_value.Content
                             });
                         }
                         else
@@ -219,7 +219,7 @@ namespace CCXT.Collector.Upbit
                                 stream = "ticker",
                                 symbol = _symbols,
                                 sequentialId = _last_limit_milli_secs,
-                                json = _b_json_value.Content
+                                payload = _b_json_value.Content
                             });
                         }
                         else

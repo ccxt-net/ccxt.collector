@@ -1,6 +1,7 @@
 ﻿using OdinSdk.BaseLib.Configuration;
 using Microsoft.Extensions.Configuration;
 using System.IO;
+using System.Collections.Generic;
 
 namespace CCXT.Collector.Library
 {
@@ -77,6 +78,30 @@ namespace CCXT.Collector.Library
         #endregion Binance
 
         #region BitMEX
+
+        public static string BitMexConnectKey
+        {
+            get
+            {
+                return CConfig.GetAppString("bitmex.private.connect.key");
+            }
+        }
+
+        public static string BitMexSecretKey
+        {
+            get
+            {
+                return CConfig.GetAppString("bitmex.private.secret.key");
+            }
+        }
+
+        public static string BitMexUserName
+        {
+            get
+            {
+                return CConfig.GetAppString("bitmex.private.user.name");
+            }
+        }
 
         private static int? __bitmex_orderbook_counter = null;
 
@@ -163,16 +188,26 @@ namespace CCXT.Collector.Library
             }
         }
 
-        private static string __name_start_symbol_names = null;
+        private static Dictionary<string, string> __name_start_symbol_names = null;
 
-        public static string StartSymbolNames
+        public static string GetStartSymbolNames(string exchange)
         {
-            get
+            var _result = "";
+
+            if (__name_start_symbol_names == null)
+                __name_start_symbol_names = new Dictionary<string, string>();
+
+            if (__name_start_symbol_names.ContainsKey(exchange) == false)
             {
-                if (__name_start_symbol_names == null)
-                    __name_start_symbol_names = CConfig.GetAppString("auto.start.symbol.names");
-                return __name_start_symbol_names;
+                _result = CConfig.GetAppString($"{exchange}.auto.start.symbol.names");
+                __name_start_symbol_names.Add(exchange, _result);
             }
+            else
+            {
+                _result = __name_start_symbol_names[exchange];
+            }
+
+            return _result;
         }
 
         private static long? __polling_prev_time = null;

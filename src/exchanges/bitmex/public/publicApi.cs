@@ -218,7 +218,7 @@ namespace CCXT.Collector.BitMEX.Public
                         _o.amount = _o.quantity * _o.price;
                         _o.count = 1;
 
-                        if (_o.side.ToLower() == "sell")
+                        if (_o.sideType == SideType.Ask)
                             _result.result.asks.Add(_o);
                         else
                             _result.result.bids.Add(_o);
