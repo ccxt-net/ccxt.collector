@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace CCXT.Collector.Upbit
 {
-    public class WebSocket
+    public class Pushing
     {
         private static ConcurrentQueue<QMessage> __command_queue = null;
 

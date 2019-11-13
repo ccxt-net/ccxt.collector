@@ -38,7 +38,7 @@ namespace CCXT.Collector.BitMEX
                     _t_params.Add("reverse", true);
                 }
 
-                var _t_request = CreateJsonRequest($"/api/v1/trade", _t_params);
+                var _t_request = CreateJsonRequest($"trade", _t_params);
 
                 while (true)
                 {
@@ -50,18 +50,14 @@ namespace CCXT.Collector.BitMEX
                         var _t_json_value = await RestExecuteAsync(_client, _t_request);
                         if (_t_json_value.IsSuccessful && _t_json_value.Content[0] == '[')
                         {
-                            var _t_json_data = JsonConvert.DeserializeObject<List<BCompleteOrderItem>>(_t_json_value.Content);
-
-                            var _trades = new BCompleteOrder
+                            Processing.SendReceiveQ(new QMessage
                             {
+                                command = "AP",
                                 exchange = BMLogger.exchange_name,
                                 stream = "trade",
                                 symbol = symbol,
-                                data = _t_json_data
-                            };
-
-                            var _t_json_content = JsonConvert.SerializeObject(_trades);
-                            Processing.SendReceiveQ(new QMessage { command = "AP", payload = _t_json_content });
+                                payload = _t_json_value.Content
+                            });
                         }
                     }
                     catch (TaskCanceledException)
@@ -97,7 +93,7 @@ namespace CCXT.Collector.BitMEX
                     _o_params.Add("depth", 25);
                 }
 
-                var _o_request = CreateJsonRequest($"/api/v1/orderBook/L2", _o_params);
+                var _o_request = CreateJsonRequest($"orderBook/L2", _o_params);
 
                 while (true)
                 {
@@ -107,48 +103,16 @@ namespace CCXT.Collector.BitMEX
 
                         // orderbook
                         var _o_json_value = await RestExecuteAsync(_client, _o_request);
-                        if (_o_json_value.IsSuccessful && _o_json_value.Content[0] == '{')
+                        if (_o_json_value.IsSuccessful && _o_json_value.Content[0] == '[')
                         {
-                            var _orderbooks = JsonConvert.DeserializeObject<List<BOrderBookItem>>(_o_json_value.Content);
-                            
-                            var _asks = new List<SOrderBookItem>();
-                            var _bids = new List<SOrderBookItem>();
-
-                            var _timestamp = 0L;
-
-                            foreach (var _o in _orderbooks)
+                            Processing.SendReceiveQ(new QMessage
                             {
-                                if (_timestamp < _o.id)
-                                    _timestamp = _o.id;
-
-                                var _ob = new SOrderBookItem
-                                {
-                                    quantity = _o.quantity,
-                                    price = _o.price,
-                                    amount = _o.quantity * _o.price,
-                                    count = 1
-                                };
-
-                                if (_o.sideType == SideType.Ask)
-                                    _asks.Add(_ob);
-                                else
-                                    _bids.Add(_ob);
-                            }
-
-                            var _orderbook = new BOrderBook
-                            {
+                                command = "AP",
+                                exchange = BMLogger.exchange_name,
                                 stream = "orderbook",
                                 symbol = symbol,
-                                data = new SOrderBook
-                                {
-                                    timestamp = _timestamp,
-                                    asks = _asks,
-                                    bids = _bids
-                                }
-                            };
-
-                            var _o_json_content = JsonConvert.SerializeObject(_orderbook);
-                            Processing.SendReceiveQ(new QMessage { command = "AP", payload = _o_json_content });
+                                payload = _o_json_value.Content
+                            });
                         }
                     }
                     catch (TaskCanceledException)

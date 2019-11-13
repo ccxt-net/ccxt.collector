@@ -40,8 +40,6 @@ namespace CCXT.Collector.Upbit
 
                 while (true)
                 {
-                    //await __semaphore.WaitAsync(tokenSource.Token);
-
                     try
                     {
                         await Task.Delay(KConfig.UpbitPollingSleep);
@@ -83,8 +81,6 @@ namespace CCXT.Collector.Upbit
                     }
                     //finally
                     {
-                        //__semaphore.Release();
-
                         if (tokenSource.IsCancellationRequested == true)
                             break;
                     }
@@ -110,8 +106,6 @@ namespace CCXT.Collector.Upbit
 
                 while (true)
                 {
-                    //await __semaphore.WaitAsync(tokenSource.Token);
-
                     try
                     {
                         await Task.Delay(KConfig.UpbitPollingSleep);
@@ -153,8 +147,6 @@ namespace CCXT.Collector.Upbit
                     }
                     //finally
                     {
-                        //__semaphore.Release();
-
                         if (tokenSource.IsCancellationRequested == true)
                             break;
                     }

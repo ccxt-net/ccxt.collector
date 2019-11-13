@@ -2,6 +2,7 @@
 using CCXT.Collector.Library;
 using CCXT.Collector.Library.Types;
 using Newtonsoft.Json;
+using OdinSdk.BaseLib.Coin.Types;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -61,37 +62,19 @@ namespace CCXT.Collector.BitMEX
                             continue;
                         }
 
-                        var _json_data = JsonConvert.DeserializeObject<QSelector>(_message.payload);
                         if (_message.command == "WS")
                         {
-                            var _stream = _json_data.stream.Split('@');
-                            if (_stream.Length > 1)
+                            if (_message.stream == "trade")
                             {
-                                //if (_stream[1] == "aggTrade")
-                                //{
-                                //    var _trade = JsonConvert.DeserializeObject<BWTrade>(_message.json);
-                                //    await mergeTradeItem(_trade.data);
-                                //}
-                                //else if (_stream[1] == "depth")
-                                //{
-                                //    var _orderbook = JsonConvert.DeserializeObject<BWOrderBook>(_message.json);
-                                //    await compareOrderbook(_orderbook);
-                                //}
-                            }
-                        }
-                        else if (_message.command == "AP")
-                        {
-                            if (_json_data.stream == "trade")
-                            {
-                                var _a_trade_data = JsonConvert.DeserializeObject<List<BCompleteOrderItem>>(_message.payload);
+                                var _w_trades = JsonConvert.DeserializeObject<List<BCompleteOrderItem>>(_message.payload);
 
-                                var _trades = new SCompleteOrders
+                                var _s_trade = new SCompleteOrder
                                 {
                                     exchange = _message.exchange,
                                     stream = _message.stream,
                                     symbol = _message.symbol,
-                                    sequentialId = _a_trade_data.Max(t => t.timestamp),
-                                    result = _a_trade_data.Select(t =>
+                                    sequentialId = _w_trades.Max(t => t.timestamp),
+                                    result = _w_trades.Select(t =>
                                     {
                                         return new SCompleteOrderItem
                                         {
@@ -104,24 +87,112 @@ namespace CCXT.Collector.BitMEX
                                     .ToList<ISCompleteOrderItem>()
                                 };
 
-                                _trades.SetSuccess();
+                                await mergeTradeItems(_s_trade);
 
-                                await mergeTradeItems(_trades);
+                                if (KConfig.UsePublishTrade == true)
+                                    await publishTrading(_s_trade);
                             }
-                            else if (_json_data.stream == "orderbook")
+                            else if (_message.stream == "orderbook")
                             {
-                                var _a_book_data = JsonConvert.DeserializeObject<BOrderBook>(_message.payload);
+                                var _w_orderbooks = JsonConvert.DeserializeObject<List<BOrderBookItem>>(_message.payload);
 
-                                var _orderbook = new SOrderBook
+                                var _timestamp = _w_orderbooks.Max(o => o.id);
+                                var _asks = _w_orderbooks.Where(o => o.sideType == SideType.Ask);
+                                var _bids = _w_orderbooks.Where(o => o.sideType == SideType.Bid);
+
+                                var _s_orderbook = new SOrderBook
                                 {
-                                    timestamp = _a_book_data.data.timestamp,
-                                    askSumQty = _a_book_data.data.askSumQty,
-                                    bidSumQty = _a_book_data.data.bidSumQty,
-                                    asks = _a_book_data.data.asks,
-                                    bids = _a_book_data.data.bids
+                                    timestamp = _timestamp,
+                                    askSumQty = _asks.Sum(o => o.quantity),
+                                    bidSumQty = _bids.Sum(o => o.quantity),
+                                    asks = _asks.Select(o =>
+                                    {
+                                        return new SOrderBookItem
+                                        {
+                                            quantity = o.quantity,
+                                            price = o.price,
+                                            amount = o.quantity * o.price,
+                                            count = 1
+                                        };
+                                    }).ToList(),
+                                    bids = _bids.Select(o =>
+                                    {
+                                        return new SOrderBookItem
+                                        {
+                                            quantity = o.quantity,
+                                            price = o.price,
+                                            amount = o.quantity * o.price,
+                                            count = 1
+                                        };
+                                    }).ToList()
                                 };
 
-                                await mergeOrderbook(_orderbook, _message.exchange, _message.symbol);
+                                await mergeOrderbook(_s_orderbook, _message.exchange, _message.symbol);
+                            }
+                        }
+                        else if (_message.command == "AP")
+                        {
+                            if (_message.stream == "trade")
+                            {
+                                var _a_trades = JsonConvert.DeserializeObject<List<BCompleteOrderItem>>(_message.payload);
+
+                                var _s_trade = new SCompleteOrder
+                                {
+                                    exchange = _message.exchange,
+                                    stream = _message.stream,
+                                    symbol = _message.symbol,
+                                    sequentialId = _a_trades.Max(t => t.timestamp),
+                                    result = _a_trades.Select(t =>
+                                    {
+                                        return new SCompleteOrderItem
+                                        {
+                                            timestamp = t.timestamp,
+                                            sideType = t.sideType,
+                                            price = t.price,
+                                            quantity = t.quantity
+                                        };
+                                    })
+                                    .ToList<ISCompleteOrderItem>()
+                                };
+
+                                await mergeTradeItems(_s_trade);
+                            }
+                            else if (_message.stream == "orderbook")
+                            {
+                                var _a_orderbooks = JsonConvert.DeserializeObject<List<BOrderBookItem>>(_message.payload);
+
+                                var _timestamp = _a_orderbooks.Max(o => o.id);
+                                var _asks = _a_orderbooks.Where(o => o.sideType == SideType.Ask);
+                                var _bids = _a_orderbooks.Where(o => o.sideType == SideType.Bid);
+
+                                var _s_orderbook = new SOrderBook
+                                {
+                                    timestamp = _timestamp,
+                                    askSumQty = _asks.Sum(o => o.quantity),
+                                    bidSumQty = _bids.Sum(o => o.quantity),
+                                    asks = _asks.Select(o =>
+                                    {
+                                        return new SOrderBookItem
+                                        {
+                                            quantity = o.quantity,
+                                            price = o.price,
+                                            amount = o.quantity * o.price,
+                                            count = 1
+                                        };
+                                    }).ToList(),
+                                    bids = _bids.Select(o =>
+                                    {
+                                        return new SOrderBookItem
+                                        {
+                                            quantity = o.quantity,
+                                            price = o.price,
+                                            amount = o.quantity * o.price,
+                                            count = 1
+                                        };
+                                    }).ToList()
+                                };
+
+                                await mergeOrderbook(_s_orderbook, _message.exchange, _message.symbol);
                             }
                         }
                         else if (_message.command == "SS")

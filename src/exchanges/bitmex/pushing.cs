@@ -14,7 +14,7 @@ using System.Threading.Tasks;
 
 namespace CCXT.Collector.BitMEX
 {
-    public class WsBitMEX
+    public class Pushing
     {
         private const string __auth_point = "/realtime";
         private const string __end_point = __auth_point + "md";
@@ -23,33 +23,11 @@ namespace CCXT.Collector.BitMEX
         {
             get
             {
-                return $"wss://testnet.bitmex.com/{__auth_point}{__end_point}";
+                if (KConfig.BitMexUseLiveServer == true)
+                    return $"wss://www.bitmex.com{__end_point}";
+                else
+                    return $"wss://testnet.bitmex.com{__end_point}";
             }
-        }
-
-        private static ConcurrentQueue<QMessage> __recv_queue = null;
-
-        /// <summary>
-        ///
-        /// </summary>
-        private static ConcurrentQueue<QMessage> ReceiveQ
-        {
-            get
-            {
-                if (__recv_queue == null)
-                    __recv_queue = new ConcurrentQueue<QMessage>();
-
-                return __recv_queue;
-            }
-        }
-
-        /// <summary>
-        ///
-        /// </summary>
-        /// <param name="message"></param>
-        public static void SendReceiveQ(QMessage message)
-        {
-            ReceiveQ.Enqueue(message);
         }
 
         private static ConcurrentQueue<QMessage> __command_queue = null;
@@ -112,6 +90,7 @@ namespace CCXT.Collector.BitMEX
             });
 
             var _args = new List<string>();
+
             {
                 _args.Add($"'trade:{symbol}'");
                 _args.Add($"'orderBookL2_25:{symbol}'");
@@ -290,8 +269,45 @@ namespace CCXT.Collector.BitMEX
 
                             if (_result.MessageType == WebSocketMessageType.Text)
                             {
-                                var _data = Encoding.UTF8.GetString(_buffer, 0, _offset);
-                                SendReceiveQ(new QMessage { command = "DAT", payload = _data });
+                                var _json = Encoding.UTF8.GetString(_buffer, 0, _offset);
+
+                                while (true)
+                                {
+                                    if (_json[0] != '[')
+                                    {
+                                        if (_json != "pong")
+                                            BMLogger.WriteO(_json);
+                                        break;
+                                    }
+
+                                    var _packet = JsonConvert.DeserializeObject<JArray>(_json);
+                                    if (_packet.Count < 4)
+                                    {
+                                        BMLogger.WriteO(_json);
+                                        break;
+                                    }
+
+                                    var _selector = _packet[3].ToObject<WsData>();
+                                    if (String.IsNullOrEmpty(_selector.table) || String.IsNullOrEmpty(_selector.action))
+                                    {
+                                        BMLogger.WriteO(_json);
+                                        break;
+                                    }
+
+                                    if (_selector.table == "orderBookL2_25")
+                                        _selector.table = "orderbook";
+
+                                    Processing.SendReceiveQ(new QMessage
+                                    {
+                                        command = "WS",
+                                        exchange = BMLogger.exchange_name,
+                                        stream = _selector.table,
+                                        symbol = symbol,
+                                        payload = _selector.data.ToString(Formatting.None)
+                                    });
+
+                                    break;
+                                }
                             }
                             else if (_result.MessageType == WebSocketMessageType.Binary)
                             {
@@ -300,9 +316,13 @@ namespace CCXT.Collector.BitMEX
                             {
                                 await _cws.CloseOutputAsync(WebSocketCloseStatus.NormalClosure, "", tokenSource.Token);
 
+                                BMLogger.WriteO($"receive close message from server: symbol => {symbol}...");
                                 tokenSource.Cancel();
                                 break;
                             }
+                        }
+                        catch (TaskCanceledException)
+                        {
                         }
                         catch (Exception ex)
                         {
@@ -312,6 +332,7 @@ namespace CCXT.Collector.BitMEX
                         {
                             if (_cws.State != WebSocketState.Open && _cws.State != WebSocketState.Connecting)
                             {
+                                BMLogger.WriteO($"disconnect from server: symbol => {symbol}...");
                                 tokenSource.Cancel();
                                 break;
                             }
@@ -327,93 +348,9 @@ namespace CCXT.Collector.BitMEX
                 tokenSource.Token
                 );
 
-                var _processing = Task.Run(async () =>
-                {
-                    while (true)
-                    {
-                        try
-                        {
-                            await Task.Delay(0);
+                await Task.WhenAll(_sending, _receiving);
 
-                            var _message = (QMessage)null;
-                            if (ReceiveQ.TryDequeue(out _message) == false)
-                            {
-                                var _cancelled = tokenSource.Token.WaitHandle.WaitOne(10);
-                                if (_cancelled == true)
-                                    break;
-
-                                continue;
-                            }
-
-                            if (_message.payload[0] != '[')
-                            {
-                                if (_message.payload != "pong")
-                                    BMLogger.WriteO(_message.payload);
-                                continue;
-                            }
-
-                            var _packet = JsonConvert.DeserializeObject<JArray>(_message.payload);
-                            if (_packet.Count < 4)
-                            {
-                                BMLogger.WriteO(_message.payload);
-                                continue;
-                            }
-
-                            var _payload = (JProperty)_packet[3].First;
-                            if (_payload.Name != "table")
-                            {
-                                BMLogger.WriteO(_message.payload);
-                                continue;
-                            }
-
-                            var _json_data = _packet[3].ToObject<WsData>();
-                            if (String.IsNullOrEmpty(_json_data.table) || String.IsNullOrEmpty(_json_data.action))
-                            {
-                                BMLogger.WriteO(_message.payload);
-                                continue;
-                            }
-
-                            _message.table = _json_data.table;
-                            {
-                                _message.payload = _packet[3].ToString(Formatting.None);
-
-                                if (_json_data.table == "trade")
-                                {
-                                }
-                                else if (_json_data.table == "orderBookL2_25")
-                                {
-                                }
-                                else if (_json_data.table == "position")
-                                {
-                                }
-                                else if (_json_data.table == "execution")
-                                {
-                                }
-                                else if (_json_data.table == "order")
-                                {
-                                }
-                                else
-                                {
-                                    BMLogger.WriteO(_message.payload);
-                                }
-                            }
-
-                            if (tokenSource.IsCancellationRequested == true)
-                                break;
-                        }
-                        catch (Exception ex)
-                        {
-                            BMLogger.WriteX(ex.ToString());
-                        }
-                    }
-                },
-                tokenSource.Token
-                );
-
-                await Task.WhenAll(_sending, _receiving, _processing);
-
-                if (tokenSource.IsCancellationRequested == false)
-                    tokenSource.Cancel();
+                BMLogger.WriteO($"websocket service stopped: symbol => {symbol}...");
             }
         }
     }

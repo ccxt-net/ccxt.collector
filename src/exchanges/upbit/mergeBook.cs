@@ -19,7 +19,7 @@ namespace CCXT.Collector.Upbit
         /// </summary>
         /// <param name="trades"></param>
         /// <returns></returns>
-        private async ValueTask<bool> mergeTradeItems(SCompleteOrders trades)
+        private async ValueTask<bool> mergeTradeItems(SCompleteOrder trades)
         {
             var _result = false;
 
@@ -60,7 +60,7 @@ namespace CCXT.Collector.Upbit
         /// <param name="settings"></param>
         /// <returns></returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private async ValueTask<bool> updateTradeItems(SOrderBooks qob, SCompleteOrders trades, Settings settings)
+        private async ValueTask<bool> updateTradeItems(SOrderBooks qob, SCompleteOrder trades, Settings settings)
         {
             var _nob = new SOrderBooks
             {
@@ -581,7 +581,7 @@ namespace CCXT.Collector.Upbit
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private async Task publishTrading(SCompleteOrders sco)
+        private async Task publishTrading(SCompleteOrder sco)
         {
             await Task.Delay(0);
             {

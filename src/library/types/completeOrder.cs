@@ -10,15 +10,6 @@ namespace CCXT.Collector.Library.Types
     /// </summary>
     public interface ISCompleteOrderItem
     {
-        ///// <summary>
-        ///// 
-        ///// </summary>
-        //string symbol
-        //{
-        //    get;
-        //    set;
-        //}
-
         /// <summary>
         ///
         /// </summary>
@@ -63,15 +54,6 @@ namespace CCXT.Collector.Library.Types
     /// </summary>
     public class SCompleteOrderItem : ISCompleteOrderItem
     {
-        ///// <summary>
-        ///// 
-        ///// </summary>
-        //public virtual string symbol
-        //{
-        //    get;
-        //    set;
-        //}
-
         /// <summary>
         ///
         /// </summary>
@@ -118,7 +100,7 @@ namespace CCXT.Collector.Library.Types
     /// <summary>
     ///
     /// </summary>
-    public interface ISCompleteOrders : IApiResult<List<ISCompleteOrderItem>>
+    public interface ISCompleteOrder : IApiResult<List<ISCompleteOrderItem>>
     {
         /// <summary>
         ///
@@ -171,7 +153,7 @@ namespace CCXT.Collector.Library.Types
     /// <summary>
     ///
     /// </summary>
-    public class SCompleteOrders : ApiResult<List<ISCompleteOrderItem>>, ISCompleteOrders
+    public class SCompleteOrder : ApiResult<List<ISCompleteOrderItem>>, ISCompleteOrder
     {
         /// <summary>
         /// is success calling

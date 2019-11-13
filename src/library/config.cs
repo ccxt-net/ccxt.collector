@@ -79,6 +79,14 @@ namespace CCXT.Collector.Library
 
         #region BitMEX
 
+        public static bool BitMexUseLiveServer
+        {
+            get
+            {
+                return CConfig.GetAppBoolean("bitmex.use.live.server");
+            }
+        }
+
         public static string BitMexConnectKey
         {
             get
@@ -104,8 +112,6 @@ namespace CCXT.Collector.Library
         }
 
         private static int? __bitmex_orderbook_counter = null;
-
-
         public static int BitmexOrderBookCounter
         {
             get
@@ -117,7 +123,6 @@ namespace CCXT.Collector.Library
         }
 
         private static int? __bitmex_websocket_retry = null;
-
         public static int BitmexWebSocketRetry
         {
             get

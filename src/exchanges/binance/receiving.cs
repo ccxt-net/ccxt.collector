@@ -27,7 +27,7 @@ namespace CCXT.Collector.Binance
     /// <summary>
     ///
     /// </summary>
-    public partial class WebSocket
+    public partial class Pushing
     {
         private static ConcurrentQueue<QMessage> __command_queue = null;
 

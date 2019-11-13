@@ -67,7 +67,7 @@ namespace CCXT.Collector.BitMEX.Public
             {
                 var _params = publicClient.MergeParamsAndArgs(args);
 
-                var _json_value = await publicClient.CallApiGet1Async("/api/v1/instrument/active", _params);
+                var _json_value = await publicClient.CallApiGet1Async("/instrument/active", _params);
 #if DEBUG
                 _result.rawJson = _json_value.Content;
 #endif
@@ -186,61 +186,6 @@ namespace CCXT.Collector.BitMEX.Public
         }
 
         /// <summary>
-        /// Fetch pending or registered order details
-        /// </summary>
-        /// <param name="symbol"></param>
-        /// <param name="count">maximum number of items (optional): default 25</param>
-        /// <returns></returns>
-        public async ValueTask<OrderBooks> GetOrderBooks(string symbol, int count = 25)
-        {
-            var _result = new OrderBooks();
-
-            var _params = new Dictionary<string, object>();
-            {
-                _params.Add("symbol", symbol);
-                _params.Add("depth", count);
-            }
-
-            var _response = await publicClient.CallApiGet2Async("/api/v1/orderBook/L2", _params);
-#if DEBUG
-            _result.rawJson = _response.Content;
-#endif
-            if (_response.IsSuccessful == true)
-            {
-                var _orderbooks = publicClient.DeserializeObject<List<BOrderBookItem>>(_response.Content);
-                if (_orderbooks != null)
-                {
-                    _result.result.asks = new List<OrderBookItem>();
-                    _result.result.bids = new List<OrderBookItem>();
-
-                    foreach (var _o in _orderbooks)
-                    {
-                        _o.amount = _o.quantity * _o.price;
-                        _o.count = 1;
-
-                        if (_o.sideType == SideType.Ask)
-                            _result.result.asks.Add(_o);
-                        else
-                            _result.result.bids.Add(_o);
-                    }
-
-                    _result.result.symbol = symbol;
-                    _result.result.timestamp = CUnixTime.NowMilli;
-                    _result.result.nonce = CUnixTime.Now;
-
-                    _result.SetSuccess();
-                }
-            }
-            else
-            {
-                var _message = publicClient.GetResponseMessage(_response);
-                _result.SetFailure(_message.message);
-            }
-
-            return _result;
-        }
-
-        /// <summary>
         /// Fetch array of symbol name and OHLCVs data
         /// </summary>
         /// <param name="symbol">Instrument symbol.</param>
@@ -260,7 +205,7 @@ namespace CCXT.Collector.BitMEX.Public
                 _params.Add("reverse", true);           // If true, will sort results newest first.
             }
 
-            var _response = await publicClient.CallApiGet2Async("/api/v1/trade/bucketed", _params);
+            var _response = await publicClient.CallApiGet2Async("/trade/bucketed", _params);
 #if DEBUG
             _result.rawJson = _response.Content;
 #endif
@@ -317,7 +262,7 @@ namespace CCXT.Collector.BitMEX.Public
                 _params.Add("reverse", true);
             }
 
-            var _response = await publicClient.CallApiGet2Async("/api/v1/trade", _params);
+            var _response = await publicClient.CallApiGet2Async("/trade", _params);
 #if DEBUG
             _result.rawJson = _response.Content;
 #endif
@@ -335,6 +280,61 @@ namespace CCXT.Collector.BitMEX.Public
                 }
 
                 _result.SetSuccess();
+            }
+            else
+            {
+                var _message = publicClient.GetResponseMessage(_response);
+                _result.SetFailure(_message.message);
+            }
+
+            return _result;
+        }
+
+        /// <summary>
+        /// Fetch pending or registered order details
+        /// </summary>
+        /// <param name="symbol"></param>
+        /// <param name="count">maximum number of items (optional): default 25</param>
+        /// <returns></returns>
+        public async ValueTask<OrderBooks> GetOrderBooks(string symbol, int count = 25)
+        {
+            var _result = new OrderBooks();
+
+            var _params = new Dictionary<string, object>();
+            {
+                _params.Add("symbol", symbol);
+                _params.Add("depth", count);
+            }
+
+            var _response = await publicClient.CallApiGet2Async("/orderBook/L2", _params);
+#if DEBUG
+            _result.rawJson = _response.Content;
+#endif
+            if (_response.IsSuccessful == true)
+            {
+                var _orderbooks = publicClient.DeserializeObject<List<BOrderBookItem>>(_response.Content);
+                if (_orderbooks != null)
+                {
+                    _result.result.asks = new List<OrderBookItem>();
+                    _result.result.bids = new List<OrderBookItem>();
+
+                    foreach (var _o in _orderbooks)
+                    {
+                        _o.amount = _o.quantity * _o.price;
+                        _o.count = 1;
+
+                        if (_o.sideType == SideType.Ask)
+                            _result.result.asks.Add(_o);
+                        else
+                            _result.result.bids.Add(_o);
+                    }
+
+                    _result.result.symbol = symbol;
+                    _result.result.timestamp = CUnixTime.NowMilli;
+                    _result.result.nonce = CUnixTime.Now;
+
+                    _result.SetSuccess();
+                }
             }
             else
             {

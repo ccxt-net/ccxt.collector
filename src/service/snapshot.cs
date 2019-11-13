@@ -16,7 +16,6 @@ namespace CCXT.Collector.Service
     public class SnapshotQ : FactoryX
     {
         private static string __last_exchanges = "";
-        //private static string __last_symbols = "";
 
         private static CancellationTokenSource __ss_token_source;
 
@@ -82,8 +81,6 @@ namespace CCXT.Collector.Service
 
             __last_exchanges = exchanges;
 
-            LoggerQ.WriteO($"snapshot restart: exchanges: {__last_exchanges}");
-
             __change_symbol_flag = false;
         }
 
@@ -100,7 +97,7 @@ namespace CCXT.Collector.Service
                         if (String.IsNullOrEmpty(_s) == true)
                             continue;
 
-                        SnapshotTasks.Add((new Upbit.WebSocket()).Start(SSTokenSource, _s));
+                        SnapshotTasks.Add((new Upbit.Pushing()).Start(SSTokenSource, _s));
                         SnapshotTasks.Add((new Upbit.Polling()).OStart(SSTokenSource, _s));
                     }
                 }
@@ -118,7 +115,7 @@ namespace CCXT.Collector.Service
                         if (String.IsNullOrEmpty(_s) == true)
                             continue;
 
-                        SnapshotTasks.Add((new BitMEX.WsBitMEX()).Start(SSTokenSource, _s));
+                        SnapshotTasks.Add((new BitMEX.Pushing()).Start(SSTokenSource, _s));
                         SnapshotTasks.Add((new BitMEX.Polling()).Start(SSTokenSource, _s));
                     }
                 }
@@ -136,7 +133,7 @@ namespace CCXT.Collector.Service
                         if (String.IsNullOrEmpty(_s) == true)
                             continue;
 
-                        SnapshotTasks.Add((new Binance.WebSocket()).Start(SSTokenSource, _s));
+                        SnapshotTasks.Add((new Binance.Pushing()).Start(SSTokenSource, _s));
                         SnapshotTasks.Add((new Binance.Polling()).OStart(SSTokenSource, _s));
                     }
                 }
