@@ -2,6 +2,7 @@
 using RabbitMQ.Client;
 using System;
 using System.Collections.Concurrent;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
