@@ -57,8 +57,6 @@ namespace CCXT.Collector.BitMEX
                                 action = "polling",
                                 payload = _t_json_value.Content
                             });
-
-                            BMLogger.WriteO(_t_json_value.Content);
                         }
                         else
                         {
@@ -140,8 +138,6 @@ namespace CCXT.Collector.BitMEX
                                 action = "polling",
                                 payload = _o_json_value.Content
                             });
-
-                            BMLogger.WriteO(_o_json_value.Content);
                         }
                         else
                         {

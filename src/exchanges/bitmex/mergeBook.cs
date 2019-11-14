@@ -23,6 +23,8 @@ namespace CCXT.Collector.BitMEX
         {
             var _result = false;
 
+            BMLogger.WriteO("mergeOrderbook");
+
             SOrderBooks _qob;
             {
                 if (__qOrderBooks.TryGetValue(cob.symbol, out _qob) == true)
@@ -53,6 +55,8 @@ namespace CCXT.Collector.BitMEX
         private async ValueTask<bool> insertOrderbook(SOrderBooks cob)
         {
             var _result = false;
+
+            BMLogger.WriteO("insertOrderbook");
 
             var _sqo = await createOrderbook(cob);
             if (__qOrderBooks.TryAdd(cob.symbol, _sqo) == true)
