@@ -3,7 +3,6 @@ using OdinSdk.BaseLib.Coin.Public;
 using OdinSdk.BaseLib.Coin.Types;
 using OdinSdk.BaseLib.Configuration;
 using System;
-using System.Collections.Generic;
 
 namespace CCXT.Collector.BitMEX.Public
 {
@@ -114,57 +113,6 @@ namespace CCXT.Collector.BitMEX.Public
             {
                 sideType = SideTypeConverter.FromString(value);
             }
-        }
-    }
-
-    /// <summary>
-    ///
-    /// </summary>
-    public class BCompleteOrder
-    {
-        /// <summary>
-        ///
-        /// </summary>
-        public string exchange
-        {
-            get;
-            set;
-        }
-
-        /// <summary>
-        ///
-        /// </summary>
-        public string stream
-        {
-            get;
-            set;
-        }
-
-        /// <summary>
-        ///
-        /// </summary>
-        public string symbol
-        {
-            get;
-            set;
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public long timestamp
-        {
-            get;
-            set;
-        }
-
-        /// <summary>
-        ///
-        /// </summary>
-        public List<BCompleteOrderItem> data
-        {
-            get;
-            set;
         }
     }
 }

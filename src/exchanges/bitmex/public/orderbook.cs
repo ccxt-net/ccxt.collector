@@ -1,5 +1,4 @@
-﻿using CCXT.Collector.Library.Types;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using OdinSdk.BaseLib.Coin.Public;
 using OdinSdk.BaseLib.Coin.Types;
 
@@ -79,48 +78,6 @@ namespace CCXT.Collector.BitMEX.Public
         /// </summary>
         [JsonProperty(PropertyName = "price")]
         public override decimal price
-        {
-            get;
-            set;
-        }
-    }
-
-    /// <summary>
-    ///
-    /// </summary>
-    public class BOrderBook
-    {
-        /// <summary>
-        ///
-        /// </summary>
-        public string exchange
-        {
-            get;
-            set;
-        }
-        
-        /// <summary>
-        ///
-        /// </summary>
-        public string stream
-        {
-            get;
-            set;
-        }
-
-        /// <summary>
-        ///
-        /// </summary>
-        public string symbol
-        {
-            get;
-            set;
-        }
-
-        /// <summary>
-        ///
-        /// </summary>
-        public SOrderBook data
         {
             get;
             set;

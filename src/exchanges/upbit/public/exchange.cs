@@ -6,30 +6,6 @@ namespace CCXT.Collector.Upbit.Public
     /// <summary>
     ///
     /// </summary>
-    public class UExchange
-    {
-        /// <summary>
-        ///
-        /// </summary>
-        public long sequentialId
-        {
-            get;
-            set;
-        }
-
-        /// <summary>
-        ///
-        /// </summary>
-        public List<UExchangeItem> data
-        {
-            get;
-            set;
-        }
-    }
-
-    /// <summary>
-    ///
-    /// </summary>
     public class UExchangeItem
     {
         /// <summary>
