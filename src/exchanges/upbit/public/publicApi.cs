@@ -112,9 +112,9 @@ namespace CCXT.Collector.Upbit.Public
         /// <param name="quote_name">The type of trading quote-currency of which information you want to query for.</param>
         /// <param name="limits">maximum number of items (optional): default 20</param>
         /// <returns></returns>
-        public async ValueTask<SCompleteOrder> GetCompleteOrders(string base_name, string quote_name, int limits = 20)
+        public async ValueTask<SCompleteOrders> GetCompleteOrders(string base_name, string quote_name, int limits = 20)
         {
-            var _result = new SCompleteOrder
+            var _result = new SCompleteOrders
             {
                 symbol = $"{quote_name}-{base_name}"
             };

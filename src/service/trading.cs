@@ -72,9 +72,10 @@ namespace CCXT.Collector.Service
                                     continue;
                                 }
 
+#if !DEBUG
                                 var _body = Encoding.UTF8.GetBytes(_json_message);
                                 _channel.BasicPublish(exchange: QueueName, routingKey: "", basicProperties: null, body: _body);
-#if DEBUG
+#else
                                 LoggerQ.WriteO(_json_message);
 #endif
                                 if (_channel.IsClosed == true)

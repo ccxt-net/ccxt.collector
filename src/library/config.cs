@@ -133,6 +133,18 @@ namespace CCXT.Collector.Library
             }
         }
 
+        private static int? __bitmex_polling_sleep = null;
+
+        public static int BitMexPollingSleep
+        {
+            get
+            {
+                if (__bitmex_polling_sleep == null)
+                    __bitmex_polling_sleep = CConfig.GetAppInteger("bitmex.polling.sleep.milliseconds");
+                return __bitmex_polling_sleep.Value;
+            }
+        }
+
         #endregion BitMEX
 
         #region Upbit

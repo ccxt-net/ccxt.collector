@@ -52,8 +52,9 @@ namespace CCXT.Collector.Upbit
                             { 
                                 command = "AP",
                                 exchange = UPLogger.exchange_name,
-                                stream = "trade",
                                 symbol = symbol,
+                                stream = "trade",
+                                action = "polling",
                                 payload = _t_json_value.Content
                             });
                         }
@@ -118,8 +119,9 @@ namespace CCXT.Collector.Upbit
                             {
                                 command = "AP",
                                 exchange = UPLogger.exchange_name,
-                                stream = "orderbook",
                                 symbol = symbol,
+                                stream = "orderbook",
+                                action = "polling",
                                 payload = _o_json_value.Content
                             });
                         }
@@ -208,8 +210,9 @@ namespace CCXT.Collector.Upbit
                             {
                                 command = "AP",
                                 exchange = UPLogger.exchange_name,
-                                stream = "ticker",
                                 symbol = _symbols,
+                                stream = "ticker",
+                                action = "polling",
                                 sequentialId = _last_limit_milli_secs,
                                 payload = _b_json_value.Content
                             });

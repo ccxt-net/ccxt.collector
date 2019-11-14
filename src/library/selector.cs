@@ -12,6 +12,24 @@
         }
 
         /// <summary>
+        /// 
+        /// </summary>
+        public virtual string code
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public virtual string stream_type
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
         /// for Binance
         /// </summary>
         public virtual string stream

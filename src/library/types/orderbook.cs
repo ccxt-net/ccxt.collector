@@ -54,6 +54,15 @@ namespace CCXT.Collector.Library.Types
             get;
             set;
         }
+
+        /// <summary>
+        ///
+        /// </summary>
+        public virtual long id
+        {
+            get;
+            set;
+        }
     }
 
     /// <summary>
@@ -316,6 +325,15 @@ namespace CCXT.Collector.Library.Types
         /// string symbol of the market ('BTCUSD', 'ETHBTC', ...)
         /// </summary>
         public virtual string symbol
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public virtual string action
         {
             get;
             set;

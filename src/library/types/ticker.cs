@@ -269,11 +269,20 @@ namespace CCXT.Collector.Library.Types
             get;
             set;
         }
-        
+
         /// <summary>
         /// symbol
         /// </summary>
         public virtual string symbol
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// action
+        /// </summary>
+        public virtual string action
         {
             get;
             set;

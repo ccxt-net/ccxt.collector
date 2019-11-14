@@ -169,7 +169,7 @@ namespace CCXT.Collector.BitMEX
 
             await publicOpen(__stream_id, symbol);
 
-            await privateOpen(__stream_id, KConfig.BitMexConnectKey, KConfig.BitMexSecretKey, KConfig.BitMexUserName);
+            //await privateOpen(__stream_id, KConfig.BitMexConnectKey, KConfig.BitMexSecretKey, KConfig.BitMexUserName);
         }
 
         private volatile int __last_receive_time = 0;
@@ -301,8 +301,9 @@ namespace CCXT.Collector.BitMEX
                                     {
                                         command = "WS",
                                         exchange = BMLogger.exchange_name,
-                                        stream = _selector.table,
                                         symbol = symbol,
+                                        stream = _selector.table,
+                                        action = _selector.action,
                                         payload = _selector.data.ToString(Formatting.None)
                                     });
 

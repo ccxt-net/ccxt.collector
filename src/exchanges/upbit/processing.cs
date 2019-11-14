@@ -67,12 +67,14 @@ namespace CCXT.Collector.Upbit
                             {
                                 var _w_trade = JsonConvert.DeserializeObject<UWCompleteOrderItem>(_message.payload);
 
-                                var _s_trade = new SCompleteOrder
+                                var _s_trade = new SCompleteOrders
                                 {
                                     exchange = _message.exchange,
+                                    symbol = _message.symbol,
                                     stream = _message.stream,
-                                    symbol = _w_trade.symbol,
-                                    sequentialId = _w_trade.sequential_id,
+                                    action = _message.action,
+                                    sequentialId = _w_trade.timestamp,
+
                                     result = new List<ISCompleteOrderItem>
                                     {
                                         new SCompleteOrderItem
@@ -85,25 +87,33 @@ namespace CCXT.Collector.Upbit
                                     }
                                 };
 
-                                await mergeTradeItems(_s_trade);
-
-                                if (KConfig.UsePublishTrade == true)
-                                    await publishTrading(_s_trade);
+                                await mergeCompleteOrder(_s_trade);
                             }
                             else if (_message.stream == "orderbook")
                             {
                                 var _w_orderbook = JsonConvert.DeserializeObject<UWOrderBook>(_message.payload);
 
-                                var _s_orderbook = new SOrderBook
+                                var _s_orderbooks = new SOrderBooks
                                 {
-                                    timestamp = _w_orderbook.timestamp,
-                                    askSumQty = _w_orderbook.askSumQty,
-                                    bidSumQty = _w_orderbook.bidSumQty,
-                                    asks = _w_orderbook.asks,
-                                    bids = _w_orderbook.bids
+                                    exchange = _message.exchange,
+                                    symbol = _message.symbol,
+                                    stream = _message.stream,
+                                    action = _message.action,
+                                    sequentialId = _w_orderbook.timestamp,
+
+                                    result = new SOrderBook
+                                    {
+                                        timestamp = _w_orderbook.timestamp,
+                                        
+                                        askSumQty = _w_orderbook.askSumQty,
+                                        bidSumQty = _w_orderbook.bidSumQty,
+                                     
+                                        asks = _w_orderbook.asks,
+                                        bids = _w_orderbook.bids
+                                    }
                                 };
 
-                                await mergeOrderbook(_s_orderbook, _message.exchange, _message.symbol);
+                                await mergeOrderbook(_s_orderbooks);
                             }
                         }
                         else if (_message.command == "AP")
@@ -112,12 +122,14 @@ namespace CCXT.Collector.Upbit
                             {
                                 var _a_trades = JsonConvert.DeserializeObject<List<UACompleteOrderItem>>(_message.payload);
 
-                                var _s_trade = new SCompleteOrder
+                                var _s_trade = new SCompleteOrders
                                 {
                                     exchange = _message.exchange,
-                                    stream = _message.stream,
                                     symbol = _message.symbol,
-                                    sequentialId = _a_trades.Max(t => t.sequential_id),
+                                    stream = _message.stream,
+                                    action = _message.action,
+                                    sequentialId = _a_trades.Max(t => t.timestamp),
+
                                     result = _a_trades.Select(t => 
                                     {
                                         return new SCompleteOrderItem
@@ -131,7 +143,7 @@ namespace CCXT.Collector.Upbit
                                     .ToList<ISCompleteOrderItem>()
                                 };
 
-                                await mergeTradeItems(_s_trade);
+                                await mergeCompleteOrder(_s_trade);
                             }
                             else if (_message.stream == "orderbook")
                             {
@@ -141,16 +153,27 @@ namespace CCXT.Collector.Upbit
                                 var _asks = _a_orderbooks[0].asks;
                                 var _bids = _a_orderbooks[0].bids;
 
-                                var _s_orderbook = new SOrderBook
+                                var _s_orderbooks = new SOrderBooks
                                 {
-                                    timestamp = _timestamp,
-                                    askSumQty = _asks.Sum(o => o.quantity),
-                                    bidSumQty = _bids.Sum(o => o.quantity),
-                                    asks = _asks,
-                                    bids = _bids
+                                    exchange = _message.exchange,
+                                    symbol = _message.symbol,
+                                    stream = _message.stream,
+                                    action = _message.action,
+                                    sequentialId = _a_orderbooks.Max(t => t.timestamp),
+
+                                    result = new SOrderBook
+                                    {
+                                        timestamp = _timestamp,
+                                        
+                                        askSumQty = _asks.Sum(o => o.quantity),
+                                        bidSumQty = _bids.Sum(o => o.quantity),
+                                     
+                                        asks = _asks,
+                                        bids = _bids
+                                    }
                                 };
 
-                                await mergeOrderbook(_s_orderbook, _message.exchange, _message.symbol);
+                                await mergeOrderbook(_s_orderbooks);
                             }
                             else if (_message.stream == "ticker")
                             {
@@ -159,9 +182,11 @@ namespace CCXT.Collector.Upbit
                                 await publishTicker(new STickers
                                 {
                                     exchange = _message.exchange,
-                                    stream = _message.stream,
                                     symbol = _message.symbol,
+                                    stream = _message.stream,
+                                    action = _message.action,
                                     sequentialId = _message.sequentialId,
+
                                     result = _a_ticker_data.Select(o =>
                                     {
                                         var _ask = o.asks.OrderBy(a => a.price).First();

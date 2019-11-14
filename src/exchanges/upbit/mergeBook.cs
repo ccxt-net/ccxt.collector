@@ -17,36 +17,25 @@ namespace CCXT.Collector.Upbit
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="trades"></param>
+        /// <param name="cob"></param>
         /// <returns></returns>
-        private async ValueTask<bool> mergeTradeItems(SCompleteOrder trades)
+        private async ValueTask<bool> mergeOrderbook(SOrderBooks cob)
         {
             var _result = false;
 
             SOrderBooks _qob;
-            if (__qOrderBooks.TryGetValue(trades.symbol, out _qob) == true)
             {
-                _qob.stream = trades.stream;
-
-                if (trades.result != null)
+                if (__qOrderBooks.TryGetValue(cob.symbol, out _qob) == true)
                 {
-                    var _settings = GetSettings(trades.symbol);
-                    _result = await updateTradeItems(_qob, trades, _settings);
+                    _qob.stream = cob.stream;
+
+                    var _settings = GetSettings(cob.symbol);
+                    _result = await modifyOrderbook(_qob, cob, _settings);
                 }
-            }
-
-            return _result;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private Settings GetSettings(string symbol)
-        {
-            Settings _result;
-
-            if (__qSettings.TryGetValue(symbol, out _result) == false)
-            {
-                _result = new Settings();
-                __qSettings.TryAdd(symbol, _result);
+                else
+                {
+                    _result = await insertOrderbook(cob);
+                }
             }
 
             return _result;
@@ -55,153 +44,23 @@ namespace CCXT.Collector.Upbit
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="qob"></param>
-        /// <param name="trades"></param>
-        /// <param name="settings"></param>
+        /// <param name="cob"></param>
         /// <returns></returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private async ValueTask<bool> updateTradeItems(SOrderBooks qob, SCompleteOrder trades, Settings settings)
-        {
-            var _nob = new SOrderBooks
-            {
-                exchange = trades.exchange,
-                stream = "difftrade",
-                symbol = trades.symbol,
-                sequentialId = trades.sequentialId,
-                result = new SOrderBook
-                {
-                    timestamp = trades.result.Max(o => o.timestamp),
-                    askSumQty = 0,
-                    bidSumQty = 0
-                }
-            };
-
-            lock (__qOrderBooks)
-            {
-                settings.before_trade_ask_size = qob.result.asks.Sum(o => o.quantity);
-                settings.before_trade_bid_size = qob.result.bids.Sum(o => o.quantity);
-
-                foreach (var _t in trades.result.OrderBy(t => t.timestamp))
-                {
-                    if (settings.last_trade_id >= _t.timestamp)
-                        continue;
-
-                    settings.last_trade_id = _t.timestamp;
-
-                    var _ask = qob.result.asks.Where(o => o.price == _t.price).SingleOrDefault();
-                    if (_ask != null)
-                    {
-                        if (_ask.quantity <= _t.quantity)
-                        {
-                            var _aoi = new SOrderBookItem
-                            {
-                                action = "delete",
-                                price = _ask.price,
-                                quantity = _ask.quantity,
-                                amount = _ask.price * _ask.quantity,
-                                count = 1
-                            };
-
-                            _nob.result.asks.Add(_aoi);
-
-                            _nob.result.askSumQty -= _ask.quantity;
-                            _ask.quantity = 0;
-                        }
-                        else
-                        {
-                            _ask.quantity -= _t.quantity;
-
-                            var _aoi = new SOrderBookItem
-                            {
-                                action = "update",
-                                price = _ask.price,
-                                quantity = _ask.quantity,
-                                amount = _ask.price * _ask.quantity,
-                                count = 1
-                            };
-
-                            _nob.result.asks.Add(_aoi);
-                            _nob.result.askSumQty += _ask.quantity;
-                        }
-                    }
-
-                    var _bid = qob.result.bids.Where(o => o.price == _t.price).SingleOrDefault();
-                    if (_bid != null)
-                    {
-                        if (_bid.quantity <= _t.quantity)
-                        {
-                            var _aoi = new SOrderBookItem
-                            {
-                                action = "delete",
-                                price = _bid.price,
-                                quantity = _bid.quantity,
-                                amount = _bid.price * _bid.quantity,
-                                count = 1
-                            };
-
-                            _nob.result.bids.Add(_aoi);
-
-                            _nob.result.bidSumQty -= _bid.quantity;
-                            _bid.quantity = 0;
-                        }
-                        else
-                        {
-                            _bid.quantity -= _t.quantity;
-
-                            var _aoi = new SOrderBookItem
-                            {
-                                action = "update",
-                                price = _bid.price,
-                                quantity = _bid.quantity,
-                                amount = _bid.price * _bid.quantity,
-                                count = 1
-                            };
-
-                            _nob.result.bids.Add(_aoi);
-                            _nob.result.bidSumQty += _bid.quantity;
-                        }
-                    }
-
-                    cleanOrderbook(qob, _nob, _t.price);
-                }
-
-                qob.sequentialId = _nob.sequentialId;
-
-                qob.result.asks.RemoveAll(o => o.quantity == 0);
-                qob.result.bids.RemoveAll(o => o.quantity == 0);
-            }
-
-            if (_nob.result.asks.Count + _nob.result.bids.Count > 0)
-            {
-                await publishOrderbook(_nob);
-
-                settings.orderbook_count = 0;
-                settings.trades_flag = true;
-            }
-
-            return true;
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="orderbook"></param>
-        /// <param name="symbol"></param>
-        /// <returns></returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private async ValueTask<bool> insertOrderbook(SOrderBook orderbook, string exchange, string symbol)
+        private async ValueTask<bool> insertOrderbook(SOrderBooks cob)
         {
             var _result = false;
 
-            var _sqo = await createOrderbooks(orderbook, exchange, symbol);
-            if (__qOrderBooks.TryAdd(symbol, _sqo) == true)
+            var _sqo = await createOrderbook(cob);
+            if (__qOrderBooks.TryAdd(cob.symbol, _sqo) == true)
             {
-                var _settings = GetSettings(symbol);
+                var _settings = GetSettings(cob.symbol);
+                {
+                    _settings.last_orderbook_time = cob.result.timestamp;
+                    _settings.orderbook_count = 0;
+                }
 
-                _settings.last_orderbook_time = orderbook.timestamp;
-                _settings.orderbook_count = 0;
-
-                await snapshotOrderbook(symbol);
+                await snapshotOrderbook(cob.symbol);
                 _result = true;
             }
 
@@ -212,41 +71,37 @@ namespace CCXT.Collector.Upbit
         /// 
         /// </summary>
         /// <param name="qob"></param>
-        /// <param name="orderbook"></param>
-        /// <param name="exchange"></param>
-        /// <param name="symbol"></param>
+        /// <param name="cob"></param>
+        /// <param name="settings"></param>
         /// <returns></returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private async ValueTask<bool> modifyOrderbook(SOrderBooks qob, SOrderBook orderbook, string exchange, string symbol)
+        private async ValueTask<bool> modifyOrderbook(SOrderBooks qob, SOrderBooks cob, Settings settings)
         {
             var _result = false;
 
-            var _settings = GetSettings(symbol);
-            if (_settings.last_orderbook_time < orderbook.timestamp)
+            if (settings.last_orderbook_time < cob.result.timestamp)
             {
-                _settings.last_orderbook_time = orderbook.timestamp;
+                settings.last_orderbook_time = cob.result.timestamp;
 
-                var _current_ask_size = orderbook.askSumQty;
-                var _current_bid_size = orderbook.bidSumQty;
+                var _current_ask_size = cob.result.askSumQty;
+                var _current_bid_size = cob.result.bidSumQty;
 
-                if (_settings.last_order_ask_size != _current_ask_size || _settings.last_order_bid_size != _current_bid_size)
+                if (settings.last_order_ask_size != _current_ask_size || settings.last_order_bid_size != _current_bid_size)
                 {
-                    if (_settings.before_trade_ask_size != _current_ask_size || _settings.before_trade_bid_size != _current_bid_size)
+                    if (settings.before_trade_ask_size != _current_ask_size || settings.before_trade_bid_size != _current_bid_size)
                     {
-                        var _cob = await createOrderbooks(orderbook, exchange, symbol);
-
-                        if (_settings.trades_flag == true)
+                        if (settings.trades_flag == true)
                         {
                             var _t_ask = qob.result.asks.OrderByDescending(o => o.price).LastOrDefault();
                             var _t_bid = qob.result.bids.OrderByDescending(o => o.price).FirstOrDefault();
 
                             if (_t_ask != null && _t_bid != null)
                             {
-                                _cob.result.asks.RemoveAll(o => o.price < _t_ask.price);
-                                _cob.result.bids.RemoveAll(o => o.price > _t_bid.price);
+                                cob.result.asks.RemoveAll(o => o.price < _t_ask.price);
+                                cob.result.bids.RemoveAll(o => o.price > _t_bid.price);
 
-                                var _c_ask = _cob.result.asks.Where(o => o.price == _t_ask.price).SingleOrDefault();
-                                var _c_bid = _cob.result.bids.Where(o => o.price == _t_bid.price).SingleOrDefault();
+                                var _c_ask = cob.result.asks.Where(o => o.price == _t_ask.price).SingleOrDefault();
+                                var _c_bid = cob.result.bids.Where(o => o.price == _t_bid.price).SingleOrDefault();
 
                                 if (_c_ask != null && _c_bid != null)
                                 {
@@ -258,50 +113,15 @@ namespace CCXT.Collector.Upbit
                                 }
                             }
 
-                            _settings.trades_flag = false;
+                            settings.trades_flag = false;
                         }
 
-                        _result = await updateOrderbook(qob, _cob, _settings);
+                        _result = await updateOrderbook(qob, cob, settings);
 
-                        _settings.last_order_ask_size = qob.result.asks.Sum(o => o.quantity);
-                        _settings.last_order_bid_size = qob.result.bids.Sum(o => o.quantity);
-#if DEBUG
-                        // modified check
-                        if (_current_ask_size != _settings.last_order_ask_size || _current_bid_size != _settings.last_order_bid_size)
-                            UPLogger.WriteQ($"diffb: timestamp => {_settings.last_orderbook_time}, symbol => {symbol}, ask_size => {_current_ask_size}, {_settings.last_order_ask_size}, bid_size => {_current_bid_size}, {_settings.last_order_bid_size}");
-
-                        var _ask_count = qob.result.asks.Count;
-                        var _bid_count = qob.result.bids.Count;
-                        if (_ask_count + _bid_count != 30)
-                            UPLogger.WriteQ($"diffb: timestamp => {_settings.last_orderbook_time}, symbol => {symbol}, ask_count => {_ask_count}, bid_count => {_bid_count}");
-#endif
+                        settings.last_order_ask_size = qob.result.asks.Sum(o => o.quantity);
+                        settings.last_order_bid_size = qob.result.bids.Sum(o => o.quantity);
                     }
-                    else
-                        UPLogger.WriteQ($"trade: timestamp => {_settings.last_orderbook_time}, symbol => {symbol}, ask_size => {_current_ask_size}, bid_size => {_current_bid_size}");
                 }
-                else
-                    UPLogger.WriteQ($"equal: timestamp => {_settings.last_orderbook_time}, symbol => {symbol}, ask_size => {_current_ask_size}, bid_size => {_current_bid_size}");
-            }
-
-            return _result;
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="orderbook"></param>
-        /// <param name="symbol"></param>
-        /// <returns></returns>
-        private async ValueTask<bool> mergeOrderbook(SOrderBook orderbook, string exchange, string symbol)
-        {
-            var _result = false;
-
-            SOrderBooks _qob;
-            {
-                if (__qOrderBooks.TryGetValue(symbol, out _qob) == false)
-                    _result = await insertOrderbook(orderbook, exchange, symbol);
-                else
-                    _result = await modifyOrderbook(_qob, orderbook, exchange, symbol);
             }
 
             return _result;
@@ -317,12 +137,14 @@ namespace CCXT.Collector.Upbit
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private async ValueTask<bool> updateOrderbook(SOrderBooks qob, SOrderBooks cob, Settings settings)
         {
-            var _dqo = new SOrderBooks
+            var _nob = new SOrderBooks
             {
                 exchange = cob.exchange,
                 stream = "diffbooks",
                 symbol = cob.symbol,
+                action = cob.action,
                 sequentialId = cob.sequentialId,
+
                 result = new SOrderBook
                 {
                     timestamp = cob.result.timestamp,
@@ -333,111 +155,125 @@ namespace CCXT.Collector.Upbit
 
             lock (__qOrderBooks)
             {
-                foreach (var _coi in cob.result.asks)
+                foreach (var _ci in cob.result.asks)
                 {
-                    var _oi = qob.result.asks.Where(o => o.price == _coi.price).SingleOrDefault();
-                    if (_oi == null)
+                    var _qi = qob.result.asks.Where(o => o.price == _ci.price).SingleOrDefault();
+                    if (_qi == null)
                     {
-                        var _ioi = new SOrderBookItem
+                        var _ici = new SOrderBookItem
                         {
                             action = "insert",
-                            price = _coi.price,
-                            quantity = _coi.quantity,
-                            amount = _coi.price * _coi.quantity,
+                            id = _ci.id,
+                            price = _ci.price,
+                            quantity = _ci.quantity,
+                            amount = _ci.price * _ci.quantity,
                             count = 1
                         };
 
-                        _dqo.result.asks.Add(_ioi);
-                        qob.result.asks.Add(_ioi);
+                        _nob.result.asks.Add(_ici);
+                        qob.result.asks.Add(_ici);
 
-                        _dqo.result.askSumQty += _coi.quantity;
+                        _nob.result.askSumQty += _ci.quantity;
                     }
-                    else if (_oi.quantity != _coi.quantity)
+                    else if (_qi.quantity != _ci.quantity)
                     {
-                        _dqo.result.asks.Add(new SOrderBookItem
+                        _nob.result.asks.Add(new SOrderBookItem
                         {
                             action = "update",
-                            price = _coi.price,
-                            quantity = _coi.quantity,
-                            amount = _coi.price * _coi.quantity,
+                            id = _qi.id,
+                            price = _qi.price,
+                            quantity = _ci.quantity,
+                            amount = _qi.price * _ci.quantity,
                             count = 1
                         });
 
-                        _oi.quantity = _coi.quantity;
-                        _dqo.result.askSumQty += _coi.quantity;
+                        _qi.quantity = _ci.quantity;
+                        _qi.amount = _qi.price * _qi.quantity;
+
+                        _nob.result.askSumQty += _ci.quantity;
                     }
                 }
 
-                foreach (var _coi in cob.result.bids)
+                foreach (var _ci in cob.result.bids)
                 {
-                    var _oi = qob.result.bids.Where(o => o.price == _coi.price).SingleOrDefault();
-                    if (_oi == null)
+                    var _qi = qob.result.bids.Where(o => o.price == _ci.price).SingleOrDefault();
+                    if (_qi == null)
                     {
-                        var _ioi = new SOrderBookItem
+                        var _ici = new SOrderBookItem
                         {
                             action = "insert",
-                            price = _coi.price,
-                            quantity = _coi.quantity,
-                            amount = _coi.price * _coi.quantity,
+                            id = _ci.id,
+                            price = _ci.price,
+                            quantity = _ci.quantity,
+                            amount = _ci.price * _ci.quantity,
                             count = 1
                         };
 
-                        _dqo.result.bids.Add(_ioi);
-                        qob.result.bids.Add(_ioi);
+                        _nob.result.bids.Add(_ici);
+                        qob.result.bids.Add(_ici);
 
-                        _dqo.result.bidSumQty += _coi.quantity;
+                        _nob.result.bidSumQty += _ci.quantity;
                     }
-                    else if (_oi.quantity != _coi.quantity)
+                    else if (_qi.quantity != _ci.quantity)
                     {
-                        _dqo.result.bids.Add(new SOrderBookItem
+                        _nob.result.bids.Add(new SOrderBookItem
                         {
                             action = "update",
-                            price = _coi.price,
-                            quantity = _coi.quantity,
-                            amount = _coi.price * _coi.quantity,
+                            id = _qi.id,
+                            price = _qi.price,
+                            quantity = _ci.quantity,
+                            amount = _qi.price * _ci.quantity,
                             count = 1
                         });
 
-                        _oi.quantity = _coi.quantity;
-                        _dqo.result.bidSumQty += _coi.quantity;
+                        _qi.quantity = _ci.quantity;
+                        _qi.amount = _qi.quantity * _qi.price;
+
+                        _nob.result.bidSumQty += _ci.quantity;
                     }
                 }
 
-                foreach (var _loi in qob.result.asks)
+                foreach (var _qi in qob.result.asks)
                 {
-                    var _oi = cob.result.asks.Where(o => o.price == _loi.price).SingleOrDefault();
-                    if (_oi == null)
+                    var _ci = cob.result.asks.Where(o => o.price == _qi.price).SingleOrDefault();
+                    if (_ci == null)
                     {
-                        _dqo.result.asks.Add(new SOrderBookItem
+                        _nob.result.asks.Add(new SOrderBookItem
                         {
                             action = "delete",
-                            price = _loi.price,
-                            quantity = _loi.quantity,
-                            amount = _loi.price * _loi.quantity,
+                            id = _qi.id,
+                            price = _qi.price,
+                            quantity = _qi.quantity,
+                            amount = _qi.price * _qi.quantity,
                             count = 1
                         });
 
-                        _dqo.result.askSumQty -= _loi.quantity;
-                        _loi.quantity = 0;
+                        _nob.result.askSumQty -= _qi.quantity;
+
+                        _qi.quantity = 0;
+                        _qi.amount = 0;
                     }
                 }
 
-                foreach (var _loi in qob.result.bids)
+                foreach (var _qi in qob.result.bids)
                 {
-                    var _oi = cob.result.bids.Where(o => o.price == _loi.price).SingleOrDefault();
-                    if (_oi == null)
+                    var _ci = cob.result.bids.Where(o => o.price == _qi.price).SingleOrDefault();
+                    if (_ci == null)
                     {
-                        _dqo.result.bids.Add(new SOrderBookItem
+                        _nob.result.bids.Add(new SOrderBookItem
                         {
                             action = "delete",
-                            price = _loi.price,
-                            quantity = _loi.quantity,
-                            amount = _loi.price * _loi.quantity,
+                            id = _qi.id,
+                            price = _qi.price,
+                            quantity = _qi.quantity,
+                            amount = _qi.price * _qi.quantity,
                             count = 1
                         });
 
-                        _dqo.result.bidSumQty -= _loi.quantity;
-                        _loi.quantity = 0;
+                        _nob.result.bidSumQty -= _qi.quantity;
+
+                        _qi.quantity = 0;
+                        _qi.amount = 0;
                     }
                 }
 
@@ -448,10 +284,182 @@ namespace CCXT.Collector.Upbit
             if (++settings.orderbook_count == KConfig.SnapshotSkipCounter)
             {
                 qob.sequentialId = cob.sequentialId;
-                await snapshotOrderbook(_dqo.symbol);
+                await snapshotOrderbook(_nob.symbol);
             }
-            else
-                await publishOrderbook(_dqo);
+            else 
+            {
+                _nob.result.asks.RemoveAll(o => o.quantity == 0);
+                _nob.result.bids.RemoveAll(o => o.quantity == 0);
+
+                if (_nob.result.asks.Count > 0 || _nob.result.bids.Count > 0)
+                    await publishOrderbook(_nob);
+            }
+
+            return true;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="cco"></param>
+        /// <returns></returns>
+        private async ValueTask<bool> mergeCompleteOrder(SCompleteOrders cco)
+        {
+            var _result = false;
+
+            if (KConfig.UsePublishTrade == true)
+                await publishTrading(cco);
+
+            SOrderBooks _qob;
+            if (__qOrderBooks.TryGetValue(cco.symbol, out _qob) == true)
+            {
+                _qob.stream = cco.stream;
+
+                if (cco.result != null)
+                {
+                    var _settings = GetSettings(cco.symbol);
+                    _result = await updateCompleteOrder(_qob, cco, _settings);
+                }
+            }
+
+            return _result;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="qob"></param>
+        /// <param name="cco"></param>
+        /// <param name="settings"></param>
+        /// <returns></returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private async ValueTask<bool> updateCompleteOrder(SOrderBooks qob, SCompleteOrders cco, Settings settings)
+        {
+            var _nob = new SOrderBooks
+            {
+                exchange = cco.exchange,
+                stream = "difftrade",
+                symbol = cco.symbol,
+                action = cco.action,
+                sequentialId = cco.sequentialId,
+
+                result = new SOrderBook
+                {
+                    timestamp = cco.result.Max(o => o.timestamp),
+                    askSumQty = 0,
+                    bidSumQty = 0
+                }
+            };
+
+            lock (__qOrderBooks)
+            {
+                settings.before_trade_ask_size = qob.result.asks.Sum(o => o.quantity);
+                settings.before_trade_bid_size = qob.result.bids.Sum(o => o.quantity);
+
+                foreach (var _t in cco.result.OrderBy(t => t.timestamp))
+                {
+                    if (settings.last_trade_id >= _t.timestamp)
+                        continue;
+
+                    settings.last_trade_id = _t.timestamp;
+
+                    var _ask = qob.result.asks.Where(o => o.price == _t.price).SingleOrDefault();
+                    if (_ask != null)
+                    {
+                        if (_ask.quantity <= _t.quantity)
+                        {
+                            _nob.result.asks.Add(new SOrderBookItem
+                            {
+                                action = "delete",
+                                id = _ask.id,
+                                price = _ask.price,
+                                quantity = _ask.quantity,
+                                amount = _ask.price * _ask.quantity,
+                                count = 1
+                            });
+
+                            _nob.result.askSumQty -= _ask.quantity;
+
+                            _ask.quantity = 0;
+                            _ask.amount = 0;
+                        }
+                        else
+                        {
+                            _ask.quantity -= _t.quantity;
+                            _ask.amount = _ask.price * _ask.quantity;
+
+                            _nob.result.asks.Add(new SOrderBookItem
+                            {
+                                action = "update",
+                                id = _ask.id,
+                                price = _ask.price,
+                                quantity = _ask.quantity,
+                                amount = _ask.price * _ask.quantity,
+                                count = 1
+                            });
+
+                            _nob.result.askSumQty += _ask.quantity;
+                        }
+                    }
+
+                    var _bid = qob.result.bids.Where(o => o.price == _t.price).SingleOrDefault();
+                    if (_bid != null)
+                    {
+                        if (_bid.quantity <= _t.quantity)
+                        {
+                            _nob.result.bids.Add(new SOrderBookItem
+                            {
+                                action = "delete",
+                                id = _bid.id,
+                                price = _bid.price,
+                                quantity = _bid.quantity,
+                                amount = _bid.price * _bid.quantity,
+                                count = 1
+                            });
+
+                            _nob.result.bidSumQty -= _bid.quantity;
+
+                            _bid.quantity = 0;
+                            _bid.amount = 0;
+                        }
+                        else
+                        {
+                            _bid.quantity -= _t.quantity;
+                            _bid.amount = _bid.price * _bid.quantity;
+
+                            _nob.result.bids.Add(new SOrderBookItem
+                            {
+                                action = "update",
+                                id = _bid.id,
+                                price = _bid.price,
+                                quantity = _bid.quantity,
+                                amount = _bid.price * _bid.quantity,
+                                count = 1
+                            });
+
+                            _nob.result.bidSumQty += _bid.quantity;
+                        }
+                    }
+
+                    //cleanOrderbook(qob, _nob, _t.price);
+                }
+
+                qob.sequentialId = _nob.sequentialId;
+
+                qob.result.asks.RemoveAll(o => o.quantity == 0);
+                qob.result.bids.RemoveAll(o => o.quantity == 0);
+            }
+
+            _nob.result.asks.RemoveAll(o => o.quantity == 0);
+            _nob.result.bids.RemoveAll(o => o.quantity == 0);
+            
+            if (_nob.result.asks.Count + _nob.result.bids.Count > 0)
+            {
+                await publishOrderbook(_nob);
+
+                settings.orderbook_count = 0;
+                settings.trades_flag = true;
+            }
 
             return true;
         }
@@ -466,40 +474,44 @@ namespace CCXT.Collector.Upbit
         private void cleanOrderbook(SOrderBooks qob, SOrderBooks nob, decimal price)
         {
             var _asks = qob.result.asks.Where(o => o.price < price);
-            //if (_asks.Count() > 0)
             {
-                foreach (var _qox in _asks)
+                foreach (var _ask in _asks)
                 {
                     nob.result.asks.Add(new SOrderBookItem
                     {
                         action = "delete",
-                        price = _qox.price,
-                        quantity = _qox.quantity,
-                        amount = _qox.price * _qox.quantity,
+                        id = _ask.id,
+                        price = _ask.price,
+                        quantity = _ask.quantity,
+                        amount = _ask.price * _ask.quantity,
                         count = 1
                     });
 
-                    nob.result.askSumQty -= _qox.quantity;
-                    _qox.quantity = 0;
+                    nob.result.askSumQty -= _ask.quantity;
+
+                    _ask.quantity = 0;
+                    _ask.amount = 0;
                 }
             }
 
             var _bids = qob.result.bids.Where(o => o.price > price);
-            //if (_bids.Count() > 0)
             {
-                foreach (var _qox in _bids)
+                foreach (var _bid in _bids)
                 {
                     nob.result.bids.Add(new SOrderBookItem
                     {
                         action = "delete",
-                        price = _qox.price,
-                        quantity = _qox.quantity,
-                        amount = _qox.price * _qox.quantity,
+                        id = _bid.id,
+                        price = _bid.price,
+                        quantity = _bid.quantity,
+                        amount = _bid.price * _bid.quantity,
                         count = 1
                     });
 
-                    nob.result.bidSumQty -= _qox.quantity;
-                    _qox.quantity = 0;
+                    nob.result.bidSumQty -= _bid.quantity;
+                    
+                    _bid.quantity = 0;
+                    _bid.amount = 0;
                 }
             }
         }
@@ -507,51 +519,15 @@ namespace CCXT.Collector.Upbit
         /// <summary>
         /// Json 변환시 표준 클래스로 변환 하기 위해 new create 해야 함
         /// </summary>
-        /// <param name="orderbook"></param>
-        /// <param name="exchange"></param>
-        /// <param name="symbol"></param>
+        /// <param name="cob"></param>
         /// <returns></returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private async ValueTask<SOrderBooks> createOrderbooks(SOrderBook orderbook, string exchange, string symbol)
+        private async ValueTask<SOrderBooks> createOrderbook(SOrderBooks cob)
         {
-            var _sob = new SOrderBooks
-            {
-                exchange = exchange,
-                symbol = symbol,
-                sequentialId = orderbook.timestamp,
-                result = new SOrderBook
-                {
-                    timestamp = orderbook.timestamp,
-                    askSumQty = orderbook.asks.Sum(o => o.quantity),
-                    bidSumQty = orderbook.bids.Sum(o => o.quantity)
-                }
-            };
+            cob.result.asks.ForEach(a => a.action = "insert");
+            cob.result.bids.ForEach(a => a.action = "insert");
 
-            foreach (var _oi in orderbook.asks)
-            {
-                _sob.result.asks.Add(new SOrderBookItem
-                {
-                    action = "insert",
-                    price = _oi.price,
-                    quantity = _oi.quantity,
-                    amount = _oi.price * _oi.quantity,
-                    count = 1
-                });
-            }
-
-            foreach (var _oi in orderbook.bids)
-            {
-                _sob.result.bids.Add(new SOrderBookItem
-                {
-                    action = "insert",
-                    price = _oi.price,
-                    quantity = _oi.quantity,
-                    amount = _oi.price * _oi.quantity,
-                    count = 1
-                });
-            }
-
-            return await Task.FromResult(_sob);
+            return await Task.FromResult(cob);
         }
 
         private async Task snapshotOrderbook(string symbol)
@@ -561,9 +537,7 @@ namespace CCXT.Collector.Upbit
             lock (__qOrderBooks)
             {
                 if (__qOrderBooks.TryGetValue(symbol, out _qob) == true)
-                {
                     _qob.stream = "snapshot";
-                }
             }
 
             if (_qob != null)
@@ -574,30 +548,44 @@ namespace CCXT.Collector.Upbit
         private async Task publishOrderbook(SOrderBooks sob)
         {
             await Task.Delay(0);
-            {
-                var _json_data = JsonConvert.SerializeObject(sob);
-                OrderbookQ.Write(_json_data);
-            }
+#if DEBUG
+            var _json_data = JsonConvert.SerializeObject(sob);
+            OrderbookQ.Write(_json_data);
+#endif
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private async Task publishTrading(SCompleteOrder sco)
+        private async Task publishTrading(SCompleteOrders sco)
         {
             await Task.Delay(0);
-            {
-                var _json_data = JsonConvert.SerializeObject(sco);
-                TradingQ.Write(_json_data);
-            }
+#if DEBUG
+            var _json_data = JsonConvert.SerializeObject(sco);
+            TradingQ.Write(_json_data);
+#endif
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private async Task publishTicker(STickers stk)
         {
             await Task.Delay(0);
+#if DEBUG
+            var _json_data = JsonConvert.SerializeObject(stk);
+            TickerQ.Write(_json_data);
+#endif
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private Settings GetSettings(string symbol)
+        {
+            Settings _result;
+
+            if (__qSettings.TryGetValue(symbol, out _result) == false)
             {
-                var _json_data = JsonConvert.SerializeObject(stk);
-                TickerQ.Write(_json_data);
+                _result = new Settings();
+                __qSettings.TryAdd(symbol, _result);
             }
+
+            return _result;
         }
     }
 }

@@ -138,9 +138,10 @@ namespace CCXT.Collector.Service
 
                                 if (_packet.command == "WQ")
                                 {
+#if !DEBUG
                                     var _body = Encoding.UTF8.GetBytes(_message);
                                     _channel.BasicPublish(exchange: QueueName, routingKey: "", basicProperties: null, body: _body);
-#if DEBUG
+#else
                                     Console.Out.WriteLine(_message);
 #endif
                                 }

@@ -153,7 +153,7 @@ namespace CCXT.Collector.Library.Types
     /// <summary>
     ///
     /// </summary>
-    public class SCompleteOrder : ApiResult<List<ISCompleteOrderItem>>, ISCompleteOrder
+    public class SCompleteOrders : ApiResult<List<ISCompleteOrderItem>>, ISCompleteOrder
     {
         /// <summary>
         /// is success calling
@@ -227,6 +227,15 @@ namespace CCXT.Collector.Library.Types
         ///
         /// </summary>
         public virtual string symbol
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        ///
+        /// </summary>
+        public virtual string action
         {
             get;
             set;

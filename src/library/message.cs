@@ -91,5 +91,14 @@
             get;
             set;
         }
+
+        /// <summary>
+        ///
+        /// </summary>
+        public string action
+        {
+            get;
+            set;
+        }
     }
 }

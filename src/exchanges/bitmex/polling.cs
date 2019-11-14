@@ -1,12 +1,10 @@
-﻿using CCXT.Collector.BitMEX.Public;
-using CCXT.Collector.Library;
-using CCXT.Collector.Library.Types;
-using Newtonsoft.Json;
-using OdinSdk.BaseLib.Coin.Types;
+﻿using CCXT.Collector.Library;
 using System;
+using System.Linq;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using OdinSdk.BaseLib.Configuration;
 
 namespace CCXT.Collector.BitMEX
 {
@@ -18,7 +16,7 @@ namespace CCXT.Collector.BitMEX
             get
             {
                 if (__public_api == null)
-                    __public_api = new CCXT.Collector.BitMEX.Public.PublicApi();
+                    __public_api = new CCXT.Collector.BitMEX.Public.PublicApi(KConfig.BitMexUseLiveServer);
                 return __public_api;
             }
         }
@@ -54,10 +52,36 @@ namespace CCXT.Collector.BitMEX
                             {
                                 command = "AP",
                                 exchange = BMLogger.exchange_name,
-                                stream = "trade",
                                 symbol = symbol,
+                                stream = "trade",
+                                action = "polling",
                                 payload = _t_json_value.Content
                             });
+                        }
+                        else
+                        {
+                            var _http_status = (int)_t_json_value.StatusCode;
+                            if (_http_status == 403 || _http_status == 418 || _http_status == 429)
+                            {
+                                BMLogger.WriteQ($"request-limit: symbol => {symbol}, https_status => {_http_status}");
+
+                                var _waiting = tokenSource.Token.WaitHandle.WaitOne(0);
+                                if (_waiting == true)
+                                    break;
+
+                                var _seconds = 1;
+                                {
+                                    var _limit_reset = _t_json_value.Headers.Where(h => h.Name.ToLower() == "x-ratelimit-reset").FirstOrDefault();
+                                    if (_limit_reset != null)
+                                    {
+                                        var _diff_seconds = Convert.ToInt64(_limit_reset.Value) - CUnixTime.Now;
+                                        if (_diff_seconds > 0)
+                                            _seconds += (int)_diff_seconds;
+                                    }
+
+                                    await Task.Delay(_seconds * 1000);
+                                }
+                            }
                         }
                     }
                     catch (TaskCanceledException)
@@ -77,7 +101,7 @@ namespace CCXT.Collector.BitMEX
                     if (_cancelled == true)
                         break;
 
-                    await Task.Delay(KConfig.UpbitPollingSleep);
+                    await Task.Delay(KConfig.BitMexPollingSleep);
                 }
             },
             tokenSource.Token
@@ -109,10 +133,36 @@ namespace CCXT.Collector.BitMEX
                             {
                                 command = "AP",
                                 exchange = BMLogger.exchange_name,
-                                stream = "orderbook",
                                 symbol = symbol,
+                                stream = "orderbook",
+                                action = "polling",
                                 payload = _o_json_value.Content
                             });
+                        }
+                        else
+                        {
+                            var _http_status = (int)_o_json_value.StatusCode;
+                            if (_http_status == 403 || _http_status == 418 || _http_status == 429)
+                            {
+                                BMLogger.WriteQ($"request-limit: symbol => {symbol}, https_status => {_http_status}");
+
+                                var _waiting = tokenSource.Token.WaitHandle.WaitOne(0);
+                                if (_waiting == true)
+                                    break;
+
+                                var _seconds = 1;
+                                {
+                                    var _limit_reset = _o_json_value.Headers.Where(h => h.Name.ToLower() == "x-ratelimit-reset").FirstOrDefault();
+                                    if (_limit_reset != null)
+                                    {
+                                        var _diff_seconds = Convert.ToInt64(_limit_reset.Value) - CUnixTime.Now;
+                                        if (_diff_seconds > 0)
+                                            _seconds += (int)_diff_seconds;
+                                    }
+
+                                    await Task.Delay(_seconds * 1000);
+                                }
+                            }
                         }
                     }
                     catch (TaskCanceledException)
@@ -132,7 +182,7 @@ namespace CCXT.Collector.BitMEX
                     if (_cancelled == true)
                         break;
 
-                    await Task.Delay(KConfig.UpbitPollingSleep);
+                    await Task.Delay(KConfig.BitMexPollingSleep);
                 }
             },
             tokenSource.Token
