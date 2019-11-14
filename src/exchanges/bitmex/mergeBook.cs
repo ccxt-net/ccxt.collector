@@ -33,13 +33,22 @@ namespace CCXT.Collector.BitMEX
 
                     var _settings = GetSettings(cob.symbol);
                     if (cob.action == "insert" || cob.action == "update" || cob.action == "delete")
+                    {
+                        BMLogger.WriteO($"mergeOrderbook1: {cob.action}");
                         _result = await updateOrderbookW(_qob, cob, _settings);
+                    }
                     else
+                    {
+                        BMLogger.WriteO($"mergeOrderbook2: {cob.action}");
                         _result = await updateOrderbook(_qob, cob, _settings);
+                    }
                 }
-                else if (cob.action == "partial" || cob.action == "polling")
+                else 
                 {
-                    _result = await insertOrderbook(cob);
+                    BMLogger.WriteO($"mergeOrderbook3: {cob.action}");
+
+                    if (cob.action == "partial" || cob.action == "polling")
+                        _result = await insertOrderbook(cob);
                 }
             }
 
@@ -55,8 +64,6 @@ namespace CCXT.Collector.BitMEX
         private async ValueTask<bool> insertOrderbook(SOrderBooks cob)
         {
             var _result = false;
-
-            BMLogger.WriteO("insertOrderbook");
 
             var _sqo = await createOrderbook(cob);
             if (__qOrderBooks.TryAdd(cob.symbol, _sqo) == true)
