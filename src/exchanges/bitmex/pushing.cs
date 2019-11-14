@@ -176,6 +176,8 @@ namespace CCXT.Collector.BitMEX
 
         public async Task Start(CancellationTokenSource tokenSource, string symbol)
         {
+            BMLogger.WriteO($"pushing service start: symbol => {symbol}...");
+
             using (var _cws = new ClientWebSocket())
             {
                 await _cws.ConnectAsync(new Uri(webSocketUrl), tokenSource.Token);
@@ -351,7 +353,7 @@ namespace CCXT.Collector.BitMEX
 
                 await Task.WhenAll(_sending, _receiving);
 
-                BMLogger.WriteO($"websocket service stopped: symbol => {symbol}...");
+                BMLogger.WriteO($"pushing service stopped: symbol => {symbol}...");
             }
         }
     }

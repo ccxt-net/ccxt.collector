@@ -65,7 +65,7 @@ namespace CCXT.Collector.Upbit
 
         public async Task Start(CancellationTokenSource tokenSource, string symbol)
         {
-            UPLogger.WriteO($"websocket service start: symbol => {symbol}...");
+            UPLogger.WriteO($"pushing service start: symbol => {symbol}...");
 
             using (var _cws = new ClientWebSocket())
             {
@@ -217,7 +217,7 @@ namespace CCXT.Collector.Upbit
 
                 await Task.WhenAll(_sending, _receiving);
 
-                UPLogger.WriteO($"websocket service stopped: symbol => {symbol}...");
+                UPLogger.WriteO($"pushing service stopped: symbol => {symbol}...");
             }
         }
     }
