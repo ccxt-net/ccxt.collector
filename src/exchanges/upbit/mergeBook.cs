@@ -548,7 +548,7 @@ namespace CCXT.Collector.Upbit
         private async Task publishOrderbook(SOrderBooks sob)
         {
             await Task.Delay(0);
-#if DEBUG
+#if !DEBUG
             var _json_data = JsonConvert.SerializeObject(sob);
             OrderbookQ.Write(_json_data);
 #endif
@@ -558,7 +558,7 @@ namespace CCXT.Collector.Upbit
         private async Task publishTrading(SCompleteOrders sco)
         {
             await Task.Delay(0);
-#if DEBUG
+#if !DEBUG
             var _json_data = JsonConvert.SerializeObject(sco);
             TradingQ.Write(_json_data);
 #endif
@@ -568,7 +568,7 @@ namespace CCXT.Collector.Upbit
         private async Task publishTicker(STickers stk)
         {
             await Task.Delay(0);
-#if DEBUG
+#if !DEBUG
             var _json_data = JsonConvert.SerializeObject(stk);
             TickerQ.Write(_json_data);
 #endif

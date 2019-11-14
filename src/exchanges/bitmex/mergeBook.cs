@@ -23,8 +23,6 @@ namespace CCXT.Collector.BitMEX
         {
             var _result = false;
 
-            BMLogger.WriteO("mergeOrderbook");
-
             SOrderBooks _qob;
             {
                 if (__qOrderBooks.TryGetValue(cob.symbol, out _qob) == true)
@@ -33,20 +31,12 @@ namespace CCXT.Collector.BitMEX
 
                     var _settings = GetSettings(cob.symbol);
                     if (cob.action == "insert" || cob.action == "update" || cob.action == "delete")
-                    {
-                        BMLogger.WriteO($"mergeOrderbook1: {cob.action}");
                         _result = await updateOrderbookW(_qob, cob, _settings);
-                    }
                     else
-                    {
-                        BMLogger.WriteO($"mergeOrderbook2: {cob.action}");
                         _result = await updateOrderbook(_qob, cob, _settings);
-                    }
                 }
                 else 
                 {
-                    BMLogger.WriteO($"mergeOrderbook3: {cob.action}");
-
                     if (cob.action == "partial" || cob.action == "polling")
                         _result = await insertOrderbook(cob);
                 }
@@ -682,7 +672,7 @@ namespace CCXT.Collector.BitMEX
         private async Task publishOrderbook(SOrderBooks sob)
         {
             await Task.Delay(0);
-#if DEBUG
+#if !DEBUG
             var _json_data = JsonConvert.SerializeObject(sob);
             OrderbookQ.Write(_json_data);
 #endif
@@ -692,7 +682,7 @@ namespace CCXT.Collector.BitMEX
         private async Task publishTrading(SCompleteOrders sco)
         {
             await Task.Delay(0);
-#if DEBUG
+#if !DEBUG
             var _json_data = JsonConvert.SerializeObject(sco);
             TradingQ.Write(_json_data);
 #endif
@@ -702,7 +692,7 @@ namespace CCXT.Collector.BitMEX
         private async Task publishTicker(STickers stk)
         {
             await Task.Delay(0);
-#if DEBUG
+#if !DEBUG
             var _json_data = JsonConvert.SerializeObject(stk);
             TickerQ.Write(_json_data);
 #endif
