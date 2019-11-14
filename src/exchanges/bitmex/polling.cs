@@ -23,7 +23,7 @@ namespace CCXT.Collector.BitMEX
 
         public async Task Start(CancellationTokenSource tokenSource, string symbol, int limits = 25)
         {
-            BMLogger.WriteO($"polling service start: symbol => {symbol}");
+            BMLogger.WriteO($"polling service start: symbol => {symbol}...");
 
             var _t_polling = Task.Run(async () =>
             {
@@ -57,6 +57,8 @@ namespace CCXT.Collector.BitMEX
                                 action = "polling",
                                 payload = _t_json_value.Content
                             });
+
+                            BMLogger.WriteO(_t_json_value.Content);
                         }
                         else
                         {
@@ -138,6 +140,8 @@ namespace CCXT.Collector.BitMEX
                                 action = "polling",
                                 payload = _o_json_value.Content
                             });
+
+                            BMLogger.WriteO(_o_json_value.Content);
                         }
                         else
                         {
@@ -190,7 +194,7 @@ namespace CCXT.Collector.BitMEX
 
             await Task.WhenAll(_t_polling, _o_polling);
 
-            BMLogger.WriteO($"polling service stopped: symbol => {symbol}");
+            BMLogger.WriteO($"polling service stopped: symbol => {symbol}...");
         }
     }
 }

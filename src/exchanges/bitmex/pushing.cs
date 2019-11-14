@@ -309,6 +309,8 @@ namespace CCXT.Collector.BitMEX
                                         payload = _selector.data.ToString(Formatting.None)
                                     });
 
+                                    BMLogger.WriteO(_json);
+
                                     break;
                                 }
                             }
