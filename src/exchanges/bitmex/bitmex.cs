@@ -61,14 +61,14 @@ namespace CCXT.Collector.BitMEX
                             logo = "https://user-images.githubusercontent.com/1294454/27766319-f653c6e6-5ed4-11e7-933d-f0bc3699ae8f.jpg",
                             api = new Dictionary<string, string>
                             {
-                                { "public", "https://www.bitmex.com/api/v1" },
-                                { "private", "https://www.bitmex.com/api/v1" },
-                                { "trade", "https://www.bitmex.com/api/v1" },
+                                { "public", "https://www.bitmex.com" },
+                                { "private", "https://www.bitmex.com" },
+                                { "trade", "https://www.bitmex.com" },
                                 { "udf", "https://www.bitmex.com" },
                                 { "wss", "wss://www.bitmex.com" },
-                                { "test.public", "https://testnet.bitmex.com/api/v1" },
-                                { "test.private", "https://testnet.bitmex.com/api/v1" },
-                                { "test.trade", "https://testnet.bitmex.com/api/v1" },
+                                { "test.public", "https://testnet.bitmex.com" },
+                                { "test.private", "https://testnet.bitmex.com" },
+                                { "test.trade", "https://testnet.bitmex.com" },
                                 { "test.wss", "wss://testnet.bitmex.com" }
                             },
                             www = "https://www.bitmex.com",

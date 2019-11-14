@@ -62,7 +62,7 @@ namespace CCXT.Collector.BitMEX.Private
                 _params.Add("currency", currency);
             }
 
-            var _response = await privateClient.CallApiGet2Async("/user/depositAddress", _params);
+            var _response = await privateClient.CallApiGet2Async("/api/v1/user/depositAddress", _params);
 #if DEBUG
             _result.rawJson = _response.Content;
 #endif
@@ -99,7 +99,7 @@ namespace CCXT.Collector.BitMEX.Private
                 _params.Add("amount", quantity);
             }
 
-            var _response = await privateClient.CallApiPost2Async("/user/requestWithdrawal", _params);
+            var _response = await privateClient.CallApiPost2Async("/api/v1/user/requestWithdrawal", _params);
 #if DEBUG
             _result.rawJson = _response.Content;
 #endif
@@ -144,7 +144,7 @@ namespace CCXT.Collector.BitMEX.Private
                 _params.Add("start", start);
             }
 
-            var _response = await privateClient.CallApiGet2Async("/user/walletHistory", _params);
+            var _response = await privateClient.CallApiGet2Async("/api/v1/user/walletHistory", _params);
 #if DEBUG
             _result.rawJson = _response.Content;
 #endif
@@ -199,7 +199,7 @@ namespace CCXT.Collector.BitMEX.Private
                 _params.Add("currency", base_name);
             }
 
-            var _response = await privateClient.CallApiGet2Async("/user/margin", _params);
+            var _response = await privateClient.CallApiGet2Async("/api/v1/user/margin", _params);
 #if DEBUG
             _result.rawJson = _response.Content;
 #endif
@@ -236,7 +236,7 @@ namespace CCXT.Collector.BitMEX.Private
                 _params.Add("currency", "all");
             }
 
-            var _response = await privateClient.CallApiGet2Async("/user/margin", _params);
+            var _response = await privateClient.CallApiGet2Async("/api/v1/user/margin", _params);
 #if DEBUG
             _result.rawJson = _response.Content;
 #endif
@@ -269,7 +269,7 @@ namespace CCXT.Collector.BitMEX.Private
         {
             var _result = new BUserInfo();
 
-            var _response = await privateClient.CallApiGet2Async("/user");
+            var _response = await privateClient.CallApiGet2Async("/api/v1/user");
 #if DEBUG
             _result.rawJson = _response.Content;
 #endif
@@ -319,7 +319,7 @@ namespace CCXT.Collector.BitMEX.Private
                 });
             }
 
-            var _response = await privateClient.CallApiGet2Async("/order", _params);
+            var _response = await privateClient.CallApiGet2Async("/api/v1/order", _params);
 #if DEBUG
             _result.rawJson = _response.Content;
 #endif
@@ -376,7 +376,7 @@ namespace CCXT.Collector.BitMEX.Private
                 });
             }
 
-            var _response = await privateClient.CallApiGet2Async("/order", _params);
+            var _response = await privateClient.CallApiGet2Async("/api/v1/order", _params);
 #if DEBUG
             _result.rawJson = _response.Content;
 #endif
@@ -431,7 +431,7 @@ namespace CCXT.Collector.BitMEX.Private
                 });
             }
 
-            var _response = await privateClient.CallApiGet2Async("/position", _params);
+            var _response = await privateClient.CallApiGet2Async("/api/v1/position", _params);
 #if DEBUG
             _result.rawJson = _response.Content;
 #endif
@@ -472,7 +472,7 @@ namespace CCXT.Collector.BitMEX.Private
         {
             var _result = new MyPositions();
 
-            var _response = await privateClient.CallApiGet2Async("/position");
+            var _response = await privateClient.CallApiGet2Async("/api/v1/position");
 #if DEBUG
             _result.rawJson = _response.Content;
 #endif
@@ -523,7 +523,7 @@ namespace CCXT.Collector.BitMEX.Private
                 _params.Add("reverse", true);
             }
 
-            var _response = await privateClient.CallApiGet2Async("/execution/tradeHistory", _params);
+            var _response = await privateClient.CallApiGet2Async("/api/v1/execution/tradeHistory", _params);
 #if DEBUG
             _result.rawJson = _response.Content;
 #endif
@@ -572,7 +572,7 @@ namespace CCXT.Collector.BitMEX.Private
                     _params.Add("execInst", execInst);
             }
 
-            var _response = await privateClient.CallApiPost2Async("/order", _params);
+            var _response = await privateClient.CallApiPost2Async("/api/v1/order", _params);
 #if DEBUG
             _result.rawJson = _response.Content;
 #endif
@@ -621,7 +621,7 @@ namespace CCXT.Collector.BitMEX.Private
                     _params.Add("execInst", execInst);
             }
 
-            var _response = await privateClient.CallApiPost2Async("/order", _params);
+            var _response = await privateClient.CallApiPost2Async("/api/v1/order", _params);
 #if DEBUG
             _result.rawJson = _response.Content;
 #endif
@@ -659,7 +659,7 @@ namespace CCXT.Collector.BitMEX.Private
                 _params.Add("orders", orders);
             }
 
-            var _response = await privateClient.CallApiPost2Async("/order/bulk", _params);
+            var _response = await privateClient.CallApiPost2Async("/api/v1/order/bulk", _params);
 #if DEBUG
             _result.rawJson = _response.Content;
 #endif
@@ -703,7 +703,7 @@ namespace CCXT.Collector.BitMEX.Private
                     _params.Add("price", price);
             }
 
-            var _response = await privateClient.CallApiPost2Async("/order", _params);
+            var _response = await privateClient.CallApiPost2Async("/api/v1/order", _params);
 #if DEBUG
             _result.rawJson = _response.Content;
 #endif
@@ -746,7 +746,7 @@ namespace CCXT.Collector.BitMEX.Private
                     _params.Add("execInst", execInst);
             }
 
-            var _response = await privateClient.CallApiPut2Async("/order", _params);
+            var _response = await privateClient.CallApiPut2Async("/api/v1/order", _params);
 #if DEBUG
             _result.rawJson = _response.Content;
 #endif
@@ -784,7 +784,7 @@ namespace CCXT.Collector.BitMEX.Private
                 _params.Add("orders", orders);
             }
 
-            var _response = await privateClient.CallApiPut2Async("/order/bulk", _params);
+            var _response = await privateClient.CallApiPut2Async("/api/v1/order/bulk", _params);
 #if DEBUG
             _result.rawJson = _response.Content;
 #endif
@@ -820,7 +820,7 @@ namespace CCXT.Collector.BitMEX.Private
                 _params.Add("orderID", order_id);
             }
 
-            var _response = await privateClient.CallApiDelete2Async("/order", _params);
+            var _response = await privateClient.CallApiDelete2Async("/api/v1/order", _params);
 #if DEBUG
             _result.rawJson = _response.Content;
 #endif
@@ -856,7 +856,7 @@ namespace CCXT.Collector.BitMEX.Private
                 _params.Add("orderID", order_ids);
             }
 
-            var _response = await privateClient.CallApiDelete2Async("/order", _params);
+            var _response = await privateClient.CallApiDelete2Async("/api/v1/order", _params);
 #if DEBUG
             _result.rawJson = _response.Content;
 #endif
@@ -886,7 +886,7 @@ namespace CCXT.Collector.BitMEX.Private
         {
             var _result = new MyOrders();
 
-            var _response = await privateClient.CallApiDelete2Async("/order/all");
+            var _response = await privateClient.CallApiDelete2Async("/api/v1/order/all");
 #if DEBUG
             _result.rawJson = _response.Content;
 #endif
@@ -924,7 +924,7 @@ namespace CCXT.Collector.BitMEX.Private
                 _params.Add("leverage", leverage);
             }
 
-            var _response = await privateClient.CallApiPost2Async("/position/leverage", _params);
+            var _response = await privateClient.CallApiPost2Async("/api/v1/position/leverage", _params);
 #if DEBUG
             _result.rawJson = _response.Content;
 #endif
