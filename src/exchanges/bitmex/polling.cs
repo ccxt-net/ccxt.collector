@@ -36,7 +36,7 @@ namespace CCXT.Collector.BitMEX
                     _t_params.Add("reverse", true);
                 }
 
-                var _t_request = CreateJsonRequest($"trade", _t_params);
+                var _t_request = CreateJsonRequest($"/api/v1/trade", _t_params);
 
                 while (true)
                 {
@@ -117,7 +117,7 @@ namespace CCXT.Collector.BitMEX
                     _o_params.Add("depth", 25);
                 }
 
-                var _o_request = CreateJsonRequest($"orderBook/L2", _o_params);
+                var _o_request = CreateJsonRequest($"/api/v1/orderBook/L2", _o_params);
 
                 while (true)
                 {
