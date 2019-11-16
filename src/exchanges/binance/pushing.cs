@@ -80,7 +80,7 @@ namespace CCXT.Collector.Binance
 
         public async Task Start(CancellationTokenSource tokenSource, string symbol)
         {
-            BNLogger.WriteO($"websocket service start: symbol => {symbol}...");
+            BNLogger.WriteO($"pushing service start: symbol => {symbol}...");
 
             using (var _cws = new ClientWebSocket())
             {
@@ -98,7 +98,7 @@ namespace CCXT.Collector.Binance
                                 __last_receive_time = CUnixTime.NowMilli;
                                 await Open(tokenSource, _cws, symbol);
 
-                                BNLogger.WriteO($"websocket open: symbol => {symbol}...");
+                                BNLogger.WriteO($"pushing open: symbol => {symbol}...");
                             }
 
                             var _message = (QMessage)null;
@@ -235,7 +235,7 @@ namespace CCXT.Collector.Binance
 
                 await Task.WhenAll(_sending, _receiving);
 
-                BNLogger.WriteO($"websocket service stopped: symbol => {symbol}...");
+                BNLogger.WriteO($"pushing service stopped: symbol => {symbol}...");
             }
         }
     }

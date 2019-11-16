@@ -83,7 +83,7 @@ namespace CCXT.Collector.Upbit
                                 __last_receive_time = CUnixTime.NowMilli;
                                 await Open(tokenSource, _cws, symbol);
 
-                                UPLogger.WriteO($"websocket open: symbol => {symbol}...");
+                                UPLogger.WriteO($"pushing open: symbol => {symbol}...");
                             }
 
                             var _message = (QMessage)null;
