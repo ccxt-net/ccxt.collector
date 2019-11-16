@@ -86,8 +86,6 @@ namespace CCXT.Collector.Binance
 
                     while (true)
                     {
-                        //await __semaphore.WaitAsync(tokenSource.Token);
-
                         try
                         {
                             await Task.Delay(0);

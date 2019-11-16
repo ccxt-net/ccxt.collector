@@ -26,73 +26,73 @@ namespace CCXT.Collector.Upbit
         {
             UPLogger.WriteO($"polling service start: symbol => {symbol}...");
 
-            //var _t_polling = Task.Run(async () =>
-            //{
-            //    var _client = CreateJsonClient(publicApi.publicClient.ApiUrl);
+            var _t_polling = Task.Run(async () =>
+            {
+                var _client = CreateJsonClient(publicApi.publicClient.ApiUrl);
 
-            //    var _t_params = new Dictionary<string, object>();
-            //    {
-            //        _t_params.Add("market", symbol);
-            //        _t_params.Add("count", limit);
-            //    }
+                var _t_params = new Dictionary<string, object>();
+                {
+                    _t_params.Add("market", symbol);
+                    _t_params.Add("count", limit);
+                }
 
-            //    var _t_request = CreateJsonRequest($"/trades/ticks", _t_params);
+                var _t_request = CreateJsonRequest($"/trades/ticks", _t_params);
 
-            //    while (true)
-            //    {
-            //        try
-            //        {
-            //            await Task.Delay(KConfig.UpbitPollingSleep);
+                while (true)
+                {
+                    try
+                    {
+                        await Task.Delay(KConfig.UpbitPollingSleep);
 
-            //            // trades
-            //            var _t_json_value = await RestExecuteAsync(_client, _t_request);
-            //            if (_t_json_value.IsSuccessful && _t_json_value.Content[0] == '[')
-            //            {
-            //                Processing.SendReceiveQ(new QMessage 
-            //                { 
-            //                    command = "AP",
-            //                    exchange = UPLogger.exchange_name,
-            //                    symbol = symbol,
-            //                    stream = "trade",
-            //                    action = "polling",
-            //                    payload = _t_json_value.Content
-            //                });
-            //            }
-            //            else
-            //            {
-            //                var _http_status = (int)_t_json_value.StatusCode;
-            //                if (_http_status == 403 || _http_status == 418)// || _http_status == 429)
-            //                {
-            //                    UPLogger.WriteQ($"request-limit: symbol => {symbol}, https_status => {_http_status}");
+                        // trades
+                        var _t_json_value = await RestExecuteAsync(_client, _t_request);
+                        if (_t_json_value.IsSuccessful && _t_json_value.Content[0] == '[')
+                        {
+                            Processing.SendReceiveQ(new QMessage
+                            {
+                                command = "AP",
+                                exchange = UPLogger.exchange_name,
+                                symbol = symbol,
+                                stream = "trade",
+                                action = "polling",
+                                payload = _t_json_value.Content
+                            });
+                        }
+                        else
+                        {
+                            var _http_status = (int)_t_json_value.StatusCode;
+                            if (_http_status == 403 || _http_status == 418)// || _http_status == 429)
+                            {
+                                UPLogger.WriteQ($"request-limit: symbol => {symbol}, https_status => {_http_status}");
 
-            //                    var _waiting = tokenSource.Token.WaitHandle.WaitOne(0);
-            //                    if (_waiting == true)
-            //                        break;
+                                var _waiting = tokenSource.Token.WaitHandle.WaitOne(0);
+                                if (_waiting == true)
+                                    break;
 
-            //                    await Task.Delay(1000);     // waiting 1 second
-            //                }
-            //            }
-            //        }
-            //        catch (TaskCanceledException)
-            //        {
-            //        }
-            //        catch (Exception ex)
-            //        {
-            //            UPLogger.WriteX(ex.ToString());
-            //        }
-            //        //finally
-            //        {
-            //            if (tokenSource.IsCancellationRequested == true)
-            //                break;
-            //        }
+                                await Task.Delay(1000);     // waiting 1 second
+                            }
+                        }
+                    }
+                    catch (TaskCanceledException)
+                    {
+                    }
+                    catch (Exception ex)
+                    {
+                        UPLogger.WriteX(ex.ToString());
+                    }
+                    //finally
+                    {
+                        if (tokenSource.IsCancellationRequested == true)
+                            break;
+                    }
 
-            //        var _cancelled = tokenSource.Token.WaitHandle.WaitOne(0);
-            //        if (_cancelled == true)
-            //            break;
-            //    }
-            //},
-            //tokenSource.Token
-            //);
+                    var _cancelled = tokenSource.Token.WaitHandle.WaitOne(0);
+                    if (_cancelled == true)
+                        break;
+                }
+            },
+            tokenSource.Token
+            );
 
             var _o_polling = Task.Run(async () =>
             {

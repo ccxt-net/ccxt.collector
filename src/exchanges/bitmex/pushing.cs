@@ -164,8 +164,8 @@ namespace CCXT.Collector.BitMEX
 
         private async Task Open(string symbol)
         {
-            if (String.IsNullOrEmpty(__stream_id) == true)
-                __stream_id = CExtension.GenerateRandomString(13);
+            //if (String.IsNullOrEmpty(__stream_id) == true)
+            __stream_id = CExtension.GenerateRandomString(13);
 
             await publicOpen(__stream_id, symbol);
 

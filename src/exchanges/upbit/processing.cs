@@ -44,6 +44,8 @@ namespace CCXT.Collector.Upbit
 
             var _processing = Task.Run(async () =>
             {
+                var _last_polling_trade = 0L;
+                
                 while (true)
                 {
                     try
@@ -87,7 +89,11 @@ namespace CCXT.Collector.Upbit
                                     }
                                 };
 
-                                await mergeCompleteOrder(_s_trade);
+                                if (_s_trade.result.Count() > 0)
+                                {
+                                    _last_polling_trade = _s_trade.sequentialId;
+                                    await mergeCompleteOrder(_s_trade);
+                                }
                             }
                             else if (_message.stream == "orderbook")
                             {
@@ -130,7 +136,7 @@ namespace CCXT.Collector.Upbit
                                     action = _message.action,
                                     sequentialId = _a_trades.Max(t => t.timestamp),
 
-                                    result = _a_trades.Select(t => 
+                                    result = _a_trades.Where(t => t.timestamp > _last_polling_trade).Select(t => 
                                     {
                                         return new SCompleteOrderItem
                                         {
@@ -143,7 +149,11 @@ namespace CCXT.Collector.Upbit
                                     .ToList<ISCompleteOrderItem>()
                                 };
 
-                                await mergeCompleteOrder(_s_trade);
+                                if (_s_trade.result.Count() > 0)
+                                {
+                                    _last_polling_trade = _s_trade.sequentialId;
+                                    await mergeCompleteOrder(_s_trade);
+                                }
                             }
                             else if (_message.stream == "orderbook")
                             {
