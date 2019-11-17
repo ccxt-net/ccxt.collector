@@ -90,7 +90,6 @@ namespace CCXT.Collector.BitMEX
             });
 
             var _args = new List<string>();
-
             {
                 _args.Add($"'trade:{symbol}'");
                 _args.Add($"'orderBookL2_25:{symbol}'");
@@ -164,7 +163,6 @@ namespace CCXT.Collector.BitMEX
 
         private async Task Open(string symbol)
         {
-            //if (String.IsNullOrEmpty(__stream_id) == true)
             __stream_id = CExtension.GenerateRandomString(13);
 
             await publicOpen(__stream_id, symbol);
