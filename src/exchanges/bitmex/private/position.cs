@@ -126,7 +126,7 @@ namespace CCXT.Collector.BitMEX.Private
         ///
         /// </summary>
         [JsonProperty(PropertyName = "breakEvenPrice")]
-        public decimal breakEvenPrice
+        public decimal? breakEvenPrice
         {
             get;
             set;
@@ -238,7 +238,7 @@ namespace CCXT.Collector.BitMEX.Private
         /// Indicates where your position is in the ADL queue.
         /// </summary>
         [JsonProperty(PropertyName = "deleveragePercentile")]
-        public decimal deleveragePercentile
+        public decimal? deleveragePercentile
         {
             get;
             set;
@@ -851,7 +851,7 @@ namespace CCXT.Collector.BitMEX.Private
         ///
         /// </summary>
         [JsonProperty(PropertyName = "avgCostPrice")]
-        public decimal avgCostPrice
+        public decimal? avgCostPrice
         {
             get;
             set;
@@ -861,7 +861,7 @@ namespace CCXT.Collector.BitMEX.Private
         ///
         /// </summary>
         [JsonProperty(PropertyName = "avgEntryPrice")]
-        public decimal avgEntryPrice
+        public decimal? avgEntryPrice
         {
             get;
             set;
@@ -871,7 +871,7 @@ namespace CCXT.Collector.BitMEX.Private
         ///
         /// </summary>
         [JsonProperty(PropertyName = "marginCallPrice")]
-        public decimal marginCallPrice
+        public decimal? marginCallPrice
         {
             get;
             set;
@@ -881,7 +881,7 @@ namespace CCXT.Collector.BitMEX.Private
         /// Once markPrice reaches this price, this position will have no equity.
         /// </summary>
         [JsonProperty(PropertyName = "bankruptPrice")]
-        public decimal bankruptPrice
+        public decimal? bankruptPrice
         {
             get;
             set;

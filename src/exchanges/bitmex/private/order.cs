@@ -72,10 +72,12 @@ namespace CCXT.Collector.BitMEX.Private
         ///
         /// </summary>
         [JsonProperty(PropertyName = "price")]
-        public override decimal price
+        public decimal? orderPrice
         {
-            get;
-            set;
+            set
+            {
+                this.price = value.HasValue ? value.Value : 0;
+            }
         }
 
         /// <summary>
@@ -94,10 +96,12 @@ namespace CCXT.Collector.BitMEX.Private
         ///
         /// </summary>
         [JsonProperty(PropertyName = "leavesQty")]
-        public override decimal remaining
+        public decimal? leavesQty
         {
-            get;
-            set;
+            set
+            {
+                this.remaining = value.HasValue ? value.Value : 0;
+            }
         }
 
         /// <summary>
