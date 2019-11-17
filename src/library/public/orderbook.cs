@@ -3,21 +3,90 @@ using OdinSdk.BaseLib.Coin;
 using OdinSdk.BaseLib.Configuration;
 using System.Collections.Generic;
 
-namespace CCXT.Collector.Library.Types
+namespace CCXT.Collector.Library.Public
 {
+    /// <summary>
+    /// item of orderbook
+    /// </summary>
+    public class SOrderBookItem
+    {
+        /// <summary>
+        /// I,U,D
+        /// </summary>
+        public string action
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// quantity
+        /// </summary>
+        public virtual decimal quantity
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// price
+        /// </summary>
+        public virtual decimal price
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// amount (quantity * price)
+        /// </summary>
+        public virtual decimal amount
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        ///
+        /// </summary>
+        public virtual int count
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        ///
+        /// </summary>
+        public virtual long id
+        {
+            get;
+            set;
+        }
+    }
+
     /// <summary>
     ///
     /// </summary>
-    public interface ISTickerItem
+    public interface ISOrderBook
     {
-        ///// <summary>
-        ///// string symbol of the market ('BTCUSD', 'ETHBTC', ...)
-        ///// </summary>
-        //string symbol
-        //{
-        //    get;
-        //    set;
-        //}
+        /// <summary>
+        /// 호가 매도 총 잔량
+        /// </summary>
+        decimal askSumQty
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// 호가 매수 총 잔량
+        /// </summary>
+        decimal bidSumQty
+        {
+            get;
+            set;
+        }
 
         /// <summary>
         /// 64-bit Unix Timestamp in milliseconds since Epoch 1 Jan 1970
@@ -37,36 +106,18 @@ namespace CCXT.Collector.Library.Types
         }
 
         /// <summary>
-        /// current best bid (buy) price
+        /// buy array
         /// </summary>
-        decimal bidPrice
+        List<SOrderBookItem> bids
         {
             get;
             set;
         }
 
         /// <summary>
-        /// current best bid (buy) amount (may be missing or undefined)
+        /// sell array
         /// </summary>
-        decimal bidQuantity
-        {
-            get;
-            set;
-        }
-
-        /// <summary>
-        /// current best ask (sell) price
-        /// </summary>
-        decimal askPrice
-        {
-            get;
-            set;
-        }
-
-        /// <summary>
-        /// current best ask (sell) amount (may be missing or undefined)
-        /// </summary>
-        decimal askQuantity
+        List<SOrderBookItem> asks
         {
             get;
             set;
@@ -76,12 +127,30 @@ namespace CCXT.Collector.Library.Types
     /// <summary>
     ///
     /// </summary>
-    public class STickerItem : ISTickerItem
+    public class SOrderBook : ISOrderBook
     {
         /// <summary>
-        /// string symbol of the market ('BTCUSD', 'ETHBTC', ...)
+        /// 
         /// </summary>
-        public virtual string symbol
+        public SOrderBook()
+        {
+            this.asks = new List<SOrderBookItem>();
+            this.bids = new List<SOrderBookItem>();
+        }
+
+        /// <summary>
+        /// 호가 매도 총 잔량
+        /// </summary>
+        public virtual decimal askSumQty
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// 호가 매수 총 잔량
+        /// </summary>
+        public virtual decimal bidSumQty
         {
             get;
             set;
@@ -109,36 +178,18 @@ namespace CCXT.Collector.Library.Types
         }
 
         /// <summary>
-        /// current best bid (buy) price
+        /// buy array
         /// </summary>
-        public virtual decimal bidPrice
+        public virtual List<SOrderBookItem> bids
         {
             get;
             set;
         }
 
         /// <summary>
-        /// current best bid (buy) amount (may be missing or undefined)
+        /// sell array
         /// </summary>
-        public virtual decimal bidQuantity
-        {
-            get;
-            set;
-        }
-
-        /// <summary>
-        /// current best ask (sell) price
-        /// </summary>
-        public virtual decimal askPrice
-        {
-            get;
-            set;
-        }
-
-        /// <summary>
-        /// current best ask (sell) amount (may be missing or undefined)
-        /// </summary>
-        public virtual decimal askQuantity
+        public virtual List<SOrderBookItem> asks
         {
             get;
             set;
@@ -148,10 +199,10 @@ namespace CCXT.Collector.Library.Types
     /// <summary>
     ///
     /// </summary>
-    public interface ISTickers : IApiResult<List<ISTickerItem>>
+    public interface ISOrderBooks : IApiResult<ISOrderBook>
     {
         /// <summary>
-        /// exchange
+        ///
         /// </summary>
         string exchange
         {
@@ -160,7 +211,7 @@ namespace CCXT.Collector.Library.Types
         }
 
         /// <summary>
-        /// stream
+        /// S, R
         /// </summary>
         string stream
         {
@@ -169,7 +220,7 @@ namespace CCXT.Collector.Library.Types
         }
 
         /// <summary>
-        /// symbol
+        /// string symbol of the market ('BTCUSD', 'ETHBTC', ...)
         /// </summary>
         string symbol
         {
@@ -178,7 +229,7 @@ namespace CCXT.Collector.Library.Types
         }
 
         /// <summary>
-        /// sequential id
+        ///
         /// </summary>
         long sequentialId
         {
@@ -200,7 +251,7 @@ namespace CCXT.Collector.Library.Types
     /// <summary>
     ///
     /// </summary>
-    public class STickers : ApiResult<List<ISTickerItem>>, ISTickers
+    public class SOrderBooks : ApiResult<ISOrderBook>, ISOrderBooks
     {
         /// <summary>
         /// is success calling
@@ -253,7 +304,7 @@ namespace CCXT.Collector.Library.Types
         }
 
         /// <summary>
-        /// exchange
+        ///
         /// </summary>
         public virtual string exchange
         {
@@ -262,7 +313,7 @@ namespace CCXT.Collector.Library.Types
         }
 
         /// <summary>
-        /// stream
+        /// S, R
         /// </summary>
         public virtual string stream
         {
@@ -271,7 +322,7 @@ namespace CCXT.Collector.Library.Types
         }
 
         /// <summary>
-        /// symbol
+        /// string symbol of the market ('BTCUSD', 'ETHBTC', ...)
         /// </summary>
         public virtual string symbol
         {
@@ -280,7 +331,7 @@ namespace CCXT.Collector.Library.Types
         }
 
         /// <summary>
-        /// action
+        /// 
         /// </summary>
         public virtual string action
         {
@@ -289,7 +340,7 @@ namespace CCXT.Collector.Library.Types
         }
 
         /// <summary>
-        /// sequential id
+        ///
         /// </summary>
         public virtual long sequentialId
         {

@@ -1,6 +1,6 @@
 ﻿using CCXT.Collector.BitMEX.Public;
 using CCXT.Collector.Library;
-using CCXT.Collector.Library.Types;
+using CCXT.Collector.Library.Public;
 using Newtonsoft.Json;
 using OdinSdk.BaseLib.Coin.Types;
 using OdinSdk.BaseLib.Configuration;

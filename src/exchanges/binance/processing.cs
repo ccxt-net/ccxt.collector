@@ -1,6 +1,6 @@
 ﻿using CCXT.Collector.Binance.Public;
 using CCXT.Collector.Library;
-using CCXT.Collector.Library.Types;
+using CCXT.Collector.Library.Public;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Concurrent;

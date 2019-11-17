@@ -3,7 +3,7 @@ using OdinSdk.BaseLib.Coin;
 using OdinSdk.BaseLib.Coin.Types;
 using System.Collections.Generic;
 
-namespace CCXT.Collector.Library.Types
+namespace CCXT.Collector.Library.Public
 {
     /// <summary>
     /// 

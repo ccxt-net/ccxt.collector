@@ -1,9 +1,8 @@
 ﻿using CCXT.Collector.Binance.Public;
 using CCXT.Collector.Library;
-using CCXT.Collector.Library.Types;
+using CCXT.Collector.Library.Public;
 using CCXT.Collector.Service;
 using Newtonsoft.Json;
-using OdinSdk.BaseLib.Coin.Types;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;

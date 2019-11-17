@@ -1,4 +1,4 @@
-﻿using CCXT.Collector.Library.Types;
+﻿using CCXT.Collector.Library.Public;
 using OdinSdk.BaseLib.Coin;
 using OdinSdk.BaseLib.Coin.Public;
 using System;

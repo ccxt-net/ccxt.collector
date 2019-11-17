@@ -1,5 +1,5 @@
 ﻿using CCXT.Collector.Library;
-using CCXT.Collector.Library.Types;
+using CCXT.Collector.Library.Public;
 using CCXT.Collector.Service;
 using Newtonsoft.Json;
 using System.Collections.Concurrent;

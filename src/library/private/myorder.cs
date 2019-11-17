@@ -4,7 +4,7 @@ using OdinSdk.BaseLib.Coin.Types;
 using OdinSdk.BaseLib.Configuration;
 using System.Collections.Generic;
 
-namespace CCXT.Collector.Library.Types
+namespace CCXT.Collector.Library.Private
 {
     /// <summary>
     ///

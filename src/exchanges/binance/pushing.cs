@@ -1,6 +1,4 @@
-﻿using CCXT.Collector.Binance.Public;
-using CCXT.Collector.Library;
-using CCXT.Collector.Library.Types;
+﻿using CCXT.Collector.Library;
 using Newtonsoft.Json;
 using OdinSdk.BaseLib.Configuration;
 using System;

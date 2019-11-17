@@ -1,4 +1,4 @@
-﻿using CCXT.Collector.Library.Types;
+﻿using CCXT.Collector.Library.Public;
 using Newtonsoft.Json;
 using System.Collections.Generic;
 
@@ -49,7 +49,7 @@ namespace CCXT.Collector.Upbit.Public
     /// <summary>
     ///
     /// </summary>
-    public class UOrderBook : CCXT.Collector.Library.Types.SOrderBook
+    public class UOrderBook : CCXT.Collector.Library.Public.SOrderBook
     {
         /// <summary>
         /// 호가 매도 총 잔량

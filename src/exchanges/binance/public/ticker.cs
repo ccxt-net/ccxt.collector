@@ -5,7 +5,7 @@ namespace CCXT.Collector.Binance.Public
     /// <summary>
     ///
     /// </summary>
-    public class BTickerItem : CCXT.Collector.Library.Types.STickerItem
+    public class BTickerItem : CCXT.Collector.Library.Public.STickerItem
     {
         /// <summary>
         /// ask price

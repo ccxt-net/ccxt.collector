@@ -6,7 +6,7 @@ namespace CCXT.Collector.Upbit.Public
     /// <summary>
     ///
     /// </summary>
-    public class UCompleteOrderItem : CCXT.Collector.Library.Types.SCompleteOrderItem
+    public class UCompleteOrderItem : CCXT.Collector.Library.Public.SCompleteOrderItem
     {
         /// <summary>
         ///
