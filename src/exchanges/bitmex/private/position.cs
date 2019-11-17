@@ -136,10 +136,12 @@ namespace CCXT.Collector.BitMEX.Private
         /// Once markPrice reaches this price, this position will be liquidated.
         /// </summary>
         [JsonProperty(PropertyName = "liquidationPrice")]
-        public override decimal liquidationPrice
+        private decimal? liqPrice
         {
-            get;
-            set;
+            set
+            {
+                this.liquidationPrice = value.HasValue ? value.Value : 0;
+            }
         }
 
         /// <summary>

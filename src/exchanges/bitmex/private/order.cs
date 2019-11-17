@@ -82,10 +82,12 @@ namespace CCXT.Collector.BitMEX.Private
         ///
         /// </summary>
         [JsonProperty(PropertyName = "orderQty")]
-        public override decimal quantity
+        private decimal? orderQty
         {
-            get;
-            set;
+            set
+            {
+                this.quantity = value.HasValue ? value.Value : 0;
+            }
         }
 
         /// <summary>
