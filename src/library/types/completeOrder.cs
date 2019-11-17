@@ -100,7 +100,7 @@ namespace CCXT.Collector.Library.Types
     /// <summary>
     ///
     /// </summary>
-    public interface ISCompleteOrder : IApiResult<List<ISCompleteOrderItem>>
+    public interface ISCompleteOrders : IApiResult<List<ISCompleteOrderItem>>
     {
         /// <summary>
         ///
@@ -132,6 +132,15 @@ namespace CCXT.Collector.Library.Types
         /// <summary>
         ///
         /// </summary>
+        string action
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        ///
+        /// </summary>
         long sequentialId
         {
             get;
@@ -153,7 +162,7 @@ namespace CCXT.Collector.Library.Types
     /// <summary>
     ///
     /// </summary>
-    public class SCompleteOrders : ApiResult<List<ISCompleteOrderItem>>, ISCompleteOrder
+    public class SCompleteOrders : ApiResult<List<ISCompleteOrderItem>>, ISCompleteOrders
     {
         /// <summary>
         /// is success calling

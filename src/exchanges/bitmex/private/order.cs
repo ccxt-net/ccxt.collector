@@ -133,6 +133,15 @@ namespace CCXT.Collector.BitMEX.Private
         /// <summary>
         /// 
         /// </summary>
+        public bool workingIndicator
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
         public string execInst
         {
             get;
