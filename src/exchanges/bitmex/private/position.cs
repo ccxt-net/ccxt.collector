@@ -891,7 +891,7 @@ namespace CCXT.Collector.BitMEX.Private
         /// The latest mark price for this contract.
         /// </summary>
         [JsonProperty(PropertyName = "lastPrice")]
-        public decimal lastPrice
+        public decimal? lastPrice
         {
             get;
             set;
@@ -901,7 +901,7 @@ namespace CCXT.Collector.BitMEX.Private
         ///
         /// </summary>
         [JsonProperty(PropertyName = "lastValue")]
-        public decimal lastValue
+        public decimal? lastValue
         {
             get;
             set;
