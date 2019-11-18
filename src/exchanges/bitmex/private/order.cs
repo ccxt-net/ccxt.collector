@@ -95,6 +95,18 @@ namespace CCXT.Collector.BitMEX.Private
         /// <summary>
         ///
         /// </summary>
+        [JsonProperty(PropertyName = "cumQty")]
+        public decimal? cumQty
+        {
+            set
+            {
+                this.filled = value.HasValue ? value.Value : 0;
+            }
+        }
+
+        /// <summary>
+        ///
+        /// </summary>
         [JsonProperty(PropertyName = "leavesQty")]
         public decimal? leavesQty
         {
@@ -102,6 +114,16 @@ namespace CCXT.Collector.BitMEX.Private
             {
                 this.remaining = value.HasValue ? value.Value : 0;
             }
+        }
+
+        /// <summary>
+        ///
+        /// </summary>
+        [JsonProperty(PropertyName = "avgPx")]
+        public decimal? avgPx
+        {
+            get;
+            set;
         }
 
         /// <summary>

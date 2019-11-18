@@ -66,6 +66,15 @@ namespace CCXT.Collector.Library.Private
         }
 
         /// <summary>
+        /// 
+        /// </summary>
+        bool workingIndicator
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
         ///
         /// </summary>
         long timestamp
@@ -122,6 +131,15 @@ namespace CCXT.Collector.Library.Private
         ///
         /// </summary>
         decimal remaining
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        ///
+        /// </summary>
+        decimal avgPx
         {
             get;
             set;
@@ -283,6 +301,15 @@ namespace CCXT.Collector.Library.Private
         ///
         /// </summary>
         public virtual decimal remaining
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        ///
+        /// </summary>
+        public decimal avgPx
         {
             get;
             set;

@@ -86,7 +86,7 @@ namespace CCXT.Collector.BitMEX.Private
         /// The mark price of the symbol in quoteCurrency.
         /// </summary>
         [JsonProperty(PropertyName = "markPrice")]
-        public decimal markPrice
+        public decimal? markPrice
         {
             get;
             set;
@@ -96,7 +96,7 @@ namespace CCXT.Collector.BitMEX.Private
         /// The currentQty at the mark price in the settlement currency of the symbol (currency).
         /// </summary>
         [JsonProperty(PropertyName = "markValue")]
-        public decimal markValue
+        public decimal? markValue
         {
             get;
             set;
