@@ -168,7 +168,8 @@ namespace CCXT.Collector.BitMEX
 
             await publicOpen(__stream_id, symbol);
 
-            await privateOpen(__stream_id, KConfig.BitMexConnectKey, KConfig.BitMexSecretKey, KConfig.BitMexUserName);
+            if (KConfig.BitMexUseMyOrderStream == true)
+                await privateOpen(__stream_id, KConfig.BitMexConnectKey, KConfig.BitMexSecretKey, KConfig.BitMexUserName);
         }
 
         private volatile int __last_receive_time = 0;

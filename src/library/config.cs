@@ -87,6 +87,14 @@ namespace CCXT.Collector.Library
             }
         }
 
+        public static bool BitMexUseMyOrderStream
+        {
+            get
+            {
+                return CConfig.GetAppBoolean("bitmex.use.myorder.stream");
+            }
+        }
+
         public static string BitMexConnectKey
         {
             get

@@ -40,14 +40,15 @@ namespace CCXT.Collector.BitMEX
 
             var _m_polling = Task.Run(async () =>
             {
-                while (true)
+                while (KConfig.BitMexUseMyOrderStream == true)
                 {
                     try
                     {
                         await Task.Delay(0);
 
                         // my orders
-                        var _orders = await privateApi.GetOrders(symbol); 
+                        var _orders = await privateApi.GetOrders(symbol);
+
                         if (_orders.success == true)
                         {
                             Processing.SendReceiveQ(new QMessage
