@@ -91,7 +91,7 @@ namespace CCXT.Collector.BitMEX
 
                                             timestamp = o.timestamp,
 
-                                            makerType = o.makerType,
+                                            makerType = MakerType.Maker,
                                             orderStatus = o.orderStatus,
                                             orderType = o.orderType,
 

@@ -596,14 +596,19 @@ namespace CCXT.Collector.BitMEX
         /// </summary>
         /// <param name="cmy"></param>
         /// <returns></returns>
-        private async ValueTask mergeMyOrder(SMyOrders cmy)
+        private async ValueTask<bool> mergeMyOrder(SMyOrders cmy)
         {
+            var _result = false;
+
             SMyOrders _qmy;
             {
                 if (__qMyOrders.TryGetValue(cmy.symbol, out _qmy) == true)
                 {
                     if (cmy.action == "insert" || cmy.action == "update" || cmy.action == "delete")
+                    {
                         updateMyOrder(_qmy, ref cmy);
+                        _result = true;
+                    }
 
                     if (cmy.action == "partial" || cmy.action == "polling")
                         modifyMyOrder(_qmy, ref cmy);
@@ -613,10 +618,14 @@ namespace CCXT.Collector.BitMEX
                 else if (cmy.action == "partial" || cmy.action == "polling")
                 {
                     __qMyOrders[cmy.symbol] = cmy;
+                    _result = true;
                 }
 
-                await publishMyCompleteOrder(cmy);
+                if (_result == true)
+                    await publishMyCompleteOrder(cmy);
             }
+
+            return _result;
         }
 
         /// <summary>
