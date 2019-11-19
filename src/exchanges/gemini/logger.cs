@@ -1,13 +1,13 @@
 ﻿using CCXT.Collector.Service;
 
-namespace CCXT.Collector.BitMEX
+namespace CCXT.Collector.Gemini
 {
     /// <summary>
-    /// bitmex
+    /// Gemini
     /// </summary>
-    public class BMLogger
+    public class GMLogger
     {
-        public const string exchange_name = "bitmex";
+        public const string exchange_name = "gemini";
 
         /// <summary>
         ///

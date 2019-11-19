@@ -145,7 +145,8 @@ namespace CCXT.Collector.BitMEX
 
             var _json_subc = "{"
                          + " 'op': 'subscribe', "
-                         + " 'args': ['position','execution','order'] "
+                         + " 'args': ['order'] "
+                         //+ " 'args': ['position','execution','order'] "
                          //+ " 'args': ['margin'] "
                          + "}";
 
@@ -167,7 +168,7 @@ namespace CCXT.Collector.BitMEX
 
             await publicOpen(__stream_id, symbol);
 
-            //await privateOpen(__stream_id, KConfig.BitMexConnectKey, KConfig.BitMexSecretKey, KConfig.BitMexUserName);
+            await privateOpen(__stream_id, KConfig.BitMexConnectKey, KConfig.BitMexSecretKey, KConfig.BitMexUserName);
         }
 
         private volatile int __last_receive_time = 0;

@@ -1,5 +1,7 @@
-﻿using CCXT.Collector.BitMEX.Public;
+﻿using CCXT.Collector.BitMEX.Private;
+using CCXT.Collector.BitMEX.Public;
 using CCXT.Collector.Library;
+using CCXT.Collector.Library.Private;
 using CCXT.Collector.Library.Public;
 using Newtonsoft.Json;
 using OdinSdk.BaseLib.Coin.Types;
@@ -67,7 +69,47 @@ namespace CCXT.Collector.BitMEX
 
                         if (_message.command == "WS")
                         {
-                            if (_message.stream == "trade")
+                            if (_message.stream == "order")
+                            {
+                                var _w_orders = JsonConvert.DeserializeObject<List<BMyOrderItem>>(_message.payload);
+
+                                var _s_order = new SMyOrders
+                                {
+                                    exchange = _message.exchange,
+                                    stream = _message.stream,
+                                    symbol = _message.symbol,
+                                    action = _message.action,
+                                    sequentialId = _w_orders.Max(t => t.timestamp),
+
+                                    result = _w_orders.Where(o => o.orderStatus == OrderStatus.Closed)
+                                                      .Select(o =>
+                                                      {
+                                                          return new SMyOrderItem
+                                                          {
+                                                              symbol = o.symbol,
+                                                              orderId = o.orderId,
+
+                                                              timestamp = o.timestamp,
+                                                              orderStatus = o.orderStatus,
+
+                                                              sideType = o.sideType,
+                                                              makerType = o.makerType,
+                                                              orderType = o.orderType,
+
+                                                              price = o.price,
+                                                              quantity = o.quantity,
+                                                              filled = o.filled,
+                                                              remaining = o.remaining,
+                                                              fee = o.fee
+                                                          };
+                                                      })
+                                                      .ToList<ISMyOrderItem>()
+                                };
+
+                                if (_s_order.result.Count > 0)
+                                    await publishMyCompleteOrder(_s_order);
+                            }
+                            else if (_message.stream == "trade")
                             {
                                 var _w_trades = JsonConvert.DeserializeObject<List<BCompleteOrderItem>>(_message.payload);
 

@@ -35,5 +35,14 @@ namespace CCXT.Collector.Binance
         {
             LoggerQ.WriteX(message, exchange_name);
         }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="message"></param>
+        public static void WriteC(string message)
+        {
+            LoggerQ.WriteC(message, exchange_name);
+        }
     }
 }

@@ -64,9 +64,10 @@ namespace CCXT.Collector.Service
         }
 
         /// <summary>
-        ///
+        /// 
         /// </summary>
         /// <param name="message"></param>
+        /// <param name="exchange"></param>
         public static void WriteQ(string message, string exchange = "")
         {
             LogQ.Enqueue(new PLogger
@@ -81,6 +82,7 @@ namespace CCXT.Collector.Service
         ///
         /// </summary>
         /// <param name="message"></param>
+        /// <param name="exchange"></param>
         public static void WriteO(string message, string exchange = "")
         {
             LogQ.Enqueue(new PLogger
@@ -95,6 +97,7 @@ namespace CCXT.Collector.Service
         ///
         /// </summary>
         /// <param name="message"></param>
+        /// <param name="exchange"></param>
         public static void WriteX(string message, string exchange = "")
         {
             LogQ.Enqueue(new PLogger
@@ -105,9 +108,19 @@ namespace CCXT.Collector.Service
             });
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="message"></param>
+        /// <param name="exchange"></param>
+        public static void WriteC(string message, string exchange = "")
+        {
+            Console.Out.WriteLine($"{CUnixTime.UtcNow.ToLogDateTimeString()} {exchange} {message}");
+        }
+
         public async Task Start(CancellationTokenSource tokenSource)
         {
-            Console.Out.WriteLine($"{CUnixTime.UtcNow.ToLogDateTimeString()} {FactoryX.RootQName} logger service start...");
+            WriteC($"logger service start...", FactoryX.RootQName);
 
             var _processing = Task.Run(async () =>
             {
@@ -173,7 +186,7 @@ namespace CCXT.Collector.Service
 
             await Task.WhenAll(_processing);
 
-            Console.Out.WriteLine($"{CUnixTime.UtcNow.ToLogDateTimeString()} {FactoryX.RootQName} logger service stopped...");
+            WriteC($"logger service stopped...", FactoryX.RootQName);
         }
     }
 }
