@@ -105,8 +105,7 @@ namespace CCXT.Collector.BitMEX
                                     .ToList<ISMyOrderItem>()
                                 };
 
-                                if (_s_order.result.Count > 0)
-                                    await publishMyCompleteOrder(_s_order);
+                                await mergeMyOrder(_s_order);
                             }
                             else if (_message.stream == "trade")
                             {
