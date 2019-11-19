@@ -217,7 +217,7 @@ namespace CCXT.Collector.Library.Public
         /// <summary>
         ///
         /// </summary>
-        public virtual string exchange
+        public string exchange
         {
             get;
             set;
@@ -226,7 +226,7 @@ namespace CCXT.Collector.Library.Public
         /// <summary>
         /// S, R
         /// </summary>
-        public virtual string stream
+        public string stream
         {
             get;
             set;
@@ -235,7 +235,7 @@ namespace CCXT.Collector.Library.Public
         /// <summary>
         ///
         /// </summary>
-        public virtual string symbol
+        public string symbol
         {
             get;
             set;
@@ -244,7 +244,7 @@ namespace CCXT.Collector.Library.Public
         /// <summary>
         ///
         /// </summary>
-        public virtual string action
+        public string action
         {
             get;
             set;
@@ -253,7 +253,7 @@ namespace CCXT.Collector.Library.Public
         /// <summary>
         ///
         /// </summary>
-        public virtual long sequentialId
+        public long sequentialId
         {
             get;
             set;
@@ -264,7 +264,7 @@ namespace CCXT.Collector.Library.Public
         ///
         /// </summary>
         [JsonIgnore]
-        public virtual string rawJson
+        public string rawJson
         {
             get;
             set;

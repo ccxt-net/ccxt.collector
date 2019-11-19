@@ -22,7 +22,7 @@ namespace CCXT.Collector.Library.Public
         /// <summary>
         /// quantity
         /// </summary>
-        public virtual decimal quantity
+        public decimal quantity
         {
             get;
             set;
@@ -31,7 +31,7 @@ namespace CCXT.Collector.Library.Public
         /// <summary>
         /// price
         /// </summary>
-        public virtual decimal price
+        public decimal price
         {
             get;
             set;
@@ -40,7 +40,7 @@ namespace CCXT.Collector.Library.Public
         /// <summary>
         /// amount (quantity * price)
         /// </summary>
-        public virtual decimal amount
+        public decimal amount
         {
             get;
             set;
@@ -49,7 +49,7 @@ namespace CCXT.Collector.Library.Public
         /// <summary>
         ///
         /// </summary>
-        public virtual int count
+        public int count
         {
             get;
             set;
@@ -58,7 +58,7 @@ namespace CCXT.Collector.Library.Public
         /// <summary>
         ///
         /// </summary>
-        public virtual long id
+        public long id
         {
             get;
             set;
@@ -159,7 +159,7 @@ namespace CCXT.Collector.Library.Public
         /// <summary>
         /// 64-bit Unix Timestamp in milliseconds since Epoch 1 Jan 1970
         /// </summary>
-        public virtual long timestamp
+        public long timestamp
         {
             get;
             set;
@@ -169,7 +169,7 @@ namespace CCXT.Collector.Library.Public
         /// ISO 8601 datetime string with milliseconds
         /// </summary>
         [JsonIgnore]
-        public virtual string datetime
+        public string datetime
         {
             get
             {
@@ -180,7 +180,7 @@ namespace CCXT.Collector.Library.Public
         /// <summary>
         /// buy array
         /// </summary>
-        public virtual List<SOrderBookItem> bids
+        public List<SOrderBookItem> bids
         {
             get;
             set;
@@ -189,7 +189,7 @@ namespace CCXT.Collector.Library.Public
         /// <summary>
         /// sell array
         /// </summary>
-        public virtual List<SOrderBookItem> asks
+        public List<SOrderBookItem> asks
         {
             get;
             set;
@@ -306,7 +306,7 @@ namespace CCXT.Collector.Library.Public
         /// <summary>
         ///
         /// </summary>
-        public virtual string exchange
+        public string exchange
         {
             get;
             set;
@@ -315,7 +315,7 @@ namespace CCXT.Collector.Library.Public
         /// <summary>
         /// S, R
         /// </summary>
-        public virtual string stream
+        public string stream
         {
             get;
             set;
@@ -324,7 +324,7 @@ namespace CCXT.Collector.Library.Public
         /// <summary>
         /// string symbol of the market ('BTCUSD', 'ETHBTC', ...)
         /// </summary>
-        public virtual string symbol
+        public string symbol
         {
             get;
             set;
@@ -333,7 +333,7 @@ namespace CCXT.Collector.Library.Public
         /// <summary>
         /// 
         /// </summary>
-        public virtual string action
+        public string action
         {
             get;
             set;
@@ -342,7 +342,7 @@ namespace CCXT.Collector.Library.Public
         /// <summary>
         ///
         /// </summary>
-        public virtual long sequentialId
+        public long sequentialId
         {
             get;
             set;
@@ -352,7 +352,7 @@ namespace CCXT.Collector.Library.Public
         ///
         /// </summary>
         [JsonIgnore]
-        public virtual string rawJson
+        public string rawJson
         {
             get;
             set;

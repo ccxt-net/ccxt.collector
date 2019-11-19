@@ -10,15 +10,6 @@ namespace CCXT.Collector.Library.Public
     /// </summary>
     public interface ISTickerItem
     {
-        ///// <summary>
-        ///// string symbol of the market ('BTCUSD', 'ETHBTC', ...)
-        ///// </summary>
-        //string symbol
-        //{
-        //    get;
-        //    set;
-        //}
-
         /// <summary>
         /// 64-bit Unix Timestamp in milliseconds since Epoch 1 Jan 1970
         /// </summary>
@@ -81,7 +72,7 @@ namespace CCXT.Collector.Library.Public
         /// <summary>
         /// string symbol of the market ('BTCUSD', 'ETHBTC', ...)
         /// </summary>
-        public virtual string symbol
+        public string symbol
         {
             get;
             set;
@@ -90,7 +81,7 @@ namespace CCXT.Collector.Library.Public
         /// <summary>
         /// 64-bit Unix Timestamp in milliseconds since Epoch 1 Jan 1970
         /// </summary>
-        public virtual long timestamp
+        public long timestamp
         {
             get;
             set;
@@ -100,7 +91,7 @@ namespace CCXT.Collector.Library.Public
         /// ISO 8601 datetime string with milliseconds
         /// </summary>
         [JsonIgnore]
-        public virtual string datetime
+        public string datetime
         {
             get
             {
@@ -255,7 +246,7 @@ namespace CCXT.Collector.Library.Public
         /// <summary>
         /// exchange
         /// </summary>
-        public virtual string exchange
+        public string exchange
         {
             get;
             set;
@@ -264,7 +255,7 @@ namespace CCXT.Collector.Library.Public
         /// <summary>
         /// stream
         /// </summary>
-        public virtual string stream
+        public string stream
         {
             get;
             set;
@@ -273,7 +264,7 @@ namespace CCXT.Collector.Library.Public
         /// <summary>
         /// symbol
         /// </summary>
-        public virtual string symbol
+        public string symbol
         {
             get;
             set;
@@ -282,7 +273,7 @@ namespace CCXT.Collector.Library.Public
         /// <summary>
         /// action
         /// </summary>
-        public virtual string action
+        public string action
         {
             get;
             set;
@@ -291,7 +282,7 @@ namespace CCXT.Collector.Library.Public
         /// <summary>
         /// sequential id
         /// </summary>
-        public virtual long sequentialId
+        public long sequentialId
         {
             get;
             set;
@@ -301,7 +292,7 @@ namespace CCXT.Collector.Library.Public
         ///
         /// </summary>
         [JsonIgnore]
-        public virtual string rawJson
+        public string rawJson
         {
             get;
             set;

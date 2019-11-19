@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 using OdinSdk.BaseLib.Coin;
 using OdinSdk.BaseLib.Coin.Types;
 using OdinSdk.BaseLib.Configuration;
@@ -181,7 +182,7 @@ namespace CCXT.Collector.Library.Private
         /// <summary>
         ///
         /// </summary>
-        public virtual string orderId
+        public string orderId
         {
             get;
             set;
@@ -190,7 +191,7 @@ namespace CCXT.Collector.Library.Private
         /// <summary>
         ///
         /// </summary>
-        public virtual string symbol
+        public string symbol
         {
             get;
             set;
@@ -199,7 +200,8 @@ namespace CCXT.Collector.Library.Private
         /// <summary>
         ///
         /// </summary>
-        public virtual SideType sideType
+        [JsonConverter(typeof(StringEnumConverter))]
+        public SideType sideType
         {
             get;
             set;
@@ -208,7 +210,8 @@ namespace CCXT.Collector.Library.Private
         /// <summary>
         ///
         /// </summary>
-        public virtual OrderType orderType
+        [JsonConverter(typeof(StringEnumConverter))]
+        public OrderType orderType
         {
             get;
             set;
@@ -217,7 +220,8 @@ namespace CCXT.Collector.Library.Private
         /// <summary>
         ///
         /// </summary>
-        public virtual MakerType makerType
+        [JsonConverter(typeof(StringEnumConverter))]
+        public MakerType makerType
         {
             get;
             set;
@@ -226,7 +230,8 @@ namespace CCXT.Collector.Library.Private
         /// <summary>
         ///
         /// </summary>
-        public virtual OrderStatus orderStatus
+        [JsonConverter(typeof(StringEnumConverter))]
+        public OrderStatus orderStatus
         {
             get;
             set;
@@ -244,7 +249,7 @@ namespace CCXT.Collector.Library.Private
         /// <summary>
         ///
         /// </summary>
-        public virtual long timestamp
+        public long timestamp
         {
             get;
             set;
@@ -253,7 +258,7 @@ namespace CCXT.Collector.Library.Private
         /// <summary>
         /// ISO 8601 datetime string with milliseconds
         /// </summary>
-        public virtual string datetime
+        public string datetime
         {
             get
             {
@@ -264,7 +269,7 @@ namespace CCXT.Collector.Library.Private
         /// <summary>
         ///
         /// </summary>
-        public virtual decimal quantity
+        public decimal quantity
         {
             get;
             set;
@@ -273,7 +278,7 @@ namespace CCXT.Collector.Library.Private
         /// <summary>
         ///
         /// </summary>
-        public virtual decimal price
+        public decimal price
         {
             get;
             set;
@@ -282,7 +287,7 @@ namespace CCXT.Collector.Library.Private
         /// <summary>
         ///
         /// </summary>
-        public virtual decimal amount
+        public decimal amount
         {
             get;
             set;
@@ -291,7 +296,7 @@ namespace CCXT.Collector.Library.Private
         /// <summary>
         ///
         /// </summary>
-        public virtual decimal filled
+        public decimal filled
         {
             get;
             set;
@@ -300,7 +305,7 @@ namespace CCXT.Collector.Library.Private
         /// <summary>
         ///
         /// </summary>
-        public virtual decimal remaining
+        public decimal remaining
         {
             get;
             set;
@@ -318,7 +323,7 @@ namespace CCXT.Collector.Library.Private
         /// <summary>
         ///
         /// </summary>
-        public virtual decimal cost
+        public decimal cost
         {
             get;
             set;
@@ -327,7 +332,7 @@ namespace CCXT.Collector.Library.Private
         /// <summary>
         ///
         /// </summary>
-        public virtual decimal fee
+        public decimal fee
         {
             get;
             set;
@@ -336,7 +341,7 @@ namespace CCXT.Collector.Library.Private
         /// <summary>
         ///
         /// </summary>
-        public virtual int count
+        public int count
         {
             get;
             set;
@@ -462,7 +467,7 @@ namespace CCXT.Collector.Library.Private
         /// <summary>
         ///
         /// </summary>
-        public virtual string exchange
+        public string exchange
         {
             get;
             set;
@@ -471,7 +476,7 @@ namespace CCXT.Collector.Library.Private
         /// <summary>
         /// S, R
         /// </summary>
-        public virtual string stream
+        public string stream
         {
             get;
             set;
@@ -480,7 +485,7 @@ namespace CCXT.Collector.Library.Private
         /// <summary>
         ///
         /// </summary>
-        public virtual string symbol
+        public string symbol
         {
             get;
             set;
@@ -489,7 +494,7 @@ namespace CCXT.Collector.Library.Private
         /// <summary>
         ///
         /// </summary>
-        public virtual string action
+        public string action
         {
             get;
             set;
@@ -498,7 +503,7 @@ namespace CCXT.Collector.Library.Private
         /// <summary>
         ///
         /// </summary>
-        public virtual long sequentialId
+        public long sequentialId
         {
             get;
             set;
@@ -508,7 +513,7 @@ namespace CCXT.Collector.Library.Private
         ///
         /// </summary>
         [JsonIgnore]
-        public virtual string rawJson
+        public string rawJson
         {
             get;
             set;
