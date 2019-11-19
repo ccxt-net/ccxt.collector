@@ -81,29 +81,28 @@ namespace CCXT.Collector.BitMEX
                                     action = _message.action,
                                     sequentialId = _w_orders.Max(t => t.timestamp),
 
-                                    result = _w_orders.Where(o => o.orderStatus == OrderStatus.Closed)
-                                                      .Select(o =>
-                                                      {
-                                                          return new SMyOrderItem
-                                                          {
-                                                              symbol = o.symbol,
-                                                              orderId = o.orderId,
+                                    result = _w_orders.Select(o =>
+                                    {
+                                        return new SMyOrderItem
+                                        {
+                                            symbol = o.symbol,
+                                            orderId = o.orderId,
 
-                                                              timestamp = o.timestamp,
-                                                              orderStatus = o.orderStatus,
+                                            timestamp = o.timestamp,
+                                            orderStatus = o.orderStatus,
 
-                                                              sideType = o.sideType,
-                                                              makerType = o.makerType,
-                                                              orderType = o.orderType,
+                                            sideType = o.sideType,
+                                            makerType = o.makerType,
+                                            orderType = o.orderType,
 
-                                                              price = o.price,
-                                                              quantity = o.quantity,
-                                                              filled = o.filled,
-                                                              remaining = o.remaining,
-                                                              fee = o.fee
-                                                          };
-                                                      })
-                                                      .ToList<ISMyOrderItem>()
+                                            price = o.price,
+                                            quantity = o.quantity,
+                                            filled = o.filled,
+                                            remaining = o.remaining,
+                                            fee = o.fee
+                                        };
+                                    })
+                                    .ToList<ISMyOrderItem>()
                                 };
 
                                 if (_s_order.result.Count > 0)
