@@ -298,7 +298,7 @@ namespace CCXT.Collector.BitMEX.Private
         /// <param name="count">Number of results to fetch.</param>
         /// <param name="start">Starting point for results.</param>
         /// <returns></returns>
-        public async ValueTask<MyOrders> GetOrders(string symbol, long count, long start = 0)
+        public async ValueTask<MyOrders> GetOrders(string symbol, long count = 0, long start = 0)
         {
             var _result = new MyOrders();
 

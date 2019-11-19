@@ -161,7 +161,7 @@ namespace CCXT.Collector.Bithumb
             tokenSource.Token
             );
 
-            await Task.WhenAll(_o_polling);
+            await Task.WhenAll(_t_polling, _o_polling);
 
             GMLogger.WriteO($"polling service stopped: symbol => {symbol}...");
         }

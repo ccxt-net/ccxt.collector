@@ -5,6 +5,8 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using OdinSdk.BaseLib.Configuration;
+using CCXT.Collector.Library.Private;
+using Newtonsoft.Json;
 
 namespace CCXT.Collector.BitMEX
 {
@@ -21,9 +23,66 @@ namespace CCXT.Collector.BitMEX
             }
         }
 
+        private CCXT.Collector.BitMEX.Private.PrivateApi __private_api = null;
+        private CCXT.Collector.BitMEX.Private.PrivateApi privateApi
+        {
+            get
+            {
+                if (__private_api == null)
+                    __private_api = new CCXT.Collector.BitMEX.Private.PrivateApi(KConfig.BitMexConnectKey, KConfig.BitMexSecretKey, KConfig.BitMexUseLiveServer);
+                return __private_api;
+            }
+        }
+
         public async Task Start(CancellationTokenSource tokenSource, string symbol, int limits = 25)
         {
             BMLogger.WriteO($"polling service start: symbol => {symbol}...");
+
+            var _m_polling = Task.Run(async () =>
+            {
+                while (true)
+                {
+                    try
+                    {
+                        await Task.Delay(0);
+
+                        // my orders
+                        var _orders = await privateApi.GetOrders(symbol); 
+                        if (_orders.success == true)
+                        {
+                            Processing.SendReceiveQ(new QMessage
+                            {
+                                command = "AP",
+                                exchange = BMLogger.exchange_name,
+                                symbol = symbol,
+                                stream = "order",
+                                action = "polling",
+                                payload = JsonConvert.SerializeObject(_orders.result)
+                            });
+                        }
+                    }
+                    catch (TaskCanceledException)
+                    {
+                    }
+                    catch (Exception ex)
+                    {
+                        BMLogger.WriteX(ex.ToString());
+                    }
+                    //finally
+                    {
+                        if (tokenSource.IsCancellationRequested == true)
+                            break;
+                    }
+
+                    var _cancelled = tokenSource.Token.WaitHandle.WaitOne(0);
+                    if (_cancelled == true)
+                        break;
+
+                    await Task.Delay(KConfig.BitMexPollingSleep * 10);
+                }
+            },
+            tokenSource.Token
+            );
 
             var _t_polling = Task.Run(async () =>
             {
@@ -188,7 +247,7 @@ namespace CCXT.Collector.BitMEX
             tokenSource.Token
             );
 
-            await Task.WhenAll(_o_polling);
+            await Task.WhenAll(_m_polling, _t_polling, _o_polling);
 
             BMLogger.WriteO($"polling service stopped: symbol => {symbol}...");
         }

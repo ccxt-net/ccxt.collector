@@ -596,79 +596,110 @@ namespace CCXT.Collector.BitMEX
         /// </summary>
         /// <param name="cmy"></param>
         /// <returns></returns>
-        private async ValueTask<bool> mergeMyOrder(SMyOrders cmy)
+        private async ValueTask mergeMyOrder(SMyOrders cmy)
         {
-            var _result = false;
-
             SMyOrders _qmy;
             {
                 if (__qMyOrders.TryGetValue(cmy.symbol, out _qmy) == true)
                 {
                     if (cmy.action == "insert" || cmy.action == "update" || cmy.action == "delete")
-                    {
-                        foreach (var _co in cmy.result)
-                        {
-                            var _qa = _qmy.result.Where(o => o.orderId == _co.orderId).SingleOrDefault();
-                            if (_qa == null)
-                            {
-                                if (_co.orderStatus == OrderStatus.Open)
-                                    _qmy.result.Add(_co);
-                            }
-                            else
-                            {
-                                _qa.timestamp = _co.timestamp;
+                        updateMyOrder(_qmy, ref cmy);
 
-                                _co.orderStatus = _co.orderStatus == OrderStatus.Unknown ? _qa.orderStatus : _co.orderStatus;
-                                _co.sideType = _co.sideType == SideType.Unknown ? _qa.sideType : _co.sideType;
-                                _co.orderType = _co.orderType == OrderType.Unknown ? _qa.orderType : _co.orderType;
-                                _co.makerType = _co.makerType == MakerType.Unknown ? _qa.makerType : _co.makerType;
+                    if (cmy.action == "partial" || cmy.action == "polling")
+                        modifyMyOrder(_qmy, ref cmy);
 
-                                if (_co.orderStatus == OrderStatus.Partially || _co.orderStatus == OrderStatus.Closed)
-                                {
-                                    _qa.remaining = _co.remaining;
-                                    _qa.filled = _co.filled;
-                                    _qa.avgPx = _co.avgPx;
-                                }
-                                else if (_co.orderStatus == OrderStatus.Canceled)
-                                {
-                                    _qa.remaining = _co.remaining;
-                                    _qa.filled = _qa.quantity - _qa.remaining;
-                                }
-                                else
-                                {
-                                    if (_co.quantity != 0 && _co.quantity != _qa.quantity)
-                                    {
-                                        _qa.quantity = _co.quantity;
-                                        _qa.amount = _qa.price * _qa.quantity;
-                                    }
-
-                                    if (_co.price != 0 && _co.price != _qa.price)
-                                    {
-                                        _qa.price = _co.price;
-                                        _qa.amount = _qa.price * _qa.quantity;
-                                    }
-
-                                    if (_co.remaining != 0 && _co.remaining != _qa.remaining)
-                                    {
-                                        _qa.remaining = _co.remaining;
-                                        _qa.filled = _qa.quantity - _qa.remaining;
-                                    }
-                                }
-                            }
-                        }
-
-                        _qmy.result.RemoveAll(o => o.quantity == o.filled);
-                    }
+                    _qmy.result.RemoveAll(o => o.quantity == o.filled);
                 }
-                else if (cmy.action == "partial")
+                else if (cmy.action == "partial" || cmy.action == "polling")
                 {
                     __qMyOrders[cmy.symbol] = cmy;
                 }
 
                 await publishMyCompleteOrder(cmy);
             }
+        }
 
-            return _result;
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="qmy"></param>
+        /// <param name="cmy"></param>
+        /// <returns></returns>
+        private void updateMyOrder(SMyOrders qmy, ref SMyOrders cmy)
+        {
+            foreach (var _co in cmy.result)
+            {
+                var _qa = qmy.result.Where(o => o.orderId == _co.orderId).SingleOrDefault();
+                if (_qa == null)
+                {
+                    if (_co.orderStatus == OrderStatus.Open)
+                        qmy.result.Add(_co);
+                }
+                else
+                {
+                    _qa.timestamp = _co.timestamp;
+
+                    _co.orderStatus = _co.orderStatus == OrderStatus.Unknown ? _qa.orderStatus : _co.orderStatus;
+                    _co.sideType = _co.sideType == SideType.Unknown ? _qa.sideType : _co.sideType;
+                    _co.orderType = _co.orderType == OrderType.Unknown ? _qa.orderType : _co.orderType;
+                    _co.makerType = _co.makerType == MakerType.Unknown ? _qa.makerType : _co.makerType;
+
+                    if (_co.orderStatus == OrderStatus.Partially || _co.orderStatus == OrderStatus.Closed)
+                    {
+                        _qa.remaining = _co.remaining;
+                        _qa.filled = _co.filled;
+                        _qa.avgPx = _co.avgPx;
+                    }
+                    else if (_co.orderStatus == OrderStatus.Canceled)
+                    {
+                        _qa.remaining = _co.remaining;
+                        _qa.filled = _qa.quantity - _qa.remaining;
+                    }
+                    else
+                    {
+                        if (_co.quantity != 0 && _co.quantity != _qa.quantity)
+                        {
+                            _qa.quantity = _co.quantity;
+                            _qa.amount = _qa.price * _qa.quantity;
+                        }
+
+                        if (_co.price != 0 && _co.price != _qa.price)
+                        {
+                            _qa.price = _co.price;
+                            _qa.amount = _qa.price * _qa.quantity;
+                        }
+
+                        if (_co.remaining != 0 && _co.remaining != _qa.remaining)
+                        {
+                            _qa.remaining = _co.remaining;
+                            _qa.filled = _qa.quantity - _qa.remaining;
+                        }
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="qmy"></param>
+        /// <param name="cmy"></param>
+        /// <returns></returns>
+        private void modifyMyOrder(SMyOrders qmy, ref SMyOrders cmy)
+        {
+            foreach (var _co in cmy.result)
+            {
+                var _qa = qmy.result.Where(o => o.orderId == _co.orderId).SingleOrDefault();
+                if (_qa == null)
+                    qmy.result.Add(_co);
+            }
+
+            foreach (var _qo in qmy.result)
+            {
+                var _ca = cmy.result.Where(o => o.orderId == _qo.orderId).SingleOrDefault();
+                if (_ca == null)
+                    _qo.filled = _qo.quantity;
+            }
         }
 
         /// <summary>

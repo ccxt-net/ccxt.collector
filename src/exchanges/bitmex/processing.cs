@@ -85,21 +85,28 @@ namespace CCXT.Collector.BitMEX
                                     {
                                         return new SMyOrderItem
                                         {
-                                            symbol = o.symbol,
                                             orderId = o.orderId,
+                                            symbol = o.symbol,
+                                            sideType = o.sideType,
 
                                             timestamp = o.timestamp,
-                                            orderStatus = o.orderStatus,
 
-                                            sideType = o.sideType,
                                             makerType = o.makerType,
+                                            orderStatus = o.orderStatus,
                                             orderType = o.orderType,
 
-                                            price = o.price,
                                             quantity = o.quantity,
+                                            price = o.price,
+                                            amount = o.amount,
                                             filled = o.filled,
                                             remaining = o.remaining,
-                                            fee = o.fee
+
+                                            workingIndicator = o.workingIndicator,
+                                            avgPx = o.avgPx.HasValue ? o.avgPx.Value : 0,
+                                            fee = o.fee,
+                                            cost = o.cost,
+
+                                            count = o.count
                                         };
                                     })
                                     .ToList<ISMyOrderItem>()
@@ -190,7 +197,52 @@ namespace CCXT.Collector.BitMEX
                         }
                         else if (_message.command == "AP")
                         {
-                            if (_message.stream == "trade")
+                            if (_message.stream == "order")
+                            {
+                                var _w_orders = JsonConvert.DeserializeObject<List<BMyOrderItem>>(_message.payload);
+
+                                var _s_order = new SMyOrders
+                                {
+                                    exchange = _message.exchange,
+                                    stream = _message.stream,
+                                    symbol = _message.symbol,
+                                    action = _message.action,
+                                    sequentialId = _w_orders.Max(t => t.timestamp),
+
+                                    result = _w_orders.Select(o =>
+                                    {
+                                        return new SMyOrderItem
+                                        {
+                                            orderId = o.orderId,
+                                            symbol = o.symbol,
+                                            sideType = o.sideType,
+
+                                            timestamp = o.timestamp,
+
+                                            makerType = o.makerType,
+                                            orderStatus = o.orderStatus,
+                                            orderType = o.orderType,
+
+                                            quantity = o.quantity,
+                                            price = o.price,
+                                            amount = o.amount,
+                                            filled = o.filled,
+                                            remaining = o.remaining,
+
+                                            workingIndicator = o.workingIndicator,
+                                            avgPx = o.avgPx.HasValue ? o.avgPx.Value : 0,
+                                            fee = o.fee,
+                                            cost = o.cost,
+
+                                            count = o.count
+                                        };
+                                    })
+                                    .ToList<ISMyOrderItem>()
+                                };
+
+                                await mergeMyOrder(_s_order);
+                            }
+                            else if (_message.stream == "trade")
                             {
                                 var _a_trades = JsonConvert.DeserializeObject<List<BCompleteOrderItem>>(_message.payload);
 
