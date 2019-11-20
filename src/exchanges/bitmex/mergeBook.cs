@@ -609,9 +609,10 @@ namespace CCXT.Collector.BitMEX
                         updateMyOrder(_qmy, ref cmy);
                         _result = true;
                     }
-
-                    if (cmy.action == "partial" || cmy.action == "polling")
+                    else if (cmy.action == "partial" || cmy.action == "polling")
+                    {
                         modifyMyOrder(_qmy, ref cmy);
+                    }
 
                     _qmy.result.RemoveAll(o => o.quantity == o.filled);
                 }
