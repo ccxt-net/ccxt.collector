@@ -1,6 +1,4 @@
 ﻿using Newtonsoft.Json;
-using OdinSdk.BaseLib.Coin;
-using OdinSdk.BaseLib.Configuration;
 using System.Collections.Generic;
 
 namespace CCXT.Collector.Library.Public
@@ -8,56 +6,39 @@ namespace CCXT.Collector.Library.Public
     /// <summary>
     ///
     /// </summary>
-    public interface ISTickerItem
+    public class STickerItem
     {
         /// <summary>
-        /// 64-bit Unix Timestamp in milliseconds since Epoch 1 Jan 1970
+        /// 
         /// </summary>
-        long timestamp
+        public virtual decimal askPrice
         {
             get;
             set;
         }
 
         /// <summary>
-        /// ISO 8601 datetime string with milliseconds
+        /// 
         /// </summary>
-        string datetime
-        {
-            get;
-        }
-
-        /// <summary>
-        /// current best bid (buy) price
-        /// </summary>
-        decimal bidPrice
+        public virtual decimal bidPrice
         {
             get;
             set;
         }
 
         /// <summary>
-        /// current best bid (buy) amount (may be missing or undefined)
+        /// 
         /// </summary>
-        decimal bidQuantity
+        public virtual decimal askSize
         {
             get;
             set;
         }
 
         /// <summary>
-        /// current best ask (sell) price
+        /// 
         /// </summary>
-        decimal askPrice
-        {
-            get;
-            set;
-        }
-
-        /// <summary>
-        /// current best ask (sell) amount (may be missing or undefined)
-        /// </summary>
-        decimal askQuantity
+        public virtual decimal bidSize
         {
             get;
             set;
@@ -67,17 +48,8 @@ namespace CCXT.Collector.Library.Public
     /// <summary>
     ///
     /// </summary>
-    public class STickerItem : ISTickerItem
+    public class STickers : SApiResult<List<STickerItem>>
     {
-        /// <summary>
-        /// string symbol of the market ('BTCUSD', 'ETHBTC', ...)
-        /// </summary>
-        public string symbol
-        {
-            get;
-            set;
-        }
-
         /// <summary>
         /// 64-bit Unix Timestamp in milliseconds since Epoch 1 Jan 1970
         /// </summary>
@@ -88,215 +60,21 @@ namespace CCXT.Collector.Library.Public
         }
 
         /// <summary>
-        /// ISO 8601 datetime string with milliseconds
+        /// 
         /// </summary>
-        [JsonIgnore]
-        public string datetime
-        {
-            get
-            {
-                return CUnixTime.ConvertToUtcTimeMilli(timestamp).ToString("o");
-            }
-        }
-
-        /// <summary>
-        /// current best bid (buy) price
-        /// </summary>
-        public virtual decimal bidPrice
+        public decimal totalAskSize
         {
             get;
             set;
         }
 
         /// <summary>
-        /// current best bid (buy) amount (may be missing or undefined)
+        /// 
         /// </summary>
-        public virtual decimal bidQuantity
+        public decimal totalBidSize
         {
             get;
             set;
         }
-
-        /// <summary>
-        /// current best ask (sell) price
-        /// </summary>
-        public virtual decimal askPrice
-        {
-            get;
-            set;
-        }
-
-        /// <summary>
-        /// current best ask (sell) amount (may be missing or undefined)
-        /// </summary>
-        public virtual decimal askQuantity
-        {
-            get;
-            set;
-        }
-    }
-
-    /// <summary>
-    ///
-    /// </summary>
-    public interface ISTickers : IApiResult<List<ISTickerItem>>
-    {
-        /// <summary>
-        /// exchange
-        /// </summary>
-        string exchange
-        {
-            get;
-            set;
-        }
-
-        /// <summary>
-        /// stream
-        /// </summary>
-        string stream
-        {
-            get;
-            set;
-        }
-
-        /// <summary>
-        /// symbol
-        /// </summary>
-        string symbol
-        {
-            get;
-            set;
-        }
-
-        /// <summary>
-        /// sequential id
-        /// </summary>
-        long sequentialId
-        {
-            get;
-            set;
-        }
-#if DEBUG
-        /// <summary>
-        ///
-        /// </summary>
-        string rawJson
-        {
-            get;
-            set;
-        }
-#endif
-    }
-
-    /// <summary>
-    ///
-    /// </summary>
-    public class STickers : ApiResult<List<ISTickerItem>>, ISTickers
-    {
-        /// <summary>
-        /// is success calling
-        /// </summary>
-        [JsonIgnore]
-        public override bool success
-        {
-            get;
-            set;
-        }
-
-        /// <summary>
-        /// error or success message
-        /// </summary>
-        [JsonIgnore]
-        public override string message
-        {
-            get;
-            set;
-        }
-
-        /// <summary>
-        /// status, error code
-        /// </summary>
-        [JsonIgnore]
-        public override int statusCode
-        {
-            get;
-            set;
-        }
-
-        /// <summary>
-        ///
-        /// </summary>
-        [JsonIgnore]
-        public override ErrorCode errorCode
-        {
-            get;
-            set;
-        }
-
-        /// <summary>
-        /// check implemented
-        /// </summary>
-        [JsonIgnore]
-        public override bool supported
-        {
-            get;
-            set;
-        }
-
-        /// <summary>
-        /// exchange
-        /// </summary>
-        public string exchange
-        {
-            get;
-            set;
-        }
-
-        /// <summary>
-        /// stream
-        /// </summary>
-        public string stream
-        {
-            get;
-            set;
-        }
-
-        /// <summary>
-        /// symbol
-        /// </summary>
-        public string symbol
-        {
-            get;
-            set;
-        }
-
-        /// <summary>
-        /// action
-        /// </summary>
-        public string action
-        {
-            get;
-            set;
-        }
-
-        /// <summary>
-        /// sequential id
-        /// </summary>
-        public long sequentialId
-        {
-            get;
-            set;
-        }
-#if DEBUG
-        /// <summary>
-        ///
-        /// </summary>
-        [JsonIgnore]
-        public string rawJson
-        {
-            get;
-            set;
-        }
-#endif
     }
 }

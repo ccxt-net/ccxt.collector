@@ -77,7 +77,7 @@ namespace CCXT.Collector.Bithumb
                                     action = _message.action,
                                     sequentialId = _w_trade.timestamp,
 
-                                    result = new List<ISCompleteOrderItem>
+                                    result = new List<SCompleteOrderItem>
                                     {
                                         new SCompleteOrderItem
                                         {
@@ -146,7 +146,7 @@ namespace CCXT.Collector.Bithumb
                                             quantity = t.quantity
                                         };
                                     })
-                                    .ToList<ISCompleteOrderItem>()
+                                    .ToList()
                                 };
 
                                 if (_s_trade.result.Count() > 0)
@@ -196,6 +196,10 @@ namespace CCXT.Collector.Bithumb
                                     stream = _message.stream,
                                     action = _message.action,
                                     sequentialId = _message.sequentialId,
+                                    
+                                    timestamp = _a_ticker_data.Max(o => o.timestamp),
+                                    totalAskSize = _a_ticker_data.Sum(o => o.askSumQty),
+                                    totalBidSize = _a_ticker_data.Sum(o => o.bidSumQty),
 
                                     result = _a_ticker_data.Select(o =>
                                     {
@@ -204,14 +208,13 @@ namespace CCXT.Collector.Bithumb
 
                                         return new STickerItem
                                         {
-                                            symbol = _message.symbol,
                                             askPrice = _ask.price,
-                                            askQuantity = _ask.quantity,
+                                            askSize = _ask.quantity,
                                             bidPrice = _bid.price,
-                                            bidQuantity = _bid.quantity
+                                            bidSize = _bid.quantity
                                         };
                                     })
-                                    .ToList<ISTickerItem>()
+                                    .ToList()
                                 });
                             }
                         }

@@ -136,7 +136,7 @@ namespace CCXT.Collector.BitMEX
                                             quantity = t.quantity
                                         };
                                     })
-                                    .ToList<ISCompleteOrderItem>()
+                                    .ToList()
                                 };
 
                                 if (_s_trade.result.Count() > 0)
@@ -264,7 +264,7 @@ namespace CCXT.Collector.BitMEX
                                             quantity = t.quantity
                                         };
                                     })
-                                    .ToList<ISCompleteOrderItem>()
+                                    .ToList()
                                 };
 
                                 if (_s_trade.result.Count() > 0)

@@ -209,7 +209,7 @@ namespace CCXT.Collector.Binance
                                     exchange = BNLogger.exchange_name,
                                     stream = "ticker",
                                     sequentialId = _last_limit_milli_secs,
-                                    result = _b_json_data.Where(t => symbols.Contains(t.symbol)).ToList<ISTickerItem>()
+                                    result = _b_json_data.Where(t => symbols.Contains(t.symbol)).ToList<STickerItem>()
                                 };
 
                                 var _b_json_content = JsonConvert.SerializeObject(_tickers);

@@ -77,7 +77,7 @@ namespace CCXT.Collector.ItBit
                                     action = _message.action,
                                     sequentialId = _w_trade.timestamp,
 
-                                    result = new List<ISCompleteOrderItem>
+                                    result = new List<SCompleteOrderItem>
                                     {
                                         new SCompleteOrderItem
                                         {
@@ -146,7 +146,7 @@ namespace CCXT.Collector.ItBit
                                             quantity = t.quantity
                                         };
                                     })
-                                    .ToList<ISCompleteOrderItem>()
+                                    .ToList()
                                 };
 
                                 if (_s_trade.result.Count() > 0)
@@ -204,14 +204,13 @@ namespace CCXT.Collector.ItBit
 
                                         return new STickerItem
                                         {
-                                            symbol = _message.symbol,
                                             askPrice = _ask.price,
-                                            askQuantity = _ask.quantity,
+                                            askSize = _ask.quantity,
                                             bidPrice = _bid.price,
-                                            bidQuantity = _bid.quantity
+                                            bidSize = _bid.quantity
                                         };
                                     })
-                                    .ToList<ISTickerItem>()
+                                    .ToList()
                                 });
                             }
                         }

@@ -8,28 +8,10 @@ namespace CCXT.Collector.Binance.Public
     public class BTickerItem : CCXT.Collector.Library.Public.STickerItem
     {
         /// <summary>
-        /// ask price
-        /// </summary>
-        public override decimal askPrice
-        {
-            get;
-            set;
-        }
-
-        /// <summary>
         /// ask quantity
         /// </summary>
         [JsonProperty(PropertyName = "askQty")]
-        public override decimal askQuantity
-        {
-            get;
-            set;
-        }
-
-        /// <summary>
-        /// bid price
-        /// </summary>
-        public override decimal bidPrice
+        public override decimal askSize
         {
             get;
             set;
@@ -39,7 +21,7 @@ namespace CCXT.Collector.Binance.Public
         /// bid quantity
         /// </summary>
         [JsonProperty(PropertyName = "bidQty")]
-        public override decimal bidQuantity
+        public override decimal bidSize
         {
             get;
             set;

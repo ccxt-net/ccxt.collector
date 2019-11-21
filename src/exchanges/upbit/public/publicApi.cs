@@ -144,7 +144,7 @@ namespace CCXT.Collector.Upbit.Public
                             quantity = t.quantity
                         };
                     })
-                    .ToList<ISCompleteOrderItem>();
+                    .ToList();
                 }
 
                 _result.SetSuccess();
