@@ -165,7 +165,7 @@ namespace CCXT.Collector.Binance
             BNLogger.WriteO($"polling service stopped: symbol => {symbol}...");
         }
 
-        public async Task BStart(CancellationTokenSource tokenSource, string[] symbols)
+        public async Task BStart(CancellationTokenSource tokenSource, string symbol)
         {
             BNLogger.WriteO($"bpolling service start...");
 
@@ -209,7 +209,7 @@ namespace CCXT.Collector.Binance
                                     exchange = BNLogger.exchange_name,
                                     stream = "ticker",
                                     sequentialId = _last_limit_milli_secs,
-                                    result = _b_json_data.Where(t => symbols.Contains(t.symbol)).ToList<STickerItem>()
+                                    result = _b_json_data.Where(t => t.symbol == symbol).ToList<STickerItem>()
                                 };
 
                                 var _b_json_content = JsonConvert.SerializeObject(_tickers);

@@ -121,5 +121,15 @@ namespace CCXT.Collector.Library.Public
     /// </summary>
     public class SOhlcvs : SApiResult<List<SOhlcvItem>>
     {
+#if DEBUG
+        /// <summary>
+        ///
+        /// </summary>
+        public string rawJson
+        {
+            get;
+            set;
+        }
+#endif
     }
 }

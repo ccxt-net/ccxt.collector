@@ -102,7 +102,10 @@ namespace CCXT.Collector.Service
                     }
                 }
                 else
-                    SnapshotTasks.Add((new Upbit.Polling()).BStart(SSTokenSource, _symbols));
+                {
+                    foreach (var _s in _symbols)
+                        SnapshotTasks.Add((new Upbit.Polling()).BStart(SSTokenSource, _s));
+                }
 
                 SnapshotTasks.Add((new Upbit.Processing()).Start(SSTokenSource));
             }
@@ -120,7 +123,15 @@ namespace CCXT.Collector.Service
                     }
                 }
                 else
-                    SnapshotTasks.Add((new BitMEX.Polling()).Start(SSTokenSource, _symbols[0]));
+                {
+                    foreach (var _s in _symbols)
+                    {
+                        if (String.IsNullOrEmpty(_s) == true)
+                            continue;
+
+                        SnapshotTasks.Add((new BitMEX.Polling()).Start(SSTokenSource, _s));
+                    }
+                }
 
                 SnapshotTasks.Add((new BitMEX.Processing()).Start(SSTokenSource));
             }
@@ -138,7 +149,10 @@ namespace CCXT.Collector.Service
                     }
                 }
                 else
-                    SnapshotTasks.Add((new Binance.Polling()).BStart(SSTokenSource, _symbols));
+                {
+                    foreach (var _s in _symbols)
+                        SnapshotTasks.Add((new Binance.Polling()).BStart(SSTokenSource, _s));
+                }
 
                 SnapshotTasks.Add((new Binance.Processing()).Start(SSTokenSource));
             }

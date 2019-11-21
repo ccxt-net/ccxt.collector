@@ -8,6 +8,15 @@ namespace CCXT.Collector.Binance.Public
     public class BTickerItem : CCXT.Collector.Library.Public.STickerItem
     {
         /// <summary>
+        /// 
+        /// </summary>
+        public string symbol
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
         /// ask quantity
         /// </summary>
         [JsonProperty(PropertyName = "askQty")]

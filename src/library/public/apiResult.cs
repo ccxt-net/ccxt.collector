@@ -1,6 +1,70 @@
 ﻿namespace CCXT.Collector.Library.Public
 {
-    public class SApiResult<T>
+    /// <summary>
+    /// api call result class
+    /// </summary>
+    public class SApiResult
+    {
+        /// <summary>
+        /// api call result class
+        /// </summary>
+        public SApiResult(bool success = false)
+        {
+            if (success == true)
+                this.SetSuccess();
+            else
+                this.SetFailure();
+        }
+
+        /// <summary>
+        /// is success calling
+        /// </summary>
+        public virtual bool success
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// error or success message
+        /// </summary>
+        public virtual string message
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="result"></param>
+        /// <returns></returns>
+        public void SetResult(SApiResult result)
+        {
+            this.message = result.message;
+            this.success = result.success;
+        }
+
+        /// <summary>
+        ///
+        /// </summary>
+        public void SetSuccess(string message = "success", bool success = true)
+        {
+            this.message = message;
+            this.success = success;
+        }
+
+        /// <summary>
+        ///
+        /// </summary>
+        public void SetFailure(string message = "failure", bool success = false)
+        {
+            this.message = message;
+            this.success = success;
+        }
+    }
+
+    public class SApiResult<T> : SApiResult
     {
         /// <summary>
         ///

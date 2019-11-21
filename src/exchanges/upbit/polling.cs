@@ -166,18 +166,17 @@ namespace CCXT.Collector.Upbit
             UPLogger.WriteO($"polling service stopped: symbol => {symbol}...");
         }
 
-        public async Task BStart(CancellationTokenSource tokenSource, string[] symbols)
+        public async Task BStart(CancellationTokenSource tokenSource, string symbol)
         {
             UPLogger.WriteO($"bpolling service start..");
 
             var _b_polling = Task.Run(async () =>
             {
-                var _symbols = String.Join(",", symbols);
                 var _client = CreateJsonClient(publicApi.publicClient.ApiUrl);
 
                 var _b_params = new Dictionary<string, object>();
                 {
-                    _b_params.Add("markets", _symbols);
+                    _b_params.Add("markets", symbol);
                 }
 
                 var _b_request = CreateJsonRequest($"/orderbook", _b_params);
@@ -210,7 +209,7 @@ namespace CCXT.Collector.Upbit
                             {
                                 command = "AP",
                                 exchange = UPLogger.exchange_name,
-                                symbol = _symbols,
+                                symbol = symbol,
                                 stream = "ticker",
                                 action = "polling",
                                 sequentialId = _last_limit_milli_secs,
@@ -222,7 +221,7 @@ namespace CCXT.Collector.Upbit
                             var _http_status = (int)_b_json_value.StatusCode;
                             if (_http_status == 403 || _http_status == 418)// || _http_status == 429)
                             {
-                                UPLogger.WriteQ($"request-limit: symbol => {_symbols}, https_status => {_http_status}");
+                                UPLogger.WriteQ($"request-limit: symbol => {symbol}, https_status => {_http_status}");
 
                                 var _waiting = tokenSource.Token.WaitHandle.WaitOne(0);
                                 if (_waiting == true)
