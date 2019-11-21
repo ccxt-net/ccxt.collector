@@ -882,11 +882,17 @@ namespace CCXT.Collector.BitMEX.Private
         /// Cancels all of your orders.
         /// </summary>
         /// <returns></returns>
-        public async ValueTask<MyOrders> CancelAllOrders()
+        public async ValueTask<MyOrders> CancelAllOrders(string symbol = "")
         {
             var _result = new MyOrders();
 
-            var _response = await privateClient.CallApiDelete2Async("/api/v1/order/all");
+            var _params = new Dictionary<string, object>();
+            {
+                if (String.IsNullOrEmpty(symbol) == false)
+                    _params.Add("symbol", symbol);
+            }
+
+            var _response = await privateClient.CallApiDelete2Async("/api/v1/order/all", _params);
 #if DEBUG
             _result.rawJson = _response.Content;
 #endif
