@@ -1,12 +1,11 @@
 ﻿using CCXT.Collector.Library;
+using Newtonsoft.Json;
+using OdinSdk.BaseLib.Configuration;
 using System;
-using System.Linq;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using OdinSdk.BaseLib.Configuration;
-using CCXT.Collector.Library.Private;
-using Newtonsoft.Json;
 
 namespace CCXT.Collector.BitMEX
 {
@@ -79,7 +78,7 @@ namespace CCXT.Collector.BitMEX
                     if (_cancelled == true)
                         break;
 
-                    await Task.Delay(KConfig.BitMexPollingSleep * 10);
+                    await Task.Delay(KConfig.BitMexPollingSleep * 3);
                 }
             },
             tokenSource.Token
@@ -161,7 +160,7 @@ namespace CCXT.Collector.BitMEX
                     if (_cancelled == true)
                         break;
 
-                    await Task.Delay(KConfig.BitMexPollingSleep);
+                    await Task.Delay(KConfig.BitMexPollingSleep * 2);
                 }
             },
             tokenSource.Token
@@ -242,7 +241,7 @@ namespace CCXT.Collector.BitMEX
                     if (_cancelled == true)
                         break;
 
-                    await Task.Delay(KConfig.BitMexPollingSleep);
+                    await Task.Delay(KConfig.BitMexPollingSleep * 2);
                 }
             },
             tokenSource.Token

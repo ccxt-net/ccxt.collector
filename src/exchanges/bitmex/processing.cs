@@ -288,7 +288,7 @@ namespace CCXT.Collector.BitMEX
                                     stream = _message.stream,
                                     action = _message.action,
                                     sequentialId = _timestamp,
-                                    
+
                                     result = new SOrderBook
                                     {
                                         timestamp = _timestamp,
@@ -343,8 +343,8 @@ namespace CCXT.Collector.BitMEX
                     }
                 }
             },
-           tokenSource.Token
-           );
+            tokenSource.Token
+            );
 
             await Task.WhenAll(_processing);
 
