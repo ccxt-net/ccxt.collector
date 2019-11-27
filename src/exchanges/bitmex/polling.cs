@@ -39,7 +39,7 @@ namespace CCXT.Collector.BitMEX
 
             var _m_polling = Task.Run(async () =>
             {
-                while (KConfig.BitMexUseMyOrderStream == true)
+                while (KConfig.BitMexUseMyOrderStream)
                 {
                     try
                     {
@@ -178,7 +178,7 @@ namespace CCXT.Collector.BitMEX
 
                 var _o_request = CreateJsonRequest($"/api/v1/orderBook/L2", _o_params);
 
-                while (true)
+                while (KConfig.BitMexUsePollingOrderboook)
                 {
                     try
                     {

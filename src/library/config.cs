@@ -95,6 +95,14 @@ namespace CCXT.Collector.Library
             }
         }
 
+        public static bool BitMexUsePollingOrderboook
+        {
+            get
+            {
+                return CConfig.GetAppBoolean("bitmex.use.polling.orderbook");
+            }
+        }
+
         public static string BitMexConnectKey
         {
             get
