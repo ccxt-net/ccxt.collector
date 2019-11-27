@@ -76,5 +76,16 @@ namespace CCXT.Collector.Library.Public
             get;
             set;
         }
+#if DEBUG
+        /// <summary>
+        ///
+        /// </summary>
+        [JsonIgnore]
+        public string rawJson
+        {
+            get;
+            set;
+        }
+#endif
     }
 }

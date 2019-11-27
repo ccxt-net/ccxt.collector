@@ -1,4 +1,6 @@
-﻿namespace CCXT.Collector.Library.Public
+﻿using Newtonsoft.Json;
+
+namespace CCXT.Collector.Library.Public
 {
     /// <summary>
     /// api call result class
@@ -19,6 +21,7 @@
         /// <summary>
         /// is success calling
         /// </summary>
+        [JsonIgnore]
         public virtual bool success
         {
             get;
@@ -28,6 +31,7 @@
         /// <summary>
         /// error or success message
         /// </summary>
+        [JsonIgnore]
         public virtual string message
         {
             get;

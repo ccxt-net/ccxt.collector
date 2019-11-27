@@ -61,6 +61,7 @@ namespace CCXT.Collector.Library.Public
         /// <summary>
         ///
         /// </summary>
+        [JsonIgnore]
         public string rawJson
         {
             get;

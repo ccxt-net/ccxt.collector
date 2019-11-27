@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using Newtonsoft.Json;
+using System.Collections.Generic;
 
 namespace CCXT.Collector.Library.Public
 {
@@ -125,6 +126,7 @@ namespace CCXT.Collector.Library.Public
         /// <summary>
         ///
         /// </summary>
+        [JsonIgnore]
         public string rawJson
         {
             get;
