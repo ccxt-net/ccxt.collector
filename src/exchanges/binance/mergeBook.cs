@@ -425,7 +425,7 @@ namespace CCXT.Collector.Binance
         {
             if (exchange == BNLogger.exchange_name)
             {
-                var _sob = (SOrderBooks)null;
+                SOrderBooks? _sob = null;
 
                 lock (__qOrderBooks)
                 {
