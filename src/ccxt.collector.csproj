@@ -16,6 +16,8 @@
     <PackageTags>cryptocurrency;exchange;trading;market-data;exchange-markets;bot;crypto</PackageTags>
     <PackageReleaseNotes>net472 rebuild</PackageReleaseNotes>
     <Platforms>AnyCPU;x64;x86</Platforms>
+    <LangVersion>8.0</LangVersion>
+    <Nullable>enable</Nullable>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
