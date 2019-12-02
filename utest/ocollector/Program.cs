@@ -7,14 +7,14 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace CCXT.OCollector
+namespace CCXT.Sample
 {
     /// <summary>
     ///
     /// </summary>
     public class Program
     {
-        private static CancellationTokenSource __main_token_source;
+        private static CancellationTokenSource? __main_token_source;
 
         public static CancellationTokenSource MainTokenSource
         {
@@ -27,7 +27,7 @@ namespace CCXT.OCollector
             }
         }
 
-        private static SynchronizedCollection<Task> __main_tasks;
+        private static SynchronizedCollection<Task>? __main_tasks;
 
         /// <summary>
         ///

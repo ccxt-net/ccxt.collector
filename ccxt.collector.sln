@@ -15,13 +15,13 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "logo-files", "logo-files", 
 		logo-files\ccxt.net.ico = logo-files\ccxt.net.ico
 	EndProjectSection
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "sample", "sample", "{F5F13CB7-91AE-498C-AD71-9EC31AA49A5B}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "utest", "utest", "{F5F13CB7-91AE-498C-AD71-9EC31AA49A5B}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{9E137A9C-8E9F-4484-B4A2-D190573B082C}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ccxt.collector", "src\ccxt.collector.csproj", "{A175DBB0-4B27-45BA-92C1-DC6C8F15C619}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ocollector", "sample\ocollector\ocollector.csproj", "{28A0B9C4-0661-4744-886F-DCBD80B78CBD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ccxt.sample", "utest\ocollector\ccxt.sample.csproj", "{28A0B9C4-0661-4744-886F-DCBD80B78CBD}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "shells", "shells", "{BDE3F436-CA04-4841-8238-A62C56F39AEB}"
 	ProjectSection(SolutionItems) = preProject
