@@ -59,7 +59,7 @@ namespace CCXT.Collector.BitMEX.Public
         /// </summary>
         /// <param name="args">Add additional attributes for each exchange</param>
         /// <returns></returns>
-        public override async ValueTask<Markets> FetchMarkets(Dictionary<string, object> args = null)
+        public override async ValueTask<Markets> FetchMarkets(Dictionary<string, object>? args = null)
         {
             var _result = new Markets();
 

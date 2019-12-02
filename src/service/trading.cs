@@ -11,8 +11,8 @@ namespace CCXT.Collector.Service
     public class TradingQ : FactoryX
     {
         public TradingQ(
-             string host_name = null, string ip_address = null, string virtual_host = null,
-             string user_name = null, string password = null
+             string? host_name = null, string? ip_address = null, string? virtual_host = null,
+             string? user_name = null, string password = null
          )
          : base(host_name, ip_address, virtual_host, user_name, password, TradingQName)
         {

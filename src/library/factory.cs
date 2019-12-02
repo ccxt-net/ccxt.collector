@@ -82,8 +82,8 @@ namespace CCXT.Collector.Library
         /// <param name="password"></param>
         /// <param name="queue_name"></param>
         public FactoryX(
-            string host_name = null, string ip_address = null, string virtual_host = null,
-            string user_name = null, string password = null, string queue_name = null
+            string? host_name = null, string? ip_address = null, string? virtual_host = null,
+            string? user_name = null, string? password = null, string? queue_name = null
             ) 
             : base(host_name, ip_address, virtual_host, user_name, password, queue_name)
         {

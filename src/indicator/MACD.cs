@@ -17,21 +17,22 @@ namespace CCXT.Collector.Indicator
 
         public MACD()
         {
+            OhlcList = new List<Ohlcv>();
         }
 
-        public MACD(bool percent)
+        public MACD(bool percent) : this()
         {
             this.Percent = percent;
         }
 
-        public MACD(int fast, int slow, int signal)
+        public MACD(int fast, int slow, int signal) : this()
         {
             this.Fast = fast;
             this.Slow = slow;
             this.Signal = signal;
         }
 
-        public MACD(int fast, int slow, int signal, bool percent)
+        public MACD(int fast, int slow, int signal, bool percent) : this()
         {
             this.Fast = fast;
             this.Slow = slow;
@@ -41,15 +42,17 @@ namespace CCXT.Collector.Indicator
 
         public override MACDSerie Calculate()
         {
-            MACDSerie macdSerie = new MACDSerie();
+            var macdSerie = new MACDSerie();
 
-            EMA ema = new EMA(Fast, false);
-            ema.Load(OhlcList);
-            var fastEmaValues = ema.Calculate().Values;
+            var _ema = new EMA(Fast, false);
+            _ema.Load(OhlcList);
+            
+            var fastEmaValues = _ema.Calculate().Values;
 
-            ema = new EMA(Slow, false);
-            ema.Load(OhlcList);
-            var slowEmaValues = ema.Calculate().Values;
+            _ema = new EMA(Slow, false);
+            _ema.Load(OhlcList);
+
+            var slowEmaValues = _ema.Calculate().Values;
 
             for (var i = 0; i < OhlcList.Count; i++)
             {
@@ -58,12 +61,12 @@ namespace CCXT.Collector.Indicator
                 {
                     if (!Percent)
                     {
-                        macdSerie.MACDLine.Add(fastEmaValues[i].Value - slowEmaValues[i].Value);
+                        macdSerie.MACDLine.Add(fastEmaValues[i] - slowEmaValues[i]);
                     }
                     else
                     {
                         // macd <- 100 * ( mavg.fast / mavg.slow - 1 )
-                        macdSerie.MACDLine.Add(100 * ((fastEmaValues[i].Value / slowEmaValues[i].Value) - 1));
+                        macdSerie.MACDLine.Add(100 * ((fastEmaValues[i] / slowEmaValues[i]) - 1));
                     }
                     OhlcList[i].closePrice = macdSerie.MACDLine[i].Value;
                 }
@@ -75,9 +78,9 @@ namespace CCXT.Collector.Indicator
             }
 
             int zeroCount = macdSerie.MACDLine.Where(x => x == null).Count();
-            ema = new EMA(Signal, false);
-            ema.Load(OhlcList.Skip(zeroCount).ToList());
-            var signalEmaValues = ema.Calculate().Values;
+            _ema = new EMA(Signal, false);
+            _ema.Load(OhlcList.Skip(zeroCount).ToList());
+            var signalEmaValues = _ema.Calculate().Values;
             for (var i = 0; i < zeroCount; i++)
             {
                 signalEmaValues.Insert(0, null);

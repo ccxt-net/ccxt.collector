@@ -513,7 +513,7 @@ namespace CCXT.Collector.Library.Private
         ///
         /// </summary>
         [JsonIgnore]
-        public string rawJson
+        public string? rawJson
         {
             get;
             set;

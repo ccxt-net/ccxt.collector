@@ -130,7 +130,7 @@ namespace CCXT.Collector.BitMEX
             }
         }
 
-        private HMACSHA256 __encryptor = null;
+        private HMACSHA256? __encryptor = null;
 
         /// <summary>
         ///
@@ -152,7 +152,7 @@ namespace CCXT.Collector.BitMEX
         /// <param name="endpoint">api link address of a function</param>
         /// <param name="args">Add additional attributes for each exchange</param>
         /// <returns></returns>
-        public override async ValueTask<IRestRequest> CreatePostRequest(string endpoint, Dictionary<string, object> args = null)
+        public override async ValueTask<IRestRequest> CreatePostRequest(string endpoint, Dictionary<string, object>? args = null)
         {
             var _request = await base.CreatePostRequest(endpoint);
 
@@ -198,7 +198,7 @@ namespace CCXT.Collector.BitMEX
         /// <param name="endpoint"></param>
         /// <param name="args">Add additional attributes for each exchange</param>
         /// <returns></returns>
-        public override async ValueTask<IRestRequest> CreatePutRequest(string endpoint, Dictionary<string, object> args = null)
+        public override async ValueTask<IRestRequest> CreatePutRequest(string endpoint, Dictionary<string, object>? args = null)
         {
             var _request = await base.CreatePutRequest(endpoint);
 
@@ -237,7 +237,7 @@ namespace CCXT.Collector.BitMEX
         /// <param name="endpoint">api link address of a function</param>
         /// <param name="args">Add additional attributes for each exchange</param>
         /// <returns></returns>
-        public override async ValueTask<IRestRequest> CreateGetRequest(string endpoint, Dictionary<string, object> args = null)
+        public override async ValueTask<IRestRequest> CreateGetRequest(string endpoint, Dictionary<string, object>? args = null)
         {
             var _request = await base.CreateGetRequest(endpoint, args);
 
@@ -267,7 +267,7 @@ namespace CCXT.Collector.BitMEX
         /// <param name="endpoint">api link address of a function</param>
         /// <param name="args">Add additional attributes for each exchange</param>
         /// <returns></returns>
-        public override async ValueTask<IRestRequest> CreateDeleteRequest(string endpoint, Dictionary<string, object> args = null)
+        public override async ValueTask<IRestRequest> CreateDeleteRequest(string endpoint, Dictionary<string, object>? args = null)
         {
             var _request = await base.CreateDeleteRequest(endpoint);
 
@@ -341,7 +341,7 @@ namespace CCXT.Collector.BitMEX
         /// </summary>
         /// <param name="response">response value arrive from exchange's server</param>
         /// <returns></returns>
-        public override BoolResult GetResponseMessage(IRestResponse response = null)
+        public override BoolResult GetResponseMessage(IRestResponse? response = null)
         {
             var _result = new BoolResult();
 

@@ -127,7 +127,7 @@ namespace CCXT.Collector.Gemini
             }
         }
 
-        private JwtHeader __jwt_header = null;
+        private JwtHeader? __jwt_header = null;
 
         /// <summary>
         ///
@@ -148,7 +148,7 @@ namespace CCXT.Collector.Gemini
             }
         }
 
-        private JwtSecurityTokenHandler __jwt_handler = null;
+        private JwtSecurityTokenHandler? __jwt_handler = null;
 
         /// <summary>
         ///
@@ -170,7 +170,7 @@ namespace CCXT.Collector.Gemini
         /// <param name="endpoint">api link address of a function</param>
         /// <param name="args">Add additional attributes for each exchange</param>
         /// <returns></returns>
-        public override async ValueTask<IRestRequest> CreatePostRequest(string endpoint, Dictionary<string, object> args = null)
+        public override async ValueTask<IRestRequest> CreatePostRequest(string endpoint, Dictionary<string, object>? args = null)
         {
             var _request = await base.CreatePostRequest(endpoint, args);
 
@@ -203,7 +203,7 @@ namespace CCXT.Collector.Gemini
         /// <param name="endpoint">api link address of a function</param>
         /// <param name="args">Add additional attributes for each exchange</param>
         /// <returns></returns>
-        public override async ValueTask<IRestRequest> CreateGetRequest(string endpoint, Dictionary<string, object> args = null)
+        public override async ValueTask<IRestRequest> CreateGetRequest(string endpoint, Dictionary<string, object>? args = null)
         {
             var _request = await base.CreateGetRequest(endpoint, args);
 
@@ -236,7 +236,7 @@ namespace CCXT.Collector.Gemini
         /// <param name="endpoint">api link address of a function</param>
         /// <param name="args">Add additional attributes for each exchange</param>
         /// <returns></returns>
-        public override async ValueTask<IRestRequest> CreateDeleteRequest(string endpoint, Dictionary<string, object> args = null)
+        public override async ValueTask<IRestRequest> CreateDeleteRequest(string endpoint, Dictionary<string, object>? args = null)
         {
             var _request = await base.CreateDeleteRequest(endpoint, args);
 
@@ -268,7 +268,7 @@ namespace CCXT.Collector.Gemini
         /// </summary>
         /// <param name="response">response value arrive from exchange's server</param>
         /// <returns></returns>
-        public override BoolResult GetResponseMessage(IRestResponse response = null)
+        public override BoolResult GetResponseMessage(IRestResponse? response = null)
         {
             var _result = new BoolResult();
 

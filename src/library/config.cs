@@ -209,7 +209,7 @@ namespace CCXT.Collector.Library
             }
         }
 
-        private static string __name_start_exchange = null;
+        private static string? __name_start_exchange = null;
 
         public static string StartExchangeNames
         {
@@ -299,8 +299,8 @@ namespace CCXT.Collector.Library
 
         #region Creator
 
-        private static IConfigurationBuilder __config_builder = null;
-        private static IConfigurationRoot __config_root = null;
+        private static IConfigurationBuilder? __config_builder = null;
+        private static IConfigurationRoot? __config_root = null;
 
         public static void SetConfigRoot()
         {
