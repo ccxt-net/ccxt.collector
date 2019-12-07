@@ -136,7 +136,7 @@ namespace CCXT.Collector.Service
                             {
                                 await Task.Delay(0);
 
-                                var _packet = (PLogger)null;
+                                var _packet = (PLogger?)null;
                                 if (LogQ.TryDequeue(out _packet) == false)
                                 {
                                     var _cancelled = tokenSource.Token.WaitHandle.WaitOne(0);

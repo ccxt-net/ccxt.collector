@@ -75,7 +75,7 @@ namespace CCXT.Collector.Library
         /// <returns></returns>
         public async ValueTask<IRestResponse> RestExecuteAsync(IRestClient client, IRestRequest request, int max_retry = 3, int delay_milliseconds = 1000)
         {
-            var _result = (IRestResponse)null;
+            var _result = (IRestResponse?)null;
 
             for (var _retry_count = 0; _retry_count < max_retry; _retry_count++)
             {

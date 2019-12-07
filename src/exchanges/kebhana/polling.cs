@@ -62,15 +62,15 @@ namespace CCXT.Collector.KebHana
         /// <summary>
         ///
         /// </summary>
-        public static KebExchange LastExchange
+        public static KebExchange? LastExchange
         {
             get;
             set;
         }
 
-        public static KebExchangeItem GetExchange(string symbol)
+        public static KebExchangeItem? GetExchange(string symbol)
         {
-            var _result = (KebExchangeItem)null;
+            var _result = (KebExchangeItem?)null;
 
             if (LastExchange != null)
                 _result = LastExchange.data.Where(e => e.code == symbol).FirstOrDefault();

@@ -119,7 +119,7 @@ namespace CCXT.Collector.Binance.Public
 
                         JToken _filters = _market["filters"];
                         {
-                            var _price_filter = _filters.SingleOrDefault(f => f["filterType"].ToString() == "PRICE_FILTER");
+                            var _price_filter = _filters.SingleOrDefault(f => f["filterType"]?.ToString() == "PRICE_FILTER");
                             if (_price_filter != null)
                             {
                                 _entry.precision.price = Numerical.PrecisionFromString(_price_filter["tickSize"].ToString());
@@ -127,7 +127,7 @@ namespace CCXT.Collector.Binance.Public
                                 _entry.limits.price.max = _price_filter["maxPrice"].Value<decimal>();
                             }
 
-                            var _lot_size = _filters.SingleOrDefault(f => f["filterType"].ToString() == "LOT_SIZE");
+                            var _lot_size = _filters.SingleOrDefault(f => f["filterType"]?.ToString() == "LOT_SIZE");
                             if (_lot_size != null)
                             {
                                 _entry.precision.quantity = Numerical.PrecisionFromString(_lot_size["stepSize"].ToString());
@@ -135,7 +135,7 @@ namespace CCXT.Collector.Binance.Public
                                 _entry.limits.quantity.max = _lot_size["maxQty"].Value<decimal>();
                             }
 
-                            var _min_notional = _filters.SingleOrDefault(f => f["filterType"].ToString() == "MIN_NOTIONAL");
+                            var _min_notional = _filters.SingleOrDefault(f => f["filterType"]?.ToString() == "MIN_NOTIONAL");
                             if (_min_notional != null)
                             {
                                 _entry.limits.amount.min = _min_notional["minNotional"].Value<decimal>();

@@ -203,7 +203,7 @@ namespace CCXT.Collector.BitMEX
                                 __last_receive_time = (int)CUnixTime.Now;
                             }
 
-                            var _message = (QMessage)null;
+                            var _message = (QMessage?)null;
 
                             if (CommandQ.TryDequeue(out _message) == false)
                             {

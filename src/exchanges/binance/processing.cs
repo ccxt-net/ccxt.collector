@@ -48,7 +48,7 @@ namespace CCXT.Collector.Binance
                     {
                         await Task.Delay(0);
 
-                        var _message = (QMessage)null;
+                        var _message = (QMessage?)null;
                         if (ReceiveQ.TryDequeue(out _message) == false)
                         {
                             var _cancelled = tokenSource.Token.WaitHandle.WaitOne(0);

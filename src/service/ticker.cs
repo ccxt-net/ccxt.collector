@@ -61,7 +61,7 @@ namespace CCXT.Collector.Service
                             {
                                 await Task.Delay(0);
 
-                                var _json_message = (string)null;
+                                var _json_message = (string?)null;
                                 if (QTicker.TryDequeue(out _json_message) == false)
                                 {
                                     var _cancelled = tokenSource.Token.WaitHandle.WaitOne(0);

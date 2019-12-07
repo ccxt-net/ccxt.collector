@@ -283,7 +283,7 @@ namespace CCXT.Collector.Bithumb
                     if (_json_error != null)
                     {
                         var _error_code = ErrorCode.ExchangeError;
-                        var _error_msg = _json_error["message"].Value<string>();
+                        var _error_msg = _json_error["message"]?.Value<string>();
 
                         var _json_name = _json_error["name"];
                         if (_json_name != null)

@@ -86,7 +86,7 @@ namespace CCXT.Collector.Bithumb
                                 GMLogger.WriteO($"pushing open: symbol => {symbol}...");
                             }
 
-                            var _message = (QMessage)null;
+                            var _message = (QMessage?)null;
 
                             if (CommandQ.TryDequeue(out _message) == false)
                             {
