@@ -11,7 +11,7 @@ namespace CCXT.Collector.Upbit.Private
         /// <summary>
         /// 화폐를 의미하는 영문 대문자 코드
         /// </summary>
-        public string currency
+        public string? currency
         {
             get;
             set;
@@ -44,7 +44,7 @@ namespace CCXT.Collector.Upbit.Private
         /// <summary>
         /// 마켓의 유일 키
         /// </summary>
-        public string id
+        public string? id
         {
             get;
             set;
@@ -53,7 +53,7 @@ namespace CCXT.Collector.Upbit.Private
         /// <summary>
         /// 마켓 이름
         /// </summary>
-        public string name
+        public string? name
         {
             get;
             set;
@@ -107,7 +107,7 @@ namespace CCXT.Collector.Upbit.Private
         /// <summary>
         /// 마켓 운영 상태
         /// </summary>
-        public string state
+        public string? state
         {
             get;
             set;
@@ -221,7 +221,7 @@ namespace CCXT.Collector.Upbit.Private
     /// </summary>
     public interface IMyOrdersChance : IApiResult<IOrdersChance>
     {
-#if DEBUG
+#if RAWJSON
 
         /// <summary>
         ///
@@ -248,7 +248,7 @@ namespace CCXT.Collector.Upbit.Private
             this.result = new OrdersChance();
         }
 
-#if DEBUG
+#if RAWJSON
         /// <summary>
         ///
         /// </summary>

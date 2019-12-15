@@ -54,7 +54,7 @@ namespace CCXT.Collector.Binance
             }
         }
         
-        private CCXT.Collector.Binance.Public.PublicApi __public_api = null;
+        private CCXT.Collector.Binance.Public.PublicApi? __public_api = null;
         private CCXT.Collector.Binance.Public.PublicApi publicApi
         {
             get

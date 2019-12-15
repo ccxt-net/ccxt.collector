@@ -65,7 +65,7 @@ namespace CCXT.Collector.BitMEX.Private
             var _response = await privateClient.CallApiGet2Async("/api/v1/user/depositAddress", _params);
             if (_response != null)
             {
-#if DEBUG
+#if RAWJSON
                 _result.rawJson = _response.Content;
 #endif
                 if (_response.IsSuccessful == true)
@@ -103,26 +103,29 @@ namespace CCXT.Collector.BitMEX.Private
             }
 
             var _response = await privateClient.CallApiPost2Async("/api/v1/user/requestWithdrawal", _params);
-#if DEBUG
+            if (_response != null)
+            {
+#if RAWJSON
             _result.rawJson = _response.Content;
 #endif
-            if (_response.IsSuccessful == true)
-            {
-                var _withdraw = privateClient.DeserializeObject<BTransferItem>(_response.Content);
-                if (_withdraw != null && String.IsNullOrEmpty(_withdraw.transferId) == false)
+                if (_response.IsSuccessful == true)
                 {
-                    _withdraw.transactionType = TransactionType.Withdraw;
-                    _withdraw.confirmations = 0;
-                    _withdraw.isCompleted = true;
+                    var _withdraw = privateClient.DeserializeObject<BTransferItem>(_response.Content);
+                    if (_withdraw != null && String.IsNullOrEmpty(_withdraw.transferId) == false)
+                    {
+                        _withdraw.transactionType = TransactionType.Withdraw;
+                        _withdraw.confirmations = 0;
+                        _withdraw.isCompleted = true;
 
-                    _result.result = _withdraw;
-                    _result.SetSuccess();
+                        _result.result = _withdraw;
+                        _result.SetSuccess();
+                    }
                 }
-            }
-            else
-            {
-                var _message = privateClient.GetResponseMessage(_response);
-                _result.SetFailure(_message.message);
+                else
+                {
+                    var _message = privateClient.GetResponseMessage(_response);
+                    _result.SetFailure(_message.message);
+                }
             }
 
             return _result;
@@ -148,41 +151,44 @@ namespace CCXT.Collector.BitMEX.Private
             }
 
             var _response = await privateClient.CallApiGet2Async("/api/v1/user/walletHistory", _params);
-#if DEBUG
+            if (_response != null)
+            {
+#if RAWJSON
             _result.rawJson = _response.Content;
 #endif
-            if (_response.IsSuccessful == true)
-            {
-                var _transfers = privateClient.DeserializeObject<List<BTransferItem>>(_response.Content);
-                if (_transfers != null)
+                if (_response.IsSuccessful == true)
                 {
-                    foreach (var _t in _transfers)
+                    var _transfers = privateClient.DeserializeObject<List<BTransferItem>>(_response.Content);
+                    if (_transfers != null)
                     {
-                        _t.toAddress = String.IsNullOrEmpty(_t.toAddress) == false ? _t.toAddress : "undefined";
-
-                        if (_t.transactionType == TransactionType.Deposit)
+                        foreach (var _t in _transfers)
                         {
-                            _t.fromAddress = _t.toAddress;
-                            _t.fromTag = _t.toTag;
+                            _t.toAddress = String.IsNullOrEmpty(_t.toAddress) == false ? _t.toAddress : "undefined";
 
-                            _t.toAddress = "";
-                            _t.toTag = "";
+                            if (_t.transactionType == TransactionType.Deposit)
+                            {
+                                _t.fromAddress = _t.toAddress ?? "";
+                                _t.fromTag = _t.toTag;
+
+                                _t.toAddress = "";
+                                _t.toTag = "";
+                            }
+
+                            _t.transferType = TransferTypeConverter.FromString(_t.transactStatus);
+                            _t.isCompleted = (_t.transferType == TransferType.Done);
+
+                            _t.transactionId = (_t.timestamp * 1000).ToString();
                         }
 
-                        _t.transferType = TransferTypeConverter.FromString(_t.transactStatus);
-                        _t.isCompleted = (_t.transferType == TransferType.Done);
-
-                        _t.transactionId = (_t.timestamp * 1000).ToString();
+                        _result.result = _transfers.ToList<ITransferItem>();
+                        _result.SetSuccess();
                     }
-
-                    _result.result = _transfers.ToList<ITransferItem>();
-                    _result.SetSuccess();
                 }
-            }
-            else
-            {
-                var _message = privateClient.GetResponseMessage(_response);
-                _result.SetFailure(_message.message);
+                else
+                {
+                    var _message = privateClient.GetResponseMessage(_response);
+                    _result.SetFailure(_message.message);
+                }
             }
 
             return _result;
@@ -203,24 +209,27 @@ namespace CCXT.Collector.BitMEX.Private
             }
 
             var _response = await privateClient.CallApiGet2Async("/api/v1/user/margin", _params);
-#if DEBUG
+            if (_response != null)
+            {
+#if RAWJSON
             _result.rawJson = _response.Content;
 #endif
-            if (_response.IsSuccessful == true)
-            {
-                var _balance = privateClient.DeserializeObject<BBalanceItem>(_response.Content);
-                if (_balance != null)
+                if (_response.IsSuccessful == true)
                 {
-                    _balance.used = _balance.total - _balance.free;
+                    var _balance = privateClient.DeserializeObject<BBalanceItem>(_response.Content);
+                    if (_balance != null)
+                    {
+                        _balance.used = _balance.total - _balance.free;
 
-                    _result.result = _balance;
-                    _result.SetSuccess();
+                        _result.result = _balance;
+                        _result.SetSuccess();
+                    }
                 }
-            }
-            else
-            {
-                var _message = privateClient.GetResponseMessage(_response);
-                _result.SetFailure(_message.message);
+                else
+                {
+                    var _message = privateClient.GetResponseMessage(_response);
+                    _result.SetFailure(_message.message);
+                }
             }
 
             return _result;
@@ -240,25 +249,28 @@ namespace CCXT.Collector.BitMEX.Private
             }
 
             var _response = await privateClient.CallApiGet2Async("/api/v1/user/margin", _params);
-#if DEBUG
+            if (_response != null)
+            {
+#if RAWJSON
             _result.rawJson = _response.Content;
 #endif
-            if (_response.IsSuccessful == true)
-            {
-                var _balances = privateClient.DeserializeObject<List<BBalanceItem>>(_response.Content);
-                if (_balances != null)
+                if (_response.IsSuccessful == true)
                 {
-                    foreach (var _balance in _balances)
-                        _balance.used = _balance.total - _balance.free;
+                    var _balances = privateClient.DeserializeObject<List<BBalanceItem>>(_response.Content);
+                    if (_balances != null)
+                    {
+                        foreach (var _balance in _balances)
+                            _balance.used = _balance.total - _balance.free;
 
-                    _result.result = _balances.ToList<IBalanceItem>();
-                    _result.SetSuccess();
+                        _result.result = _balances.ToList<IBalanceItem>();
+                        _result.SetSuccess();
+                    }
                 }
-            }
-            else
-            {
-                var _message = privateClient.GetResponseMessage(_response);
-                _result.SetFailure(_message.message);
+                else
+                {
+                    var _message = privateClient.GetResponseMessage(_response);
+                    _result.SetFailure(_message.message);
+                }
             }
 
             return _result;
@@ -273,22 +285,25 @@ namespace CCXT.Collector.BitMEX.Private
             var _result = new BUserInfo();
 
             var _response = await privateClient.CallApiGet2Async("/api/v1/user");
-#if DEBUG
+            if (_response != null)
+            {
+#if RAWJSON
             _result.rawJson = _response.Content;
 #endif
-            if (_response.IsSuccessful == true)
-            {
-                var _user_info = privateClient.DeserializeObject<BUserInfoItem>(_response.Content);
-                if (_user_info != null)
+                if (_response.IsSuccessful == true)
                 {
-                    _result.result = _user_info;
-                    _result.SetSuccess();
+                    var _user_info = privateClient.DeserializeObject<BUserInfoItem>(_response.Content);
+                    if (_user_info != null)
+                    {
+                        _result.result = _user_info;
+                        _result.SetSuccess();
+                    }
                 }
-            }
-            else
-            {
-                var _message = privateClient.GetResponseMessage(_response);
-                _result.SetFailure(_message.message);
+                else
+                {
+                    var _message = privateClient.GetResponseMessage(_response);
+                    _result.SetFailure(_message.message);
+                }
             }
 
             return _result;
@@ -323,31 +338,34 @@ namespace CCXT.Collector.BitMEX.Private
             }
 
             var _response = await privateClient.CallApiGet2Async("/api/v1/order", _params);
-#if DEBUG
+            if (_response != null)
+            {
+#if RAWJSON
             _result.rawJson = _response.Content;
 #endif
-            if (_response.IsSuccessful == true)
-            {
-                var _orders = privateClient.DeserializeObject<List<BMyOrderItem>>(_response.Content);
-                if (_orders != null)
+                if (_response.IsSuccessful == true)
                 {
-                    foreach (var _o in _orders)
+                    var _orders = privateClient.DeserializeObject<List<BMyOrderItem>>(_response.Content);
+                    if (_orders != null)
                     {
-                        _o.makerType = MakerType.Maker;
+                        foreach (var _o in _orders)
+                        {
+                            _o.makerType = MakerType.Maker;
 
-                        _o.amount = _o.price * _o.quantity;
-                        _o.filled = Math.Max(_o.quantity - _o.remaining, 0);
-                        _o.cost = _o.price * _o.filled;
+                            _o.amount = _o.price * _o.quantity;
+                            _o.filled = Math.Max(_o.quantity - _o.remaining, 0);
+                            _o.cost = _o.price * _o.filled;
+                        }
+
+                        _result.result = _orders.ToList<IMyOrderItem>();
+                        _result.SetSuccess();
                     }
-
-                    _result.result = _orders.ToList<IMyOrderItem>();
-                    _result.SetSuccess();
                 }
-            }
-            else
-            {
-                var _message = privateClient.GetResponseMessage(_response);
-                _result.SetFailure(_message.message);
+                else
+                {
+                    var _message = privateClient.GetResponseMessage(_response);
+                    _result.SetFailure(_message.message);
+                }
             }
 
             return _result;
@@ -380,31 +398,34 @@ namespace CCXT.Collector.BitMEX.Private
             }
 
             var _response = await privateClient.CallApiGet2Async("/api/v1/order", _params);
-#if DEBUG
+            if (_response != null)
+            {
+#if RAWJSON
             _result.rawJson = _response.Content;
 #endif
-            if (_response.IsSuccessful == true)
-            {
-                var _orders = privateClient.DeserializeObject<List<BMyOrderItem>>(_response.Content);
-                if (_orders != null)
+                if (_response.IsSuccessful == true)
                 {
-                    foreach (var _o in _orders.Where(o => OrderStatusConverter.IsAlive(o.orderStatus) == true))
+                    var _orders = privateClient.DeserializeObject<List<BMyOrderItem>>(_response.Content);
+                    if (_orders != null)
                     {
-                        _o.makerType = MakerType.Maker;
+                        foreach (var _o in _orders.Where(o => OrderStatusConverter.IsAlive(o.orderStatus) == true))
+                        {
+                            _o.makerType = MakerType.Maker;
 
-                        _o.amount = _o.price * _o.quantity;
-                        _o.filled = Math.Max(_o.quantity - _o.remaining, 0);
-                        _o.cost = _o.price * _o.filled;
+                            _o.amount = _o.price * _o.quantity;
+                            _o.filled = Math.Max(_o.quantity - _o.remaining, 0);
+                            _o.cost = _o.price * _o.filled;
+                        }
+
+                        _result.result = _orders.ToList<IMyOrderItem>();
+                        _result.SetSuccess();
                     }
-
-                    _result.result = _orders.ToList<IMyOrderItem>();
-                    _result.SetSuccess();
                 }
-            }
-            else
-            {
-                var _message = privateClient.GetResponseMessage(_response);
-                _result.SetFailure(_message.message);
+                else
+                {
+                    var _message = privateClient.GetResponseMessage(_response);
+                    _result.SetFailure(_message.message);
+                }
             }
 
             return _result;
@@ -435,33 +456,36 @@ namespace CCXT.Collector.BitMEX.Private
             }
 
             var _response = await privateClient.CallApiGet2Async("/api/v1/position", _params);
-#if DEBUG
+            if (_response != null)
+            {
+#if RAWJSON
             _result.rawJson = _response.Content;
 #endif
-            if (_response.IsSuccessful == true)
-            {
-                var _positions = privateClient.DeserializeObject<List<BMyPositionItem>>(_response.Content);
-                if (_positions != null)
+                if (_response.IsSuccessful == true)
                 {
-                    foreach (var _p in _positions)
+                    var _positions = privateClient.DeserializeObject<List<BMyPositionItem>>(_response.Content);
+                    if (_positions != null)
                     {
-                        _p.orderType = OrderType.Position;
+                        foreach (var _p in _positions)
+                        {
+                            _p.orderType = OrderType.Position;
 
-                        _p.orderStatus = _p.isOpen ? OrderStatus.Open : OrderStatus.Closed;
-                        _p.sideType = _p.quantity > 0 ? SideType.Bid : _p.quantity < 0 ? SideType.Ask : SideType.Unknown;
+                            _p.orderStatus = _p.isOpen ? OrderStatus.Open : OrderStatus.Closed;
+                            _p.sideType = _p.quantity > 0 ? SideType.Bid : _p.quantity < 0 ? SideType.Ask : SideType.Unknown;
 
-                        _p.quantity = Math.Abs(_p.quantity);
-                        _p.amount = _p.price * _p.quantity;
+                            _p.quantity = Math.Abs(_p.quantity);
+                            _p.amount = _p.price * _p.quantity;
+                        }
+
+                        _result.result = _positions.ToList<IMyPositionItem>();
+                        _result.SetSuccess();
                     }
-
-                    _result.result = _positions.ToList<IMyPositionItem>();
-                    _result.SetSuccess();
                 }
-            }
-            else
-            {
-                var _message = privateClient.GetResponseMessage(_response);
-                _result.SetFailure(_message.message);
+                else
+                {
+                    var _message = privateClient.GetResponseMessage(_response);
+                    _result.SetFailure(_message.message);
+                }
             }
 
             return _result;
@@ -476,33 +500,36 @@ namespace CCXT.Collector.BitMEX.Private
             var _result = new MyPositions();
 
             var _response = await privateClient.CallApiGet2Async("/api/v1/position");
-#if DEBUG
+            if (_response != null)
+            {
+#if RAWJSON
             _result.rawJson = _response.Content;
 #endif
-            if (_response.IsSuccessful == true)
-            {
-                var _positions = privateClient.DeserializeObject<List<BMyPositionItem>>(_response.Content);
-                if (_positions != null)
+                if (_response.IsSuccessful == true)
                 {
-                    foreach (var _p in _positions)
+                    var _positions = privateClient.DeserializeObject<List<BMyPositionItem>>(_response.Content);
+                    if (_positions != null)
                     {
-                        _p.orderType = OrderType.Position;
+                        foreach (var _p in _positions)
+                        {
+                            _p.orderType = OrderType.Position;
 
-                        _p.orderStatus = _p.isOpen ? OrderStatus.Open : OrderStatus.Closed;
-                        _p.sideType = _p.quantity > 0 ? SideType.Bid : _p.quantity < 0 ? SideType.Ask : SideType.Unknown;
+                            _p.orderStatus = _p.isOpen ? OrderStatus.Open : OrderStatus.Closed;
+                            _p.sideType = _p.quantity > 0 ? SideType.Bid : _p.quantity < 0 ? SideType.Ask : SideType.Unknown;
 
-                        _p.quantity = Math.Abs(_p.quantity);
-                        _p.amount = _p.price * _p.quantity;
+                            _p.quantity = Math.Abs(_p.quantity);
+                            _p.amount = _p.price * _p.quantity;
+                        }
+
+                        _result.result = _positions.ToList<IMyPositionItem>();
+                        _result.SetSuccess();
                     }
-
-                    _result.result = _positions.ToList<IMyPositionItem>();
-                    _result.SetSuccess();
                 }
-            }
-            else
-            {
-                var _message = privateClient.GetResponseMessage(_response);
-                _result.SetFailure(_message.message);
+                else
+                {
+                    var _message = privateClient.GetResponseMessage(_response);
+                    _result.SetFailure(_message.message);
+                }
             }
 
             return _result;
@@ -527,25 +554,28 @@ namespace CCXT.Collector.BitMEX.Private
             }
 
             var _response = await privateClient.CallApiGet2Async("/api/v1/execution/tradeHistory", _params);
-#if DEBUG
+            if (_response != null)
+            {
+#if RAWJSON
             _result.rawJson = _response.Content;
 #endif
-            if (_response.IsSuccessful == true)
-            {
-                var _trades = privateClient.DeserializeObject<List<BMyTradeItem>>(_response.Content);
-                if (_trades != null)
+                if (_response.IsSuccessful == true)
                 {
-                    foreach (var _t in _trades)
-                        _t.amount = _t.price * _t.quantity;
+                    var _trades = privateClient.DeserializeObject<List<BMyTradeItem>>(_response.Content);
+                    if (_trades != null)
+                    {
+                        foreach (var _t in _trades)
+                            _t.amount = _t.price * _t.quantity;
 
-                    _result.result = _trades.ToList<IMyTradeItem>();
-                    _result.SetSuccess();
+                        _result.result = _trades.ToList<IMyTradeItem>();
+                        _result.SetSuccess();
+                    }
                 }
-            }
-            else
-            {
-                var _message = privateClient.GetResponseMessage(_response);
-                _result.SetFailure(_message.message);
+                else
+                {
+                    var _message = privateClient.GetResponseMessage(_response);
+                    _result.SetFailure(_message.message);
+                }
             }
 
             return _result;
@@ -576,27 +606,30 @@ namespace CCXT.Collector.BitMEX.Private
             }
 
             var _response = await privateClient.CallApiPost2Async("/api/v1/order", _params);
-#if DEBUG
+            if (_response != null)
+            {
+#if RAWJSON
             _result.rawJson = _response.Content;
 #endif
-            if (_response.IsSuccessful == true)
-            {
-                var _order = privateClient.DeserializeObject<BPlaceOrderItem>(_response.Content);
-                if (_order != null)
+                if (_response.IsSuccessful == true)
                 {
-                    _order.orderType = OrderType.Limit;
+                    var _order = privateClient.DeserializeObject<BPlaceOrderItem>(_response.Content);
+                    if (_order != null)
+                    {
+                        _order.orderType = OrderType.Limit;
 
-                    _order.remaining = Math.Max(_order.quantity - _order.filled, 0);
-                    _order.cost = _order.price * _order.filled;
+                        _order.remaining = Math.Max(_order.quantity - _order.filled, 0);
+                        _order.cost = _order.price * _order.filled;
 
-                    _result.result = _order;
-                    _result.SetSuccess();
+                        _result.result = _order;
+                        _result.SetSuccess();
+                    }
                 }
-            }
-            else
-            {
-                var _message = privateClient.GetResponseMessage(_response);
-                _result.SetFailure(_message.message);
+                else
+                {
+                    var _message = privateClient.GetResponseMessage(_response);
+                    _result.SetFailure(_message.message);
+                }
             }
 
             return _result;
@@ -625,24 +658,27 @@ namespace CCXT.Collector.BitMEX.Private
             }
 
             var _response = await privateClient.CallApiPost2Async("/api/v1/order", _params);
-#if DEBUG
+            if (_response != null)
+            {
+#if RAWJSON
             _result.rawJson = _response.Content;
 #endif
-            if (_response.IsSuccessful == true)
-            {
-                var _order = privateClient.DeserializeObject<BPlaceOrderItem>(_response.Content);
-                if (_order != null)
+                if (_response.IsSuccessful == true)
                 {
-                    _order.orderType = OrderType.Market;
+                    var _order = privateClient.DeserializeObject<BPlaceOrderItem>(_response.Content);
+                    if (_order != null)
+                    {
+                        _order.orderType = OrderType.Market;
 
-                    _result.result = _order;
-                    _result.SetSuccess();
+                        _result.result = _order;
+                        _result.SetSuccess();
+                    }
                 }
-            }
-            else
-            {
-                var _message = privateClient.GetResponseMessage(_response);
-                _result.SetFailure(_message.message);
+                else
+                {
+                    var _message = privateClient.GetResponseMessage(_response);
+                    _result.SetFailure(_message.message);
+                }
             }
 
             return _result;
@@ -663,24 +699,27 @@ namespace CCXT.Collector.BitMEX.Private
             }
 
             var _response = await privateClient.CallApiPost2Async("/api/v1/order/bulk", _params);
-#if DEBUG
+            if (_response != null)
+            {
+#if RAWJSON
             _result.rawJson = _response.Content;
 #endif
-            if (_response.IsSuccessful == true)
-            {
-                var _orders = privateClient.DeserializeObject<List<BMyOrderItem>>(_response.Content);
-                if (_orders != null)
+                if (_response.IsSuccessful == true)
                 {
-                    _orders.ForEach(o => o.amount = o.quantity * o.price);
+                    var _orders = privateClient.DeserializeObject<List<BMyOrderItem>>(_response.Content);
+                    if (_orders != null)
+                    {
+                        _orders.ForEach(o => o.amount = o.quantity * o.price);
 
-                    _result.result = _orders.ToList<IMyOrderItem>();
-                    _result.SetSuccess();
+                        _result.result = _orders.ToList<IMyOrderItem>();
+                        _result.SetSuccess();
+                    }
                 }
-            }
-            else
-            {
-                var _message = privateClient.GetResponseMessage(_response);
-                _result.SetFailure(_message.message);
+                else
+                {
+                    var _message = privateClient.GetResponseMessage(_response);
+                    _result.SetFailure(_message.message);
+                }
             }
 
             return _result;
@@ -707,22 +746,25 @@ namespace CCXT.Collector.BitMEX.Private
             }
 
             var _response = await privateClient.CallApiPost2Async("/api/v1/order", _params);
-#if DEBUG
+            if (_response != null)
+            {
+#if RAWJSON
             _result.rawJson = _response.Content;
 #endif
-            if (_response.IsSuccessful == true)
-            {
-                var _order = privateClient.DeserializeObject<BMyOrderItem>(_response.Content);
-                if (_order != null)
+                if (_response.IsSuccessful == true)
                 {
-                    _result.result = _order;
-                    _result.SetSuccess();
+                    var _order = privateClient.DeserializeObject<BMyOrderItem>(_response.Content);
+                    if (_order != null)
+                    {
+                        _result.result = _order;
+                        _result.SetSuccess();
+                    }
                 }
-            }
-            else
-            {
-                var _message = privateClient.GetResponseMessage(_response);
-                _result.SetFailure(_message.message);
+                else
+                {
+                    var _message = privateClient.GetResponseMessage(_response);
+                    _result.SetFailure(_message.message);
+                }
             }
 
             return _result;
@@ -750,22 +792,25 @@ namespace CCXT.Collector.BitMEX.Private
             }
 
             var _response = await privateClient.CallApiPut2Async("/api/v1/order", _params);
-#if DEBUG
+            if (_response != null)
+            {
+#if RAWJSON
             _result.rawJson = _response.Content;
 #endif
-            if (_response.IsSuccessful == true)
-            {
-                var _order = privateClient.DeserializeObject<BPlaceOrderItem>(_response.Content);
-                if (_order != null)
+                if (_response.IsSuccessful == true)
                 {
-                    _result.result = _order;
-                    _result.SetSuccess();
+                    var _order = privateClient.DeserializeObject<BPlaceOrderItem>(_response.Content);
+                    if (_order != null)
+                    {
+                        _result.result = _order;
+                        _result.SetSuccess();
+                    }
                 }
-            }
-            else
-            {
-                var _message = privateClient.GetResponseMessage(_response);
-                _result.SetFailure(_message.message);
+                else
+                {
+                    var _message = privateClient.GetResponseMessage(_response);
+                    _result.SetFailure(_message.message);
+                }
             }
 
             return _result;
@@ -788,22 +833,25 @@ namespace CCXT.Collector.BitMEX.Private
             }
 
             var _response = await privateClient.CallApiPut2Async("/api/v1/order/bulk", _params);
-#if DEBUG
+            if (_response != null)
+            {
+#if RAWJSON
             _result.rawJson = _response.Content;
 #endif
-            if (_response.IsSuccessful == true)
-            {
-                var _orders = privateClient.DeserializeObject<List<BPlaceOrderItem>>(_response.Content);
-                if (_orders != null)
+                if (_response.IsSuccessful == true)
                 {
-                    _result.result = _orders.ToList<IMyOrderItem>();
-                    _result.SetSuccess();
+                    var _orders = privateClient.DeserializeObject<List<BPlaceOrderItem>>(_response.Content);
+                    if (_orders != null)
+                    {
+                        _result.result = _orders.ToList<IMyOrderItem>();
+                        _result.SetSuccess();
+                    }
                 }
-            }
-            else
-            {
-                var _message = privateClient.GetResponseMessage(_response);
-                _result.SetFailure(_message.message);
+                else
+                {
+                    var _message = privateClient.GetResponseMessage(_response);
+                    _result.SetFailure(_message.message);
+                }
             }
 
             return _result;
@@ -824,22 +872,25 @@ namespace CCXT.Collector.BitMEX.Private
             }
 
             var _response = await privateClient.CallApiDelete2Async("/api/v1/order", _params);
-#if DEBUG
+            if (_response != null)
+            {
+#if RAWJSON
             _result.rawJson = _response.Content;
 #endif
-            if (_response.IsSuccessful == true)
-            {
-                var _orders = privateClient.DeserializeObject<List<BPlaceOrderItem>>(_response.Content);
-                if (_orders != null)
+                if (_response.IsSuccessful == true)
                 {
-                    _result.result = _orders.FirstOrDefault();
-                    _result.SetSuccess();
+                    var _orders = privateClient.DeserializeObject<List<BPlaceOrderItem>>(_response.Content);
+                    if (_orders != null)
+                    {
+                        _result.result = _orders.FirstOrDefault();
+                        _result.SetSuccess();
+                    }
                 }
-            }
-            else
-            {
-                var _message = privateClient.GetResponseMessage(_response);
-                _result.SetFailure(_message.message);
+                else
+                {
+                    var _message = privateClient.GetResponseMessage(_response);
+                    _result.SetFailure(_message.message);
+                }
             }
 
             return _result;
@@ -850,7 +901,7 @@ namespace CCXT.Collector.BitMEX.Private
         /// </summary>
         /// <param name="order_ids"></param>
         /// <returns></returns>
-        public async ValueTask<MyOrders> CancelOrders(string[] order_ids)
+        public async ValueTask<MyOrders> CancelOrders(string?[] order_ids)
         {
             var _result = new MyOrders();
 
@@ -860,22 +911,25 @@ namespace CCXT.Collector.BitMEX.Private
             }
 
             var _response = await privateClient.CallApiDelete2Async("/api/v1/order", _params);
-#if DEBUG
+            if (_response != null)
+            {
+#if RAWJSON
             _result.rawJson = _response.Content;
 #endif
-            if (_response.IsSuccessful == true)
-            {
-                var _orders = privateClient.DeserializeObject<List<BPlaceOrderItem>>(_response.Content);
-                if (_orders != null)
+                if (_response.IsSuccessful == true)
                 {
-                    _result.result.AddRange(_orders);
-                    _result.SetSuccess();
+                    var _orders = privateClient.DeserializeObject<List<BPlaceOrderItem>>(_response.Content);
+                    if (_orders != null)
+                    {
+                        _result.result.AddRange(_orders);
+                        _result.SetSuccess();
+                    }
                 }
-            }
-            else
-            {
-                var _message = privateClient.GetResponseMessage(_response);
-                _result.SetFailure(_message.message);
+                else
+                {
+                    var _message = privateClient.GetResponseMessage(_response);
+                    _result.SetFailure(_message.message);
+                }
             }
 
             return _result;
@@ -896,22 +950,25 @@ namespace CCXT.Collector.BitMEX.Private
             }
 
             var _response = await privateClient.CallApiDelete2Async("/api/v1/order/all", _params);
-#if DEBUG
+            if (_response != null)
+            {
+#if RAWJSON
             _result.rawJson = _response.Content;
 #endif
-            if (_response.IsSuccessful == true)
-            {
-                var _orders = privateClient.DeserializeObject<List<BPlaceOrderItem>>(_response.Content);
-                if (_orders != null)
+                if (_response.IsSuccessful == true)
                 {
-                    _result.result.AddRange(_orders);
-                    _result.SetSuccess();
+                    var _orders = privateClient.DeserializeObject<List<BPlaceOrderItem>>(_response.Content);
+                    if (_orders != null)
+                    {
+                        _result.result.AddRange(_orders);
+                        _result.SetSuccess();
+                    }
                 }
-            }
-            else
-            {
-                var _message = privateClient.GetResponseMessage(_response);
-                _result.SetFailure(_message.message);
+                else
+                {
+                    var _message = privateClient.GetResponseMessage(_response);
+                    _result.SetFailure(_message.message);
+                }
             }
 
             return _result;
@@ -934,22 +991,25 @@ namespace CCXT.Collector.BitMEX.Private
             }
 
             var _response = await privateClient.CallApiPost2Async("/api/v1/position/leverage", _params);
-#if DEBUG
+            if (_response != null)
+            {
+#if RAWJSON
             _result.rawJson = _response.Content;
 #endif
-            if (_response.IsSuccessful == true)
-            {
-                var _position = privateClient.DeserializeObject<BMyPositionItem>(_response.Content);
-                if (_position != null)
+                if (_response.IsSuccessful == true)
                 {
-                    _result.result = _position;
-                    _result.SetSuccess();
+                    var _position = privateClient.DeserializeObject<BMyPositionItem>(_response.Content);
+                    if (_position != null)
+                    {
+                        _result.result = _position;
+                        _result.SetSuccess();
+                    }
                 }
-            }
-            else
-            {
-                var _message = privateClient.GetResponseMessage(_response);
-                _result.SetFailure(_message.message);
+                else
+                {
+                    var _message = privateClient.GetResponseMessage(_response);
+                    _result.SetFailure(_message.message);
+                }
             }
 
             return _result;

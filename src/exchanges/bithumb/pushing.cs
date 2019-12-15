@@ -12,7 +12,7 @@ namespace CCXT.Collector.Bithumb
 {
     public class Pushing
     {
-        private static ConcurrentQueue<QMessage> __command_queue = null;
+        private static ConcurrentQueue<QMessage>? __command_queue = null;
 
         /// <summary>
         ///

@@ -31,7 +31,7 @@ namespace CCXT.Collector.Library
         /// </summary>
         /// <param name="baseurl"></param>
         /// <returns></returns>
-        public override IRestClient CreateJsonClient(string baseurl)
+        public override IRestClient CreateJsonClient(string? baseurl)
         {
             var _client = new RestClient(baseurl)
             {
@@ -73,7 +73,7 @@ namespace CCXT.Collector.Library
         /// <param name="max_retry"></param>
         /// <param name="delay_milliseconds"></param>
         /// <returns></returns>
-        public async ValueTask<IRestResponse> RestExecuteAsync(IRestClient client, IRestRequest request, int max_retry = 3, int delay_milliseconds = 1000)
+        public async ValueTask<IRestResponse?> RestExecuteAsync(IRestClient client, IRestRequest request, int max_retry = 3, int delay_milliseconds = 1000)
         {
             var _result = (IRestResponse?)null;
 
@@ -105,9 +105,9 @@ namespace CCXT.Collector.Library
         /// <param name="max_retry"></param>
         /// <param name="delay_milliseconds"></param>
         /// <returns></returns>
-        public async ValueTask<byte[]> RestExecuteBytesAsync(IRestClient client, IRestRequest request, int max_retry = 3, int delay_milliseconds = 1000)
+        public async ValueTask<byte[]?> RestExecuteBytesAsync(IRestClient client, IRestRequest request, int max_retry = 3, int delay_milliseconds = 1000)
         {
-            var _result = (byte[])null;
+            var _result = (byte[]?)null;
 
             for (var _retry_count = 0; _retry_count < max_retry; _retry_count++)
             {

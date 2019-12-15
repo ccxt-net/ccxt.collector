@@ -5,7 +5,7 @@
         /// <summary>
         ///
         /// </summary>
-        public string command
+        public string? command
         {
             get;
             set;
@@ -14,7 +14,7 @@
         /// <summary>
         ///
         /// </summary>
-        public string exchange
+        public string? exchange
         {
             get;
             set;
@@ -23,7 +23,7 @@
         /// <summary>
         ///
         /// </summary>
-        public string symbol
+        public string? symbol
         {
             get;
             set;
@@ -50,7 +50,7 @@
         /// <summary>
         ///
         /// </summary>
-        public string stream
+        public string? stream
         {
             get;
             set;
@@ -59,7 +59,7 @@
         /// <summary>
         ///
         /// </summary>
-        public string id
+        public string? id
         {
             get;
             set;
@@ -68,7 +68,7 @@
         /// <summary>
         ///
         /// </summary>
-        public string topic
+        public string? topic
         {
             get;
             set;
@@ -77,7 +77,7 @@
         /// <summary>
         ///
         /// </summary>
-        public string payload
+        public string? payload
         {
             get;
             set;
@@ -86,7 +86,7 @@
         /// <summary>
         ///
         /// </summary>
-        public string table
+        public string? table
         {
             get;
             set;
@@ -95,7 +95,7 @@
         /// <summary>
         ///
         /// </summary>
-        public string action
+        public string? action
         {
             get;
             set;

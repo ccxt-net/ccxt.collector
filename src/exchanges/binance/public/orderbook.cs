@@ -11,7 +11,7 @@ namespace CCXT.Collector.Binance.Public
         /// <summary>
         /// Symbol
         /// </summary>
-        public virtual string symbol
+        public virtual string? symbol
         {
             get;
             set;
@@ -76,7 +76,7 @@ namespace CCXT.Collector.Binance.Public
         /// <summary>
         ///
         /// </summary>
-        public string stream
+        public string? stream
         {
             get;
             set;
@@ -144,7 +144,7 @@ namespace CCXT.Collector.Binance.Public
         /// <summary>
         ///
         /// </summary>
-        public string stream
+        public string? stream
         {
             get;
             set;
@@ -169,7 +169,7 @@ namespace CCXT.Collector.Binance.Public
         ///
         /// </summary>
         [JsonProperty(PropertyName = "e")]
-        public string eventType
+        public string? eventType
         {
             get;
             set;
@@ -189,7 +189,7 @@ namespace CCXT.Collector.Binance.Public
         /// Symbol
         /// </summary>
         [JsonProperty(PropertyName = "s")]
-        public override string symbol
+        public override string? symbol
         {
             get;
             set;

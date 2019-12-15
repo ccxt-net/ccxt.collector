@@ -12,7 +12,7 @@ namespace CCXT.Collector.Gemini
 {
     public class Pushing
     {
-        private static ConcurrentQueue<QMessage> __command_queue = null;
+        private static ConcurrentQueue<QMessage>? __command_queue = null;
 
         /// <summary>
         ///

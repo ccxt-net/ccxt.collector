@@ -57,7 +57,7 @@ namespace CCXT.Collector.Library.Public
     /// </summary>
     public class SCompleteOrders : SApiResult<List<SCompleteOrderItem>>
     {
-#if DEBUG
+#if RAWJSON
         /// <summary>
         ///
         /// </summary>

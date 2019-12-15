@@ -15,7 +15,7 @@ namespace CCXT.Collector.BitMEX.Public
         ///
         /// </summary>
         [JsonProperty(PropertyName = "trdMatchID")]
-        public override string transactionId
+        public override string? transactionId
         {
             get;
             set;

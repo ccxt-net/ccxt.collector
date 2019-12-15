@@ -11,7 +11,7 @@ namespace CCXT.Collector.Upbit.Private
         /// <summary>
         /// 화폐를 의미하는 영문 대문자 코드
         /// </summary>
-        public override string currency
+        public override string? currency
         {
             get;
             set;
@@ -21,7 +21,7 @@ namespace CCXT.Collector.Upbit.Private
         /// 입금 주소
         /// </summary>
         [JsonProperty(PropertyName = "deposit_address")]
-        public override string address
+        public override string? address
         {
             get;
             set;
@@ -31,7 +31,7 @@ namespace CCXT.Collector.Upbit.Private
         /// 2차 입금 주소
         /// </summary>
         [JsonProperty(PropertyName = "secondary_address")]
-        public override string tag
+        public override string? tag
         {
             get;
             set;
@@ -55,7 +55,7 @@ namespace CCXT.Collector.Upbit.Private
         /// <summary>
         /// 요청 결과에 대한 메세지
         /// </summary>
-        public string message
+        public string? message
         {
             get;
             set;

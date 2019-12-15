@@ -11,7 +11,7 @@ namespace CCXT.Collector.Gemini
 {
     public class Polling : KRestClient
     {
-        private CCXT.Collector.Upbit.Public.PublicApi __public_api = null;
+        private CCXT.Collector.Upbit.Public.PublicApi? __public_api = null;
         private CCXT.Collector.Upbit.Public.PublicApi publicApi
         {
             get

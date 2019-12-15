@@ -18,7 +18,7 @@ namespace CCXT.Collector.Gemini
         /// <summary>
         ///
         /// </summary>
-        public override string DealerName { get; set; } = "Gemini";
+        public override string? DealerName { get; set; } = "Gemini";
 
         /// <summary>
         ///
@@ -170,7 +170,7 @@ namespace CCXT.Collector.Gemini
         /// <param name="endpoint">api link address of a function</param>
         /// <param name="args">Add additional attributes for each exchange</param>
         /// <returns></returns>
-        public override async ValueTask<IRestRequest> CreatePostRequest(string endpoint, Dictionary<string, object>? args = null)
+        public override async ValueTask<IRestRequest> CreatePostRequest(string? endpoint, Dictionary<string, object>? args = null)
         {
             var _request = await base.CreatePostRequest(endpoint, args);
 
@@ -203,7 +203,7 @@ namespace CCXT.Collector.Gemini
         /// <param name="endpoint">api link address of a function</param>
         /// <param name="args">Add additional attributes for each exchange</param>
         /// <returns></returns>
-        public override async ValueTask<IRestRequest> CreateGetRequest(string endpoint, Dictionary<string, object>? args = null)
+        public override async ValueTask<IRestRequest> CreateGetRequest(string? endpoint, Dictionary<string, object>? args = null)
         {
             var _request = await base.CreateGetRequest(endpoint, args);
 
@@ -236,7 +236,7 @@ namespace CCXT.Collector.Gemini
         /// <param name="endpoint">api link address of a function</param>
         /// <param name="args">Add additional attributes for each exchange</param>
         /// <returns></returns>
-        public override async ValueTask<IRestRequest> CreateDeleteRequest(string endpoint, Dictionary<string, object>? args = null)
+        public override async ValueTask<IRestRequest> CreateDeleteRequest(string? endpoint, Dictionary<string, object>? args = null)
         {
             var _request = await base.CreateDeleteRequest(endpoint, args);
 
@@ -283,7 +283,7 @@ namespace CCXT.Collector.Gemini
                     if (_json_error != null)
                     {
                         var _error_code = ErrorCode.ExchangeError;
-                        var _error_msg = _json_error["message"].Value<string>();
+                        var _error_msg = _json_error["message"]?.Value<string>();
 
                         var _json_name = _json_error["name"];
                         if (_json_name != null)

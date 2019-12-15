@@ -17,7 +17,7 @@ namespace CCXT.Collector.Service
     {
         private static string __last_exchanges = "";
 
-        private static CancellationTokenSource __ss_token_source;
+        private static CancellationTokenSource? __ss_token_source;
 
         public static CancellationTokenSource SSTokenSource
         {

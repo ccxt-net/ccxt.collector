@@ -17,7 +17,7 @@ namespace CCXT.Collector.BitMEX
 {
     public partial class Processing
     {
-        private static ConcurrentQueue<QMessage> __recv_queue = null;
+        private static ConcurrentQueue<QMessage>? __recv_queue = null;
 
         /// <summary>
         ///
@@ -85,8 +85,8 @@ namespace CCXT.Collector.BitMEX
                                     {
                                         return new SMyOrderItem
                                         {
-                                            orderId = o.orderId,
-                                            symbol = o.symbol,
+                                            orderId = o.orderId ?? "",
+                                            symbol = o.symbol ?? "",
                                             sideType = o.sideType,
 
                                             timestamp = o.timestamp,
@@ -213,8 +213,8 @@ namespace CCXT.Collector.BitMEX
                                     {
                                         return new SMyOrderItem
                                         {
-                                            orderId = o.orderId,
-                                            symbol = o.symbol,
+                                            orderId = o.orderId ?? "",
+                                            symbol = o.symbol ?? "",
                                             sideType = o.sideType,
 
                                             timestamp = o.timestamp,

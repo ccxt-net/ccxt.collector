@@ -125,7 +125,7 @@ namespace CCXT.Collector.Library.Public
     /// </summary>
     public class SOrderBooks : SApiResult<SOrderBook>
     {
-#if DEBUG
+#if RAWJSON
         /// <summary>
         ///
         /// </summary>

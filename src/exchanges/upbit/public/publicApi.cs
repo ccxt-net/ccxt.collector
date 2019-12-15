@@ -40,66 +40,71 @@ namespace CCXT.Collector.Upbit.Public
             var _result = new Markets();
 
             var _response = await publicClient.CallApiGet2Async("/market/all");
-#if DEBUG
+            if (_response != null)
+            {
+#if RAWJSON
             _result.rawJson = _response.Content;
 #endif
-            if (_response.IsSuccessful == true)
-            {
-                var _markets = publicClient.DeserializeObject<List<UMarketItem>>(_response.Content);
-
-                foreach (var _market in _markets)
+                if (_response.IsSuccessful == true)
                 {
-                    var _symbol = _market.symbol;
+                    var _markets = publicClient.DeserializeObject<List<UMarketItem>>(_response.Content);
 
-                    _market.baseId = _symbol.Split('-')[1];
-                    _market.quoteId = _symbol.Split('-')[0];
-
-                    _market.baseName = publicClient.ExchangeInfo.GetCommonCurrencyName(_market.baseId);
-                    _market.quoteName = publicClient.ExchangeInfo.GetCommonCurrencyName(_market.quoteId);
-
-                    _market.marketId = _market.baseName + "/" + _market.quoteName;
-
-                    _market.precision = new MarketPrecision
+                    foreach (var _market in _markets)
                     {
-                        quantity = 8,
-                        price = 8,
-                        amount = 8
-                    };
+                        var _symbol = _market.symbol;
+                        if (_symbol == null)
+                            continue;
 
-                    _market.lot = 1.0m;
-                    _market.active = true;
+                        _market.baseId = _symbol.Split('-')[1];
+                        _market.quoteId = _symbol.Split('-')[0];
 
-                    _market.takerFee = 0.05m / 100;
-                    _market.makerFee = 0.05m / 100;
+                        _market.baseName = publicClient.ExchangeInfo.GetCommonCurrencyName(_market.baseId);
+                        _market.quoteName = publicClient.ExchangeInfo.GetCommonCurrencyName(_market.quoteId);
 
-                    _market.limits = new MarketLimits
-                    {
-                        quantity = new MarketMinMax
+                        _market.marketId = _market.baseName + "/" + _market.quoteName;
+
+                        _market.precision = new MarketPrecision
                         {
-                            min = (decimal)Math.Pow(10, -_market.precision.quantity),
-                            max = decimal.MaxValue
-                        },
-                        price = new MarketMinMax
-                        {
-                            min = (decimal)Math.Pow(10, -_market.precision.price),
-                            max = decimal.MaxValue
-                        },
-                        amount = new MarketMinMax
-                        {
-                            min = _market.lot,
-                            max = decimal.MaxValue
-                        }
-                    };
+                            quantity = 8,
+                            price = 8,
+                            amount = 8
+                        };
 
-                    _result.result.Add(_market.marketId, _market);
+                        _market.lot = 1.0m;
+                        _market.active = true;
+
+                        _market.takerFee = 0.05m / 100;
+                        _market.makerFee = 0.05m / 100;
+
+                        _market.limits = new MarketLimits
+                        {
+                            quantity = new MarketMinMax
+                            {
+                                min = (decimal)Math.Pow(10, -_market.precision.quantity),
+                                max = decimal.MaxValue
+                            },
+                            price = new MarketMinMax
+                            {
+                                min = (decimal)Math.Pow(10, -_market.precision.price),
+                                max = decimal.MaxValue
+                            },
+                            amount = new MarketMinMax
+                            {
+                                min = _market.lot,
+                                max = decimal.MaxValue
+                            }
+                        };
+
+                        _result.result.Add(_market.marketId, _market);
+                    }
+
+                    _result.SetSuccess();
                 }
-
-                _result.SetSuccess();
-            }
-            else
-            {
-                var _message = publicClient.GetResponseMessage(_response);
-                _result.SetFailure(_message.message);
+                else
+                {
+                    var _message = publicClient.GetResponseMessage(_response);
+                    _result.SetFailure(_message.message);
+                }
             }
 
             return _result;
@@ -126,33 +131,36 @@ namespace CCXT.Collector.Upbit.Public
             }
 
             var _response = await publicClient.CallApiGet2Async($"/trades/ticks", _params);
-#if DEBUG
+            if (_response != null)
+            {
+#if RAWJSON
             _result.rawJson = _response.Content;
 #endif
-            if (_response.IsSuccessful == true)
-            {
-                var _trades = publicClient.DeserializeObject<List<UACompleteOrderItem>>(_response.Content);
+                if (_response.IsSuccessful == true)
                 {
-                    _result.sequentialId = _trades.Max(t => t.sequential_id);
-                    _result.result = _trades.Select(t =>
+                    var _trades = publicClient.DeserializeObject<List<UACompleteOrderItem>>(_response.Content);
                     {
-                        return new SCompleteOrderItem
+                        _result.sequentialId = _trades.Max(t => t.sequential_id);
+                        _result.result = _trades.Select(t =>
                         {
-                            timestamp = t.timestamp,
-                            sideType = t.sideType,
-                            price = t.price,
-                            quantity = t.quantity
-                        };
-                    })
-                    .ToList();
-                }
+                            return new SCompleteOrderItem
+                            {
+                                timestamp = t.timestamp,
+                                sideType = t.sideType,
+                                price = t.price,
+                                quantity = t.quantity
+                            };
+                        })
+                        .ToList();
+                    }
 
-                _result.SetSuccess();
-            }
-            else
-            {
-                var _message = publicClient.GetResponseMessage(_response);
-                _result.SetFailure(_message.message);
+                    _result.SetSuccess();
+                }
+                else
+                {
+                    var _message = publicClient.GetResponseMessage(_response);
+                    _result.SetFailure(_message.message);
+                }
             }
 
             return _result;
@@ -174,25 +182,28 @@ namespace CCXT.Collector.Upbit.Public
             }
 
             var _response = await publicClient.CallApiGet2Async("/orderbook", _params);
-#if DEBUG
+            if (_response != null)
+            {
+#if RAWJSON
             _result.rawJson = _response.Content;
 #endif
-            if (_response.IsSuccessful == true)
-            {
-                var _orderbooks = publicClient.DeserializeObject<List<UOrderBook>>(_response.Content);
+                if (_response.IsSuccessful == true)
                 {
-                    var _orderbook = _orderbooks.FirstOrDefault();
-                    if (_orderbook != null)
+                    var _orderbooks = publicClient.DeserializeObject<List<UOrderBook>>(_response.Content);
                     {
-                        _result.result = _orderbook;
-                        _result.SetSuccess();
+                        var _orderbook = _orderbooks.FirstOrDefault();
+                        if (_orderbook != null)
+                        {
+                            _result.result = _orderbook;
+                            _result.SetSuccess();
+                        }
                     }
                 }
-            }
-            else
-            {
-                var _message = publicClient.GetResponseMessage(_response);
-                _result.SetFailure(_message.message);
+                else
+                {
+                    var _message = publicClient.GetResponseMessage(_response);
+                    _result.SetFailure(_message.message);
+                }
             }
 
             return _result;

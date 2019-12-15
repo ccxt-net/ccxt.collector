@@ -9,9 +9,9 @@ namespace CCXT.Collector.Library.Public
     public class SOhlcvItem
     {
         /// <summary>
-        /// string symbol of the market ('BTCUSD', 'ETHBTC', ...)
+        /// string? symbol of the market ('BTCUSD', 'ETHBTC', ...)
         /// </summary>
-        public string symbol
+        public string? symbol
         {
             get;
             set;
@@ -122,7 +122,7 @@ namespace CCXT.Collector.Library.Public
     /// </summary>
     public class SOhlcvs : SApiResult<List<SOhlcvItem>>
     {
-#if DEBUG
+#if RAWJSON
         /// <summary>
         ///
         /// </summary>

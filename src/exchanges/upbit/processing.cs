@@ -13,7 +13,7 @@ namespace CCXT.Collector.Upbit
 {
     public partial class Processing
     {
-        private static ConcurrentQueue<QMessage> __recv_queue = null;
+        private static ConcurrentQueue<QMessage>? __recv_queue = null;
 
         /// <summary>
         ///

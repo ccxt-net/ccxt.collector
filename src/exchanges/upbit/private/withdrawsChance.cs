@@ -359,7 +359,7 @@ namespace CCXT.Collector.Upbit.Private
     /// </summary>
     public interface IMyWithdrawsChance : IApiResult<IWithdrawsChance>
     {
-#if DEBUG
+#if RAWJSON
         /// <summary>
         ///
         /// </summary>
@@ -384,7 +384,7 @@ namespace CCXT.Collector.Upbit.Private
             this.result = new WithdrawsChance();
         }
 
-#if DEBUG
+#if RAWJSON
         /// <summary>
         ///
         /// </summary>

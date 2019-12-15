@@ -46,24 +46,27 @@ namespace CCXT.Collector.Upbit.Private
             var _result = new Balances();
 
             var _response = await privateClient.CallApiGet2Async("/accounts");
-#if DEBUG
+            if (_response != null)
+            {
+#if RAWJSON
             _result.rawJson = _response.Content;
 #endif
-            if (_response.IsSuccessful == true)
-            {
-                var _balances = privateClient.DeserializeObject<List<UBalanceItem>>(_response.Content);
+                if (_response.IsSuccessful == true)
                 {
-                    foreach (var _balance in _balances)
-                        _balance.total = _balance.free + _balance.used;
+                    var _balances = privateClient.DeserializeObject<List<UBalanceItem>>(_response.Content);
+                    {
+                        foreach (var _balance in _balances)
+                            _balance.total = _balance.free + _balance.used;
 
-                    _result.result = _balances.ToList<IBalanceItem>();
+                        _result.result = _balances.ToList<IBalanceItem>();
+                    }
+                    _result.SetSuccess();
                 }
-                _result.SetSuccess();
-            }
-            else
-            {
-                var _message = privateClient.GetResponseMessage(_response);
-                _result.SetFailure(_message.message);
+                else
+                {
+                    var _message = privateClient.GetResponseMessage(_response);
+                    _result.SetFailure(_message.message);
+                }
             }
 
             return _result;
@@ -85,18 +88,21 @@ namespace CCXT.Collector.Upbit.Private
             }
 
             var _response = await privateClient.CallApiGet2Async("/orders/chance", _params);
-#if DEBUG
+            if (_response != null)
+            {
+#if RAWJSON
             _result.rawJson = _response.Content;
 #endif
-            if (_response.IsSuccessful == true)
-            {
-                _result.result = privateClient.DeserializeObject<OrdersChance>(_response.Content);
-                _result.SetSuccess();
-            }
-            else
-            {
-                var _message = privateClient.GetResponseMessage(_response);
-                _result.SetFailure(_message.message);
+                if (_response.IsSuccessful == true)
+                {
+                    _result.result = privateClient.DeserializeObject<OrdersChance>(_response.Content);
+                    _result.SetSuccess();
+                }
+                else
+                {
+                    var _message = privateClient.GetResponseMessage(_response);
+                    _result.SetFailure(_message.message);
+                }
             }
 
             return _result;
@@ -117,22 +123,25 @@ namespace CCXT.Collector.Upbit.Private
             }
 
             var _response = await privateClient.CallApiGet2Async("/order", _params);
-#if DEBUG
+            if (_response != null)
+            {
+#if RAWJSON
             _result.rawJson = _response.Content;
 #endif
-            if (_response.IsSuccessful == true)
-            {
-                var _order = privateClient.DeserializeObject<UMyOrderItem>(_response.Content);
+                if (_response.IsSuccessful == true)
                 {
-                    _order.amount = _order.price * _order.quantity;
-                    _result.result = _order;
+                    var _order = privateClient.DeserializeObject<UMyOrderItem>(_response.Content);
+                    {
+                        _order.amount = _order.price * _order.quantity;
+                        _result.result = _order;
+                    }
+                    _result.SetSuccess();
                 }
-                _result.SetSuccess();
-            }
-            else
-            {
-                var _message = privateClient.GetResponseMessage(_response);
-                _result.SetFailure(_message.message);
+                else
+                {
+                    var _message = privateClient.GetResponseMessage(_response);
+                    _result.SetFailure(_message.message);
+                }
             }
 
             return _result;
@@ -157,23 +166,26 @@ namespace CCXT.Collector.Upbit.Private
             }
 
             var _response = await privateClient.CallApiGet2Async("/orders", _params);
-#if DEBUG
+            if (_response != null)
+            {
+#if RAWJSON
             _result.rawJson = _response.Content;
 #endif
-            if (_response.IsSuccessful == true)
-            {
-                var _orders = privateClient.DeserializeObject<List<UMyOrderItem>>(_response.Content);
+                if (_response.IsSuccessful == true)
                 {
-                    foreach (var _o in _orders)
-                        _o.amount = _o.price * _o.quantity;
-                    _result.result = _orders.ToList<IMyOrderItem>();
+                    var _orders = privateClient.DeserializeObject<List<UMyOrderItem>>(_response.Content);
+                    {
+                        foreach (var _o in _orders)
+                            _o.amount = _o.price * _o.quantity;
+                        _result.result = _orders.ToList<IMyOrderItem>();
+                    }
+                    _result.SetSuccess();
                 }
-                _result.SetSuccess();
-            }
-            else
-            {
-                var _message = privateClient.GetResponseMessage(_response);
-                _result.SetFailure(_message.message);
+                else
+                {
+                    var _message = privateClient.GetResponseMessage(_response);
+                    _result.SetFailure(_message.message);
+                }
             }
 
             return _result;
@@ -198,23 +210,26 @@ namespace CCXT.Collector.Upbit.Private
             }
 
             var _response = await privateClient.CallApiGet2Async("/orders", _params);
-#if DEBUG
+            if (_response != null)
+            {
+#if RAWJSON
             _result.rawJson = _response.Content;
 #endif
-            if (_response.IsSuccessful == true)
-            {
-                var _trades = privateClient.DeserializeObject<List<UMyTradeItem>>(_response.Content);
+                if (_response.IsSuccessful == true)
                 {
-                    foreach (var _t in _trades)
-                        _t.amount = _t.price * _t.quantity;
-                    _result.result = _trades.ToList<IMyTradeItem>();
+                    var _trades = privateClient.DeserializeObject<List<UMyTradeItem>>(_response.Content);
+                    {
+                        foreach (var _t in _trades)
+                            _t.amount = _t.price * _t.quantity;
+                        _result.result = _trades.ToList<IMyTradeItem>();
+                    }
+                    _result.SetSuccess();
                 }
-                _result.SetSuccess();
-            }
-            else
-            {
-                var _message = privateClient.GetResponseMessage(_response);
-                _result.SetFailure(_message.message);
+                else
+                {
+                    var _message = privateClient.GetResponseMessage(_response);
+                    _result.SetFailure(_message.message);
+                }
             }
 
             return _result;
@@ -236,23 +251,26 @@ namespace CCXT.Collector.Upbit.Private
             }
 
             var _response = await privateClient.CallApiGet2Async("/orders", _params);
-#if DEBUG
+            if (_response != null)
+            {
+#if RAWJSON
             _result.rawJson = _response.Content;
 #endif
-            if (_response.IsSuccessful == true)
-            {
-                var _orders = privateClient.DeserializeObject<List<UMyOrderItem>>(_response.Content);
+                if (_response.IsSuccessful == true)
                 {
-                    foreach (var _o in _orders)
-                        _o.amount = _o.price * _o.quantity;
-                    _result.result = _orders.ToList<IMyOrderItem>();
+                    var _orders = privateClient.DeserializeObject<List<UMyOrderItem>>(_response.Content);
+                    {
+                        foreach (var _o in _orders)
+                            _o.amount = _o.price * _o.quantity;
+                        _result.result = _orders.ToList<IMyOrderItem>();
+                    }
+                    _result.SetSuccess();
                 }
-                _result.SetSuccess();
-            }
-            else
-            {
-                var _message = privateClient.GetResponseMessage(_response);
-                _result.SetFailure(_message.message);
+                else
+                {
+                    var _message = privateClient.GetResponseMessage(_response);
+                    _result.SetFailure(_message.message);
+                }
             }
 
             return _result;
@@ -273,22 +291,25 @@ namespace CCXT.Collector.Upbit.Private
             }
 
             var _response = await privateClient.CallApiDelete2Async("/order", _params);
-#if DEBUG
+            if (_response != null)
+            {
+#if RAWJSON
             _result.rawJson = _response.Content;
 #endif
-            if (_response.IsSuccessful == true)
-            {
-                var _order = privateClient.DeserializeObject<UPlaceOrderItem>(_response.Content);
+                if (_response.IsSuccessful == true)
                 {
-                    _order.amount = _order.price * _order.quantity;
-                    _result.result = _order;
+                    var _order = privateClient.DeserializeObject<UPlaceOrderItem>(_response.Content);
+                    {
+                        _order.amount = _order.price * _order.quantity;
+                        _result.result = _order;
+                    }
+                    _result.SetSuccess();
                 }
-                _result.SetSuccess();
-            }
-            else
-            {
-                var _message = privateClient.GetResponseMessage(_response);
-                _result.SetFailure(_message.message);
+                else
+                {
+                    var _message = privateClient.GetResponseMessage(_response);
+                    _result.SetFailure(_message.message);
+                }
             }
 
             return _result;
@@ -317,24 +338,27 @@ namespace CCXT.Collector.Upbit.Private
             }
 
             var _response = await privateClient.CallApiPost2Async("/orders", _params);
-#if DEBUG
+            if (_response != null)
+            {
+#if RAWJSON
             _result.rawJson = _response.Content;
 #endif
-            if (_response.IsSuccessful == true)
-            {
-                var _order = privateClient.DeserializeObject<UPlaceOrderItem>(_response.Content);
+                if (_response.IsSuccessful == true)
                 {
-                    _order.orderType = OrderType.Limit;
-                    _order.amount = _order.quantity * _order.price;
+                    var _order = privateClient.DeserializeObject<UPlaceOrderItem>(_response.Content);
+                    {
+                        _order.orderType = OrderType.Limit;
+                        _order.amount = _order.quantity * _order.price;
 
-                    _result.result = _order;
+                        _result.result = _order;
+                    }
+                    _result.SetSuccess();
                 }
-                _result.SetSuccess();
-            }
-            else
-            {
-                var _message = privateClient.GetResponseMessage(_response);
-                _result.SetFailure(_message.message);
+                else
+                {
+                    var _message = privateClient.GetResponseMessage(_response);
+                    _result.SetFailure(_message.message);
+                }
             }
 
             return _result;
@@ -357,21 +381,24 @@ namespace CCXT.Collector.Upbit.Private
             }
 
             var _response = await privateClient.CallApiGet2Async("/withdraws", _params);
-#if DEBUG
+            if (_response != null)
+            {
+#if RAWJSON
             _result.rawJson = _response.Content;
 #endif
-            if (_response.IsSuccessful == true)
-            {
-                var _transfers = privateClient.DeserializeObject<List<UTransferItem>>(_response.Content);
+                if (_response.IsSuccessful == true)
                 {
-                    _result.result = _transfers.ToList<ITransferItem>();
+                    var _transfers = privateClient.DeserializeObject<List<UTransferItem>>(_response.Content);
+                    {
+                        _result.result = _transfers.ToList<ITransferItem>();
+                    }
+                    _result.SetSuccess();
                 }
-                _result.SetSuccess();
-            }
-            else
-            {
-                var _message = privateClient.GetResponseMessage(_response);
-                _result.SetFailure(_message.message);
+                else
+                {
+                    var _message = privateClient.GetResponseMessage(_response);
+                    _result.SetFailure(_message.message);
+                }
             }
 
             return _result;
@@ -392,21 +419,24 @@ namespace CCXT.Collector.Upbit.Private
             }
 
             var _response = await privateClient.CallApiGet2Async("/withdraws", _params);
-#if DEBUG
+            if (_response != null)
+            {
+#if RAWJSON
             _result.rawJson = _response.Content;
 #endif
-            if (_response.IsSuccessful == true)
-            {
-                var _transfers = privateClient.DeserializeObject<List<UTransferItem>>(_response.Content);
+                if (_response.IsSuccessful == true)
                 {
-                    _result.result = _transfers.ToList<ITransferItem>();
+                    var _transfers = privateClient.DeserializeObject<List<UTransferItem>>(_response.Content);
+                    {
+                        _result.result = _transfers.ToList<ITransferItem>();
+                    }
+                    _result.SetSuccess();
                 }
-                _result.SetSuccess();
-            }
-            else
-            {
-                var _message = privateClient.GetResponseMessage(_response);
-                _result.SetFailure(_message.message);
+                else
+                {
+                    var _message = privateClient.GetResponseMessage(_response);
+                    _result.SetFailure(_message.message);
+                }
             }
 
             return _result;
@@ -427,18 +457,21 @@ namespace CCXT.Collector.Upbit.Private
             }
 
             var _response = await privateClient.CallApiGet2Async("/withdraw", _params);
-#if DEBUG
+            if (_response != null)
+            {
+#if RAWJSON
             _result.rawJson = _response.Content;
 #endif
-            if (_response.IsSuccessful == true)
-            {
-                _result.result = privateClient.DeserializeObject<UTransferItem>(_response.Content);
-                _result.SetSuccess();
-            }
-            else
-            {
-                var _message = privateClient.GetResponseMessage(_response);
-                _result.SetFailure(_message.message);
+                if (_response.IsSuccessful == true)
+                {
+                    _result.result = privateClient.DeserializeObject<UTransferItem>(_response.Content);
+                    _result.SetSuccess();
+                }
+                else
+                {
+                    var _message = privateClient.GetResponseMessage(_response);
+                    _result.SetFailure(_message.message);
+                }
             }
 
             return _result;
@@ -459,18 +492,21 @@ namespace CCXT.Collector.Upbit.Private
             }
 
             var _response = await privateClient.CallApiGet2Async("/withdraws/chance", _params);
-#if DEBUG
+            if (_response != null)
+            {
+#if RAWJSON
             _result.rawJson = _response.Content;
 #endif
-            if (_response.IsSuccessful == true)
-            {
-                _result.result = privateClient.DeserializeObject<WithdrawsChance>(_response.Content);
-                _result.SetSuccess();
-            }
-            else
-            {
-                var _message = privateClient.GetResponseMessage(_response);
-                _result.SetFailure(_message.message);
+                if (_response.IsSuccessful == true)
+                {
+                    _result.result = privateClient.DeserializeObject<WithdrawsChance>(_response.Content);
+                    _result.SetSuccess();
+                }
+                else
+                {
+                    var _message = privateClient.GetResponseMessage(_response);
+                    _result.SetFailure(_message.message);
+                }
             }
 
             return _result;
@@ -498,24 +534,27 @@ namespace CCXT.Collector.Upbit.Private
             }
 
             var _response = await privateClient.CallApiPost2Async("/withdraws/coin", _params);
-#if DEBUG
+            if (_response != null)
+            {
+#if RAWJSON
             _result.rawJson = _response.Content;
 #endif
-            if (_response.IsSuccessful == true)
-            {
-                var _transfer = privateClient.DeserializeObject<UTransferItem>(_response.Content);
+                if (_response.IsSuccessful == true)
                 {
-                    _transfer.toAddress = address;
-                    _transfer.toTag = tag;
-                }
+                    var _transfer = privateClient.DeserializeObject<UTransferItem>(_response.Content);
+                    {
+                        _transfer.toAddress = address;
+                        _transfer.toTag = tag;
+                    }
 
-                _result.result = _transfer;
-                _result.SetSuccess();
-            }
-            else
-            {
-                var _message = privateClient.GetResponseMessage(_response);
-                _result.SetFailure(_message.message);
+                    _result.result = _transfer;
+                    _result.SetSuccess();
+                }
+                else
+                {
+                    var _message = privateClient.GetResponseMessage(_response);
+                    _result.SetFailure(_message.message);
+                }
             }
 
             return _result;
@@ -536,18 +575,21 @@ namespace CCXT.Collector.Upbit.Private
             }
 
             var _response = await privateClient.CallApiPost2Async("/withdraws/krw", _params);
-#if DEBUG
+            if (_response != null)
+            {
+#if RAWJSON
             _result.rawJson = _response.Content;
 #endif
-            if (_response.IsSuccessful == true)
-            {
-                _result.result = privateClient.DeserializeObject<UTransferItem>(_response.Content);
-                _result.SetSuccess();
-            }
-            else
-            {
-                var _message = privateClient.GetResponseMessage(_response);
-                _result.SetFailure(_message.message);
+                if (_response.IsSuccessful == true)
+                {
+                    _result.result = privateClient.DeserializeObject<UTransferItem>(_response.Content);
+                    _result.SetSuccess();
+                }
+                else
+                {
+                    var _message = privateClient.GetResponseMessage(_response);
+                    _result.SetFailure(_message.message);
+                }
             }
 
             return _result;
@@ -568,21 +610,24 @@ namespace CCXT.Collector.Upbit.Private
             }
 
             var _response = await privateClient.CallApiGet2Async("/deposits", _params);
-#if DEBUG
+            if (_response != null)
+            {
+#if RAWJSON
             _result.rawJson = _response.Content;
 #endif
-            if (_response.IsSuccessful == true)
-            {
-                var _transfers = privateClient.DeserializeObject<List<UTransferItem>>(_response.Content);
+                if (_response.IsSuccessful == true)
                 {
-                    _result.result = _transfers.ToList<ITransferItem>();
+                    var _transfers = privateClient.DeserializeObject<List<UTransferItem>>(_response.Content);
+                    {
+                        _result.result = _transfers.ToList<ITransferItem>();
+                    }
+                    _result.SetSuccess();
                 }
-                _result.SetSuccess();
-            }
-            else
-            {
-                var _message = privateClient.GetResponseMessage(_response);
-                _result.SetFailure(_message.message);
+                else
+                {
+                    var _message = privateClient.GetResponseMessage(_response);
+                    _result.SetFailure(_message.message);
+                }
             }
 
             return _result;
@@ -603,18 +648,21 @@ namespace CCXT.Collector.Upbit.Private
             }
 
             var _response = await privateClient.CallApiGet2Async("/deposit", _params);
-#if DEBUG
+            if (_response != null)
+            {
+#if RAWJSON
             _result.rawJson = _response.Content;
 #endif
-            if (_response.IsSuccessful == true)
-            {
-                _result.result = privateClient.DeserializeObject<UTransferItem>(_response.Content);
-                _result.SetSuccess();
-            }
-            else
-            {
-                var _message = privateClient.GetResponseMessage(_response);
-                _result.SetFailure(_message.message);
+                if (_response.IsSuccessful == true)
+                {
+                    _result.result = privateClient.DeserializeObject<UTransferItem>(_response.Content);
+                    _result.SetSuccess();
+                }
+                else
+                {
+                    var _message = privateClient.GetResponseMessage(_response);
+                    _result.SetFailure(_message.message);
+                }
             }
 
             return _result;
@@ -635,26 +683,29 @@ namespace CCXT.Collector.Upbit.Private
             }
 
             var _response = await privateClient.CallApiPost2Async("/deposits/generate_coin_address", _params);
-#if DEBUG
+            if (_response != null)
+            {
+#if RAWJSON
             _result.rawJson = _response.Content;
 #endif
-            if (_response.IsSuccessful == true)
-            {
-                var _address = privateClient.DeserializeObject<GenerateAddress>(_response.Content);
-                if (_address.success == false)
+                if (_response.IsSuccessful == true)
                 {
-                    _result.result = _address;
-                    _result.SetSuccess();
+                    var _address = privateClient.DeserializeObject<GenerateAddress>(_response.Content);
+                    if (_address.success == false)
+                    {
+                        _result.result = _address;
+                        _result.SetSuccess();
+                    }
+                    else
+                    {
+                        _result.SetFailure(_address.message);
+                    }
                 }
                 else
                 {
-                    _result.SetFailure(_address.message);
+                    var _message = privateClient.GetResponseMessage(_response);
+                    _result.SetFailure(_message.message);
                 }
-            }
-            else
-            {
-                var _message = privateClient.GetResponseMessage(_response);
-                _result.SetFailure(_message.message);
             }
 
             return _result;
@@ -669,21 +720,24 @@ namespace CCXT.Collector.Upbit.Private
             var _result = new Addresses();
 
             var _response = await privateClient.CallApiGet2Async("/deposits/coin_addresses");
-#if DEBUG
+            if (_response != null)
+            {
+#if RAWJSON
             _result.rawJson = _response.Content;
 #endif
-            if (_response.IsSuccessful == true)
-            {
-                var _addresses = privateClient.DeserializeObject<List<UAddress>>(_response.Content);
+                if (_response.IsSuccessful == true)
                 {
-                    _result.result = _addresses.ToList<IAddressItem>();
+                    var _addresses = privateClient.DeserializeObject<List<UAddress>>(_response.Content);
+                    {
+                        _result.result = _addresses.ToList<IAddressItem>();
+                    }
+                    _result.SetSuccess();
                 }
-                _result.SetSuccess();
-            }
-            else
-            {
-                var _message = privateClient.GetResponseMessage(_response);
-                _result.SetFailure(_message.message);
+                else
+                {
+                    var _message = privateClient.GetResponseMessage(_response);
+                    _result.SetFailure(_message.message);
+                }
             }
 
             return _result;
@@ -704,18 +758,21 @@ namespace CCXT.Collector.Upbit.Private
             }
 
             var _response = await privateClient.CallApiGet2Async("/deposits/coin_address", _params);
-#if DEBUG
+            if (_response != null)
+            {
+#if RAWJSON
             _result.rawJson = _response.Content;
 #endif
-            if (_response.IsSuccessful == true)
-            {
-                _result.result = privateClient.DeserializeObject<UAddress>(_response.Content);
-                _result.SetSuccess();
-            }
-            else
-            {
-                var _message = privateClient.GetResponseMessage(_response);
-                _result.SetFailure(_message.message);
+                if (_response.IsSuccessful == true)
+                {
+                    _result.result = privateClient.DeserializeObject<UAddress>(_response.Content);
+                    _result.SetSuccess();
+                }
+                else
+                {
+                    var _message = privateClient.GetResponseMessage(_response);
+                    _result.SetFailure(_message.message);
+                }
             }
 
             return _result;
