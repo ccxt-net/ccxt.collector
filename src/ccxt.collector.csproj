@@ -44,6 +44,10 @@
     <DefineConstants>TRACE</DefineConstants>
   </PropertyGroup>
   
+  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net472|AnyCPU'">
+    <NoWarn>1701;1702;8618</NoWarn>
+  </PropertyGroup>
+  
   <ItemGroup>
     <Content Include="..\LICENSE.txt" Link="LICENSE.txt" />
   </ItemGroup>

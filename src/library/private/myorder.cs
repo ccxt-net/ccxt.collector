@@ -401,7 +401,7 @@ namespace CCXT.Collector.Library.Private
         /// <summary>
         ///
         /// </summary>
-        string rawJson
+        string? rawJson
         {
             get;
             set;

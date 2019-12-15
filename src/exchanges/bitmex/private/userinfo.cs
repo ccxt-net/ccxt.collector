@@ -611,7 +611,7 @@ namespace CCXT.Collector.BitMEX.Private
         /// <summary>
         ///
         /// </summary>
-        string rawJson
+        string? rawJson
         {
             get;
             set;
@@ -639,7 +639,7 @@ namespace CCXT.Collector.BitMEX.Private
         ///
         /// </summary>
         [JsonIgnore]
-        public virtual string rawJson
+        public virtual string? rawJson
         {
             get;
             set;

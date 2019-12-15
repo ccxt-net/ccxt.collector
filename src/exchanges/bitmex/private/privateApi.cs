@@ -63,19 +63,22 @@ namespace CCXT.Collector.BitMEX.Private
             }
 
             var _response = await privateClient.CallApiGet2Async("/api/v1/user/depositAddress", _params);
+            if (_response != null)
+            {
 #if DEBUG
-            _result.rawJson = _response.Content;
+                _result.rawJson = _response.Content;
 #endif
-            if (_response.IsSuccessful == true)
-            {
-                _result.result.currency = currency;
-                _result.result.address = _response.Content;
-                _result.SetSuccess();
-            }
-            else
-            {
-                var _message = privateClient.GetResponseMessage(_response);
-                _result.SetFailure(_message.message);
+                if (_response.IsSuccessful == true)
+                {
+                    _result.result.currency = currency;
+                    _result.result.address = _response.Content;
+                    _result.SetSuccess();
+                }
+                else
+                {
+                    var _message = privateClient.GetResponseMessage(_response);
+                    _result.SetFailure(_message.message);
+                }
             }
 
             return _result;

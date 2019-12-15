@@ -226,7 +226,7 @@ namespace CCXT.Collector.Upbit.Private
         /// <summary>
         ///
         /// </summary>
-        string rawJson
+        string? rawJson
         {
             get;
             set;
@@ -253,7 +253,7 @@ namespace CCXT.Collector.Upbit.Private
         ///
         /// </summary>
         [JsonIgnore]
-        public virtual string rawJson
+        public virtual string? rawJson
         {
             get;
             set;
