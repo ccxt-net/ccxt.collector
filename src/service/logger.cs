@@ -35,7 +35,7 @@ namespace CCXT.Collector.Service
             /// <summary>
             ///
             /// </summary>
-            public string message
+            public string? message
             {
                 get;
                 set;
@@ -68,7 +68,7 @@ namespace CCXT.Collector.Service
         /// </summary>
         /// <param name="message"></param>
         /// <param name="exchange"></param>
-        public static void WriteQ(string message, string exchange = "")
+        public static void WriteQ(string? message, string exchange = "")
         {
             LogQ.Enqueue(new PLogger
             {
@@ -83,7 +83,7 @@ namespace CCXT.Collector.Service
         /// </summary>
         /// <param name="message"></param>
         /// <param name="exchange"></param>
-        public static void WriteO(string message, string exchange = "")
+        public static void WriteO(string? message, string exchange = "")
         {
             LogQ.Enqueue(new PLogger
             {
@@ -98,7 +98,7 @@ namespace CCXT.Collector.Service
         /// </summary>
         /// <param name="message"></param>
         /// <param name="exchange"></param>
-        public static void WriteX(string message, string exchange = "")
+        public static void WriteX(string? message, string exchange = "")
         {
             LogQ.Enqueue(new PLogger
             {
@@ -113,7 +113,7 @@ namespace CCXT.Collector.Service
         /// </summary>
         /// <param name="message"></param>
         /// <param name="exchange"></param>
-        public static void WriteC(string message, string exchange = "")
+        public static void WriteC(string? message, string exchange = "")
         {
             Console.Out.WriteLine($"{CUnixTime.UtcNow.ToLogDateTimeString()} {exchange} {message}");
         }

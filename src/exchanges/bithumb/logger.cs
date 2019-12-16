@@ -13,7 +13,7 @@ namespace CCXT.Collector.Bithumb
         ///
         /// </summary>
         /// <param name="message"></param>
-        public static void WriteQ(string message)
+        public static void WriteQ(string? message)
         {
             LoggerQ.WriteQ(message, exchange_name);
         }
@@ -22,7 +22,7 @@ namespace CCXT.Collector.Bithumb
         ///
         /// </summary>
         /// <param name="message"></param>
-        public static void WriteO(string message)
+        public static void WriteO(string? message)
         {
             LoggerQ.WriteO(message, exchange_name);
         }
@@ -31,7 +31,7 @@ namespace CCXT.Collector.Bithumb
         ///
         /// </summary>
         /// <param name="message"></param>
-        public static void WriteX(string message)
+        public static void WriteX(string? message)
         {
             LoggerQ.WriteX(message, exchange_name);
         }
@@ -40,7 +40,7 @@ namespace CCXT.Collector.Bithumb
         /// 
         /// </summary>
         /// <param name="message"></param>
-        public static void WriteC(string message)
+        public static void WriteC(string? message)
         {
             LoggerQ.WriteC(message, exchange_name);
         }
