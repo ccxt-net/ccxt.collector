@@ -165,6 +165,15 @@ namespace CCXT.Collector.BitMEX.Public
         /// <summary>
         ///
         /// </summary>
+        public decimal volume
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        ///
+        /// </summary>
         public decimal lastSize
         {
             get;
