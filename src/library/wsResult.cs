@@ -10,7 +10,7 @@ namespace CCXT.Collector.Library
         /// <summary>
         ///
         /// </summary>
-        string table
+        string? table
         {
             get;
             set;
@@ -19,7 +19,7 @@ namespace CCXT.Collector.Library
         /// <summary>
         ///
         /// </summary>
-        string action
+        string? action
         {
             get;
             set;
@@ -34,7 +34,7 @@ namespace CCXT.Collector.Library
         /// <summary>
         ///
         /// </summary>
-        public string table
+        public string? table
         {
             get;
             set;
@@ -43,7 +43,7 @@ namespace CCXT.Collector.Library
         /// <summary>
         ///
         /// </summary>
-        public string action
+        public string? action
         {
             get;
             set;
@@ -129,7 +129,7 @@ namespace CCXT.Collector.Library
         /// <summary>
         ///
         /// </summary>
-        string id
+        string? id
         {
             get;
             set;
@@ -138,7 +138,7 @@ namespace CCXT.Collector.Library
         /// <summary>
         ///
         /// </summary>
-        string topic
+        string? topic
         {
             get;
             set;
@@ -171,7 +171,7 @@ namespace CCXT.Collector.Library
         /// <summary>
         ///
         /// </summary>
-        public string id
+        public string? id
         {
             get;
             set;
@@ -180,7 +180,7 @@ namespace CCXT.Collector.Library
         /// <summary>
         ///
         /// </summary>
-        public string topic
+        public string? topic
         {
             get;
             set;

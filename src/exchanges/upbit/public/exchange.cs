@@ -11,7 +11,7 @@ namespace CCXT.Collector.Upbit.Public
         /// <summary>
         /// KRWUSD
         /// </summary>
-        public string code
+        public string? code
         {
             get;
             set;
@@ -20,7 +20,7 @@ namespace CCXT.Collector.Upbit.Public
         /// <summary>
         /// USD
         /// </summary>
-        public string currencyCode
+        public string? currencyCode
         {
             get;
             set;
@@ -29,7 +29,7 @@ namespace CCXT.Collector.Upbit.Public
         /// <summary>
         /// 달러
         /// </summary>
-        public string currencyName
+        public string? currencyName
         {
             get;
             set;
@@ -38,7 +38,7 @@ namespace CCXT.Collector.Upbit.Public
         /// <summary>
         /// 미국
         /// </summary>
-        public string country
+        public string? country
         {
             get;
             set;
@@ -47,7 +47,7 @@ namespace CCXT.Collector.Upbit.Public
         /// <summary>
         /// 미국(KRW/USD)
         /// </summary>
-        public string name
+        public string? name
         {
             get;
             set;
@@ -56,7 +56,7 @@ namespace CCXT.Collector.Upbit.Public
         /// <summary>
         ///
         /// </summary>
-        public string date
+        public string? date
         {
             get;
             set;
@@ -65,7 +65,7 @@ namespace CCXT.Collector.Upbit.Public
         /// <summary>
         ///
         /// </summary>
-        public string time
+        public string? time
         {
             get;
             set;
@@ -119,7 +119,7 @@ namespace CCXT.Collector.Upbit.Public
         /// <summary>
         ///
         /// </summary>
-        public string change
+        public string? change
         {
             get;
             set;
@@ -218,7 +218,7 @@ namespace CCXT.Collector.Upbit.Public
         /// <summary>
         ///
         /// </summary>
-        public string high52wDate
+        public string? high52wDate
         {
             get;
             set;
@@ -236,7 +236,7 @@ namespace CCXT.Collector.Upbit.Public
         /// <summary>
         ///
         /// </summary>
-        public string low52wDate
+        public string? low52wDate
         {
             get;
             set;
@@ -254,7 +254,7 @@ namespace CCXT.Collector.Upbit.Public
         /// <summary>
         ///
         /// </summary>
-        public string provider
+        public string? provider
         {
             get;
             set;

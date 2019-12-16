@@ -14,7 +14,7 @@ namespace CCXT.Collector.BitMEX.Public
         /// string symbol of the market ('BTCUSD', 'ETHBTC', ...)
         /// </summary>
         [JsonProperty(PropertyName = "symbol")]
-        public override string symbol
+        public override string? symbol
         {
             get;
             set;

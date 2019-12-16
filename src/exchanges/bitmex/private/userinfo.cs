@@ -46,7 +46,7 @@ namespace CCXT.Collector.BitMEX.Private
         /// <summary>
         ///
         /// </summary>
-        public string colorTheme
+        public string? colorTheme
         {
             get; set;
         }
@@ -54,7 +54,7 @@ namespace CCXT.Collector.BitMEX.Private
         /// <summary>
         ///
         /// </summary>
-        public string currency
+        public string? currency
         {
             get; set;
         }
@@ -126,7 +126,7 @@ namespace CCXT.Collector.BitMEX.Private
         /// <summary>
         ///
         /// </summary>
-        public string locale
+        public string? locale
         {
             get; set;
         }
@@ -151,7 +151,7 @@ namespace CCXT.Collector.BitMEX.Private
         /// <summary>
         ///
         /// </summary>
-        public string orderBookType
+        public string? orderBookType
         {
             get; set;
         }
@@ -207,7 +207,7 @@ namespace CCXT.Collector.BitMEX.Private
         /// <summary>
         ///
         /// </summary>
-        public string tickerGroup
+        public string? tickerGroup
         {
             get; set;
         }
@@ -223,7 +223,7 @@ namespace CCXT.Collector.BitMEX.Private
         /// <summary>
         ///
         /// </summary>
-        public string tradeLayout
+        public string? tradeLayout
         {
             get; set;
         }
@@ -237,7 +237,7 @@ namespace CCXT.Collector.BitMEX.Private
         /// <summary>
         ///
         /// </summary>
-        string id
+        string? id
         {
             get;
             set;
@@ -246,7 +246,7 @@ namespace CCXT.Collector.BitMEX.Private
         /// <summary>
         ///
         /// </summary>
-        string ownerId
+        string? ownerId
         {
             get;
             set;
@@ -255,7 +255,7 @@ namespace CCXT.Collector.BitMEX.Private
         /// <summary>
         ///
         /// </summary>
-        string firstName
+        string? firstName
         {
             get;
             set;
@@ -264,7 +264,7 @@ namespace CCXT.Collector.BitMEX.Private
         /// <summary>
         ///
         /// </summary>
-        string lastName
+        string? lastName
         {
             get;
             set;
@@ -273,7 +273,7 @@ namespace CCXT.Collector.BitMEX.Private
         /// <summary>
         ///
         /// </summary>
-        string userName
+        string? userName
         {
             get;
             set;
@@ -282,7 +282,7 @@ namespace CCXT.Collector.BitMEX.Private
         /// <summary>
         ///
         /// </summary>
-        string email
+        string? email
         {
             get;
             set;
@@ -291,7 +291,7 @@ namespace CCXT.Collector.BitMEX.Private
         /// <summary>
         ///
         /// </summary>
-        string phone
+        string? phone
         {
             get;
             set;
@@ -336,7 +336,7 @@ namespace CCXT.Collector.BitMEX.Private
         /// <summary>
         ///
         /// </summary>
-        string TFAEnabled
+        string? TFAEnabled
         {
             get;
             set;
@@ -345,7 +345,7 @@ namespace CCXT.Collector.BitMEX.Private
         /// <summary>
         ///
         /// </summary>
-        string affiliateId
+        string? affiliateId
         {
             get;
             set;
@@ -354,7 +354,7 @@ namespace CCXT.Collector.BitMEX.Private
         /// <summary>
         ///
         /// </summary>
-        string pgpPubKey
+        string? pgpPubKey
         {
             get;
             set;
@@ -363,7 +363,7 @@ namespace CCXT.Collector.BitMEX.Private
         /// <summary>
         ///
         /// </summary>
-        string country
+        string? country
         {
             get;
             set;
@@ -372,7 +372,7 @@ namespace CCXT.Collector.BitMEX.Private
         /// <summary>
         ///
         /// </summary>
-        string geoipCountry
+        string? geoipCountry
         {
             get;
             set;
@@ -381,7 +381,7 @@ namespace CCXT.Collector.BitMEX.Private
         /// <summary>
         ///
         /// </summary>
-        string geoipRegion
+        string? geoipRegion
         {
             get;
             set;
@@ -390,7 +390,7 @@ namespace CCXT.Collector.BitMEX.Private
         /// <summary>
         ///
         /// </summary>
-        string typ
+        string? typ
         {
             get;
             set;
@@ -423,7 +423,7 @@ namespace CCXT.Collector.BitMEX.Private
         /// <summary>
         ///
         /// </summary>
-        public string id
+        public string? id
         {
             get;
             set;
@@ -432,7 +432,7 @@ namespace CCXT.Collector.BitMEX.Private
         /// <summary>
         ///
         /// </summary>
-        public string ownerId
+        public string? ownerId
         {
             get;
             set;
@@ -441,7 +441,7 @@ namespace CCXT.Collector.BitMEX.Private
         /// <summary>
         ///
         /// </summary>
-        public string firstName
+        public string? firstName
         {
             get;
             set;
@@ -450,7 +450,7 @@ namespace CCXT.Collector.BitMEX.Private
         /// <summary>
         ///
         /// </summary>
-        public string lastName
+        public string? lastName
         {
             get;
             set;
@@ -459,7 +459,7 @@ namespace CCXT.Collector.BitMEX.Private
         /// <summary>
         ///
         /// </summary>
-        public string userName
+        public string? userName
         {
             get;
             set;
@@ -468,7 +468,7 @@ namespace CCXT.Collector.BitMEX.Private
         /// <summary>
         ///
         /// </summary>
-        public string email
+        public string? email
         {
             get;
             set;
@@ -477,7 +477,7 @@ namespace CCXT.Collector.BitMEX.Private
         /// <summary>
         ///
         /// </summary>
-        public string phone
+        public string? phone
         {
             get;
             set;
@@ -522,7 +522,7 @@ namespace CCXT.Collector.BitMEX.Private
         /// <summary>
         ///
         /// </summary>
-        public string TFAEnabled
+        public string? TFAEnabled
         {
             get;
             set;
@@ -531,7 +531,7 @@ namespace CCXT.Collector.BitMEX.Private
         /// <summary>
         ///
         /// </summary>
-        public string affiliateId
+        public string? affiliateId
         {
             get;
             set;
@@ -540,7 +540,7 @@ namespace CCXT.Collector.BitMEX.Private
         /// <summary>
         ///
         /// </summary>
-        public string pgpPubKey
+        public string? pgpPubKey
         {
             get;
             set;
@@ -549,7 +549,7 @@ namespace CCXT.Collector.BitMEX.Private
         /// <summary>
         ///
         /// </summary>
-        public string country
+        public string? country
         {
             get;
             set;
@@ -558,7 +558,7 @@ namespace CCXT.Collector.BitMEX.Private
         /// <summary>
         ///
         /// </summary>
-        public string geoipCountry
+        public string? geoipCountry
         {
             get;
             set;
@@ -567,7 +567,7 @@ namespace CCXT.Collector.BitMEX.Private
         /// <summary>
         ///
         /// </summary>
-        public string geoipRegion
+        public string? geoipRegion
         {
             get;
             set;
@@ -576,7 +576,7 @@ namespace CCXT.Collector.BitMEX.Private
         /// <summary>
         ///
         /// </summary>
-        public string typ
+        public string? typ
         {
             get;
             set;
@@ -606,12 +606,12 @@ namespace CCXT.Collector.BitMEX.Private
     /// </summary>
     public interface IUserInfo : IApiResult<IUserInfoItem>
     {
-#if DEBUG
+#if RAWJSON
 
         /// <summary>
         ///
         /// </summary>
-        string rawJson
+        string? rawJson
         {
             get;
             set;
@@ -633,13 +633,13 @@ namespace CCXT.Collector.BitMEX.Private
             this.result = new BUserInfoItem();
         }
 
-#if DEBUG
+#if RAWJSON
 
         /// <summary>
         ///
         /// </summary>
         [JsonIgnore]
-        public virtual string rawJson
+        public virtual string? rawJson
         {
             get;
             set;

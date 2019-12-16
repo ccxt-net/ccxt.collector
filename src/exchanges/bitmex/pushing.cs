@@ -30,7 +30,7 @@ namespace CCXT.Collector.BitMEX
             }
         }
 
-        private static ConcurrentQueue<QMessage> __command_queue = null;
+        private static ConcurrentQueue<QMessage>? __command_queue = null;
 
         /// <summary>
         ///
@@ -290,7 +290,7 @@ namespace CCXT.Collector.BitMEX
                                     }
 
                                     var _selector = _packet[3].ToObject<WsData>();
-                                    if (String.IsNullOrEmpty(_selector.table) || String.IsNullOrEmpty(_selector.action))
+                                    if (_selector == null || String.IsNullOrEmpty(_selector.table) || String.IsNullOrEmpty(_selector.action))
                                     {
                                         BMLogger.WriteO(_json);
                                         break;

@@ -68,7 +68,7 @@ namespace CCXT.Collector.BitMEX.Public
                 var _params = publicClient.MergeParamsAndArgs(args);
 
                 var _json_value = await publicClient.CallApiGet1Async("/api/v1/instrument/active", _params);
-#if DEBUG
+#if RAWJSON
                 _result.rawJson = _json_value.Content;
 #endif
                 var _json_result = publicClient.GetResponseMessage(_json_value.Response);
@@ -78,7 +78,7 @@ namespace CCXT.Collector.BitMEX.Public
                     foreach (var _m in _markets)
                     {
                         _m.active = _m.state != "Unlisted";
-                        if (_m.active == false)
+                        if (_m.active == false || _m.symbol == null)
                             continue;
 
                         var _base_id = _m.underlying;
@@ -206,36 +206,39 @@ namespace CCXT.Collector.BitMEX.Public
             }
 
             var _response = await publicClient.CallApiGet2Async("/api/v1/trade/bucketed", _params);
-#if DEBUG
+            if (_response != null)
+            {
+#if RAWJSON
             _result.rawJson = _response.Content;
 #endif
-            if (_response.IsSuccessful == true)
-            {
-                var _tickers = publicClient.DeserializeObject<List<BTickerItem>>(_response.Content);
+                if (_response.IsSuccessful == true)
+                {
+                    var _tickers = publicClient.DeserializeObject<List<BTickerItem>>(_response.Content);
 
-                _result.result.AddRange(
-                     _tickers
-                         .Select(x => new OHLCVItem
-                         {
-                             timestamp = x.timestamp,
-                             openPrice = x.openPrice,
-                             highPrice = x.highPrice,
-                             lowPrice = x.lowPrice,
-                             closePrice = x.closePrice,
-                             amount = x.quoteVolume,
-                             vwap = x.vwap,
-                             count = x.trades,
-                             volume = x.baseVolume
-                         })
-                         .OrderByDescending(o => o.timestamp)
-                     );
+                    _result.result.AddRange(
+                         _tickers
+                             .Select(x => new OHLCVItem
+                             {
+                                 timestamp = x.timestamp,
+                                 openPrice = x.openPrice,
+                                 highPrice = x.highPrice,
+                                 lowPrice = x.lowPrice,
+                                 closePrice = x.closePrice,
+                                 amount = x.quoteVolume,
+                                 vwap = x.vwap,
+                                 count = x.trades,
+                                 volume = x.baseVolume
+                             })
+                             .OrderByDescending(o => o.timestamp)
+                         );
 
-                _result.SetSuccess();
-            }
-            else
-            {
-                var _message = publicClient.GetResponseMessage(_response);
-                _result.SetFailure(_message.message);
+                    _result.SetSuccess();
+                }
+                else
+                {
+                    var _message = publicClient.GetResponseMessage(_response);
+                    _result.SetFailure(_message.message);
+                }
             }
 
             return _result;
@@ -263,28 +266,31 @@ namespace CCXT.Collector.BitMEX.Public
             }
 
             var _response = await publicClient.CallApiGet2Async("/api/v1/trade", _params);
-#if DEBUG
+            if (_response != null)
+            {
+#if RAWJSON
             _result.rawJson = _response.Content;
 #endif
-            if (_response.IsSuccessful == true)
-            {
-                var _orders = publicClient.DeserializeObject<List<BCompleteOrderItem>>(_response.Content);
-
-                foreach (var _o in _orders)
+                if (_response.IsSuccessful == true)
                 {
-                    _o.orderType = OrderType.Limit;
-                    _o.fillType = FillType.Fill;
+                    var _orders = publicClient.DeserializeObject<List<BCompleteOrderItem>>(_response.Content);
 
-                    _o.amount = _o.quantity * _o.price;
-                    _result.result.Add(_o);
+                    foreach (var _o in _orders)
+                    {
+                        _o.orderType = OrderType.Limit;
+                        _o.fillType = FillType.Fill;
+
+                        _o.amount = _o.quantity * _o.price;
+                        _result.result.Add(_o);
+                    }
+
+                    _result.SetSuccess();
                 }
-
-                _result.SetSuccess();
-            }
-            else
-            {
-                var _message = publicClient.GetResponseMessage(_response);
-                _result.SetFailure(_message.message);
+                else
+                {
+                    var _message = publicClient.GetResponseMessage(_response);
+                    _result.SetFailure(_message.message);
+                }
             }
 
             return _result;
@@ -307,39 +313,42 @@ namespace CCXT.Collector.BitMEX.Public
             }
 
             var _response = await publicClient.CallApiGet2Async("/api/v1/orderBook/L2", _params);
-#if DEBUG
+            if (_response != null)
+            {
+#if RAWJSON
             _result.rawJson = _response.Content;
 #endif
-            if (_response.IsSuccessful == true)
-            {
-                var _orderbooks = publicClient.DeserializeObject<List<BOrderBookItem>>(_response.Content);
-                if (_orderbooks != null)
+                if (_response.IsSuccessful == true)
                 {
-                    _result.result.asks = new List<OrderBookItem>();
-                    _result.result.bids = new List<OrderBookItem>();
-
-                    foreach (var _o in _orderbooks)
+                    var _orderbooks = publicClient.DeserializeObject<List<BOrderBookItem>>(_response.Content);
+                    if (_orderbooks != null)
                     {
-                        _o.amount = _o.quantity * _o.price;
-                        _o.count = 1;
+                        _result.result.asks = new List<OrderBookItem>();
+                        _result.result.bids = new List<OrderBookItem>();
 
-                        if (_o.sideType == SideType.Ask)
-                            _result.result.asks.Add(_o);
-                        else
-                            _result.result.bids.Add(_o);
+                        foreach (var _o in _orderbooks)
+                        {
+                            _o.amount = _o.quantity * _o.price;
+                            _o.count = 1;
+
+                            if (_o.sideType == SideType.Ask)
+                                _result.result.asks.Add(_o);
+                            else
+                                _result.result.bids.Add(_o);
+                        }
+
+                        _result.result.symbol = symbol;
+                        _result.result.timestamp = CUnixTime.NowMilli;
+                        _result.result.nonce = CUnixTime.Now;
+
+                        _result.SetSuccess();
                     }
-
-                    _result.result.symbol = symbol;
-                    _result.result.timestamp = CUnixTime.NowMilli;
-                    _result.result.nonce = CUnixTime.Now;
-
-                    _result.SetSuccess();
                 }
-            }
-            else
-            {
-                var _message = publicClient.GetResponseMessage(_response);
-                _result.SetFailure(_message.message);
+                else
+                {
+                    var _message = publicClient.GetResponseMessage(_response);
+                    _result.SetFailure(_message.message);
+                }
             }
 
             return _result;

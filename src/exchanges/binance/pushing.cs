@@ -27,7 +27,7 @@ namespace CCXT.Collector.Binance
     /// </summary>
     public partial class Pushing
     {
-        private static ConcurrentQueue<QMessage> __command_queue = null;
+        private static ConcurrentQueue<QMessage>? __command_queue = null;
 
         /// <summary>
         ///

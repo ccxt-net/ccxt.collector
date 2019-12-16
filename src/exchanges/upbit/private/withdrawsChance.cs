@@ -359,11 +359,11 @@ namespace CCXT.Collector.Upbit.Private
     /// </summary>
     public interface IMyWithdrawsChance : IApiResult<IWithdrawsChance>
     {
-#if DEBUG
+#if RAWJSON
         /// <summary>
         ///
         /// </summary>
-        string rawJson
+        string? rawJson
         {
             get;
             set;
@@ -384,12 +384,12 @@ namespace CCXT.Collector.Upbit.Private
             this.result = new WithdrawsChance();
         }
 
-#if DEBUG
+#if RAWJSON
         /// <summary>
         ///
         /// </summary>
         [JsonIgnore]
-        public virtual string rawJson
+        public virtual string? rawJson
         {
             get;
             set;

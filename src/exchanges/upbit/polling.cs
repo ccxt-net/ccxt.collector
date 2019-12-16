@@ -11,7 +11,7 @@ namespace CCXT.Collector.Upbit
 {
     public class Polling : KRestClient
     {
-        private CCXT.Collector.Upbit.Public.PublicApi __public_api = null;
+        private CCXT.Collector.Upbit.Public.PublicApi? __public_api = null;
         private CCXT.Collector.Upbit.Public.PublicApi publicApi
         {
             get
@@ -46,30 +46,33 @@ namespace CCXT.Collector.Upbit
 
                         // trades
                         var _t_json_value = await RestExecuteAsync(_client, _t_request);
-                        if (_t_json_value.IsSuccessful && _t_json_value.Content[0] == '[')
+                        if (_t_json_value != null)
                         {
-                            Processing.SendReceiveQ(new QMessage
+                            if (_t_json_value.IsSuccessful && _t_json_value.Content[0] == '[')
                             {
-                                command = "AP",
-                                exchange = UPLogger.exchange_name,
-                                symbol = symbol,
-                                stream = "trade",
-                                action = "polling",
-                                payload = _t_json_value.Content
-                            });
-                        }
-                        else
-                        {
-                            var _http_status = (int)_t_json_value.StatusCode;
-                            if (_http_status == 403 || _http_status == 418)// || _http_status == 429)
+                                Processing.SendReceiveQ(new QMessage
+                                {
+                                    command = "AP",
+                                    exchange = UPLogger.exchange_name,
+                                    symbol = symbol,
+                                    stream = "trade",
+                                    action = "polling",
+                                    payload = _t_json_value.Content
+                                });
+                            }
+                            else
                             {
-                                UPLogger.WriteQ($"request-limit: symbol => {symbol}, https_status => {_http_status}");
+                                var _http_status = (int)_t_json_value.StatusCode;
+                                if (_http_status == 403 || _http_status == 418)// || _http_status == 429)
+                                {
+                                    UPLogger.WriteQ($"request-limit: symbol => {symbol}, https_status => {_http_status}");
 
-                                var _waiting = tokenSource.Token.WaitHandle.WaitOne(0);
-                                if (_waiting == true)
-                                    break;
+                                    var _waiting = tokenSource.Token.WaitHandle.WaitOne(0);
+                                    if (_waiting == true)
+                                        break;
 
-                                await Task.Delay(1000);     // waiting 1 second
+                                    await Task.Delay(1000);     // waiting 1 second
+                                }
                             }
                         }
                     }
@@ -113,30 +116,33 @@ namespace CCXT.Collector.Upbit
 
                         // orderbook
                         var _o_json_value = await RestExecuteAsync(_client, _o_request);
-                        if (_o_json_value.IsSuccessful && _o_json_value.Content[0] == '[')
+                        if (_o_json_value != null)
                         {
-                            Processing.SendReceiveQ(new QMessage
+                            if (_o_json_value.IsSuccessful && _o_json_value.Content[0] == '[')
                             {
-                                command = "AP",
-                                exchange = UPLogger.exchange_name,
-                                symbol = symbol,
-                                stream = "orderbook",
-                                action = "polling",
-                                payload = _o_json_value.Content
-                            });
-                        }
-                        else
-                        {
-                            var _http_status = (int)_o_json_value.StatusCode;
-                            if (_http_status == 403 || _http_status == 418)// || _http_status == 429)
+                                Processing.SendReceiveQ(new QMessage
+                                {
+                                    command = "AP",
+                                    exchange = UPLogger.exchange_name,
+                                    symbol = symbol,
+                                    stream = "orderbook",
+                                    action = "polling",
+                                    payload = _o_json_value.Content
+                                });
+                            }
+                            else
                             {
-                                UPLogger.WriteQ($"request-limit: symbol => {symbol}, https_status => {_http_status}");
+                                var _http_status = (int)_o_json_value.StatusCode;
+                                if (_http_status == 403 || _http_status == 418)// || _http_status == 429)
+                                {
+                                    UPLogger.WriteQ($"request-limit: symbol => {symbol}, https_status => {_http_status}");
 
-                                var _waiting = tokenSource.Token.WaitHandle.WaitOne(0);
-                                if (_waiting == true)
-                                    break;
+                                    var _waiting = tokenSource.Token.WaitHandle.WaitOne(0);
+                                    if (_waiting == true)
+                                        break;
 
-                                await Task.Delay(1000);     // waiting 1 second
+                                    await Task.Delay(1000);     // waiting 1 second
+                                }
                             }
                         }
                     }

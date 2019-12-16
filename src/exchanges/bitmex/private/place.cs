@@ -15,7 +15,7 @@ namespace CCXT.Collector.BitMEX.Private
         ///
         /// </summary>
         [JsonProperty(PropertyName = "orderID")]
-        public override string orderId
+        public override string? orderId
         {
             get;
             set;
@@ -25,7 +25,7 @@ namespace CCXT.Collector.BitMEX.Private
         ///
         /// </summary>
         [JsonProperty(PropertyName = "clOrdID")]
-        public string clientOrderId
+        public string? clientOrderId
         {
             get;
             set;
@@ -34,7 +34,7 @@ namespace CCXT.Collector.BitMEX.Private
         /// <summary>
         ///
         /// </summary>
-        public string clOrdLinkID
+        public string? clOrdLinkID
         {
             get;
             set;
@@ -53,7 +53,7 @@ namespace CCXT.Collector.BitMEX.Private
         ///
         /// </summary>
         [JsonProperty(PropertyName = "symbol")]
-        public override string symbol
+        public override string? symbol
         {
             get;
             set;
@@ -63,7 +63,7 @@ namespace CCXT.Collector.BitMEX.Private
         ///
         /// </summary>
         [JsonProperty(PropertyName = "side")]
-        private string sideValue
+        private string? sideValue
         {
             set
             {
@@ -129,7 +129,7 @@ namespace CCXT.Collector.BitMEX.Private
         /// <summary>
         ///
         /// </summary>
-        public string pegPriceType
+        public string? pegPriceType
         {
             get;
             set;
@@ -138,7 +138,7 @@ namespace CCXT.Collector.BitMEX.Private
         /// <summary>
         ///
         /// </summary>
-        public string currency
+        public string? currency
         {
             get;
             set;
@@ -147,7 +147,7 @@ namespace CCXT.Collector.BitMEX.Private
         /// <summary>
         ///
         /// </summary>
-        public string settlCurrency
+        public string? settlCurrency
         {
             get;
             set;
@@ -157,7 +157,7 @@ namespace CCXT.Collector.BitMEX.Private
         ///
         /// </summary>
         [JsonProperty(PropertyName = "ordType")]
-        private string orderValue
+        private string? orderValue
         {
             set
             {
@@ -169,7 +169,7 @@ namespace CCXT.Collector.BitMEX.Private
         ///
         /// </summary>
         [JsonProperty(PropertyName = "timeInForce")]
-        public string timeInForce
+        public string? timeInForce
         {
             get;
             set;
@@ -178,7 +178,7 @@ namespace CCXT.Collector.BitMEX.Private
         /// <summary>
         ///
         /// </summary>
-        public string execInst
+        public string? execInst
         {
             get;
             set;
@@ -187,7 +187,7 @@ namespace CCXT.Collector.BitMEX.Private
         /// <summary>
         ///
         /// </summary>
-        public string contingencyType
+        public string? contingencyType
         {
             get;
             set;
@@ -196,7 +196,7 @@ namespace CCXT.Collector.BitMEX.Private
         /// <summary>
         ///
         /// </summary>
-        public string exDestination
+        public string? exDestination
         {
             get;
             set;
@@ -206,7 +206,7 @@ namespace CCXT.Collector.BitMEX.Private
         ///
         /// </summary>
         [JsonProperty(PropertyName = "ordStatus")]
-        private string statusValue
+        private string? statusValue
         {
             set
             {
@@ -217,7 +217,7 @@ namespace CCXT.Collector.BitMEX.Private
         /// <summary>
         ///
         /// </summary>
-        public string triggered
+        public string? triggered
         {
             get;
             set;
@@ -235,7 +235,7 @@ namespace CCXT.Collector.BitMEX.Private
         /// <summary>
         ///
         /// </summary>
-        public string ordRejReason
+        public string? ordRejReason
         {
             get;
             set;
@@ -290,7 +290,7 @@ namespace CCXT.Collector.BitMEX.Private
         /// <summary>
         ///
         /// </summary>
-        public string multiLegReportingType
+        public string? multiLegReportingType
         {
             get;
             set;
@@ -299,7 +299,7 @@ namespace CCXT.Collector.BitMEX.Private
         /// <summary>
         ///
         /// </summary>
-        public string text
+        public string? text
         {
             get;
             set;

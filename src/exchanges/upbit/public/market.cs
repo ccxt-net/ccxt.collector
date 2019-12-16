@@ -12,7 +12,7 @@ namespace CCXT.Collector.Upbit.Public
         ///
         /// </summary>
         [JsonProperty(PropertyName = "market")]
-        public override string symbol
+        public override string? symbol
         {
             get;
             set;
@@ -22,7 +22,7 @@ namespace CCXT.Collector.Upbit.Public
         ///
         /// </summary>
         [JsonProperty(PropertyName = "english_name")]
-        public override string baseLongName
+        public override string? baseLongName
         {
             get;
             set;

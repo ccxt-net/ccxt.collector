@@ -12,7 +12,7 @@ namespace CCXT.Collector.BitMEX.Private
         ///
         /// </summary>
         [JsonProperty(PropertyName = "currency")]
-        public override string currency
+        public override string? currency
         {
             get;
             set;

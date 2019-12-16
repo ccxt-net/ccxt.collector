@@ -50,7 +50,7 @@ namespace CCXT.Collector.Binance.Public
                 var _params = publicClient.MergeParamsAndArgs(args);
 
                 var _json_value = await publicClient.CallApiGet1Async("/exchangeInfo", _params);
-#if DEBUG
+#if RAWJSON
                 _result.rawJson = _json_value.Content;
 #endif
                 var _json_result = publicClient.GetResponseMessage(_json_value.Response);
@@ -61,14 +61,15 @@ namespace CCXT.Collector.Binance.Public
                     var _symbols = _exchange_info["symbols"].ToObject<JArray>();
                     foreach (var _market in _symbols)
                     {
-                        var _symbol = _market["symbol"].ToString();
+                        var _symbol = _market["symbol"]?.ToString();
                         if (_symbol == "123456")     // "123456" is a "test symbol/market"
                             continue;
 
-                        var _base_id = _market["baseAsset"].ToString();
-                        var _quote_id = _market["quoteAsset"].ToString();
-                        var _base_name = publicClient.ExchangeInfo.GetCommonCurrencyName(_base_id);
-                        var _quote_name = publicClient.ExchangeInfo.GetCommonCurrencyName(_quote_id);
+                        var _base_id = _market["baseAsset"]?.ToString();
+                        var _quote_id = _market["quoteAsset"]?.ToString();
+
+                        var _base_name = publicClient.ExchangeInfo.GetCommonCurrencyName(_base_id ?? "");
+                        var _quote_name = publicClient.ExchangeInfo.GetCommonCurrencyName(_quote_id ?? "");
                         var _market_id = _base_name + "/" + _quote_name;
 
                         var _precision = new MarketPrecision
@@ -104,9 +105,9 @@ namespace CCXT.Collector.Binance.Public
                         {
                             marketId = _market_id,
 
-                            symbol = _symbol,
-                            baseId = _base_id,
-                            quoteId = _quote_id,
+                            symbol = _symbol ?? "",
+                            baseId = _base_id ?? "",
+                            quoteId = _quote_id ?? "",
                             baseName = _base_name,
                             quoteName = _quote_name,
 
@@ -117,7 +118,8 @@ namespace CCXT.Collector.Binance.Public
                             limits = _limits
                         };
 
-                        JToken _filters = _market["filters"];
+                        JToken? _filters = _market["filters"];
+                        if (_filters != null)
                         {
                             var _price_filter = _filters.SingleOrDefault(f => f["filterType"]?.ToString() == "PRICE_FILTER");
                             if (_price_filter != null)

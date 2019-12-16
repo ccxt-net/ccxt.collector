@@ -11,7 +11,7 @@ namespace CCXT.Collector.BitMEX
 {
     public class Polling : KRestClient
     {
-        private CCXT.Collector.BitMEX.Public.PublicApi __public_api = null;
+        private CCXT.Collector.BitMEX.Public.PublicApi? __public_api = null;
         private CCXT.Collector.BitMEX.Public.PublicApi publicApi
         {
             get

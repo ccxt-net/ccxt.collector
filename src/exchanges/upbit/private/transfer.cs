@@ -27,7 +27,7 @@ namespace CCXT.Collector.Upbit.Private
         /// 출금의 고유 아이디
         /// </summary>
         [JsonProperty(PropertyName = "uuid")]
-        public override string transferId
+        public override string? transferId
         {
             get;
             set;
@@ -36,7 +36,7 @@ namespace CCXT.Collector.Upbit.Private
         /// <summary>
         /// 화폐를 의미하는 영문 대문자 코드
         /// </summary>
-        public override string currency
+        public override string? currency
         {
             get;
             set;
@@ -46,7 +46,7 @@ namespace CCXT.Collector.Upbit.Private
         /// 출금의 트랜잭션 아이디
         /// </summary>
         [JsonProperty(PropertyName = "txid")]
-        public override string transactionId
+        public override string? transactionId
         {
             get;
             set;

@@ -15,7 +15,7 @@ namespace CCXT.Collector.Library.Private
         /// <summary>
         ///
         /// </summary>
-        string orderId
+        string? orderId
         {
             get;
             set;
@@ -24,7 +24,7 @@ namespace CCXT.Collector.Library.Private
         /// <summary>
         ///
         /// </summary>
-        string symbol
+        string? symbol
         {
             get;
             set;
@@ -85,9 +85,9 @@ namespace CCXT.Collector.Library.Private
         }
 
         /// <summary>
-        /// ISO 8601 datetime string with milliseconds
+        /// ISO 8601 datetime string? with milliseconds
         /// </summary>
-        string datetime
+        string? datetime
         {
             get;
         }
@@ -182,7 +182,7 @@ namespace CCXT.Collector.Library.Private
         /// <summary>
         ///
         /// </summary>
-        public string orderId
+        public string? orderId
         {
             get;
             set;
@@ -191,7 +191,7 @@ namespace CCXT.Collector.Library.Private
         /// <summary>
         ///
         /// </summary>
-        public string symbol
+        public string? symbol
         {
             get;
             set;
@@ -256,9 +256,9 @@ namespace CCXT.Collector.Library.Private
         }
 
         /// <summary>
-        /// ISO 8601 datetime string with milliseconds
+        /// ISO 8601 datetime string? with milliseconds
         /// </summary>
-        public string datetime
+        public string? datetime
         {
             get
             {
@@ -356,7 +356,7 @@ namespace CCXT.Collector.Library.Private
         /// <summary>
         ///
         /// </summary>
-        string exchange
+        string? exchange
         {
             get;
             set;
@@ -365,7 +365,7 @@ namespace CCXT.Collector.Library.Private
         /// <summary>
         /// S, R
         /// </summary>
-        string stream
+        string? stream
         {
             get;
             set;
@@ -374,7 +374,7 @@ namespace CCXT.Collector.Library.Private
         /// <summary>
         ///
         /// </summary>
-        string symbol
+        string? symbol
         {
             get;
             set;
@@ -383,7 +383,7 @@ namespace CCXT.Collector.Library.Private
         /// <summary>
         ///
         /// </summary>
-        string action
+        string? action
         {
             get;
             set;
@@ -397,11 +397,11 @@ namespace CCXT.Collector.Library.Private
             get;
             set;
         }
-#if DEBUG
+#if RAWJSON
         /// <summary>
         ///
         /// </summary>
-        string rawJson
+        string? rawJson
         {
             get;
             set;
@@ -428,7 +428,7 @@ namespace CCXT.Collector.Library.Private
         /// error or success message
         /// </summary>
         [JsonIgnore]
-        public override string message
+        public override string? message
         {
             get;
             set;
@@ -467,7 +467,7 @@ namespace CCXT.Collector.Library.Private
         /// <summary>
         ///
         /// </summary>
-        public string exchange
+        public string? exchange
         {
             get;
             set;
@@ -476,7 +476,7 @@ namespace CCXT.Collector.Library.Private
         /// <summary>
         /// S, R
         /// </summary>
-        public string stream
+        public string? stream
         {
             get;
             set;
@@ -485,7 +485,7 @@ namespace CCXT.Collector.Library.Private
         /// <summary>
         ///
         /// </summary>
-        public string symbol
+        public string? symbol
         {
             get;
             set;
@@ -494,7 +494,7 @@ namespace CCXT.Collector.Library.Private
         /// <summary>
         ///
         /// </summary>
-        public string action
+        public string? action
         {
             get;
             set;
@@ -508,7 +508,7 @@ namespace CCXT.Collector.Library.Private
             get;
             set;
         }
-#if DEBUG
+#if RAWJSON
         /// <summary>
         ///
         /// </summary>

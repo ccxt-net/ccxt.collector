@@ -76,7 +76,7 @@ namespace CCXT.Collector.Library.Public
             get;
             set;
         }
-#if DEBUG
+#if RAWJSON
         /// <summary>
         ///
         /// </summary>

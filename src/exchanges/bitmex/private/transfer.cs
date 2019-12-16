@@ -15,7 +15,7 @@ namespace CCXT.Collector.BitMEX.Private
         ///
         /// </summary>
         [JsonProperty(PropertyName = "transactID")]
-        public override string transferId
+        public override string? transferId
         {
             get;
             set;
@@ -25,7 +25,7 @@ namespace CCXT.Collector.BitMEX.Private
         ///
         /// </summary>
         [JsonProperty(PropertyName = "tx")]
-        public override string transactionId
+        public override string? transactionId
         {
             get;
             set;
@@ -34,7 +34,7 @@ namespace CCXT.Collector.BitMEX.Private
         /// <summary>
         ///
         /// </summary>
-        public string account
+        public string? account
         {
             get;
             set;
@@ -43,7 +43,7 @@ namespace CCXT.Collector.BitMEX.Private
         /// <summary>
         ///
         /// </summary>
-        public override string currency
+        public override string? currency
         {
             get;
             set;
@@ -52,7 +52,7 @@ namespace CCXT.Collector.BitMEX.Private
         /// <summary>
         ///
         /// </summary>
-        public string transactType
+        public string? transactType
         {
             set
             {
@@ -64,7 +64,7 @@ namespace CCXT.Collector.BitMEX.Private
         ///
         /// </summary>
         [JsonProperty(PropertyName = "transactStatus")]
-        public string transactStatus
+        public string? transactStatus
         {
             get;
             set;
@@ -74,7 +74,7 @@ namespace CCXT.Collector.BitMEX.Private
         ///
         /// </summary>
         [JsonProperty(PropertyName = "address")]
-        public override string toAddress
+        public override string? toAddress
         {
             get;
             set;
@@ -123,7 +123,7 @@ namespace CCXT.Collector.BitMEX.Private
         /// <summary>
         ///
         /// </summary>
-        public string text
+        public string? text
         {
             get;
             set;
