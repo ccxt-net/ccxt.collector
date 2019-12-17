@@ -71,7 +71,7 @@ namespace CCXT.Collector.BitMEX
                         {
                             if (_message.stream == "order")
                             {
-                                var _w_orders = JsonConvert.DeserializeObject<List<BMyOrderItem>>(_message.payload);
+                                var _w_orders = JsonConvert.DeserializeObject<List<BMyOrderItem>>(_message.payload ?? "");
 
                                 var _s_order = new SMyOrders
                                 {
@@ -116,7 +116,7 @@ namespace CCXT.Collector.BitMEX
                             }
                             else if (_message.stream == "trade")
                             {
-                                var _w_trades = JsonConvert.DeserializeObject<List<BCompleteOrderItem>>(_message.payload);
+                                var _w_trades = JsonConvert.DeserializeObject<List<BCompleteOrderItem>>(_message.payload ?? "");
 
                                 var _s_trade = new SCompleteOrders
                                 {
@@ -147,7 +147,7 @@ namespace CCXT.Collector.BitMEX
                             }
                             else if (_message.stream == "orderbook")
                             {
-                                var _w_orderbooks = JsonConvert.DeserializeObject<List<BOrderBookItem>>(_message.payload);
+                                var _w_orderbooks = JsonConvert.DeserializeObject<List<BOrderBookItem>>(_message.payload ?? "");
 
                                 var _timestamp = CUnixTime.NowMilli;
                                 var _asks = _w_orderbooks.Where(o => o.sideType == SideType.Ask);
@@ -199,7 +199,7 @@ namespace CCXT.Collector.BitMEX
                         {
                             if (_message.stream == "order")
                             {
-                                var _w_orders = JsonConvert.DeserializeObject<List<BMyOrderItem>>(_message.payload);
+                                var _w_orders = JsonConvert.DeserializeObject<List<BMyOrderItem>>(_message.payload ?? "");
 
                                 var _s_order = new SMyOrders
                                 {
@@ -244,7 +244,7 @@ namespace CCXT.Collector.BitMEX
                             }
                             else if (_message.stream == "trade")
                             {
-                                var _a_trades = JsonConvert.DeserializeObject<List<BCompleteOrderItem>>(_message.payload);
+                                var _a_trades = JsonConvert.DeserializeObject<List<BCompleteOrderItem>>(_message.payload ?? "");
 
                                 var _s_trade = new SCompleteOrders
                                 {
@@ -275,7 +275,7 @@ namespace CCXT.Collector.BitMEX
                             }
                             else if (_message.stream == "orderbook")
                             {
-                                var _a_orderbooks = JsonConvert.DeserializeObject<List<BOrderBookItem>>(_message.payload);
+                                var _a_orderbooks = JsonConvert.DeserializeObject<List<BOrderBookItem>>(_message.payload ?? "");
 
                                 var _timestamp = CUnixTime.NowMilli;
                                 var _asks = _a_orderbooks.Where(o => o.sideType == SideType.Ask);

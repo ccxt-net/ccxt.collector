@@ -19,7 +19,7 @@ namespace CCXT.Collector.BitMEX
         /// <summary>
         ///
         /// </summary>
-        public override string? DealerName { get; set; } = "BitMEX";
+        public override string DealerName { get; set; } = "BitMEX";
 
         /// <summary>
         ///

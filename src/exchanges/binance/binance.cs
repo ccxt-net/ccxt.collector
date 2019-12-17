@@ -18,7 +18,7 @@ namespace CCXT.Collector.Binance
         /// <summary>
         ///
         /// </summary>
-        public override string? DealerName { get; set; } = "Binance";
+        public override string DealerName { get; set; } = "Binance";
 
         /// <summary>
         ///

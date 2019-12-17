@@ -18,7 +18,7 @@ namespace CCXT.Collector.Upbit
         /// <summary>
         ///
         /// </summary>
-        public override string? DealerName { get; set; } = "Upbit";
+        public override string DealerName { get; set; } = "Upbit";
 
         /// <summary>
         ///

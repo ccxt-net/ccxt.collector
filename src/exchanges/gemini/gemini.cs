@@ -18,7 +18,7 @@ namespace CCXT.Collector.Gemini
         /// <summary>
         ///
         /// </summary>
-        public override string? DealerName { get; set; } = "Gemini";
+        public override string DealerName { get; set; } = "Gemini";
 
         /// <summary>
         ///

@@ -67,7 +67,7 @@ namespace CCXT.Collector.Bithumb
                         {
                             if (_message.stream == "trade")
                             {
-                                var _w_trade = JsonConvert.DeserializeObject<UWCompleteOrderItem>(_message.payload);
+                                var _w_trade = JsonConvert.DeserializeObject<UWCompleteOrderItem>(_message.payload ?? "");
 
                                 var _s_trade = new SCompleteOrders
                                 {
@@ -97,7 +97,7 @@ namespace CCXT.Collector.Bithumb
                             }
                             else if (_message.stream == "orderbook")
                             {
-                                var _w_orderbook = JsonConvert.DeserializeObject<UWOrderBook>(_message.payload);
+                                var _w_orderbook = JsonConvert.DeserializeObject<UWOrderBook>(_message.payload ?? "");
 
                                 var _s_orderbooks = new SOrderBooks
                                 {
@@ -126,7 +126,7 @@ namespace CCXT.Collector.Bithumb
                         {
                             if (_message.stream == "trade")
                             {
-                                var _a_trades = JsonConvert.DeserializeObject<List<UACompleteOrderItem>>(_message.payload);
+                                var _a_trades = JsonConvert.DeserializeObject<List<UACompleteOrderItem>>(_message.payload ?? "");
 
                                 var _s_trade = new SCompleteOrders
                                 {
@@ -157,7 +157,7 @@ namespace CCXT.Collector.Bithumb
                             }
                             else if (_message.stream == "orderbook")
                             {
-                                var _a_orderbooks = JsonConvert.DeserializeObject<List<UAOrderBook>>(_message.payload);
+                                var _a_orderbooks = JsonConvert.DeserializeObject<List<UAOrderBook>>(_message.payload ?? "");
 
                                 var _timestamp = _a_orderbooks.Max(o => o.timestamp);
                                 var _asks = _a_orderbooks[0].asks;
@@ -187,7 +187,7 @@ namespace CCXT.Collector.Bithumb
                             }
                             else if (_message.stream == "ticker")
                             {
-                                var _a_ticker_data = JsonConvert.DeserializeObject<List<UAOrderBook>>(_message.payload);
+                                var _a_ticker_data = JsonConvert.DeserializeObject<List<UAOrderBook>>(_message.payload ?? "");
 
                                 await publishTicker(new STickers
                                 {

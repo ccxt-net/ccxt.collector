@@ -18,7 +18,7 @@ namespace CCXT.Collector.ItBit
         /// <summary>
         ///
         /// </summary>
-        public override string? DealerName { get; set; } = "ItBit";
+        public override string DealerName { get; set; } = "ItBit";
 
         /// <summary>
         ///

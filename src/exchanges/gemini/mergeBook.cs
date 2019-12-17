@@ -23,8 +23,10 @@ namespace CCXT.Collector.Gemini
         {
             var _result = false;
 
-            SOrderBooks _qob;
+            if (cob.symbol != null)
             {
+                SOrderBooks _qob;
+
                 if (__qOrderBooks.TryGetValue(cob.symbol, out _qob) == true)
                 {
                     _qob.stream = cob.stream;
@@ -51,17 +53,20 @@ namespace CCXT.Collector.Gemini
         {
             var _result = false;
 
-            var _sqo = await createOrderbook(cob);
-            if (__qOrderBooks.TryAdd(cob.symbol, _sqo) == true)
+            if (cob.symbol != null)
             {
-                var _settings = GetSettings(cob.symbol);
+                var _sqo = await createOrderbook(cob);
+                if (__qOrderBooks.TryAdd(cob.symbol, _sqo) == true)
                 {
-                    _settings.last_orderbook_time = cob.result.timestamp;
-                    _settings.orderbook_count = 0;
-                }
+                    var _settings = GetSettings(cob.symbol);
+                    {
+                        _settings.last_orderbook_time = cob.result.timestamp;
+                        _settings.orderbook_count = 0;
+                    }
 
-                await snapshotOrderbook(cob.symbol);
-                _result = true;
+                    await snapshotOrderbook(cob.symbol);
+                    _result = true;
+                }
             }
 
             return _result;
@@ -310,15 +315,18 @@ namespace CCXT.Collector.Gemini
             if (KConfig.UsePublishTrade == true)
                 await publishTrading(cco);
 
-            SOrderBooks _qob;
-            if (__qOrderBooks.TryGetValue(cco.symbol, out _qob) == true)
+            if (cco.symbol != null)
             {
-                _qob.stream = cco.stream;
-
-                if (cco.result != null)
+                SOrderBooks _qob;
+                if (__qOrderBooks.TryGetValue(cco.symbol, out _qob) == true)
                 {
-                    var _settings = GetSettings(cco.symbol);
-                    _result = await updateCompleteOrder(_qob, cco, _settings);
+                    _qob.stream = cco.stream;
+
+                    if (cco.result != null)
+                    {
+                        var _settings = GetSettings(cco.symbol);
+                        _result = await updateCompleteOrder(_qob, cco, _settings);
+                    }
                 }
             }
 
@@ -530,18 +538,21 @@ namespace CCXT.Collector.Gemini
             return await Task.FromResult(cob);
         }
 
-        private async Task snapshotOrderbook(string symbol)
+        private async Task snapshotOrderbook(string? symbol)
         {
-            SOrderBooks _qob;
-
-            lock (__qOrderBooks)
+            if (symbol != null)
             {
-                if (__qOrderBooks.TryGetValue(symbol, out _qob) == true)
-                    _qob.stream = "snapshot";
-            }
+                SOrderBooks _qob;
 
-            if (_qob != null)
-                await publishOrderbook(_qob);
+                lock (__qOrderBooks)
+                {
+                    if (__qOrderBooks.TryGetValue(symbol, out _qob) == true)
+                        _qob.stream = "snapshot";
+                }
+
+                if (_qob != null)
+                    await publishOrderbook(_qob);
+            }
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

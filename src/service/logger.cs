@@ -4,7 +4,6 @@ using OdinSdk.BaseLib.Extension;
 using RabbitMQ.Client;
 using System;
 using System.Collections.Concurrent;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -17,7 +16,7 @@ namespace CCXT.Collector.Service
             /// <summary>
             ///
             /// </summary>
-            public string command
+            public string? command
             {
                 get;
                 set;
@@ -26,7 +25,7 @@ namespace CCXT.Collector.Service
             /// <summary>
             ///
             /// </summary>
-            public string exchange
+            public string? exchange
             {
                 get;
                 set;
@@ -47,7 +46,7 @@ namespace CCXT.Collector.Service
         {
         }
 
-        private static ConcurrentQueue<PLogger> __log_queue = null;
+        private static ConcurrentQueue<PLogger>? __log_queue = null;
 
         /// <summary>
         ///
