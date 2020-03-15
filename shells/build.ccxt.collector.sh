@@ -16,8 +16,8 @@ else
 	git clone https://github.com/lisa3907/ccxt.collector.git
 
 	cd ccxt.collector
-	chmod +x ./shells/build_ocollector.sh
-	./shells/build_ocollector.sh
+	chmod +x ./shells/publish.ccxt.collector.sh
+	./shells/publish.ccxt.collector.sh
 
 	cd ~
 	rm -r github.com
