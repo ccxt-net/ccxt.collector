@@ -8,7 +8,7 @@ namespace CCXT.Collector.Library
     /// <summary>
     ///
     /// </summary>
-    public class KConfig
+    public static class KConfig
     {
         public static CConfig CConfig = new CConfig();
 
