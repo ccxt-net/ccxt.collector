@@ -115,7 +115,7 @@ namespace CCXT.Collector.Service
         /// <param name="exchange"></param>
         public static void WriteC(string? message, string exchange = "")
         {
-            Console.Out.WriteLine($"{CUnixTime.UtcNow.ToLogDateTimeString()} {exchange} {message}");
+            Console.Out.WriteLine($"{CUnixTime.UtcNow.ToLongDateTimeString()} {exchange} {message}");
         }
 
         public async Task Start(CancellationTokenSource tokenSource)
@@ -147,7 +147,7 @@ namespace CCXT.Collector.Service
                                     continue;
                                 }
 
-                                var _message = $"{CUnixTime.UtcNow.ToLogDateTimeString()} {_packet.exchange} {_packet.message}";
+                                var _message = $"{CUnixTime.UtcNow.ToLongDateTimeString()} {_packet.exchange} {_packet.message}";
 
                                 if (_packet.command == "WQ")
                                 {

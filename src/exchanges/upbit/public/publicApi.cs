@@ -35,7 +35,7 @@ namespace CCXT.Collector.Upbit.Public
         /// Fetch symbols, market ids and exchanger's information
         /// </summary>
         /// <returns></returns>
-        public override async ValueTask<Markets> FetchMarkets(Dictionary<string, object>? args = null)
+        public override async ValueTask<Markets> FetchMarketsAsync(Dictionary<string, object>? args = null)
         {
             var _result = new Markets();
 
