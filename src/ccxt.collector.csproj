@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFrameworks>net472;netstandard2.1</TargetFrameworks>
-    <AssemblyName>ccxt.collector</AssemblyName>
+    <AssemblyName>CCXT.Collector</AssemblyName>
     <RootNamespace>CCXT.Collector</RootNamespace>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageId>CCXT.Collector</PackageId>
@@ -10,13 +10,14 @@
     <Product>CCXT</Product>
     <Company>ODINSOFT</Company>
     <Description>CCXT.Collector – CryptoCurrency eXchange Data Collect Library for .NET</Description>
-    <Copyright>Copyright OdinSoftware Co., Ltd. 2019</Copyright>
+    <Copyright>Copyright OdinSoftware Co., Ltd. 2020</Copyright>
     <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
     <PackageProjectUrl>https://github.com/lisa3907/ccxt.collector</PackageProjectUrl>
     <PackageTags>cryptocurrency;exchange;trading;market-data;exchange-markets;bot;crypto</PackageTags>
-    <PackageReleaseNotes>net472 rebuild</PackageReleaseNotes>
+    <PackageReleaseNotes></PackageReleaseNotes>
     <Platforms>AnyCPU;x64;x86</Platforms>
     <LangVersion>8.0</LangVersion>
+    <Version>1.2.0</Version>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -50,6 +51,7 @@
     <PackageReference Include="Microsoft.Extensions.Configuration.FileExtensions" Version="3.1.2" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="3.1.2" />
     <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
+    <PackageReference Include="OdinSdk.BaseLib" Version="2.2.7" />
     <PackageReference Include="RabbitMQ.Client" Version="5.1.2" />
   </ItemGroup>
   
@@ -58,10 +60,6 @@
       <Pack>True</Pack>
       <PackagePath></PackagePath>
     </None>
-  </ItemGroup>
-  
-  <ItemGroup>
-    <ProjectReference Include="..\..\..\..\odinsoft-git\public\open-sdk\src\OdinSdk.BaseLib\OdinSdk.BaseLib.csproj" />
   </ItemGroup>
 
 </Project>
