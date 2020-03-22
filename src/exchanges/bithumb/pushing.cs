@@ -78,7 +78,7 @@ namespace CCXT.Collector.Bithumb
                             await Task.Delay(0);
 
                             var _waiting_time = CUnixTime.NowMilli - __last_receive_time;
-                            if (_waiting_time > KConfig.UpbitWebSocketRetry * 1000)
+                            if (_waiting_time > BTConfig.SNG.WebSocketRetry * 1000)
                             {
                                 __last_receive_time = CUnixTime.NowMilli;
                                 await Open(tokenSource, _cws, symbol);

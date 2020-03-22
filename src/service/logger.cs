@@ -4,7 +4,6 @@ using OdinSdk.BaseLib.Extension;
 using RabbitMQ.Client;
 using System;
 using System.Collections.Concurrent;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -12,7 +11,7 @@ namespace CCXT.Collector.Service
 {
     public class LoggerQ : FactoryX
     {
-        internal class PLogger
+        public class PLogger
         {
             /// <summary>
             ///
@@ -146,6 +145,9 @@ namespace CCXT.Collector.Service
                                     await Task.Delay(10);
                                     continue;
                                 }
+
+                                if (_packet == null)
+                                    continue;
 
                                 var _message = $"{CUnixTime.UtcNow.ToLongDateTimeString()} {_packet.exchange} {_packet.message}";
 

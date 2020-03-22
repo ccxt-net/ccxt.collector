@@ -23,7 +23,7 @@ namespace CCXT.Collector.BitMEX
         {
             get
             {
-                if (KConfig.BitMexUseLiveServer == true)
+                if (BMConfig.SNG.BitMexUseLiveServer == true)
                     return $"wss://www.bitmex.com{__end_point}";
                 else
                     return $"wss://testnet.bitmex.com{__end_point}";
@@ -168,8 +168,8 @@ namespace CCXT.Collector.BitMEX
 
             await publicOpen(__stream_id, symbol);
 
-            if (KConfig.BitMexUseMyOrderStream == true)
-                await privateOpen(__stream_id, KConfig.BitMexConnectKey, KConfig.BitMexSecretKey, KConfig.BitMexUserName);
+            if (BMConfig.SNG.BitMexUseMyOrderStream == true)
+                await privateOpen(__stream_id, BMConfig.SNG.BitMexConnectKey, BMConfig.SNG.BitMexSecretKey, BMConfig.SNG.BitMexUserName);
         }
 
         private volatile int __last_receive_time = 0;

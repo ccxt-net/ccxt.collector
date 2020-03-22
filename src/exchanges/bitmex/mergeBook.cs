@@ -230,7 +230,7 @@ namespace CCXT.Collector.BitMEX
                 qob.result.bids.RemoveAll(o => o.quantity == 0);
             }
 
-            if (++settings.orderbook_count == KConfig.SnapshotSkipCounter)
+            if (++settings.orderbook_count == BMConfig.SNG.SnapshotSkipCounter)
             {
                 qob.sequentialId = cob.sequentialId;
                 await snapshotOrderbook(_nob.symbol);
@@ -401,7 +401,7 @@ namespace CCXT.Collector.BitMEX
                 qob.result.bids.RemoveAll(o => o.quantity == 0);
             }
 
-            if (++settings.orderbook_count == KConfig.SnapshotSkipCounter)
+            if (++settings.orderbook_count == BMConfig.SNG.SnapshotSkipCounter)
             {
                 qob.sequentialId = cob.sequentialId;
                 await snapshotOrderbook(_nob.symbol);
@@ -427,7 +427,7 @@ namespace CCXT.Collector.BitMEX
         {
             var _result = false;
 
-            if (KConfig.UsePublishTrade == true)
+            if (BMConfig.SNG.UsePublishTrade == true)
                 await publishTrading(cco);
 
             SOrderBooks _qob;
