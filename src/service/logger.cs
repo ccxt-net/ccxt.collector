@@ -4,7 +4,6 @@ using OdinSdk.BaseLib.Extension;
 using RabbitMQ.Client;
 using System;
 using System.Collections.Concurrent;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -12,36 +11,6 @@ namespace CCXT.Collector.Service
 {
     public class LoggerQ : FactoryX
     {
-        internal class PLogger
-        {
-            /// <summary>
-            ///
-            /// </summary>
-            public string? command
-            {
-                get;
-                set;
-            }
-
-            /// <summary>
-            ///
-            /// </summary>
-            public string? exchange
-            {
-                get;
-                set;
-            }
-
-            /// <summary>
-            ///
-            /// </summary>
-            public string? message
-            {
-                get;
-                set;
-            }
-        }
-
         public LoggerQ()
             : base(queue_name: LoggerQName)
         {
