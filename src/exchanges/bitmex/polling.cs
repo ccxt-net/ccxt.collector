@@ -17,7 +17,7 @@ namespace CCXT.Collector.BitMEX
             get
             {
                 if (__public_api == null)
-                    __public_api = new CCXT.Collector.BitMEX.Public.PublicApi(KConfig.BitMexUseLiveServer);
+                    __public_api = new CCXT.Collector.BitMEX.Public.PublicApi(BMConfig.SNG.BitMexUseLiveServer);
                 return __public_api;
             }
         }
@@ -28,7 +28,7 @@ namespace CCXT.Collector.BitMEX
             get
             {
                 if (__private_api == null)
-                    __private_api = new CCXT.Collector.BitMEX.Private.PrivateApi(KConfig.BitMexConnectKey, KConfig.BitMexSecretKey, KConfig.BitMexUseLiveServer);
+                    __private_api = new CCXT.Collector.BitMEX.Private.PrivateApi(BMConfig.SNG.BitMexConnectKey, BMConfig.SNG.BitMexSecretKey, BMConfig.SNG.BitMexUseLiveServer);
                 return __private_api;
             }
         }
@@ -39,7 +39,7 @@ namespace CCXT.Collector.BitMEX
 
             var _m_polling = Task.Run(async () =>
             {
-                while (KConfig.BitMexUseMyOrderStream)
+                while (BMConfig.SNG.BitMexUseMyOrderStream)
                 {
                     try
                     {
@@ -78,7 +78,7 @@ namespace CCXT.Collector.BitMEX
                     if (_cancelled == true)
                         break;
 
-                    await Task.Delay(KConfig.BitMexPollingSleep * 3);
+                    await Task.Delay(BMConfig.SNG.PollingSleep * 3);
                 }
             },
             tokenSource.Token
@@ -160,7 +160,7 @@ namespace CCXT.Collector.BitMEX
                     if (_cancelled == true)
                         break;
 
-                    await Task.Delay(KConfig.BitMexPollingSleep * 2);
+                    await Task.Delay(BMConfig.SNG.PollingSleep * 2);
                 }
             },
             tokenSource.Token
@@ -178,7 +178,7 @@ namespace CCXT.Collector.BitMEX
 
                 var _o_request = CreateJsonRequest($"/api/v1/orderBook/L2", _o_params);
 
-                while (KConfig.BitMexUsePollingOrderboook)
+                while (BMConfig.SNG.BitMexUsePollingOrderboook)
                 {
                     try
                     {
@@ -241,7 +241,7 @@ namespace CCXT.Collector.BitMEX
                     if (_cancelled == true)
                         break;
 
-                    await Task.Delay(KConfig.BitMexPollingSleep * 2);
+                    await Task.Delay(BMConfig.SNG.PollingSleep * 2);
                 }
             },
             tokenSource.Token

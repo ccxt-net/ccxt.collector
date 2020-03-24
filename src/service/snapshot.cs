@@ -75,7 +75,7 @@ namespace CCXT.Collector.Service
 
             foreach (var _exchange in exchanges.Split(';'))
             {
-                var _symbols = KConfig.GetStartSymbolNames(_exchange.ToLower());
+                var _symbols = XConfig.SNG.GetStartSymbolNames(_exchange.ToLower());
                 StartNewSymbols(_exchange, _symbols);
             }
 
@@ -90,7 +90,7 @@ namespace CCXT.Collector.Service
 
             if (exchange == UPLogger.exchange_name)
             {
-                if (KConfig.UsePollingTicker == false)
+                if (XConfig.SNG.UsePollingTicker == false)
                 {
                     foreach (var _s in _symbols)
                     {
@@ -111,7 +111,7 @@ namespace CCXT.Collector.Service
             }
             else if (exchange == BMLogger.exchange_name)
             {
-                if (KConfig.UsePollingTicker == false)
+                if (XConfig.SNG.UsePollingTicker == false)
                 {
                     foreach (var _s in _symbols)
                     {
@@ -137,7 +137,7 @@ namespace CCXT.Collector.Service
             }
             else if (exchange == BNLogger.exchange_name)
             {
-                if (KConfig.UsePollingTicker == false)
+                if (XConfig.SNG.UsePollingTicker == false)
                 {
                     foreach (var _s in _symbols)
                     {
@@ -170,8 +170,8 @@ namespace CCXT.Collector.Service
         {
             LoggerQ.WriteO($"snapshot service start...", FactoryX.RootQName);
 
-            if (KConfig.UseAutoStart == true)
-                await StartNewExchanges(KConfig.StartExchangeNames);
+            if (XConfig.SNG.UseAutoStart == true)
+                await StartNewExchanges(XConfig.SNG.StartExchangeNames);
 
             var _processing = Task.Run((Func<Task>)(async () =>
             {
@@ -194,7 +194,7 @@ namespace CCXT.Collector.Service
                                 var _selector = JsonConvert.DeserializeObject<QSelector>(_message);
                                 if (__last_exchanges == _selector.exchanges)
                                 {
-                                    if (KConfig.UsePollingTicker == false)
+                                    if (XConfig.SNG.UsePollingTicker == false)
                                     {
                                         foreach (var _exchange in _selector.exchanges.Split(';'))
                                         {

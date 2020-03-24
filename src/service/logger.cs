@@ -11,6 +11,36 @@ namespace CCXT.Collector.Service
 {
     public class LoggerQ : FactoryX
     {
+        public class PLogger
+        {
+            /// <summary>
+            ///
+            /// </summary>
+            public string? command
+            {
+                get;
+                set;
+            }
+
+            /// <summary>
+            ///
+            /// </summary>
+            public string? exchange
+            {
+                get;
+                set;
+            }
+
+            /// <summary>
+            ///
+            /// </summary>
+            public string? message
+            {
+                get;
+                set;
+            }
+        }
+
         public LoggerQ()
             : base(queue_name: LoggerQName)
         {
@@ -115,6 +145,9 @@ namespace CCXT.Collector.Service
                                     await Task.Delay(10);
                                     continue;
                                 }
+
+                                if (_packet == null)
+                                    continue;
 
                                 var _message = $"{CUnixTime.UtcNow.ToLongDateTimeString()} {_packet.exchange} {_packet.message}";
 

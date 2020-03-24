@@ -1,6 +1,4 @@
 ﻿using OdinSdk.BaseLib.Configuration;
-using Microsoft.Extensions.Configuration;
-using System.IO;
 using System.Collections.Generic;
 
 namespace CCXT.Collector.Library
@@ -8,222 +6,88 @@ namespace CCXT.Collector.Library
     /// <summary>
     ///
     /// </summary>
-    public static class KConfig
+    public class XConfig : CConfig
     {
-        public static CConfig CConfig = new CConfig();
+        private static XConfig _singleton = null;
+        public static XConfig SNG
+        {
+            get
+            {
+                if (_singleton == null)
+                    _singleton = new XConfig();
+                return _singleton;
+            }
+        }
 
+        private bool? __use_polling_ticker = null;
 
-        private static bool? __use_polling_ticker = null;
-
-        public static bool UsePollingTicker
+        public bool UsePollingTicker
         {
             get
             {
                 if (__use_polling_ticker == null)
-                    __use_polling_ticker = CConfig.GetAppBoolean("use.polling.ticker");
+                    __use_polling_ticker = this.GetAppBoolean("use.polling.ticker");
                 return __use_polling_ticker.Value;
             }
         }
 
-        private static bool? __use_publish_trade = null;
+        private bool? __use_publish_trade = null;
 
-        public static bool UsePublishTrade
+        public bool UsePublishTrade
         {
             get
             {
                 if (__use_publish_trade == null)
-                    __use_publish_trade = CConfig.GetAppBoolean("use.publish.trade");
+                    __use_publish_trade = this.GetAppBoolean("use.publish.trade");
                 return __use_publish_trade.Value;
             }
         }
 
-        private static int? __snapshot_skip_counter = null;
+        private int? __snapshot_skip_counter = null;
 
-        public static int SnapshotSkipCounter
+        public int SnapshotSkipCounter
         {
             get
             {
                 if (__snapshot_skip_counter == null)
-                    __snapshot_skip_counter = CConfig.GetAppInteger("snapshot.skip.counter");
+                    __snapshot_skip_counter = this.GetAppInteger("snapshot.skip.counter");
                 return __snapshot_skip_counter.Value;
             }
         }
 
-        #region Binance
-
-        private static int? __binance_orderbook_counter = null;
-
-        public static int BinanceOrderBookCounter
-        {
-            get
-            {
-                if (__binance_orderbook_counter == null)
-                    __binance_orderbook_counter = CConfig.GetAppInteger("binance.orderbook.snapshot.counter");
-                return __binance_orderbook_counter.Value;
-            }
-        }
-
-        private static int? __binance_websocket_retry = null;
-
-        public static int BinanceWebSocketRetry
-        {
-            get
-            {
-                if (__binance_websocket_retry == null)
-                    __binance_websocket_retry = CConfig.GetAppInteger("binance.websocket.retry.waiting.milliseconds");
-                return __binance_websocket_retry.Value;
-            }
-        }
-
-        #endregion Binance
-
-        #region BitMEX
-
-        public static bool BitMexUseLiveServer
-        {
-            get
-            {
-                return CConfig.GetAppBoolean("bitmex.use.live.server");
-            }
-        }
-
-        public static bool BitMexUseMyOrderStream
-        {
-            get
-            {
-                return CConfig.GetAppBoolean("bitmex.use.myorder.stream");
-            }
-        }
-
-        public static bool BitMexUsePollingOrderboook
-        {
-            get
-            {
-                return CConfig.GetAppBoolean("bitmex.use.polling.orderbook");
-            }
-        }
-
-        public static string BitMexConnectKey
-        {
-            get
-            {
-                return CConfig.GetAppString("bitmex.private.connect.key");
-            }
-        }
-
-        public static string BitMexSecretKey
-        {
-            get
-            {
-                return CConfig.GetAppString("bitmex.private.secret.key");
-            }
-        }
-
-        public static string BitMexUserName
-        {
-            get
-            {
-                return CConfig.GetAppString("bitmex.private.user.name");
-            }
-        }
-
-        private static int? __bitmex_orderbook_counter = null;
-        public static int BitmexOrderBookCounter
-        {
-            get
-            {
-                if (__bitmex_orderbook_counter == null)
-                    __bitmex_orderbook_counter = CConfig.GetAppInteger("bitmex.orderbook.snapshot.counter");
-                return __bitmex_orderbook_counter.Value;
-            }
-        }
-
-        private static int? __bitmex_websocket_retry = null;
-        public static int BitmexWebSocketRetry
-        {
-            get
-            {
-                if (__bitmex_websocket_retry == null)
-                    __bitmex_websocket_retry = CConfig.GetAppInteger("bitmex.websocket.retry.waiting.milliseconds");
-                return __bitmex_websocket_retry.Value;
-            }
-        }
-
-        private static int? __bitmex_polling_sleep = null;
-
-        public static int BitMexPollingSleep
-        {
-            get
-            {
-                if (__bitmex_polling_sleep == null)
-                    __bitmex_polling_sleep = CConfig.GetAppInteger("bitmex.polling.sleep.milliseconds");
-                return __bitmex_polling_sleep.Value;
-            }
-        }
-
-        #endregion BitMEX
-
-        #region Upbit
-
-        private static int? __upbit_websocket_retry = null;
-
-        public static int UpbitWebSocketRetry
-        {
-            get
-            {
-                if (__upbit_websocket_retry == null)
-                    __upbit_websocket_retry = CConfig.GetAppInteger("upbit.websocket.retry.waiting.milliseconds");
-                return __upbit_websocket_retry.Value;
-            }
-        }
-
-        private static int? __upbit_polling_sleep = null;
-
-        public static int UpbitPollingSleep
-        {
-            get
-            {
-                if (__upbit_polling_sleep == null)
-                    __upbit_polling_sleep = CConfig.GetAppInteger("upbit.polling.sleep.milliseconds");
-                return __upbit_polling_sleep.Value;
-            }
-        }
-
-        #endregion Upbit
-
         #region Common
 
-        public static string CollectorVersion
+        public string CollectorVersion
         {
             get
             {
-                return CConfig.GetAppString("collector.version");
+                return this.GetAppString("collector.version");
             }
         }
 
-        public static bool UseAutoStart
+        public bool UseAutoStart
         {
             get
             {
-                return CConfig.GetAppBoolean("collector.auto.start");
+                return this.GetAppBoolean("collector.auto.start");
             }
         }
 
-        private static string? __name_start_exchange = null;
+        private string? __name_start_exchange = null;
 
-        public static string StartExchangeNames
+        public string StartExchangeNames
         {
             get
             {
                 if (__name_start_exchange == null)
-                    __name_start_exchange = CConfig.GetAppString("auto.start.exchange.names");
+                    __name_start_exchange = this.GetAppString("auto.start.exchange.names");
                 return __name_start_exchange;
             }
         }
 
-        private static Dictionary<string, string> __name_start_symbol_names = null;
+        private Dictionary<string, string> __name_start_symbol_names = null;
 
-        public static string GetStartSymbolNames(string exchange)
+        public string GetStartSymbolNames(string exchange)
         {
             var _result = "";
 
@@ -232,7 +96,7 @@ namespace CCXT.Collector.Library
 
             if (__name_start_symbol_names.ContainsKey(exchange) == false)
             {
-                _result = CConfig.GetAppString($"{exchange}.auto.start.symbol.names");
+                _result = this.GetAppString($"{exchange}.auto.start.symbol.names");
                 __name_start_symbol_names.Add(exchange, _result);
             }
             else
@@ -243,26 +107,26 @@ namespace CCXT.Collector.Library
             return _result;
         }
 
-        private static long? __polling_prev_time = null;
+        private long? __polling_prev_time = null;
 
-        public static long PollingPrevTime
+        public long PollingPrevTime
         {
             get
             {
                 if (__polling_prev_time == null)
-                    __polling_prev_time = CConfig.GetAppInteger64("polling.ticker.prev.millisconds");
+                    __polling_prev_time = this.GetAppInteger64("polling.ticker.prev.millisconds");
                 return __polling_prev_time.Value;
             }
         }
 
-        private static long? __polling_term_time = null;
+        private long? __polling_term_time = null;
 
-        public static long PollingTermTime
+        public long PollingTermTime
         {
             get
             {
                 if (__polling_term_time == null)
-                    __polling_term_time = CConfig.GetAppInteger64("polling.ticker.term.millisconds");
+                    __polling_term_time = this.GetAppInteger64("polling.ticker.term.millisconds");
                 return __polling_term_time.Value;
             }
         }
@@ -271,49 +135,30 @@ namespace CCXT.Collector.Library
 
         #region Arbitrage
 
-        public static bool UsePollingArbitrage
+        public bool UsePollingArbitrage
         {
             get
             {
-                return CConfig.GetAppBoolean("use.polling.arbitrage");
+                return this.GetAppBoolean("use.polling.arbitrage");
             }
         }
 
-        public static string ArbitrageBaseNames
+        public string ArbitrageBaseNames
         {
             get
             {
-                return CConfig.GetAppString("arbitrage.base.names");
+                return this.GetAppString("arbitrage.base.names");
             }
         }
 
-        public static string ArbitrageQuoteNames
+        public string ArbitrageQuoteNames
         {
             get
             {
-                return CConfig.GetAppString("arbitrage.quote.names");
+                return this.GetAppString("arbitrage.quote.names");
             }
         }
 
         #endregion Arbitrage
-
-        #region Creator
-
-        private static IConfigurationBuilder? __config_builder = null;
-        private static IConfigurationRoot? __config_root = null;
-
-        public static void SetConfigRoot()
-        {
-            __config_builder = new ConfigurationBuilder()
-                            .SetBasePath(Directory.GetCurrentDirectory())
-                            .AddJsonFile($"appsettings.json", true, true)
-                            .AddEnvironmentVariables();
-
-            __config_root = __config_builder.Build();
-
-            CConfig.SetConfigRoot(__config_root);
-        }
-
-        #endregion Creator
     }
 }

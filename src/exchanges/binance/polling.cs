@@ -69,7 +69,7 @@ namespace CCXT.Collector.Binance
         {
             BNLogger.WriteO($"polling service start: symbol => {symbol}...");
 
-            if (KConfig.UsePollingTicker == false)
+            if (BNConfig.SNG.UsePollingTicker == false)
             {
                 PollingTasks.Add(Task.Run(async () =>
                 {
@@ -90,7 +90,7 @@ namespace CCXT.Collector.Binance
                         {
                             await Task.Delay(0);
 
-                            var _waiting_milli_secs = (CUnixTime.NowMilli - KConfig.PollingPrevTime) / KConfig.PollingTermTime;
+                            var _waiting_milli_secs = (CUnixTime.NowMilli - BNConfig.SNG.PollingPrevTime) / BNConfig.SNG.PollingTermTime;
                             if (_waiting_milli_secs == _last_limit_milli_secs)
                             {
                                 var _waiting = tokenSource.Token.WaitHandle.WaitOne(0);
@@ -169,7 +169,7 @@ namespace CCXT.Collector.Binance
         {
             BNLogger.WriteO($"bpolling service start...");
 
-            if (KConfig.UsePollingTicker == true)
+            if (BNConfig.SNG.UsePollingTicker == true)
             {
                 PollingTasks.Add(Task.Run(async () =>
                 {
@@ -185,7 +185,7 @@ namespace CCXT.Collector.Binance
                         {
                             await Task.Delay(0);
 
-                            var _waiting_milli_secs = (CUnixTime.NowMilli - KConfig.PollingPrevTime) / KConfig.PollingTermTime;
+                            var _waiting_milli_secs = (CUnixTime.NowMilli - BNConfig.SNG.PollingPrevTime) / BNConfig.SNG.PollingTermTime;
                             if (_waiting_milli_secs == _last_limit_milli_secs)
                             {
                                 var _waiting = tokenSource.Token.WaitHandle.WaitOne(0);
