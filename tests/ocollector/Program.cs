@@ -56,7 +56,7 @@ namespace CCXT.Sample
             var provider = CodePagesEncodingProvider.Instance;
             Encoding.RegisterProvider(provider);
 
-            KConfig.SetConfigRoot();
+            //XConfig.SNG.SetConfigRoot();
 
             try
             {
@@ -64,9 +64,9 @@ namespace CCXT.Sample
                 FactoryX.RootQName = "odin";
 #endif
 
-                Console.Out.WriteLine($"{FactoryX.RootQName} collector {KConfig.CollectorVersion} start...");
+                Console.Out.WriteLine($"{FactoryX.RootQName} collector {XConfig.SNG.CollectorVersion} start...");
 
-                if (KConfig.CConfig.IsWindows == false)
+                if (XConfig.SNG.IsWindows == false)
                 {
                     MainTasks.Add((new TickerQ()).Start(MainTokenSource));
                     MainTasks.Add((new OrderbookQ()).Start(MainTokenSource));
@@ -76,7 +76,7 @@ namespace CCXT.Sample
 
                     Task.WaitAll(MainTasks.ToArray(), MainTokenSource.Token);
 
-                    Console.Out.WriteLine($"{FactoryX.RootQName} collector {KConfig.CollectorVersion} stop...");
+                    Console.Out.WriteLine($"{FactoryX.RootQName} collector {XConfig.SNG.CollectorVersion} stop...");
                 }
                 else
                 {
@@ -95,7 +95,7 @@ namespace CCXT.Sample
                 Console.Out.WriteLine($"thread exit: {ex.Message}");
             }
 
-            if (KConfig.CConfig.IsWindows == true)
+            if (XConfig.SNG.IsWindows == true)
             {
                 while (Console.ReadKey().Key != ConsoleKey.Escape)
                     Console.Out.WriteLine("Enter 'ESC' to stop the services and end the process...");
