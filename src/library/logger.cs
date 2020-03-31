@@ -5,7 +5,7 @@
         /// <summary>
         ///
         /// </summary>
-        public string? command
+        public string command
         {
             get;
             set;
@@ -14,7 +14,7 @@
         /// <summary>
         ///
         /// </summary>
-        public string? exchange
+        public string exchange
         {
             get;
             set;
@@ -23,7 +23,7 @@
         /// <summary>
         ///
         /// </summary>
-        public string? message
+        public string message
         {
             get;
             set;
