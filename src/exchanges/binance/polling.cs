@@ -65,7 +65,7 @@ namespace CCXT.Collector.Binance
             }
         }
 
-        public async Task OStart(CancellationTokenSource tokenSource, string symbol)
+        public async Task OStart(CancellationToken cancelToken, string symbol)
         {
             BNLogger.SNG.WriteO(this, $"polling service start: symbol => {symbol}...");
 
@@ -93,7 +93,7 @@ namespace CCXT.Collector.Binance
                             var _waiting_milli_secs = (CUnixTime.NowMilli - BNConfig.SNG.PollingPrevTime) / BNConfig.SNG.PollingTermTime;
                             if (_waiting_milli_secs == _last_limit_milli_secs)
                             {
-                                var _waiting = tokenSource.Token.WaitHandle.WaitOne(0);
+                                var _waiting = cancelToken.WaitHandle.WaitOne(0);
                                 if (_waiting == true)
                                     break;
 
@@ -127,7 +127,7 @@ namespace CCXT.Collector.Binance
                                     {
                                         BNLogger.SNG.WriteQ(this, $"request-limit: symbol => {symbol}, https_status => {_http_status}");
 
-                                        var _waiting = tokenSource.Token.WaitHandle.WaitOne(0);
+                                        var _waiting = cancelToken.WaitHandle.WaitOne(0);
                                         if (_waiting == true)
                                             break;
 
@@ -147,16 +147,16 @@ namespace CCXT.Collector.Binance
                         {
                             //__semaphore.Release();
 
-                            if (tokenSource.IsCancellationRequested == true)
+                            if (cancelToken.IsCancellationRequested == true)
                                 break;
                         }
 
-                        var _cancelled = tokenSource.Token.WaitHandle.WaitOne(0);
+                        var _cancelled = cancelToken.WaitHandle.WaitOne(0);
                         if (_cancelled == true)
                             break;
                     }
                 },
-                tokenSource.Token
+                cancelToken
                 ));
             }
 
@@ -165,7 +165,7 @@ namespace CCXT.Collector.Binance
             BNLogger.SNG.WriteO(this, $"polling service stopped: symbol => {symbol}...");
         }
 
-        public async Task BStart(CancellationTokenSource tokenSource, string symbol)
+        public async Task BStart(CancellationToken cancelToken, string symbol)
         {
             BNLogger.SNG.WriteO(this, $"bpolling service start...");
 
@@ -188,7 +188,7 @@ namespace CCXT.Collector.Binance
                             var _waiting_milli_secs = (CUnixTime.NowMilli - BNConfig.SNG.PollingPrevTime) / BNConfig.SNG.PollingTermTime;
                             if (_waiting_milli_secs == _last_limit_milli_secs)
                             {
-                                var _waiting = tokenSource.Token.WaitHandle.WaitOne(0);
+                                var _waiting = cancelToken.WaitHandle.WaitOne(0);
                                 if (_waiting == true)
                                     break;
 
@@ -222,7 +222,7 @@ namespace CCXT.Collector.Binance
                                 {
                                     BNLogger.SNG.WriteQ(this, $"request-limit: https_status => {_http_status}");
 
-                                    var _waiting = tokenSource.Token.WaitHandle.WaitOne(0);
+                                    var _waiting = cancelToken.WaitHandle.WaitOne(0);
                                     if (_waiting == true)
                                         break;
 
@@ -239,16 +239,16 @@ namespace CCXT.Collector.Binance
                         }
                         //finally
                         {
-                            if (tokenSource.IsCancellationRequested == true)
+                            if (cancelToken.IsCancellationRequested == true)
                                 break;
                         }
 
-                        var _cancelled = tokenSource.Token.WaitHandle.WaitOne(0);
+                        var _cancelled = cancelToken.WaitHandle.WaitOne(0);
                         if (_cancelled == true)
                             break;
                     }
                 },
-                tokenSource.Token
+                cancelToken
                 ));
             }
 

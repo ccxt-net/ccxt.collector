@@ -33,7 +33,7 @@ namespace CCXT.Collector.BitMEX
             }
         }
 
-        public async Task Start(CancellationTokenSource tokenSource, string symbol, int limits = 25)
+        public async Task Start(CancellationToken cancelToken, string symbol, int limits = 25)
         {
             BMLogger.SNG.WriteO(this, $"polling service start: symbol => {symbol}...");
 
@@ -70,18 +70,18 @@ namespace CCXT.Collector.BitMEX
                     }
                     //finally
                     {
-                        if (tokenSource.IsCancellationRequested == true)
+                        if (cancelToken.IsCancellationRequested == true)
                             break;
                     }
 
-                    var _cancelled = tokenSource.Token.WaitHandle.WaitOne(0);
+                    var _cancelled = cancelToken.WaitHandle.WaitOne(0);
                     if (_cancelled == true)
                         break;
 
                     await Task.Delay(BMConfig.SNG.PollingSleep * 3);
                 }
             },
-            tokenSource.Token
+            cancelToken
             );
 
             var _t_polling = Task.Run(async () =>
@@ -124,7 +124,7 @@ namespace CCXT.Collector.BitMEX
                             {
                                 BMLogger.SNG.WriteQ(this, $"request-limit: symbol => {symbol}, https_status => {_http_status}");
 
-                                var _waiting = tokenSource.Token.WaitHandle.WaitOne(0);
+                                var _waiting = cancelToken.WaitHandle.WaitOne(0);
                                 if (_waiting == true)
                                     break;
 
@@ -152,18 +152,18 @@ namespace CCXT.Collector.BitMEX
                     }
                     //finally
                     {
-                        if (tokenSource.IsCancellationRequested == true)
+                        if (cancelToken.IsCancellationRequested == true)
                             break;
                     }
 
-                    var _cancelled = tokenSource.Token.WaitHandle.WaitOne(0);
+                    var _cancelled = cancelToken.WaitHandle.WaitOne(0);
                     if (_cancelled == true)
                         break;
 
                     await Task.Delay(BMConfig.SNG.PollingSleep * 2);
                 }
             },
-            tokenSource.Token
+            cancelToken
             );
 
             var _o_polling = Task.Run(async () =>
@@ -205,7 +205,7 @@ namespace CCXT.Collector.BitMEX
                             {
                                 BMLogger.SNG.WriteQ(this, $"request-limit: symbol => {symbol}, https_status => {_http_status}");
 
-                                var _waiting = tokenSource.Token.WaitHandle.WaitOne(0);
+                                var _waiting = cancelToken.WaitHandle.WaitOne(0);
                                 if (_waiting == true)
                                     break;
 
@@ -233,18 +233,18 @@ namespace CCXT.Collector.BitMEX
                     }
                     //finally
                     {
-                        if (tokenSource.IsCancellationRequested == true)
+                        if (cancelToken.IsCancellationRequested == true)
                             break;
                     }
 
-                    var _cancelled = tokenSource.Token.WaitHandle.WaitOne(0);
+                    var _cancelled = cancelToken.WaitHandle.WaitOne(0);
                     if (_cancelled == true)
                         break;
 
                     await Task.Delay(BMConfig.SNG.PollingSleep * 2);
                 }
             },
-            tokenSource.Token
+            cancelToken
             );
 
             await Task.WhenAll(_m_polling, _t_polling, _o_polling);

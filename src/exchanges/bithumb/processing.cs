@@ -38,7 +38,7 @@ namespace CCXT.Collector.Bithumb
             ReceiveQ.Enqueue(message);
         }
 
-        public async Task Start(CancellationTokenSource tokenSource)
+        public async Task Start(CancellationToken cancelToken)
         {
             BTLogger.SNG.WriteO(this, $"processing service start...");
 
@@ -55,7 +55,7 @@ namespace CCXT.Collector.Bithumb
                         var _message = (QMessage)null;
                         if (ReceiveQ.TryDequeue(out _message) == false)
                         {
-                            var _cancelled = tokenSource.Token.WaitHandle.WaitOne(0);
+                            var _cancelled = cancelToken.WaitHandle.WaitOne(0);
                             if (_cancelled == true)
                                 break;
 
@@ -226,7 +226,7 @@ namespace CCXT.Collector.Bithumb
                         else
                             BTLogger.SNG.WriteO(this, _message.payload);
 #endif
-                        if (tokenSource.IsCancellationRequested == true)
+                        if (cancelToken.IsCancellationRequested == true)
                             break;
                     }
                     catch (TaskCanceledException)
@@ -238,7 +238,7 @@ namespace CCXT.Collector.Bithumb
                     }
                 }
             },
-            tokenSource.Token
+            cancelToken
             );
 
             await Task.WhenAll(_processing);

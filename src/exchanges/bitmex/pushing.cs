@@ -55,25 +55,25 @@ namespace CCXT.Collector.BitMEX
             CommandQ.Enqueue(message);
         }
 
-        private async Task sendMessage(CancellationTokenSource tokenSource, ClientWebSocket cws, string message)
+        private async Task sendMessage(CancellationToken cancelToken, ClientWebSocket cws, string message)
         {
             var _cmd_bytes = Encoding.UTF8.GetBytes(message);
             await cws.SendAsync(
                         new ArraySegment<byte>(_cmd_bytes),
                         WebSocketMessageType.Text,
                         endOfMessage: true,
-                        cancellationToken: tokenSource.Token
+                        cancellationToken: cancelToken
                     );
         }
 
-        private async Task sendMuxMessage(CancellationTokenSource tokenSource, ClientWebSocket cws, string id, string topic, int type, string payload = "")
+        private async Task sendMuxMessage(CancellationToken cancelToken, ClientWebSocket cws, string id, string topic, int type, string payload = "")
         {
             var _mux_msg = "["
                          + $"{type},'{id}','{topic}'"
                          + $"{(String.IsNullOrEmpty(payload) == false ? ", " + payload : "")}"
                          + "]";
 
-            await sendMessage(tokenSource, cws, _mux_msg.Replace('\'', '\"'));
+            await sendMessage(cancelToken, cws, _mux_msg.Replace('\'', '\"'));
         }
 
         private async Task publicOpen(string id, string symbol, string topic = "public")
@@ -174,13 +174,13 @@ namespace CCXT.Collector.BitMEX
 
         private volatile int __last_receive_time = 0;
 
-        public async Task Start(CancellationTokenSource tokenSource, string symbol)
+        public async Task Start(CancellationToken cancelToken, string symbol)
         {
             BMLogger.SNG.WriteO(this, $"pushing service start: symbol => {symbol}...");
 
             using (var _cws = new ClientWebSocket())
             {
-                await _cws.ConnectAsync(new Uri(webSocketUrl), tokenSource.Token);
+                await _cws.ConnectAsync(new Uri(webSocketUrl), cancelToken);
 
                 var _sending = Task.Run(async () =>
                 {
@@ -199,7 +199,7 @@ namespace CCXT.Collector.BitMEX
                             }
                             else if (_waiting_time > 5)
                             {
-                                await sendMessage(tokenSource, _cws, "ping");
+                                await sendMessage(cancelToken, _cws, "ping");
                                 __last_receive_time = (int)CUnixTime.Now;
                             }
 
@@ -207,14 +207,14 @@ namespace CCXT.Collector.BitMEX
 
                             if (CommandQ.TryDequeue(out _message) == false)
                             {
-                                var _cancelled = tokenSource.Token.WaitHandle.WaitOne(10);
+                                var _cancelled = cancelToken.WaitHandle.WaitOne(10);
                                 if (_cancelled == true)
                                     break;
                             }
                             else
                             {
                                 await sendMuxMessage(
-                                        tokenSource, _cws,
+                                        cancelToken, _cws,
                                         _message.id, _message.topic, _message.type, _message.payload
                                     );
                             }
@@ -231,12 +231,12 @@ namespace CCXT.Collector.BitMEX
                                 break;
                             }
 
-                            if (tokenSource.IsCancellationRequested == true)
+                            if (cancelToken.IsCancellationRequested == true)
                                 break;
                         }
                     }
                 },
-                tokenSource.Token
+                cancelToken
                 );
 
                 var _receiving = Task.Run(async () =>
@@ -251,7 +251,7 @@ namespace CCXT.Collector.BitMEX
                     {
                         try
                         {
-                            var _result = await _cws.ReceiveAsync(new ArraySegment<byte>(_buffer, _offset, _free), tokenSource.Token);
+                            var _result = await _cws.ReceiveAsync(new ArraySegment<byte>(_buffer, _offset, _free), cancelToken);
 
                             _offset += _result.Count;
                             _free -= _result.Count;
@@ -317,10 +317,10 @@ namespace CCXT.Collector.BitMEX
                             }
                             else if (_result.MessageType == WebSocketMessageType.Close)
                             {
-                                await _cws.CloseOutputAsync(WebSocketCloseStatus.NormalClosure, "", tokenSource.Token);
+                                await _cws.CloseOutputAsync(WebSocketCloseStatus.NormalClosure, "", cancelToken);
 
                                 BMLogger.SNG.WriteO(this, $"receive close message from server: symbol => {symbol}...");
-                                tokenSource.Cancel();
+                                //cancelToken.Cancel();
                                 break;
                             }
                         }
@@ -336,11 +336,11 @@ namespace CCXT.Collector.BitMEX
                             if (_cws.State != WebSocketState.Open && _cws.State != WebSocketState.Connecting)
                             {
                                 BMLogger.SNG.WriteO(this, $"disconnect from server: symbol => {symbol}...");
-                                tokenSource.Cancel();
+                                //cancelToken.Cancel();
                                 break;
                             }
 
-                            if (tokenSource.IsCancellationRequested == true)
+                            if (cancelToken.IsCancellationRequested == true)
                                 break;
 
                             _offset = 0;
@@ -348,7 +348,7 @@ namespace CCXT.Collector.BitMEX
                         }
                     }
                 },
-                tokenSource.Token
+                cancelToken
                 );
 
                 await Task.WhenAll(_sending, _receiving);

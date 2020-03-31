@@ -52,31 +52,31 @@ namespace CCXT.Collector.Binance
             CommandQ.Enqueue(message);
         }
 
-        private async Task SendAsync(CancellationTokenSource tokenSource, ClientWebSocket cws, string message)
+        private async Task SendAsync(CancellationToken cancelToken, ClientWebSocket cws, string message)
         {
             var _cmd_bytes = Encoding.UTF8.GetBytes(message);
             await cws.SendAsync(
                         new ArraySegment<byte>(_cmd_bytes),
                         WebSocketMessageType.Text,
                         endOfMessage: true,
-                        cancellationToken: tokenSource.Token
+                        cancellationToken: cancelToken
                     );
         }
 
-        private async Task Open(CancellationTokenSource tokenSource, ClientWebSocket cws, string symbol)
+        private async Task Open(CancellationToken cancelToken, ClientWebSocket cws, string symbol)
         {
             if (cws.State != WebSocketState.Open)
             {
                 //var _wss_url = $"wss://stream.binance.com:9443/stream?streams={symbol.ToLower()}@depth/{symbol.ToLower()}@aggTrade";
                 var _wss_url = $"wss://stream.binance.com:9443/stream?streams={symbol.ToLower()}@aggTrade";
 
-                await cws.ConnectAsync(new Uri(_wss_url), tokenSource.Token);
+                await cws.ConnectAsync(new Uri(_wss_url), cancelToken);
             }
         }
 
         private long __last_receive_time = 0;
 
-        public async Task Start(CancellationTokenSource tokenSource, string symbol)
+        public async Task Start(CancellationToken cancelToken, string symbol)
         {
             BNLogger.SNG.WriteO(this, $"pushing service start: symbol => {symbol}...");
 
@@ -94,7 +94,7 @@ namespace CCXT.Collector.Binance
                             if (_waiting_time > BNConfig.SNG.BinanceWebSocketRetry * 1000)
                             {
                                 __last_receive_time = CUnixTime.NowMilli;
-                                await Open(tokenSource, _cws, symbol);
+                                await Open(cancelToken, _cws, symbol);
 
                                 BNLogger.SNG.WriteO(this, $"pushing open: symbol => {symbol}...");
                             }
@@ -103,7 +103,7 @@ namespace CCXT.Collector.Binance
 
                             if (CommandQ.TryDequeue(out _message) == false)
                             {
-                                var _cancelled = tokenSource.Token.WaitHandle.WaitOne(0);
+                                var _cancelled = cancelToken.WaitHandle.WaitOne(0);
                                 if (_cancelled == true)
                                     break;
 
@@ -111,7 +111,7 @@ namespace CCXT.Collector.Binance
                             }
                             else
                             {
-                                await SendAsync(tokenSource, _cws, _message.payload);
+                                await SendAsync(cancelToken, _cws, _message.payload);
                             }
                         }
                         catch (TaskCanceledException)
@@ -126,16 +126,16 @@ namespace CCXT.Collector.Binance
                             if (_cws.State != WebSocketState.Open)
                             {
                                 BNLogger.SNG.WriteO(this, $"disconnect from server(cmd): symbol => {symbol}...");
-                                tokenSource.Cancel();
+                                //cancelToken.Cancel();
                                 break;
                             }
 
-                            if (tokenSource.IsCancellationRequested == true)
+                            if (cancelToken.IsCancellationRequested == true)
                                 break;
                         }
                     }
                 },
-                tokenSource.Token
+                cancelToken
                 );
 
                 var _receiving = Task.Run(async () =>
@@ -156,7 +156,7 @@ namespace CCXT.Collector.Binance
                                 continue;
                             }
 
-                            var _result = await _cws.ReceiveAsync(new ArraySegment<byte>(_buffer, _offset, _free), tokenSource.Token);
+                            var _result = await _cws.ReceiveAsync(new ArraySegment<byte>(_buffer, _offset, _free), cancelToken);
 
                             _offset += _result.Count;
                             _free -= _result.Count;
@@ -197,10 +197,10 @@ namespace CCXT.Collector.Binance
                             }
                             else if (_result.MessageType == WebSocketMessageType.Close)
                             {
-                                await _cws.CloseOutputAsync(WebSocketCloseStatus.NormalClosure, "", tokenSource.Token);
+                                await _cws.CloseOutputAsync(WebSocketCloseStatus.NormalClosure, "", cancelToken);
 
                                 BNLogger.SNG.WriteO(this, $"receive close message from server: symbol => {symbol}...");
-                                tokenSource.Cancel();
+                                //cancelToken.Cancel();
                                 break;
                             }
                         }
@@ -216,11 +216,11 @@ namespace CCXT.Collector.Binance
                             if (_cws.State != WebSocketState.Open)
                             {
                                 BNLogger.SNG.WriteO(this, $"disconnect from server: symbol => {symbol}...");
-                                tokenSource.Cancel();
+                                //cancelToken.Cancel();
                                 break;
                             }
 
-                            if (tokenSource.IsCancellationRequested == true)
+                            if (cancelToken.IsCancellationRequested == true)
                                 break;
 
                             _offset = 0;
@@ -228,7 +228,7 @@ namespace CCXT.Collector.Binance
                         }
                     }
                 },
-                tokenSource.Token
+                cancelToken
                 );
 
                 await Task.WhenAll(_sending, _receiving);

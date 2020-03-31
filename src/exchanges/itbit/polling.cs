@@ -22,7 +22,7 @@ namespace CCXT.Collector.ItBit
             }
         }
 
-        public async Task OStart(CancellationTokenSource tokenSource, string symbol, int limit = 32)
+        public async Task OStart(CancellationToken cancelToken, string symbol, int limit = 32)
         {
             IBLogger.SNG.WriteO(this, $"polling service start: symbol => {symbol}...");
 
@@ -65,7 +65,7 @@ namespace CCXT.Collector.ItBit
                             {
                                 IBLogger.SNG.WriteQ(this, $"request-limit: symbol => {symbol}, https_status => {_http_status}");
 
-                                var _waiting = tokenSource.Token.WaitHandle.WaitOne(0);
+                                var _waiting = cancelToken.WaitHandle.WaitOne(0);
                                 if (_waiting == true)
                                     break;
 
@@ -82,16 +82,16 @@ namespace CCXT.Collector.ItBit
                     }
                     //finally
                     {
-                        if (tokenSource.IsCancellationRequested == true)
+                        if (cancelToken.IsCancellationRequested == true)
                             break;
                     }
 
-                    var _cancelled = tokenSource.Token.WaitHandle.WaitOne(0);
+                    var _cancelled = cancelToken.WaitHandle.WaitOne(0);
                     if (_cancelled == true)
                         break;
                 }
             },
-            tokenSource.Token
+            cancelToken
             );
 
             var _o_polling = Task.Run(async () =>
@@ -132,7 +132,7 @@ namespace CCXT.Collector.ItBit
                             {
                                 IBLogger.SNG.WriteQ(this, $"request-limit: symbol => {symbol}, https_status => {_http_status}");
 
-                                var _waiting = tokenSource.Token.WaitHandle.WaitOne(0);
+                                var _waiting = cancelToken.WaitHandle.WaitOne(0);
                                 if (_waiting == true)
                                     break;
 
@@ -149,16 +149,16 @@ namespace CCXT.Collector.ItBit
                     }
                     //finally
                     {
-                        if (tokenSource.IsCancellationRequested == true)
+                        if (cancelToken.IsCancellationRequested == true)
                             break;
                     }
 
-                    var _cancelled = tokenSource.Token.WaitHandle.WaitOne(0);
+                    var _cancelled = cancelToken.WaitHandle.WaitOne(0);
                     if (_cancelled == true)
                         break;
                 }
             },
-            tokenSource.Token
+            cancelToken
             );
 
             await Task.WhenAll(_t_polling, _o_polling);
@@ -166,7 +166,7 @@ namespace CCXT.Collector.ItBit
             IBLogger.SNG.WriteO(this, $"polling service stopped: symbol => {symbol}...");
         }
 
-        public async Task BStart(CancellationTokenSource tokenSource, string[] symbols)
+        public async Task BStart(CancellationToken cancelToken, string[] symbols)
         {
             IBLogger.SNG.WriteO(this, $"bpolling service start..");
 
@@ -192,7 +192,7 @@ namespace CCXT.Collector.ItBit
                         var _waiting_milli_secs = (CUnixTime.NowMilli - IBConfig.SNG.PollingPrevTime) / IBConfig.SNG.PollingTermTime;
                         if (_waiting_milli_secs == _last_limit_milli_secs)
                         {
-                            var _waiting = tokenSource.Token.WaitHandle.WaitOne(0);
+                            var _waiting = cancelToken.WaitHandle.WaitOne(0);
                             if (_waiting == true)
                                 break;
 
@@ -224,7 +224,7 @@ namespace CCXT.Collector.ItBit
                             {
                                 IBLogger.SNG.WriteQ(this, $"request-limit: symbol => {_symbols}, https_status => {_http_status}");
 
-                                var _waiting = tokenSource.Token.WaitHandle.WaitOne(0);
+                                var _waiting = cancelToken.WaitHandle.WaitOne(0);
                                 if (_waiting == true)
                                     break;
 
@@ -241,16 +241,16 @@ namespace CCXT.Collector.ItBit
                     }
                     //finally
                     {
-                        if (tokenSource.IsCancellationRequested == true)
+                        if (cancelToken.IsCancellationRequested == true)
                             break;
                     }
 
-                    var _cancelled = tokenSource.Token.WaitHandle.WaitOne(0);
+                    var _cancelled = cancelToken.WaitHandle.WaitOne(0);
                     if (_cancelled == true)
                         break;
                 }
             },
-            tokenSource.Token
+            cancelToken
             );
 
             await Task.WhenAll(_b_polling);
@@ -267,7 +267,7 @@ namespace CCXT.Collector.ItBit
             set;
         }
 
-        public async Task EStart(CancellationTokenSource tokenSource)
+        public async Task EStart(CancellationToken cancelToken)
         {
             IBLogger.SNG.WriteO(this, $"epolling service start..");
 
@@ -294,7 +294,7 @@ namespace CCXT.Collector.ItBit
                         var _waiting_milli_secs = (CUnixTime.NowMilli - 0) / (600 * 1000);
                         if (_waiting_milli_secs == _last_limit_milli_secs)
                         {
-                            var _waiting = tokenSource.Token.WaitHandle.WaitOne(0);
+                            var _waiting = cancelToken.WaitHandle.WaitOne(0);
                             if (_waiting == true)
                                 break;
 
@@ -323,7 +323,7 @@ namespace CCXT.Collector.ItBit
                             {
                                 IBLogger.SNG.WriteQ(this, $"https_status => {_http_status}");
 
-                                var _waiting = tokenSource.Token.WaitHandle.WaitOne(0);
+                                var _waiting = cancelToken.WaitHandle.WaitOne(0);
                                 if (_waiting == true)
                                     break;
 
@@ -340,16 +340,16 @@ namespace CCXT.Collector.ItBit
                     }
                     //finally
                     {
-                        if (tokenSource.IsCancellationRequested == true)
+                        if (cancelToken.IsCancellationRequested == true)
                             break;
                     }
 
-                    var _cancelled = tokenSource.Token.WaitHandle.WaitOne(0);
+                    var _cancelled = cancelToken.WaitHandle.WaitOne(0);
                     if (_cancelled == true)
                         break;
                 }
             },
-            tokenSource.Token
+            cancelToken
             );
 
             await Task.WhenAll(_b_polling);

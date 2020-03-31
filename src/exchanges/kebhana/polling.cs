@@ -80,7 +80,7 @@ namespace CCXT.Collector.KebHana
 
         private static Encoding HanaEncoding = Encoding.GetEncoding("euc-kr");
 
-        public async Task Start(CancellationTokenSource tokenSource)
+        public async Task Start(CancellationToken cancelToken)
         {
             KELogger.SNG.WriteO(this, $"polling service start...");
 
@@ -103,7 +103,7 @@ namespace CCXT.Collector.KebHana
                         var _waiting_milli_secs = (CUnixTime.NowMilli - 0) / (60 * 1000);
                         if (_waiting_milli_secs == _last_limit_milli_secs)
                         {
-                            var _waiting = tokenSource.Token.WaitHandle.WaitOne(0);
+                            var _waiting = cancelToken.WaitHandle.WaitOne(0);
                             if (_waiting == true)
                                 break;
 
@@ -136,16 +136,16 @@ namespace CCXT.Collector.KebHana
                     {
                         //__semaphore.Release();
 
-                        if (tokenSource.IsCancellationRequested == true)
+                        if (cancelToken.IsCancellationRequested == true)
                             break;
                     }
 
-                    var _cancelled = tokenSource.Token.WaitHandle.WaitOne(0);
+                    var _cancelled = cancelToken.WaitHandle.WaitOne(0);
                     if (_cancelled == true)
                         break;
                 }
             },
-            tokenSource.Token
+            cancelToken
             ));
 
             await Task.WhenAll(PollingTasks);
