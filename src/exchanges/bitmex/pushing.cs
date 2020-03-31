@@ -30,7 +30,7 @@ namespace CCXT.Collector.BitMEX
             }
         }
 
-        private static ConcurrentQueue<QMessage>? __command_queue = null;
+        private static ConcurrentQueue<QMessage> __command_queue = null;
 
         /// <summary>
         ///
@@ -176,7 +176,7 @@ namespace CCXT.Collector.BitMEX
 
         public async Task Start(CancellationTokenSource tokenSource, string symbol)
         {
-            BMLogger.WriteO($"pushing service start: symbol => {symbol}...");
+            BMLogger.SNG.WriteO(this, $"pushing service start: symbol => {symbol}...");
 
             using (var _cws = new ClientWebSocket())
             {
@@ -203,7 +203,7 @@ namespace CCXT.Collector.BitMEX
                                 __last_receive_time = (int)CUnixTime.Now;
                             }
 
-                            var _message = (QMessage?)null;
+                            var _message = (QMessage)null;
 
                             if (CommandQ.TryDequeue(out _message) == false)
                             {
@@ -221,7 +221,7 @@ namespace CCXT.Collector.BitMEX
                         }
                         catch (Exception ex)
                         {
-                            BMLogger.WriteX(ex.ToString());
+                            BMLogger.SNG.WriteX(this, ex.ToString());
                         }
                         //finally
                         {
@@ -278,21 +278,21 @@ namespace CCXT.Collector.BitMEX
                                     if (_json[0] != '[')
                                     {
                                         if (_json != "pong")
-                                            BMLogger.WriteO(_json);
+                                            BMLogger.SNG.WriteO(this, _json);
                                         break;
                                     }
 
                                     var _packet = JsonConvert.DeserializeObject<JArray>(_json);
                                     if (_packet.Count < 4)
                                     {
-                                        BMLogger.WriteO(_json);
+                                        BMLogger.SNG.WriteO(this, _json);
                                         break;
                                     }
 
                                     var _selector = _packet[3].ToObject<WsData>();
                                     if (_selector == null || String.IsNullOrEmpty(_selector.table) || String.IsNullOrEmpty(_selector.action))
                                     {
-                                        BMLogger.WriteO(_json);
+                                        BMLogger.SNG.WriteO(this, _json);
                                         break;
                                     }
 
@@ -302,7 +302,7 @@ namespace CCXT.Collector.BitMEX
                                     Processing.SendReceiveQ(new QMessage
                                     {
                                         command = "WS",
-                                        exchange = BMLogger.exchange_name,
+                                        exchange = BMLogger.SNG.exchange_name,
                                         symbol = symbol,
                                         stream = _selector.table,
                                         action = _selector.action,
@@ -319,7 +319,7 @@ namespace CCXT.Collector.BitMEX
                             {
                                 await _cws.CloseOutputAsync(WebSocketCloseStatus.NormalClosure, "", tokenSource.Token);
 
-                                BMLogger.WriteO($"receive close message from server: symbol => {symbol}...");
+                                BMLogger.SNG.WriteO(this, $"receive close message from server: symbol => {symbol}...");
                                 tokenSource.Cancel();
                                 break;
                             }
@@ -329,13 +329,13 @@ namespace CCXT.Collector.BitMEX
                         }
                         catch (Exception ex)
                         {
-                            BMLogger.WriteX(ex.ToString());
+                            BMLogger.SNG.WriteX(this, ex.ToString());
                         }
                         //finally
                         {
                             if (_cws.State != WebSocketState.Open && _cws.State != WebSocketState.Connecting)
                             {
-                                BMLogger.WriteO($"disconnect from server: symbol => {symbol}...");
+                                BMLogger.SNG.WriteO(this, $"disconnect from server: symbol => {symbol}...");
                                 tokenSource.Cancel();
                                 break;
                             }
@@ -353,7 +353,7 @@ namespace CCXT.Collector.BitMEX
 
                 await Task.WhenAll(_sending, _receiving);
 
-                BMLogger.WriteO($"pushing service stopped: symbol => {symbol}...");
+                BMLogger.SNG.WriteO(this, $"pushing service stopped: symbol => {symbol}...");
             }
         }
     }

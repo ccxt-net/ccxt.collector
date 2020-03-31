@@ -16,7 +16,7 @@ namespace CCXT.Collector.Upbit.Private
         /// 주문의 고유 아이디
         /// </summary>
         [JsonProperty(PropertyName = "uuid")]
-        public override string? orderId
+        public override string orderId
         {
             get;
             set;
@@ -26,7 +26,7 @@ namespace CCXT.Collector.Upbit.Private
         /// 주문 종류
         /// </summary>
         [JsonProperty(PropertyName = "side")]
-        private string? sideValue
+        private string sideValue
         {
             set
             {
@@ -38,7 +38,7 @@ namespace CCXT.Collector.Upbit.Private
         /// 주문 방식
         /// </summary>
         [JsonProperty(PropertyName = "ord_type")]
-        private string? orderValue
+        private string orderValue
         {
             set
             {
@@ -59,7 +59,7 @@ namespace CCXT.Collector.Upbit.Private
         /// 주문 상태
         /// </summary>
         [JsonProperty(PropertyName = "state")]
-        private string? statusValue
+        private string statusValue
         {
             set
             {
@@ -71,7 +71,7 @@ namespace CCXT.Collector.Upbit.Private
         /// 마켓의 유일키
         /// </summary>
         [JsonProperty(PropertyName = "market")]
-        public override string? symbol
+        public override string symbol
         {
             get;
             set;
@@ -185,7 +185,7 @@ namespace CCXT.Collector.Upbit.Private
         /// 마켓의 유일키
         /// </summary>
         [JsonProperty(PropertyName = "market")]
-        public string? symbol
+        public string symbol
         {
             get;
             set;
@@ -195,7 +195,7 @@ namespace CCXT.Collector.Upbit.Private
         /// 체결의 고유 아이디
         /// </summary>
         [JsonProperty(PropertyName = "uuid")]
-        public string? tradeId
+        public string tradeId
         {
             get;
             set;
@@ -234,7 +234,7 @@ namespace CCXT.Collector.Upbit.Private
         /// 주문 종류
         /// </summary>
         [JsonProperty(PropertyName = "side")]
-        private string? sideValue
+        private string sideValue
         {
             set
             {

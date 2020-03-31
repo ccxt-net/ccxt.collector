@@ -15,7 +15,7 @@ namespace CCXT.Collector.Upbit.Private
         /// 주문의 고유 아이디
         /// </summary>
         [JsonProperty(PropertyName = "uuid")]
-        public override string? orderId
+        public override string orderId
         {
             get;
             set;
@@ -44,7 +44,7 @@ namespace CCXT.Collector.Upbit.Private
         /// 마켓의 유일키
         /// </summary>
         [JsonProperty(PropertyName = "market")]
-        public override string? symbol
+        public override string symbol
         {
             get;
             set;

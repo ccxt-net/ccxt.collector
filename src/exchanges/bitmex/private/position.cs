@@ -14,7 +14,7 @@ namespace CCXT.Collector.BitMEX.Private
         /// Your unique account ID.
         /// </summary>
         [JsonProperty(PropertyName = "account")]
-        public override string? positionId
+        public override string positionId
         {
             get;
             set;
@@ -24,7 +24,7 @@ namespace CCXT.Collector.BitMEX.Private
         /// The contract for this position.
         /// </summary>
         [JsonProperty(PropertyName = "symbol")]
-        public override string? symbol
+        public override string symbol
         {
             get;
             set;

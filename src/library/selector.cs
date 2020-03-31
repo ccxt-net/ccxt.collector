@@ -5,7 +5,7 @@
         /// <summary>
         /// for Upbit
         /// </summary>
-        public virtual string? type
+        public virtual string type
         {
             get;
             set;
@@ -14,7 +14,7 @@
         /// <summary>
         /// 
         /// </summary>
-        public virtual string? code
+        public virtual string code
         {
             get;
             set;
@@ -23,7 +23,7 @@
         /// <summary>
         /// 
         /// </summary>
-        public virtual string? stream_type
+        public virtual string stream_type
         {
             get;
             set;
@@ -32,7 +32,7 @@
         /// <summary>
         /// for Binance
         /// </summary>
-        public virtual string? stream
+        public virtual string stream
         {
             get;
             set;
@@ -41,7 +41,7 @@
         /// <summary>
         ///
         /// </summary>
-        public virtual string? exchanges
+        public virtual string exchanges
         {
             get;
             set;
@@ -50,7 +50,7 @@
         /// <summary>
         ///
         /// </summary>
-        public virtual string? symbols
+        public virtual string symbols
         {
             get;
             set;

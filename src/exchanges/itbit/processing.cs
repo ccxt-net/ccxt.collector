@@ -1,5 +1,5 @@
 ﻿using CCXT.Collector.Library;
-using CCXT.Collector.Library.Public;
+using CCXT.Collector.Service;
 using CCXT.Collector.Upbit.Public;
 using Newtonsoft.Json;
 using System;
@@ -13,7 +13,7 @@ namespace CCXT.Collector.ItBit
 {
     public partial class Processing
     {
-        private static ConcurrentQueue<QMessage>? __recv_queue = null;
+        private static ConcurrentQueue<QMessage> __recv_queue = null;
 
         /// <summary>
         ///
@@ -40,7 +40,7 @@ namespace CCXT.Collector.ItBit
 
         public async Task Start(CancellationTokenSource tokenSource)
         {
-            IBLogger.WriteO($"processing service start...");
+            IBLogger.SNG.WriteO(this, $"processing service start...");
 
             var _processing = Task.Run(async () =>
             {
@@ -52,7 +52,7 @@ namespace CCXT.Collector.ItBit
                     {
                         await Task.Delay(0);
 
-                        var _message = (QMessage?)null;
+                        var _message = (QMessage)null;
                         if (ReceiveQ.TryDequeue(out _message) == false)
                         {
                             var _cancelled = tokenSource.Token.WaitHandle.WaitOne(0);
@@ -220,7 +220,7 @@ namespace CCXT.Collector.ItBit
                         }
 #if DEBUG
                         else
-                            IBLogger.WriteO(_message.payload);
+                            IBLogger.SNG.WriteO(this, _message.payload);
 #endif
                         if (tokenSource.IsCancellationRequested == true)
                             break;
@@ -230,7 +230,7 @@ namespace CCXT.Collector.ItBit
                     }
                     catch (Exception ex)
                     {
-                        IBLogger.WriteX(ex.ToString());
+                        IBLogger.SNG.WriteX(this, ex.ToString());
                     }
                 }
             },
@@ -239,7 +239,7 @@ namespace CCXT.Collector.ItBit
 
             await Task.WhenAll(_processing);
 
-            IBLogger.WriteO($"processing service stopped...");
+            IBLogger.SNG.WriteO(this, $"processing service stop...");
         }
     }
 }

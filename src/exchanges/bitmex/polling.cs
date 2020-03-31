@@ -11,7 +11,7 @@ namespace CCXT.Collector.BitMEX
 {
     public class Polling : KRestClient
     {
-        private CCXT.Collector.BitMEX.Public.PublicApi? __public_api = null;
+        private CCXT.Collector.BitMEX.Public.PublicApi __public_api = null;
         private CCXT.Collector.BitMEX.Public.PublicApi publicApi
         {
             get
@@ -35,7 +35,7 @@ namespace CCXT.Collector.BitMEX
 
         public async Task Start(CancellationTokenSource tokenSource, string symbol, int limits = 25)
         {
-            BMLogger.WriteO($"polling service start: symbol => {symbol}...");
+            BMLogger.SNG.WriteO(this, $"polling service start: symbol => {symbol}...");
 
             var _m_polling = Task.Run(async () =>
             {
@@ -53,7 +53,7 @@ namespace CCXT.Collector.BitMEX
                             Processing.SendReceiveQ(new QMessage
                             {
                                 command = "AP",
-                                exchange = BMLogger.exchange_name,
+                                exchange = BMLogger.SNG.exchange_name,
                                 symbol = symbol,
                                 stream = "order",
                                 action = "polling",
@@ -66,7 +66,7 @@ namespace CCXT.Collector.BitMEX
                     }
                     catch (Exception ex)
                     {
-                        BMLogger.WriteX(ex.ToString());
+                        BMLogger.SNG.WriteX(this, ex.ToString());
                     }
                     //finally
                     {
@@ -110,7 +110,7 @@ namespace CCXT.Collector.BitMEX
                             Processing.SendReceiveQ(new QMessage
                             {
                                 command = "AP",
-                                exchange = BMLogger.exchange_name,
+                                exchange = BMLogger.SNG.exchange_name,
                                 symbol = symbol,
                                 stream = "trade",
                                 action = "polling",
@@ -122,7 +122,7 @@ namespace CCXT.Collector.BitMEX
                             var _http_status = (int)_t_json_value.StatusCode;
                             if (_http_status == 403 || _http_status == 418 || _http_status == 429)
                             {
-                                BMLogger.WriteQ($"request-limit: symbol => {symbol}, https_status => {_http_status}");
+                                BMLogger.SNG.WriteQ(this, $"request-limit: symbol => {symbol}, https_status => {_http_status}");
 
                                 var _waiting = tokenSource.Token.WaitHandle.WaitOne(0);
                                 if (_waiting == true)
@@ -148,7 +148,7 @@ namespace CCXT.Collector.BitMEX
                     }
                     catch (Exception ex)
                     {
-                        BMLogger.WriteX(ex.ToString());
+                        BMLogger.SNG.WriteX(this, ex.ToString());
                     }
                     //finally
                     {
@@ -191,7 +191,7 @@ namespace CCXT.Collector.BitMEX
                             Processing.SendReceiveQ(new QMessage
                             {
                                 command = "AP",
-                                exchange = BMLogger.exchange_name,
+                                exchange = BMLogger.SNG.exchange_name,
                                 symbol = symbol,
                                 stream = "orderbook",
                                 action = "polling",
@@ -203,7 +203,7 @@ namespace CCXT.Collector.BitMEX
                             var _http_status = (int)_o_json_value.StatusCode;
                             if (_http_status == 403 || _http_status == 418 || _http_status == 429)
                             {
-                                BMLogger.WriteQ($"request-limit: symbol => {symbol}, https_status => {_http_status}");
+                                BMLogger.SNG.WriteQ(this, $"request-limit: symbol => {symbol}, https_status => {_http_status}");
 
                                 var _waiting = tokenSource.Token.WaitHandle.WaitOne(0);
                                 if (_waiting == true)
@@ -229,7 +229,7 @@ namespace CCXT.Collector.BitMEX
                     }
                     catch (Exception ex)
                     {
-                        BMLogger.WriteX(ex.ToString());
+                        BMLogger.SNG.WriteX(this, ex.ToString());
                     }
                     //finally
                     {
@@ -249,7 +249,7 @@ namespace CCXT.Collector.BitMEX
 
             await Task.WhenAll(_m_polling, _t_polling, _o_polling);
 
-            BMLogger.WriteO($"polling service stopped: symbol => {symbol}...");
+            BMLogger.SNG.WriteO(this, $"polling service stopped: symbol => {symbol}...");
         }
     }
 }

@@ -41,7 +41,7 @@ namespace CCXT.Collector.Binance.Public
         /// </summary>
         /// <param name="args">Add additional attributes for each exchange</param>
         /// <returns></returns>
-        public override async ValueTask<Markets> FetchMarketsAsync(Dictionary<string, object>? args = null)
+        public override async ValueTask<Markets> FetchMarketsAsync(Dictionary<string, object> args = null)
         {
             var _result = new Markets();
 
@@ -118,7 +118,7 @@ namespace CCXT.Collector.Binance.Public
                             limits = _limits
                         };
 
-                        JToken? _filters = _market["filters"];
+                        JToken _filters = _market["filters"];
                         if (_filters != null)
                         {
                             var _price_filter = _filters.SingleOrDefault(f => f["filterType"]?.ToString() == "PRICE_FILTER");

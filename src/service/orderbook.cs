@@ -1,106 +1,174 @@
 ﻿using CCXT.Collector.Library;
-using RabbitMQ.Client;
-using System;
-using System.Collections.Concurrent;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
+using System.Collections.Generic;
 
 namespace CCXT.Collector.Service
 {
-    public class OrderbookQ : FactoryX
+    /// <summary>
+    /// item of orderbook
+    /// </summary>
+    public class SOrderBookItem
     {
-        public OrderbookQ(
-             string? host_name = null, string? ip_address = null, string? virtual_host = null,
-             string? user_name = null, string password = null
-         )
-         : base(host_name, ip_address, virtual_host, user_name, password, OrderbookQName)
+        /// <summary>
+        /// I,U,D
+        /// </summary>
+        public string action
         {
+            get;
+            set;
         }
 
-        private static ConcurrentQueue<string> __order_book_queue = null;
+        /// <summary>
+        /// quantity
+        /// </summary>
+        public decimal quantity
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// price
+        /// </summary>
+        public decimal price
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// amount (quantity * price)
+        /// </summary>
+        public decimal amount
+        {
+            get;
+            set;
+        }
 
         /// <summary>
         ///
         /// </summary>
-        private static ConcurrentQueue<string> QOrderbook
+        public int count
         {
-            get
-            {
-                if (__order_book_queue == null)
-                    __order_book_queue = new ConcurrentQueue<string>();
-
-                return __order_book_queue;
-            }
+            get;
+            set;
         }
 
         /// <summary>
         ///
         /// </summary>
-        /// <param name="jsonMessage"></param>
-        public static void Write(string jsonMessage)
+        public long id
         {
-            QOrderbook.Enqueue(jsonMessage);
+            get;
+            set;
+        }
+    }
+
+    /// <summary>
+    ///
+    /// </summary>
+    public class SOrderBook
+    {
+        public SOrderBook()
+        {
+            this.asks = new List<SOrderBookItem>();
+            this.bids = new List<SOrderBookItem>();
         }
 
-        public async Task Start(CancellationTokenSource tokenSource)
+        /// <summary>
+        /// 호가 매도 총 잔량
+        /// </summary>
+        public virtual decimal askSumQty
         {
-            LoggerQ.WriteO($"orderbook service start...", FactoryX.RootQName);
+            get;
+            set;
+        }
 
-            var _processing = Task.Run(async () =>
-            {
-                using (var _connection = CFactory.CreateConnection())
-                {
-                    using (var _channel = _connection.CreateModel())
-                    {
-                        _channel.ExchangeDeclare(exchange: QueueName, type: "fanout");
+        /// <summary>
+        /// 호가 매수 총 잔량
+        /// </summary>
+        public virtual decimal bidSumQty
+        {
+            get;
+            set;
+        }
 
-                        while (true)
-                        {
-                            try
-                            {
-                                await Task.Delay(0);
+        /// <summary>
+        /// 64-bit Unix Timestamp in milliseconds since Epoch 1 Jan 1970
+        /// </summary>
+        public long timestamp
+        {
+            get;
+            set;
+        }
 
-                                var _json_message = (string?)null;
-                                if (QOrderbook.TryDequeue(out _json_message) == false)
-                                {
-                                    var _cancelled = tokenSource.Token.WaitHandle.WaitOne(0);
-                                    if (_cancelled == true)
-                                        break;
+        /// <summary>
+        /// buy array
+        /// </summary>
+        public List<SOrderBookItem> bids
+        {
+            get;
+            set;
+        }
 
-                                    await Task.Delay(10);
-                                    continue;
-                                }
+        /// <summary>
+        /// sell array
+        /// </summary>
+        public List<SOrderBookItem> asks
+        {
+            get;
+            set;
+        }
+    }
 
-#if !DEBUG
-                                var _body = Encoding.UTF8.GetBytes(_json_message);
-                                _channel.BasicPublish(exchange: QueueName, routingKey: "", basicProperties: null, body: _body);
-#else
-                                LoggerQ.WriteO(_json_message);
+    /// <summary>
+    ///
+    /// </summary>
+    public class SOrderBooks : SApiResult<SOrderBook>
+    {
+#if RAWJSON
+        /// <summary>
+        ///
+        /// </summary>
+        [JsonIgnore]
+        public string rawJson
+        {
+            get;
+            set;
+        }
 #endif
-                                if (_channel.IsClosed == true)
-                                {
-                                    tokenSource.Cancel();
-                                    break;
-                                }
+    }
 
-                                if (tokenSource.IsCancellationRequested == true)
-                                    break;
-                            }
-                            catch (Exception ex)
-                            {
-                                LoggerQ.WriteX(ex.ToString());
-                            }
-                        }
-                    }
-                }
-            },
-            tokenSource.Token
-            );
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="sender"></param>
+    /// <param name="e"></param>
+    public delegate void OrderBookEventHandler(object sender, CCEventArgs e);
 
-            await Task.WhenAll(_processing);
 
-            LoggerQ.WriteO($"orderbook service stopped...", FactoryX.RootQName);
+    /// <summary>
+    /// 
+    /// </summary>
+    public class CCOrderBook
+    {
+        public static event OrderBookEventHandler OrderBookEvent;
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="exchange"></param>
+        /// <param name="jsonMessage"></param>
+        public void Write(object sender, string exchange, string jsonMessage)
+        {
+            if (OrderBookEvent != null)
+            {
+                OrderBookEvent(sender, new CCEventArgs
+                {
+                    exchange = exchange,
+                    message = jsonMessage
+                });
+            }
         }
     }
 }

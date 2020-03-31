@@ -62,15 +62,15 @@ namespace CCXT.Collector.KebHana
         /// <summary>
         ///
         /// </summary>
-        public static KebExchange? LastExchange
+        public static KebExchange LastExchange
         {
             get;
             set;
         }
 
-        public static KebExchangeItem? GetExchange(string symbol)
+        public static KebExchangeItem GetExchange(string symbol)
         {
-            var _result = (KebExchangeItem?)null;
+            var _result = (KebExchangeItem)null;
 
             if (LastExchange != null)
                 _result = LastExchange.data.Where(e => e.code == symbol).FirstOrDefault();
@@ -82,7 +82,7 @@ namespace CCXT.Collector.KebHana
 
         public async Task Start(CancellationTokenSource tokenSource)
         {
-            KELogger.WriteO($"polling service start...");
+            KELogger.SNG.WriteO(this, $"polling service start...");
 
             PollingTasks.Add(Task.Run(async () =>
             {
@@ -130,7 +130,7 @@ namespace CCXT.Collector.KebHana
                     }
                     catch (Exception ex)
                     {
-                        KELogger.WriteX(ex.ToString());
+                        KELogger.SNG.WriteX(this, ex.ToString());
                     }
                     //finally
                     {
@@ -150,7 +150,7 @@ namespace CCXT.Collector.KebHana
 
             await Task.WhenAll(PollingTasks);
 
-            KELogger.WriteO($"polling service stopped..");
+            KELogger.SNG.WriteO(this, $"polling service stopped..");
         }
     }
 }

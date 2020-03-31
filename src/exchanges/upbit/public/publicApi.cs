@@ -1,4 +1,4 @@
-﻿using CCXT.Collector.Library.Public;
+﻿using CCXT.Collector.Service;
 using OdinSdk.BaseLib.Coin;
 using OdinSdk.BaseLib.Coin.Public;
 using System;
@@ -35,7 +35,7 @@ namespace CCXT.Collector.Upbit.Public
         /// Fetch symbols, market ids and exchanger's information
         /// </summary>
         /// <returns></returns>
-        public override async ValueTask<Markets> FetchMarketsAsync(Dictionary<string, object>? args = null)
+        public override async ValueTask<Markets> FetchMarketsAsync(Dictionary<string, object> args = null)
         {
             var _result = new Markets();
 

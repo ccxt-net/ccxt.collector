@@ -5,44 +5,22 @@ namespace CCXT.Collector.Upbit
     /// <summary>
     /// upbit
     /// </summary>
-    public class UPLogger
+    public class UPLogger : CCLogger
     {
-        public const string exchange_name = "upbit";
-
-        /// <summary>
-        ///
-        /// </summary>
-        /// <param name="message"></param>
-        public static void WriteQ(string message)
+        public UPLogger() : base(UPConfig.DealerName)
         {
-            LoggerQ.WriteQ(message, exchange_name);
         }
 
-        /// <summary>
-        ///
-        /// </summary>
-        /// <param name="message"></param>
-        public static void WriteO(string message)
-        {
-            LoggerQ.WriteO(message, exchange_name);
-        }
+        private static UPLogger _single_instance = null;
 
-        /// <summary>
-        ///
-        /// </summary>
-        /// <param name="message"></param>
-        public static void WriteX(string message)
+        public static UPLogger SNG
         {
-            LoggerQ.WriteX(message, exchange_name);
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="message"></param>
-        public static void WriteC(string message)
-        {
-            LoggerQ.WriteC(message, exchange_name);
+            get
+            {
+                if (_single_instance == null)
+                    _single_instance = new UPLogger();
+                return _single_instance;
+            }
         }
     }
 }

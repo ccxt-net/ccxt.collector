@@ -1,5 +1,5 @@
 ﻿using CCXT.Collector.Library;
-using CCXT.Collector.Library.Public;
+using CCXT.Collector.Service;
 using CCXT.Collector.Upbit.Public;
 using Newtonsoft.Json;
 using System;
@@ -13,7 +13,7 @@ namespace CCXT.Collector.Bithumb
 {
     public partial class Processing
     {
-        private static ConcurrentQueue<QMessage>? __recv_queue = null;
+        private static ConcurrentQueue<QMessage> __recv_queue = null;
 
         /// <summary>
         ///
@@ -40,7 +40,7 @@ namespace CCXT.Collector.Bithumb
 
         public async Task Start(CancellationTokenSource tokenSource)
         {
-            GMLogger.WriteO($"processing service start...");
+            BTLogger.SNG.WriteO(this, $"processing service start...");
 
             var _processing = Task.Run(async () =>
             {
@@ -52,7 +52,7 @@ namespace CCXT.Collector.Bithumb
                     {
                         await Task.Delay(0);
 
-                        var _message = (QMessage?)null;
+                        var _message = (QMessage)null;
                         if (ReceiveQ.TryDequeue(out _message) == false)
                         {
                             var _cancelled = tokenSource.Token.WaitHandle.WaitOne(0);
@@ -224,7 +224,7 @@ namespace CCXT.Collector.Bithumb
                         }
 #if DEBUG
                         else
-                            GMLogger.WriteO(_message.payload);
+                            BTLogger.SNG.WriteO(this, _message.payload);
 #endif
                         if (tokenSource.IsCancellationRequested == true)
                             break;
@@ -234,7 +234,7 @@ namespace CCXT.Collector.Bithumb
                     }
                     catch (Exception ex)
                     {
-                        GMLogger.WriteX(ex.ToString());
+                        BTLogger.SNG.WriteX(this, ex.ToString());
                     }
                 }
             },
@@ -243,7 +243,7 @@ namespace CCXT.Collector.Bithumb
 
             await Task.WhenAll(_processing);
 
-            GMLogger.WriteO($"processing service stopped...");
+            BTLogger.SNG.WriteO(this, $"processing service stop...");
         }
     }
 }

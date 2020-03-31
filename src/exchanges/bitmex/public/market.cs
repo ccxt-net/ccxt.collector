@@ -11,7 +11,7 @@ namespace CCXT.Collector.BitMEX.Public
         /// <summary>
         ///
         /// </summary>
-        public string? state
+        public string state
         {
             get;
             set;
@@ -21,7 +21,7 @@ namespace CCXT.Collector.BitMEX.Public
         ///
         /// </summary>
         [JsonProperty(PropertyName = "symbol")]
-        public override string? symbol
+        public override string symbol
         {
             get;
             set;
@@ -30,7 +30,7 @@ namespace CCXT.Collector.BitMEX.Public
         /// <summary>
         ///
         /// </summary>
-        public string? rootSymbol
+        public string rootSymbol
         {
             get;
             set;
@@ -39,7 +39,7 @@ namespace CCXT.Collector.BitMEX.Public
         /// <summary>
         ///
         /// </summary>
-        public string? underlying
+        public string underlying
         {
             get;
             set;
@@ -48,7 +48,7 @@ namespace CCXT.Collector.BitMEX.Public
         /// <summary>
         /// 포지션 계약 단위 (무기한 일때 값 없음)
         /// </summary>
-        public string? positionCurrency
+        public string positionCurrency
         {
             get;
             set;
@@ -57,7 +57,7 @@ namespace CCXT.Collector.BitMEX.Public
         /// <summary>
         ///
         /// </summary>
-        public string? quoteCurrency
+        public string quoteCurrency
         {
             get;
             set;
@@ -66,7 +66,7 @@ namespace CCXT.Collector.BitMEX.Public
         /// <summary>
         ///
         /// </summary>
-        public string? settlCurrency
+        public string settlCurrency
         {
             get;
             set;
@@ -75,7 +75,7 @@ namespace CCXT.Collector.BitMEX.Public
         /// <summary>
         ///
         /// </summary>
-        public string? orderBase
+        public string orderBase
         {
             get;
             set;
@@ -84,7 +84,7 @@ namespace CCXT.Collector.BitMEX.Public
         /// <summary>
         ///
         /// </summary>
-        public string? orderQuote
+        public string orderQuote
         {
             get;
             set;
@@ -239,7 +239,7 @@ namespace CCXT.Collector.BitMEX.Public
         /// <summary>
         ///
         /// </summary>
-        public string? type
+        public string type
         {
             get;
             set;

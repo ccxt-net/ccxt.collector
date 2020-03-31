@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
 
-namespace CCXT.Collector.Library.Public
+namespace CCXT.Collector.Library
 {
     /// <summary>
     /// api call result class
@@ -32,7 +32,7 @@ namespace CCXT.Collector.Library.Public
         /// error or success message
         /// </summary>
         [JsonIgnore]
-        public virtual string? message
+        public virtual string message
         {
             get;
             set;
@@ -52,7 +52,7 @@ namespace CCXT.Collector.Library.Public
         /// <summary>
         ///
         /// </summary>
-        public void SetSuccess(string? message = "success", bool success = true)
+        public void SetSuccess(string message = "success", bool success = true)
         {
             this.message = message;
             this.success = success;
@@ -61,7 +61,7 @@ namespace CCXT.Collector.Library.Public
         /// <summary>
         ///
         /// </summary>
-        public void SetFailure(string? message = "failure", bool success = false)
+        public void SetFailure(string message = "failure", bool success = false)
         {
             this.message = message;
             this.success = success;
@@ -73,7 +73,7 @@ namespace CCXT.Collector.Library.Public
         /// <summary>
         ///
         /// </summary>
-        public string? exchange
+        public string exchange
         {
             get;
             set;
@@ -82,16 +82,16 @@ namespace CCXT.Collector.Library.Public
         /// <summary>
         /// S, R
         /// </summary>
-        public string? stream
+        public string stream
         {
             get;
             set;
         }
 
         /// <summary>
-        /// string? symbol of the market ('BTCUSD', 'ETHBTC', ...)
+        /// string symbol of the market ('BTCUSD', 'ETHBTC', ...)
         /// </summary>
-        public string? symbol
+        public string symbol
         {
             get;
             set;
@@ -100,7 +100,7 @@ namespace CCXT.Collector.Library.Public
         /// <summary>
         /// 
         /// </summary>
-        public string? action
+        public string action
         {
             get;
             set;

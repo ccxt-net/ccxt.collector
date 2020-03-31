@@ -1,6 +1,4 @@
 ﻿using CCXT.Collector.Library;
-using CCXT.Collector.Library.Private;
-using CCXT.Collector.Library.Public;
 using CCXT.Collector.Service;
 using Newtonsoft.Json;
 using OdinSdk.BaseLib.Coin.Types;
@@ -13,6 +11,11 @@ namespace CCXT.Collector.BitMEX
 {
     public partial class Processing
     {
+        private readonly CCOrderBook __orderbook = new CCOrderBook();
+        private readonly CCTrading __trading = new CCTrading();
+        private readonly CCTicker __ticker = new CCTicker();
+        private readonly CCComplete __complete = new CCComplete();
+
         private static ConcurrentDictionary<string, SOrderBooks> __qOrderBooks = new ConcurrentDictionary<string, SOrderBooks>();
         private static ConcurrentDictionary<string, Settings> __qSettings = new ConcurrentDictionary<string, Settings>();
         private static ConcurrentDictionary<string, SMyOrders> __qMyOrders = new ConcurrentDictionary<string, SMyOrders>();        
@@ -798,7 +801,7 @@ namespace CCXT.Collector.BitMEX
             await Task.Delay(0);
 
             var _json_data = JsonConvert.SerializeObject(sob);
-            OrderbookQ.Write(_json_data);
+            __orderbook.Write(this, BMConfig.DealerName, _json_data);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -807,7 +810,7 @@ namespace CCXT.Collector.BitMEX
             await Task.Delay(0);
 
             var _json_data = JsonConvert.SerializeObject(sco);
-            TradingQ.Write(_json_data);
+            __trading.Write(this, BMConfig.DealerName, _json_data);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -816,7 +819,7 @@ namespace CCXT.Collector.BitMEX
             await Task.Delay(0);
 
             var _json_data = JsonConvert.SerializeObject(stk);
-            TickerQ.Write(_json_data);
+            __ticker.Write(this, BMConfig.DealerName, _json_data);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -825,7 +828,7 @@ namespace CCXT.Collector.BitMEX
             await Task.Delay(0);
 
             var _json_data = JsonConvert.SerializeObject(stk);
-            CompleteQ.Write(_json_data);
+            __complete.Write(this, BMConfig.DealerName, _json_data);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

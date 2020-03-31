@@ -6,7 +6,7 @@ namespace CCXT.Collector.Upbit.Public
     /// <summary>
     ///
     /// </summary>
-    public class UCompleteOrderItem : CCXT.Collector.Library.Public.SCompleteOrderItem
+    public class UCompleteOrderItem : CCXT.Collector.Service.SCompleteOrderItem
     {
         /// <summary>
         ///
@@ -52,7 +52,7 @@ namespace CCXT.Collector.Upbit.Public
         ///
         /// </summary>
         [JsonProperty(PropertyName = "ask_bid")]
-        private string? sideValue
+        private string sideValue
         {
             set
             {
@@ -83,7 +83,7 @@ namespace CCXT.Collector.Upbit.Public
         /// 마켓 구분 코드
         /// </summary>
         [JsonProperty(PropertyName = "market")]
-        public string? symbol
+        public string symbol
         {
             get;
             set;
@@ -124,7 +124,7 @@ namespace CCXT.Collector.Upbit.Public
         /// <summary>
         ///
         /// </summary>
-        public string? type
+        public string type
         {
             get;
             set;
@@ -134,7 +134,7 @@ namespace CCXT.Collector.Upbit.Public
         ///
         /// </summary>
         [JsonProperty(PropertyName = "code")]
-        public string? symbol
+        public string symbol
         {
             get;
             set;
@@ -162,7 +162,7 @@ namespace CCXT.Collector.Upbit.Public
         /// <summary>
         ///
         /// </summary>
-        public string? change
+        public string change
         {
             get;
             set;
@@ -171,7 +171,7 @@ namespace CCXT.Collector.Upbit.Public
         /// <summary>
         ///
         /// </summary>
-        public string? stream_type
+        public string stream_type
         {
             get;
             set;

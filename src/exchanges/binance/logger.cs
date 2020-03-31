@@ -5,44 +5,22 @@ namespace CCXT.Collector.Binance
     /// <summary>
     /// binance
     /// </summary>
-    public class BNLogger
+    public class BNLogger : CCLogger
     {
-        public const string exchange_name = "binance";
-
-        /// <summary>
-        ///
-        /// </summary>
-        /// <param name="message"></param>
-        public static void WriteQ(string message)
+        public BNLogger() : base(BNConfig.DealerName)
         {
-            LoggerQ.WriteQ(message, exchange_name);
         }
 
-        /// <summary>
-        ///
-        /// </summary>
-        /// <param name="message"></param>
-        public static void WriteO(string message)
-        {
-            LoggerQ.WriteO(message, exchange_name);
-        }
+        private static BNLogger _single_instance = null;
 
-        /// <summary>
-        ///
-        /// </summary>
-        /// <param name="message"></param>
-        public static void WriteX(string message)
+        public static BNLogger SNG
         {
-            LoggerQ.WriteX(message, exchange_name);
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="message"></param>
-        public static void WriteC(string message)
-        {
-            LoggerQ.WriteC(message, exchange_name);
+            get
+            {
+                if (_single_instance == null)
+                    _single_instance = new BNLogger();
+                return _single_instance;
+            }
         }
     }
 }

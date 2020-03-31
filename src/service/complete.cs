@@ -1,106 +1,557 @@
-﻿using CCXT.Collector.Library;
-using RabbitMQ.Client;
-using System;
-using System.Collections.Concurrent;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
+﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
+using OdinSdk.BaseLib.Coin;
+using OdinSdk.BaseLib.Coin.Types;
+using OdinSdk.BaseLib.Configuration;
+using System.Collections.Generic;
 
 namespace CCXT.Collector.Service
 {
-    public class CompleteQ : FactoryX
+    /// <summary>
+    ///
+    /// </summary>
+    public interface ISMyOrderItem
     {
-        public CompleteQ(
-             string? host_name = null, string? ip_address = null, string? virtual_host = null,
-             string? user_name = null, string password = null
-         )
-         : base(host_name, ip_address, virtual_host, user_name, password, CompleteQName)
+        /// <summary>
+        ///
+        /// </summary>
+        string orderId
         {
+            get;
+            set;
         }
-
-        private static ConcurrentQueue<string> __complete_queue = null;
 
         /// <summary>
         ///
         /// </summary>
-        private static ConcurrentQueue<string> QComplete
+        string symbol
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        ///
+        /// </summary>
+        SideType sideType
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        ///
+        /// </summary>
+        OrderType orderType
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        ///
+        /// </summary>
+        MakerType makerType
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        ///
+        /// </summary>
+        OrderStatus orderStatus
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        bool workingIndicator
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        ///
+        /// </summary>
+        long timestamp
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// ISO 8601 datetime string with milliseconds
+        /// </summary>
+        string datetime
+        {
+            get;
+        }
+
+        /// <summary>
+        ///
+        /// </summary>
+        decimal quantity
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        ///
+        /// </summary>
+        decimal price
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        ///
+        /// </summary>
+        decimal amount
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// executedQty
+        /// </summary>
+        decimal filled
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        ///
+        /// </summary>
+        decimal remaining
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        ///
+        /// </summary>
+        decimal avgPx
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        ///
+        /// </summary>
+        decimal cost
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        ///
+        /// </summary>
+        decimal fee
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        ///
+        /// </summary>
+        int count
+        {
+            get;
+            set;
+        }
+    }
+
+    /// <summary>
+    ///
+    /// </summary>
+    public class SMyOrderItem : ISMyOrderItem
+    {
+        /// <summary>
+        ///
+        /// </summary>
+        public string orderId
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        ///
+        /// </summary>
+        public string symbol
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        ///
+        /// </summary>
+        [JsonConverter(typeof(StringEnumConverter))]
+        public SideType sideType
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        ///
+        /// </summary>
+        [JsonConverter(typeof(StringEnumConverter))]
+        public OrderType orderType
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        ///
+        /// </summary>
+        [JsonConverter(typeof(StringEnumConverter))]
+        public MakerType makerType
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        ///
+        /// </summary>
+        [JsonConverter(typeof(StringEnumConverter))]
+        public OrderStatus orderStatus
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public bool workingIndicator
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        ///
+        /// </summary>
+        public long timestamp
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// ISO 8601 datetime string with milliseconds
+        /// </summary>
+        public string datetime
         {
             get
             {
-                if (__complete_queue == null)
-                    __complete_queue = new ConcurrentQueue<string>();
-
-                return __complete_queue;
+                return CUnixTime.ConvertToUtcTimeMilli(timestamp).ToString("o");
             }
         }
 
         /// <summary>
         ///
         /// </summary>
-        /// <param name="jsonMessage"></param>
-        public static void Write(string jsonMessage)
+        public decimal quantity
         {
-            QComplete.Enqueue(jsonMessage);
+            get;
+            set;
         }
 
-        public async Task Start(CancellationTokenSource tokenSource)
+        /// <summary>
+        ///
+        /// </summary>
+        public decimal price
         {
-            LoggerQ.WriteO($"complete service start...", FactoryX.RootQName);
+            get;
+            set;
+        }
 
-            var _processing = Task.Run(async () =>
-            {
-                using (var _connection = CFactory.CreateConnection())
-                {
-                    using (var _channel = _connection.CreateModel())
-                    {
-                        _channel.ExchangeDeclare(exchange: QueueName, type: "fanout");
+        /// <summary>
+        ///
+        /// </summary>
+        public decimal amount
+        {
+            get;
+            set;
+        }
 
-                        while (true)
-                        {
-                            try
-                            {
-                                await Task.Delay(0);
+        /// <summary>
+        ///
+        /// </summary>
+        public decimal filled
+        {
+            get;
+            set;
+        }
 
-                                var _json_message = (string?)null;
-                                if (QComplete.TryDequeue(out _json_message) == false)
-                                {
-                                    var _cancelled = tokenSource.Token.WaitHandle.WaitOne(0);
-                                    if (_cancelled == true)
-                                        break;
+        /// <summary>
+        ///
+        /// </summary>
+        public decimal remaining
+        {
+            get;
+            set;
+        }
 
-                                    await Task.Delay(10);
-                                    continue;
-                                }
+        /// <summary>
+        ///
+        /// </summary>
+        public decimal avgPx
+        {
+            get;
+            set;
+        }
 
-#if !DEBUG
-                                var _body = Encoding.UTF8.GetBytes(_json_message);
-                                _channel.BasicPublish(exchange: QueueName, routingKey: "", basicProperties: null, body: _body);
-#else
-                                LoggerQ.WriteO(_json_message);
+        /// <summary>
+        ///
+        /// </summary>
+        public decimal cost
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        ///
+        /// </summary>
+        public decimal fee
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        ///
+        /// </summary>
+        public int count
+        {
+            get;
+            set;
+        }
+    }
+
+    /// <summary>
+    /// a market order list
+    /// </summary>
+    public interface ISMyOrders : IApiResult<List<ISMyOrderItem>>
+    {
+        /// <summary>
+        ///
+        /// </summary>
+        string exchange
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// S, R
+        /// </summary>
+        string stream
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        ///
+        /// </summary>
+        string symbol
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        ///
+        /// </summary>
+        string action
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        ///
+        /// </summary>
+        long sequentialId
+        {
+            get;
+            set;
+        }
+#if RAWJSON
+        /// <summary>
+        ///
+        /// </summary>
+        string rawJson
+        {
+            get;
+            set;
+        }
 #endif
-                                if (_channel.IsClosed == true)
-                                {
-                                    tokenSource.Cancel();
-                                    break;
-                                }
+    }
 
-                                if (tokenSource.IsCancellationRequested == true)
-                                    break;
-                            }
-                            catch (Exception ex)
-                            {
-                                LoggerQ.WriteX(ex.ToString());
-                            }
-                        }
-                    }
-                }
-            },
-            tokenSource.Token
-            );
+    /// <summary>
+    /// a market order list
+    /// </summary>
+    public class SMyOrders : ApiResult<List<ISMyOrderItem>>, ISMyOrders
+    {
+        /// <summary>
+        /// is success calling
+        /// </summary>
+        [JsonIgnore]
+        public override bool success
+        {
+            get;
+            set;
+        }
 
-            await Task.WhenAll(_processing);
+        /// <summary>
+        /// error or success message
+        /// </summary>
+        [JsonIgnore]
+        public override string message
+        {
+            get;
+            set;
+        }
 
-            LoggerQ.WriteO($"complete service stopped...", FactoryX.RootQName);
+        /// <summary>
+        /// status, error code
+        /// </summary>
+        [JsonIgnore]
+        public override int statusCode
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        ///
+        /// </summary>
+        [JsonIgnore]
+        public override ErrorCode errorCode
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// check implemented
+        /// </summary>
+        [JsonIgnore]
+        public override bool supported
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        ///
+        /// </summary>
+        public string exchange
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// S, R
+        /// </summary>
+        public string stream
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        ///
+        /// </summary>
+        public string symbol
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        ///
+        /// </summary>
+        public string action
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        ///
+        /// </summary>
+        public long sequentialId
+        {
+            get;
+            set;
+        }
+#if RAWJSON
+        /// <summary>
+        ///
+        /// </summary>
+        [JsonIgnore]
+        public string rawJson
+        {
+            get;
+            set;
+        }
+#endif
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="sender"></param>
+    /// <param name="e"></param>
+    public delegate void CompleteEventHandler(object sender, CCEventArgs e);
+
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public class CCComplete
+    {
+        public static event CompleteEventHandler CompleteEvent;
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="exchange"></param>
+        /// <param name="jsonMessage"></param>
+        public void Write(object sender, string exchange, string jsonMessage)
+        {
+            if (CompleteEvent != null)
+            {
+                CompleteEvent(sender, new CCEventArgs
+                {
+                    exchange = exchange,
+                    message = jsonMessage
+                });
+            }
         }
     }
 }

@@ -1,106 +1,125 @@
 ﻿using CCXT.Collector.Library;
-using RabbitMQ.Client;
-using System;
-using System.Collections.Concurrent;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
+using System.Collections.Generic;
 
 namespace CCXT.Collector.Service
 {
-    public class TickerQ : FactoryX
+    /// <summary>
+    ///
+    /// </summary>
+    public class STickerItem
     {
-        public TickerQ(
-             string? host_name = null, string? ip_address = null, string? virtual_host = null,
-             string? user_name = null, string password = null
-         )
-         : base(host_name, ip_address, virtual_host, user_name, password, TickerQName)
-        {
-        }
-
-        private static ConcurrentQueue<string> __book_ticker_queue = null;
-
         /// <summary>
-        ///
+        /// 
         /// </summary>
-        private static ConcurrentQueue<string> QTicker
+        public virtual decimal askPrice
         {
-            get
-            {
-                if (__book_ticker_queue == null)
-                    __book_ticker_queue = new ConcurrentQueue<string>();
-
-                return __book_ticker_queue;
-            }
+            get;
+            set;
         }
 
         /// <summary>
-        ///
+        /// 
         /// </summary>
-        /// <param name="jsonMessage"></param>
-        public static void Write(string jsonMessage)
+        public virtual decimal bidPrice
         {
-            QTicker.Enqueue(jsonMessage);
+            get;
+            set;
         }
 
-        public async Task Start(CancellationTokenSource tokenSource)
+        /// <summary>
+        /// 
+        /// </summary>
+        public virtual decimal askSize
         {
-            LoggerQ.WriteO($"ticker service start...", FactoryX.RootQName);
+            get;
+            set;
+        }
 
-            var _processing = Task.Run(async () =>
-            {
-                using (var _connection = CFactory.CreateConnection())
-                {
-                    using (var _channel = _connection.CreateModel())
-                    {
-                        _channel.ExchangeDeclare(exchange: QueueName, type: "fanout");
+        /// <summary>
+        /// 
+        /// </summary>
+        public virtual decimal bidSize
+        {
+            get;
+            set;
+        }
+    }
 
-                        while (true)
-                        {
-                            try
-                            {
-                                await Task.Delay(0);
+    /// <summary>
+    ///
+    /// </summary>
+    public class STickers : SApiResult<List<STickerItem>>
+    {
+        /// <summary>
+        /// 64-bit Unix Timestamp in milliseconds since Epoch 1 Jan 1970
+        /// </summary>
+        public long timestamp
+        {
+            get;
+            set;
+        }
 
-                                var _json_message = (string?)null;
-                                if (QTicker.TryDequeue(out _json_message) == false)
-                                {
-                                    var _cancelled = tokenSource.Token.WaitHandle.WaitOne(0);
-                                    if (_cancelled == true)
-                                        break;
+        /// <summary>
+        /// 
+        /// </summary>
+        public decimal totalAskSize
+        {
+            get;
+            set;
+        }
 
-                                    await Task.Delay(10);
-                                    continue;
-                                }
-
-#if !DEBUG
-                                var _body = Encoding.UTF8.GetBytes(_json_message);
-                                _channel.BasicPublish(exchange: QueueName, routingKey: "", basicProperties: null, body: _body);
-#else
-                                LoggerQ.WriteO(_json_message);
+        /// <summary>
+        /// 
+        /// </summary>
+        public decimal totalBidSize
+        {
+            get;
+            set;
+        }
+#if RAWJSON
+        /// <summary>
+        ///
+        /// </summary>
+        [JsonIgnore]
+        public string rawJson
+        {
+            get;
+            set;
+        }
 #endif
-                                if (_channel.IsClosed == true)
-                                {
-                                    tokenSource.Cancel();
-                                    break;
-                                }
+    }
 
-                                if (tokenSource.IsCancellationRequested == true)
-                                    break;
-                            }
-                            catch (Exception ex)
-                            {
-                                LoggerQ.WriteX(ex.ToString());
-                            }
-                        }
-                    }
-                }
-            },
-            tokenSource.Token
-            );
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="sender"></param>
+    /// <param name="e"></param>
+    public delegate void TickerEventHandler(object sender, CCEventArgs e);
 
-            await Task.WhenAll(_processing);
 
-            LoggerQ.WriteO($"ticker service stopped...", FactoryX.RootQName);
+    /// <summary>
+    /// 
+    /// </summary>
+    public class CCTicker
+    {
+        public static event TickerEventHandler TickerEvent;
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="exchange"></param>
+        /// <param name="jsonMessage"></param>
+        public void Write(object sender, string exchange, string jsonMessage)
+        {
+            if (TickerEvent != null)
+            {
+                TickerEvent(sender, new CCEventArgs
+                {
+                    exchange = exchange,
+                    message = jsonMessage
+                });
+            }
         }
     }
 }

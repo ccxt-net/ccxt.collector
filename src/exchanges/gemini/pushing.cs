@@ -12,7 +12,7 @@ namespace CCXT.Collector.Gemini
 {
     public class Pushing
     {
-        private static ConcurrentQueue<QMessage>? __command_queue = null;
+        private static ConcurrentQueue<QMessage> __command_queue = null;
 
         /// <summary>
         ///
@@ -65,7 +65,7 @@ namespace CCXT.Collector.Gemini
 
         public async Task Start(CancellationTokenSource tokenSource, string symbol)
         {
-            GMLogger.WriteO($"pushing service start: symbol => {symbol}...");
+            GMLogger.SNG.WriteO(this, $"pushing service start: symbol => {symbol}...");
 
             using (var _cws = new ClientWebSocket())
             {
@@ -83,10 +83,10 @@ namespace CCXT.Collector.Gemini
                                 __last_receive_time = CUnixTime.NowMilli;
                                 await Open(tokenSource, _cws, symbol);
 
-                                GMLogger.WriteO($"pushing open: symbol => {symbol}...");
+                                GMLogger.SNG.WriteO(this, $"pushing open: symbol => {symbol}...");
                             }
 
-                            var _message = (QMessage?)null;
+                            var _message = (QMessage)null;
 
                             if (CommandQ.TryDequeue(out _message) == false)
                             {
@@ -106,13 +106,13 @@ namespace CCXT.Collector.Gemini
                         }
                         catch (Exception ex)
                         {
-                            GMLogger.WriteX(ex.ToString());
+                            GMLogger.SNG.WriteX(this, ex.ToString());
                         }
                         //finally
                         {
                             if (_cws.State != WebSocketState.Open)
                             {
-                                GMLogger.WriteO($"disconnect from server(cmd): symbol => {symbol}...");
+                                GMLogger.SNG.WriteO(this, $"disconnect from server(cmd): symbol => {symbol}...");
                                 tokenSource.Cancel();
                                 break;
                             }
@@ -172,7 +172,7 @@ namespace CCXT.Collector.Gemini
                                 Processing.SendReceiveQ(new QMessage 
                                 { 
                                     command = "WS",
-                                    exchange = GMLogger.exchange_name,
+                                    exchange = GMLogger.SNG.exchange_name,
                                     symbol = symbol,
                                     stream = _selector.type,
                                     action = _selector.stream_type,
@@ -183,7 +183,7 @@ namespace CCXT.Collector.Gemini
                             {
                                 await _cws.CloseOutputAsync(WebSocketCloseStatus.NormalClosure, "", tokenSource.Token);
 
-                                GMLogger.WriteO($"receive close message from server: symbol => {symbol}...");
+                                GMLogger.SNG.WriteO(this, $"receive close message from server: symbol => {symbol}...");
                                 tokenSource.Cancel();
                                 break;
                             }
@@ -193,13 +193,13 @@ namespace CCXT.Collector.Gemini
                         }
                         catch (Exception ex)
                         {
-                            GMLogger.WriteX(ex.ToString());
+                            GMLogger.SNG.WriteX(this, ex.ToString());
                         }
                         //finally
                         {
                             if (_cws.State != WebSocketState.Open)
                             {
-                                GMLogger.WriteO($"disconnect from server: symbol => {symbol}...");
+                                GMLogger.SNG.WriteO(this, $"disconnect from server: symbol => {symbol}...");
                                 tokenSource.Cancel();
                                 break;
                             }
@@ -217,7 +217,7 @@ namespace CCXT.Collector.Gemini
 
                 await Task.WhenAll(_sending, _receiving);
 
-                GMLogger.WriteO($"pushing service stopped: symbol => {symbol}...");
+                GMLogger.SNG.WriteO(this, $"pushing service stopped: symbol => {symbol}...");
             }
         }
     }

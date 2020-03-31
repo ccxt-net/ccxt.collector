@@ -5,35 +5,22 @@ namespace CCXT.Collector.KebHana.Public
     /// <summary>
     /// kebhana
     /// </summary>
-    public class KELogger
+    public class KELogger : CCLogger
     {
-        public const string exchange_name = "kebhana";
-
-        /// <summary>
-        ///
-        /// </summary>
-        /// <param name="message"></param>
-        public static void WriteQ(string message)
+        public KELogger() : base("kebhana")
         {
-            LoggerQ.WriteQ(message, exchange_name);
         }
 
-        /// <summary>
-        ///
-        /// </summary>
-        /// <param name="message"></param>
-        public static void WriteO(string message)
-        {
-            LoggerQ.WriteO(message, exchange_name);
-        }
+        private static KELogger _single_instance = null;
 
-        /// <summary>
-        ///
-        /// </summary>
-        /// <param name="message"></param>
-        public static void WriteX(string message)
+        public static KELogger SNG
         {
-            LoggerQ.WriteX(message, exchange_name);
+            get
+            {
+                if (_single_instance == null)
+                    _single_instance = new KELogger();
+                return _single_instance;
+            }
         }
     }
 }

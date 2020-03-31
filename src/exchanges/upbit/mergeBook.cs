@@ -1,5 +1,4 @@
 ﻿using CCXT.Collector.Library;
-using CCXT.Collector.Library.Public;
 using CCXT.Collector.Service;
 using Newtonsoft.Json;
 using System.Collections.Concurrent;
@@ -11,6 +10,10 @@ namespace CCXT.Collector.Upbit
 {
     public partial class Processing
     {
+        private readonly CCOrderBook __orderbook = new CCOrderBook();
+        private readonly CCTrading __trading = new CCTrading();
+        private readonly CCTicker __ticker = new CCTicker();
+
         private static ConcurrentDictionary<string, SOrderBooks> __qOrderBooks = new ConcurrentDictionary<string, SOrderBooks>();
         private static ConcurrentDictionary<string, Settings> __qSettings = new ConcurrentDictionary<string, Settings>();
 
@@ -550,7 +553,7 @@ namespace CCXT.Collector.Upbit
             await Task.Delay(0);
 
             var _json_data = JsonConvert.SerializeObject(sob);
-            OrderbookQ.Write(_json_data);
+            __orderbook.Write(this, UPConfig.DealerName, _json_data);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -559,7 +562,7 @@ namespace CCXT.Collector.Upbit
             await Task.Delay(0);
 
             var _json_data = JsonConvert.SerializeObject(sco);
-            TradingQ.Write(_json_data);
+            __trading.Write(this, UPConfig.DealerName, _json_data);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -568,7 +571,7 @@ namespace CCXT.Collector.Upbit
             await Task.Delay(0);
 
             var _json_data = JsonConvert.SerializeObject(stk);
-            TickerQ.Write(_json_data);
+            __ticker.Write(this, UPConfig.DealerName, _json_data);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

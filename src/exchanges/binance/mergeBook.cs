@@ -1,6 +1,5 @@
 ﻿using CCXT.Collector.Binance.Public;
 using CCXT.Collector.Library;
-using CCXT.Collector.Library.Public;
 using CCXT.Collector.Service;
 using Newtonsoft.Json;
 using System.Collections.Concurrent;
@@ -12,6 +11,10 @@ namespace CCXT.Collector.Binance
 {
     public partial class Processing
     {
+        private readonly CCOrderBook __orderbook = new CCOrderBook();
+        private readonly CCTrading __trading = new CCTrading();
+        private readonly CCTicker __ticker = new CCTicker();
+
         private static ConcurrentDictionary<string, SOrderBooks> __qOrderBooks = new ConcurrentDictionary<string, SOrderBooks>();
         private static ConcurrentDictionary<string, Settings> __qSettings = new ConcurrentDictionary<string, Settings>();
 
@@ -50,7 +53,7 @@ namespace CCXT.Collector.Binance
         {
             var _rqo = new SOrderBooks
             {
-                exchange = BNLogger.exchange_name, 
+                exchange = BNLogger.SNG.exchange_name, 
                 stream = stream, 
                 symbol = qob.symbol,
                 sequentialId = tradeItems.Max(t => t.timestamp),
@@ -210,7 +213,7 @@ namespace CCXT.Collector.Binance
 
                 var _sqo = new SOrderBooks
                 {
-                    exchange = BNLogger.exchange_name,
+                    exchange = BNLogger.SNG.exchange_name,
                     stream = "snapshot",
                     symbol = orderbook.data.symbol,
                     sequentialId = orderbook.data.lastId,
@@ -268,22 +271,22 @@ namespace CCXT.Collector.Binance
 #if DEBUG
                         // modified check
                         if (_current_ask_size != _settings.last_order_ask_size || _current_bid_size != _settings.last_order_bid_size)
-                            BNLogger.WriteQ($"diffb-{orderbook.stream}: timestamp => {_settings.last_orderbook_id}, symbol => {orderbook.data.symbol}, ask_size => {_current_ask_size}, {_settings.last_order_ask_size}, bid_size => {_current_bid_size}, {_settings.last_order_bid_size}");
+                            BNLogger.SNG.WriteQ(this, $"diffb-{orderbook.stream}: timestamp => {_settings.last_orderbook_id}, symbol => {orderbook.data.symbol}, ask_size => {_current_ask_size}, {_settings.last_order_ask_size}, bid_size => {_current_bid_size}, {_settings.last_order_bid_size}");
 
                         if (_qob.result.asks.Count + _qob.result.bids.Count != 40)
                         {
                             var _ask_count = _qob.result.asks.Count();
                             var _bid_count = _qob.result.bids.Count();
 
-                            BNLogger.WriteQ($"diffb-{orderbook.stream}: timestamp => {_settings.last_orderbook_id}, symbol => {orderbook.data.symbol}, ask_count => {_ask_count}, bid_count => {_bid_count}");
+                            BNLogger.SNG.WriteQ(this, $"diffb-{orderbook.stream}: timestamp => {_settings.last_orderbook_id}, symbol => {orderbook.data.symbol}, ask_count => {_ask_count}, bid_count => {_bid_count}");
                         }
 #endif
                     }
                     else
-                        BNLogger.WriteQ($"trade-{orderbook.stream}: timestamp => {_settings.last_orderbook_id}, symbol => {orderbook.data.symbol}, ask_size => {_current_ask_size}, bid_size => {_current_bid_size}");
+                        BNLogger.SNG.WriteQ(this, $"trade-{orderbook.stream}: timestamp => {_settings.last_orderbook_id}, symbol => {orderbook.data.symbol}, ask_size => {_current_ask_size}, bid_size => {_current_bid_size}");
                 }
                 else
-                    BNLogger.WriteQ($"equal-{orderbook.stream}: timestamp => {_settings.last_orderbook_id}, symbol => {orderbook.data.symbol}, ask_size => {_current_ask_size}, bid_size => {_current_bid_size}");
+                    BNLogger.SNG.WriteQ(this, $"equal-{orderbook.stream}: timestamp => {_settings.last_orderbook_id}, symbol => {orderbook.data.symbol}, ask_size => {_current_ask_size}, bid_size => {_current_bid_size}");
             }
 
             return _result;
@@ -293,7 +296,7 @@ namespace CCXT.Collector.Binance
         {
             var _dqo = new SOrderBooks
             {
-                exchange = BNLogger.exchange_name,
+                exchange = BNLogger.SNG.exchange_name,
                 stream = "diffbooks",
                 symbol = orderbook.data.symbol,
                 sequentialId = orderbook.data.lastId,
@@ -423,9 +426,9 @@ namespace CCXT.Collector.Binance
 
         private async Task snapshotOrderbook(string exchange, string symbol)
         {
-            if (exchange == BNLogger.exchange_name)
+            if (exchange == BNLogger.SNG.exchange_name)
             {
-                SOrderBooks? _sob = null;
+                SOrderBooks _sob = null;
 
                 lock (__qOrderBooks)
                 {
@@ -448,7 +451,7 @@ namespace CCXT.Collector.Binance
             if (sob.result.asks.Count + sob.result.bids.Count > 0)
             {
                 var _json_data = JsonConvert.SerializeObject(sob);
-                OrderbookQ.Write(_json_data);
+                __orderbook.Write(this, BNConfig.DealerName, _json_data);
             }
         }
 
@@ -459,7 +462,7 @@ namespace CCXT.Collector.Binance
             if (sbt.result.Count > 0)
             {
                 var _json_data = JsonConvert.SerializeObject(sbt);
-                TickerQ.Write(_json_data);
+                __ticker.Write(this, BNConfig.DealerName, _json_data);
             }
         }
     }

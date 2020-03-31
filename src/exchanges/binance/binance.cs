@@ -18,7 +18,7 @@ namespace CCXT.Collector.Binance
         /// <summary>
         ///
         /// </summary>
-        public override string DealerName { get; set; } = "Binance";
+        public override string DealerName { get; set; } = BNConfig.DealerName;
 
         /// <summary>
         ///
@@ -143,7 +143,7 @@ namespace CCXT.Collector.Binance
             }
         }
 
-        private HMACSHA256? __encryptor = null;
+        private HMACSHA256 __encryptor = null;
 
         /// <summary>
         ///
@@ -165,7 +165,7 @@ namespace CCXT.Collector.Binance
         /// <param name="endpoint">api link address of a function</param>
         /// <param name="args">Add additional attributes for each exchange</param>
         /// <returns></returns>
-        public override async ValueTask<IRestRequest> CreatePostRequestAsync(string? endpoint, Dictionary<string, object>? args = null)
+        public override async ValueTask<IRestRequest> CreatePostRequestAsync(string endpoint, Dictionary<string, object> args = null)
         {
             var _request = await base.CreatePostRequestAsync(endpoint, args);
 
@@ -202,7 +202,7 @@ namespace CCXT.Collector.Binance
         /// <param name="endpoint">api link address of a function</param>
         /// <param name="args">Add additional attributes for each exchange</param>
         /// <returns></returns>
-        public override async ValueTask<IRestRequest> CreateGetRequestAsync(string? endpoint, Dictionary<string, object>? args = null)
+        public override async ValueTask<IRestRequest> CreateGetRequestAsync(string endpoint, Dictionary<string, object> args = null)
         {
             var _request = await base.CreateGetRequestAsync(endpoint, args);
 
@@ -229,7 +229,7 @@ namespace CCXT.Collector.Binance
         /// <param name="endpoint">api link address of a function</param>
         /// <param name="args">Add additional attributes for each exchange</param>
         /// <returns></returns>
-        public override async ValueTask<IRestRequest> CreateDeleteRequestAsync(string? endpoint, Dictionary<string, object>? args = null)
+        public override async ValueTask<IRestRequest> CreateDeleteRequestAsync(string endpoint, Dictionary<string, object> args = null)
         {
             var _request = await base.CreateDeleteRequestAsync(endpoint, args);
 
@@ -281,7 +281,7 @@ namespace CCXT.Collector.Binance
         /// </summary>
         /// <param name="response">response value arrive from exchange's server</param>
         /// <returns></returns>
-        public override BoolResult GetResponseMessage(IRestResponse? response = null)
+        public override BoolResult GetResponseMessage(IRestResponse response = null)
         {
             var _result = new BoolResult();
 

@@ -901,7 +901,7 @@ namespace CCXT.Collector.BitMEX.Private
         /// </summary>
         /// <param name="order_ids"></param>
         /// <returns></returns>
-        public async ValueTask<MyOrders> CancelOrders(string?[] order_ids)
+        public async ValueTask<MyOrders> CancelOrders(string[] order_ids)
         {
             var _result = new MyOrders();
 

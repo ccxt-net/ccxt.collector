@@ -5,44 +5,22 @@ namespace CCXT.Collector.ItBit
     /// <summary>
     /// itbit
     /// </summary>
-    public class IBLogger
+    public class IBLogger : CCLogger
     {
-        public const string exchange_name = "itbit";
-
-        /// <summary>
-        ///
-        /// </summary>
-        /// <param name="message"></param>
-        public static void WriteQ(string message)
+        public IBLogger() : base(IBConfig.DealerName)
         {
-            LoggerQ.WriteQ(message, exchange_name);
         }
 
-        /// <summary>
-        ///
-        /// </summary>
-        /// <param name="message"></param>
-        public static void WriteO(string message)
-        {
-            LoggerQ.WriteO(message, exchange_name);
-        }
+        private static IBLogger _single_instance = null;
 
-        /// <summary>
-        ///
-        /// </summary>
-        /// <param name="message"></param>
-        public static void WriteX(string message)
+        public static IBLogger SNG
         {
-            LoggerQ.WriteX(message, exchange_name);
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="message"></param>
-        public static void WriteC(string message)
-        {
-            LoggerQ.WriteC(message, exchange_name);
+            get
+            {
+                if (_single_instance == null)
+                    _single_instance = new IBLogger();
+                return _single_instance;
+            }
         }
     }
 }

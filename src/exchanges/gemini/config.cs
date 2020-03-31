@@ -7,6 +7,8 @@ namespace CCXT.Collector.Gemini
     /// </summary>
     public class GMConfig : XConfig
     {
+        public const string DealerName = "Gemini";
+
         private static GMConfig _singleton = null;
         public static new GMConfig SNG
         {

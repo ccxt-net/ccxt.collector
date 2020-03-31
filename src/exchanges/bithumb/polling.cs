@@ -11,7 +11,7 @@ namespace CCXT.Collector.Bithumb
 {
     public class Polling : KRestClient
     {
-        private CCXT.Collector.Upbit.Public.PublicApi? __public_api = null;
+        private CCXT.Collector.Upbit.Public.PublicApi __public_api = null;
         private CCXT.Collector.Upbit.Public.PublicApi publicApi
         {
             get
@@ -24,7 +24,7 @@ namespace CCXT.Collector.Bithumb
 
         public async Task OStart(CancellationTokenSource tokenSource, string symbol, int limit = 32)
         {
-            GMLogger.WriteO($"polling service start: symbol => {symbol}...");
+            BTLogger.SNG.WriteO(this, $"polling service start: symbol => {symbol}...");
 
             var _t_polling = Task.Run(async () =>
             {
@@ -51,7 +51,7 @@ namespace CCXT.Collector.Bithumb
                             Processing.SendReceiveQ(new QMessage
                             {
                                 command = "AP",
-                                exchange = GMLogger.exchange_name,
+                                exchange = BTLogger.SNG.exchange_name,
                                 symbol = symbol,
                                 stream = "trade",
                                 action = "polling",
@@ -63,7 +63,7 @@ namespace CCXT.Collector.Bithumb
                             var _http_status = (int)_t_json_value.StatusCode;
                             if (_http_status == 403 || _http_status == 418)// || _http_status == 429)
                             {
-                                GMLogger.WriteQ($"request-limit: symbol => {symbol}, https_status => {_http_status}");
+                                BTLogger.SNG.WriteQ(this, $"request-limit: symbol => {symbol}, https_status => {_http_status}");
 
                                 var _waiting = tokenSource.Token.WaitHandle.WaitOne(0);
                                 if (_waiting == true)
@@ -78,7 +78,7 @@ namespace CCXT.Collector.Bithumb
                     }
                     catch (Exception ex)
                     {
-                        GMLogger.WriteX(ex.ToString());
+                        BTLogger.SNG.WriteX(this, ex.ToString());
                     }
                     //finally
                     {
@@ -118,7 +118,7 @@ namespace CCXT.Collector.Bithumb
                             Processing.SendReceiveQ(new QMessage
                             {
                                 command = "AP",
-                                exchange = GMLogger.exchange_name,
+                                exchange = BTLogger.SNG.exchange_name,
                                 symbol = symbol,
                                 stream = "orderbook",
                                 action = "polling",
@@ -130,7 +130,7 @@ namespace CCXT.Collector.Bithumb
                             var _http_status = (int)_o_json_value.StatusCode;
                             if (_http_status == 403 || _http_status == 418)// || _http_status == 429)
                             {
-                                GMLogger.WriteQ($"request-limit: symbol => {symbol}, https_status => {_http_status}");
+                                BTLogger.SNG.WriteQ(this, $"request-limit: symbol => {symbol}, https_status => {_http_status}");
 
                                 var _waiting = tokenSource.Token.WaitHandle.WaitOne(0);
                                 if (_waiting == true)
@@ -145,7 +145,7 @@ namespace CCXT.Collector.Bithumb
                     }
                     catch (Exception ex)
                     {
-                        GMLogger.WriteX(ex.ToString());
+                        BTLogger.SNG.WriteX(this, ex.ToString());
                     }
                     //finally
                     {
@@ -163,12 +163,12 @@ namespace CCXT.Collector.Bithumb
 
             await Task.WhenAll(_t_polling, _o_polling);
 
-            GMLogger.WriteO($"polling service stopped: symbol => {symbol}...");
+            BTLogger.SNG.WriteO(this, $"polling service stopped: symbol => {symbol}...");
         }
 
         public async Task BStart(CancellationTokenSource tokenSource, string[] symbols)
         {
-            GMLogger.WriteO($"bpolling service start..");
+            BTLogger.SNG.WriteO(this, $"bpolling service start..");
 
             var _b_polling = Task.Run(async () =>
             {
@@ -209,7 +209,7 @@ namespace CCXT.Collector.Bithumb
                             Processing.SendReceiveQ(new QMessage
                             {
                                 command = "AP",
-                                exchange = GMLogger.exchange_name,
+                                exchange = BTLogger.SNG.exchange_name,
                                 symbol = _symbols,
                                 stream = "ticker",
                                 action = "polling",
@@ -222,7 +222,7 @@ namespace CCXT.Collector.Bithumb
                             var _http_status = (int)_b_json_value.StatusCode;
                             if (_http_status == 403 || _http_status == 418)// || _http_status == 429)
                             {
-                                GMLogger.WriteQ($"request-limit: symbol => {_symbols}, https_status => {_http_status}");
+                                BTLogger.SNG.WriteQ(this, $"request-limit: symbol => {_symbols}, https_status => {_http_status}");
 
                                 var _waiting = tokenSource.Token.WaitHandle.WaitOne(0);
                                 if (_waiting == true)
@@ -237,7 +237,7 @@ namespace CCXT.Collector.Bithumb
                     }
                     catch (Exception ex)
                     {
-                        GMLogger.WriteX(ex.ToString());
+                        BTLogger.SNG.WriteX(this, ex.ToString());
                     }
                     //finally
                     {
@@ -255,7 +255,7 @@ namespace CCXT.Collector.Bithumb
 
             await Task.WhenAll(_b_polling);
 
-            GMLogger.WriteO($"bpolling service stopped..");
+            BTLogger.SNG.WriteO(this, $"bpolling service stopped..");
         }
 
         /// <summary>
@@ -269,7 +269,7 @@ namespace CCXT.Collector.Bithumb
 
         public async Task EStart(CancellationTokenSource tokenSource)
         {
-            GMLogger.WriteO($"epolling service start..");
+            BTLogger.SNG.WriteO(this, $"epolling service start..");
 
             var _dunamu_url = publicApi.publicClient.ExchangeInfo.GetApiUrl("dunamu");
 
@@ -321,7 +321,7 @@ namespace CCXT.Collector.Bithumb
                             var _http_status = (int)_b_json_value.StatusCode;
                             if (_http_status == 403 || _http_status == 418)// || _http_status == 429)
                             {
-                                GMLogger.WriteQ($"https_status => {_http_status}");
+                                BTLogger.SNG.WriteQ(this, $"https_status => {_http_status}");
 
                                 var _waiting = tokenSource.Token.WaitHandle.WaitOne(0);
                                 if (_waiting == true)
@@ -336,7 +336,7 @@ namespace CCXT.Collector.Bithumb
                     }
                     catch (Exception ex)
                     {
-                        GMLogger.WriteX(ex.ToString());
+                        BTLogger.SNG.WriteX(this, ex.ToString());
                     }
                     //finally
                     {
@@ -354,7 +354,7 @@ namespace CCXT.Collector.Bithumb
 
             await Task.WhenAll(_b_polling);
 
-            GMLogger.WriteO($"epolling service stopped..");
+            BTLogger.SNG.WriteO(this, $"epolling service stopped..");
         }
     }
 }

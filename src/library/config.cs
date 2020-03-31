@@ -73,7 +73,7 @@ namespace CCXT.Collector.Library
             }
         }
 
-        private string? __name_start_exchange = null;
+        private string __name_start_exchange = null;
 
         public string StartExchangeNames
         {

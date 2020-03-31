@@ -1,8 +1,7 @@
 ﻿using CCXT.Collector.BitMEX.Private;
 using CCXT.Collector.BitMEX.Public;
 using CCXT.Collector.Library;
-using CCXT.Collector.Library.Private;
-using CCXT.Collector.Library.Public;
+using CCXT.Collector.Service;
 using Newtonsoft.Json;
 using OdinSdk.BaseLib.Coin.Types;
 using OdinSdk.BaseLib.Configuration;
@@ -17,7 +16,7 @@ namespace CCXT.Collector.BitMEX
 {
     public partial class Processing
     {
-        private static ConcurrentQueue<QMessage>? __recv_queue = null;
+        private static ConcurrentQueue<QMessage> __recv_queue = null;
 
         /// <summary>
         ///
@@ -44,7 +43,7 @@ namespace CCXT.Collector.BitMEX
 
         public async Task Start(CancellationTokenSource tokenSource)
         {
-            BMLogger.WriteO($"processing service start...");
+            BMLogger.SNG.WriteO(this, $"processing service start...");
 
             var _processing = Task.Run(async () =>
             {
@@ -56,7 +55,7 @@ namespace CCXT.Collector.BitMEX
                     {
                         await Task.Delay(0);
 
-                        var _message = (QMessage?)null;
+                        var _message = (QMessage)null;
                         if (ReceiveQ.TryDequeue(out _message) == false)
                         {
                             var _cancelled = tokenSource.Token.WaitHandle.WaitOne(0);
@@ -329,7 +328,7 @@ namespace CCXT.Collector.BitMEX
                         }
 #if DEBUG
                         else
-                            BMLogger.WriteO(_message.payload);
+                            BMLogger.SNG.WriteO(this, _message.payload);
 #endif
                         if (tokenSource.IsCancellationRequested == true)
                             break;
@@ -339,7 +338,7 @@ namespace CCXT.Collector.BitMEX
                     }
                     catch (Exception ex)
                     {
-                        BMLogger.WriteX(ex.ToString());
+                        BMLogger.SNG.WriteX(this, ex.ToString());
                     }
                 }
             },
@@ -348,7 +347,7 @@ namespace CCXT.Collector.BitMEX
 
             await Task.WhenAll(_processing);
 
-            BMLogger.WriteO($"processing service stopped...");
+            BMLogger.SNG.WriteO(this, $"processing service stop...");
         }
     }
 }

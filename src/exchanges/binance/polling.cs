@@ -1,6 +1,6 @@
 ﻿using CCXT.Collector.Binance.Public;
 using CCXT.Collector.Library;
-using CCXT.Collector.Library.Public;
+using CCXT.Collector.Service;
 using Newtonsoft.Json;
 using OdinSdk.BaseLib.Configuration;
 using System;
@@ -54,7 +54,7 @@ namespace CCXT.Collector.Binance
             }
         }
         
-        private CCXT.Collector.Binance.Public.PublicApi? __public_api = null;
+        private CCXT.Collector.Binance.Public.PublicApi __public_api = null;
         private CCXT.Collector.Binance.Public.PublicApi publicApi
         {
             get
@@ -67,7 +67,7 @@ namespace CCXT.Collector.Binance
 
         public async Task OStart(CancellationTokenSource tokenSource, string symbol)
         {
-            BNLogger.WriteO($"polling service start: symbol => {symbol}...");
+            BNLogger.SNG.WriteO(this, $"polling service start: symbol => {symbol}...");
 
             if (BNConfig.SNG.UsePollingTicker == false)
             {
@@ -125,7 +125,7 @@ namespace CCXT.Collector.Binance
                                     var _http_status = (int)_o_json_value.StatusCode;
                                     if (_http_status == 403 || _http_status == 418 || _http_status == 429)
                                     {
-                                        BNLogger.WriteQ($"request-limit: symbol => {symbol}, https_status => {_http_status}");
+                                        BNLogger.SNG.WriteQ(this, $"request-limit: symbol => {symbol}, https_status => {_http_status}");
 
                                         var _waiting = tokenSource.Token.WaitHandle.WaitOne(0);
                                         if (_waiting == true)
@@ -141,7 +141,7 @@ namespace CCXT.Collector.Binance
                         }
                         catch (Exception ex)
                         {
-                            BNLogger.WriteX(ex.ToString());
+                            BNLogger.SNG.WriteX(this, ex.ToString());
                         }
                         //finally
                         {
@@ -162,12 +162,12 @@ namespace CCXT.Collector.Binance
 
             await Task.WhenAll(PollingTasks);
 
-            BNLogger.WriteO($"polling service stopped: symbol => {symbol}...");
+            BNLogger.SNG.WriteO(this, $"polling service stopped: symbol => {symbol}...");
         }
 
         public async Task BStart(CancellationTokenSource tokenSource, string symbol)
         {
-            BNLogger.WriteO($"bpolling service start...");
+            BNLogger.SNG.WriteO(this, $"bpolling service start...");
 
             if (BNConfig.SNG.UsePollingTicker == true)
             {
@@ -206,7 +206,7 @@ namespace CCXT.Collector.Binance
 
                                 var _tickers = new STickers
                                 {
-                                    exchange = BNLogger.exchange_name,
+                                    exchange = BNLogger.SNG.exchange_name,
                                     stream = "ticker",
                                     sequentialId = _last_limit_milli_secs,
                                     result = _b_json_data.Where(t => t.symbol == symbol).ToList<STickerItem>()
@@ -220,7 +220,7 @@ namespace CCXT.Collector.Binance
                                 var _http_status = (int)_b_json_value.StatusCode;
                                 if (_http_status == 403 || _http_status == 418 || _http_status == 429)
                                 {
-                                    BNLogger.WriteQ($"request-limit: https_status => {_http_status}");
+                                    BNLogger.SNG.WriteQ(this, $"request-limit: https_status => {_http_status}");
 
                                     var _waiting = tokenSource.Token.WaitHandle.WaitOne(0);
                                     if (_waiting == true)
@@ -235,7 +235,7 @@ namespace CCXT.Collector.Binance
                         }
                         catch (Exception ex)
                         {
-                            BNLogger.WriteX(ex.ToString());
+                            BNLogger.SNG.WriteX(this, ex.ToString());
                         }
                         //finally
                         {
@@ -254,7 +254,7 @@ namespace CCXT.Collector.Binance
 
             await Task.WhenAll(PollingTasks);
 
-            BNLogger.WriteO($"bpolling service stopped...");
+            BNLogger.SNG.WriteO(this, $"bpolling service stop...");
         }
     }
 }

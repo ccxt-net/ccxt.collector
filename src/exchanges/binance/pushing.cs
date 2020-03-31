@@ -27,7 +27,7 @@ namespace CCXT.Collector.Binance
     /// </summary>
     public partial class Pushing
     {
-        private static ConcurrentQueue<QMessage>? __command_queue = null;
+        private static ConcurrentQueue<QMessage> __command_queue = null;
 
         /// <summary>
         ///
@@ -78,7 +78,7 @@ namespace CCXT.Collector.Binance
 
         public async Task Start(CancellationTokenSource tokenSource, string symbol)
         {
-            BNLogger.WriteO($"pushing service start: symbol => {symbol}...");
+            BNLogger.SNG.WriteO(this, $"pushing service start: symbol => {symbol}...");
 
             using (var _cws = new ClientWebSocket())
             {
@@ -96,10 +96,10 @@ namespace CCXT.Collector.Binance
                                 __last_receive_time = CUnixTime.NowMilli;
                                 await Open(tokenSource, _cws, symbol);
 
-                                BNLogger.WriteO($"pushing open: symbol => {symbol}...");
+                                BNLogger.SNG.WriteO(this, $"pushing open: symbol => {symbol}...");
                             }
 
-                            var _message = (QMessage?)null;
+                            var _message = (QMessage)null;
 
                             if (CommandQ.TryDequeue(out _message) == false)
                             {
@@ -119,13 +119,13 @@ namespace CCXT.Collector.Binance
                         }
                         catch (Exception ex)
                         {
-                            BNLogger.WriteX(ex.ToString());
+                            BNLogger.SNG.WriteX(this, ex.ToString());
                         }
                         //finally
                         {
                             if (_cws.State != WebSocketState.Open)
                             {
-                                BNLogger.WriteO($"disconnect from server(cmd): symbol => {symbol}...");
+                                BNLogger.SNG.WriteO(this, $"disconnect from server(cmd): symbol => {symbol}...");
                                 tokenSource.Cancel();
                                 break;
                             }
@@ -199,7 +199,7 @@ namespace CCXT.Collector.Binance
                             {
                                 await _cws.CloseOutputAsync(WebSocketCloseStatus.NormalClosure, "", tokenSource.Token);
 
-                                BNLogger.WriteO($"receive close message from server: symbol => {symbol}...");
+                                BNLogger.SNG.WriteO(this, $"receive close message from server: symbol => {symbol}...");
                                 tokenSource.Cancel();
                                 break;
                             }
@@ -209,13 +209,13 @@ namespace CCXT.Collector.Binance
                         }
                         catch (Exception ex)
                         {
-                            BNLogger.WriteX(ex.ToString());
+                            BNLogger.SNG.WriteX(this, ex.ToString());
                         }
                         //finally
                         {
                             if (_cws.State != WebSocketState.Open)
                             {
-                                BNLogger.WriteO($"disconnect from server: symbol => {symbol}...");
+                                BNLogger.SNG.WriteO(this, $"disconnect from server: symbol => {symbol}...");
                                 tokenSource.Cancel();
                                 break;
                             }
@@ -233,7 +233,7 @@ namespace CCXT.Collector.Binance
 
                 await Task.WhenAll(_sending, _receiving);
 
-                BNLogger.WriteO($"pushing service stopped: symbol => {symbol}...");
+                BNLogger.SNG.WriteO(this, $"pushing service stopped: symbol => {symbol}...");
             }
         }
     }

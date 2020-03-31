@@ -7,6 +7,8 @@ namespace CCXT.Collector.BitMEX
     /// </summary>
     public class BMConfig : XConfig
     {
+        public const string DealerName = "BitMEX";
+
         private static BMConfig _singleton = null;
         public static new BMConfig SNG
         {

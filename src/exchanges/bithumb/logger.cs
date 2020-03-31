@@ -3,46 +3,24 @@
 namespace CCXT.Collector.Bithumb
 {
     /// <summary>
-    /// Gemini
+    /// Bithumb
     /// </summary>
-    public class GMLogger
+    public class BTLogger : CCLogger
     {
-        public const string exchange_name = "bithumb";
-
-        /// <summary>
-        ///
-        /// </summary>
-        /// <param name="message"></param>
-        public static void WriteQ(string? message)
+        public BTLogger() : base(BTConfig.DealerName)
         {
-            LoggerQ.WriteQ(message, exchange_name);
         }
 
-        /// <summary>
-        ///
-        /// </summary>
-        /// <param name="message"></param>
-        public static void WriteO(string? message)
-        {
-            LoggerQ.WriteO(message, exchange_name);
-        }
+        private static BTLogger _single_instance = null;
 
-        /// <summary>
-        ///
-        /// </summary>
-        /// <param name="message"></param>
-        public static void WriteX(string? message)
+        public static BTLogger SNG
         {
-            LoggerQ.WriteX(message, exchange_name);
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="message"></param>
-        public static void WriteC(string? message)
-        {
-            LoggerQ.WriteC(message, exchange_name);
+            get
+            {
+                if (_single_instance == null)
+                    _single_instance = new BTLogger();
+                return _single_instance;
+            }
         }
     }
 }

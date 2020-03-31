@@ -12,7 +12,7 @@ namespace CCXT.Collector.Upbit
 {
     public class Pushing
     {
-        private static ConcurrentQueue<QMessage>? __command_queue = null;
+        private static ConcurrentQueue<QMessage> __command_queue = null;
 
         /// <summary>
         ///
@@ -65,7 +65,7 @@ namespace CCXT.Collector.Upbit
 
         public async Task Start(CancellationTokenSource tokenSource, string symbol)
         {
-            UPLogger.WriteO($"pushing service start: symbol => {symbol}...");
+            UPLogger.SNG.WriteO(this, $"pushing service start: symbol => {symbol}...");
 
             using (var _cws = new ClientWebSocket())
             {
@@ -83,10 +83,10 @@ namespace CCXT.Collector.Upbit
                                 __last_receive_time = CUnixTime.NowMilli;
                                 await Open(tokenSource, _cws, symbol);
 
-                                UPLogger.WriteO($"pushing open: symbol => {symbol}...");
+                                UPLogger.SNG.WriteO(this, $"pushing open: symbol => {symbol}...");
                             }
 
-                            var _message = (QMessage?)null;
+                            var _message = (QMessage)null;
 
                             if (CommandQ.TryDequeue(out _message) == false)
                             {
@@ -106,13 +106,13 @@ namespace CCXT.Collector.Upbit
                         }
                         catch (Exception ex)
                         {
-                            UPLogger.WriteX(ex.ToString());
+                            UPLogger.SNG.WriteX(this, ex.ToString());
                         }
                         //finally
                         {
                             if (_cws.State != WebSocketState.Open)
                             {
-                                UPLogger.WriteO($"disconnect from server(cmd): symbol => {symbol}...");
+                                UPLogger.SNG.WriteO(this, $"disconnect from server(cmd): symbol => {symbol}...");
                                 tokenSource.Cancel();
                                 break;
                             }
@@ -172,7 +172,7 @@ namespace CCXT.Collector.Upbit
                                 Processing.SendReceiveQ(new QMessage 
                                 { 
                                     command = "WS",
-                                    exchange = UPLogger.exchange_name,
+                                    exchange = UPLogger.SNG.exchange_name,
                                     symbol = symbol,
                                     stream = _selector.type,
                                     action = _selector.stream_type,
@@ -183,7 +183,7 @@ namespace CCXT.Collector.Upbit
                             {
                                 await _cws.CloseOutputAsync(WebSocketCloseStatus.NormalClosure, "", tokenSource.Token);
 
-                                UPLogger.WriteO($"receive close message from server: symbol => {symbol}...");
+                                UPLogger.SNG.WriteO(this, $"receive close message from server: symbol => {symbol}...");
                                 tokenSource.Cancel();
                                 break;
                             }
@@ -193,13 +193,13 @@ namespace CCXT.Collector.Upbit
                         }
                         catch (Exception ex)
                         {
-                            UPLogger.WriteX(ex.ToString());
+                            UPLogger.SNG.WriteX(this, ex.ToString());
                         }
                         //finally
                         {
                             if (_cws.State != WebSocketState.Open)
                             {
-                                UPLogger.WriteO($"disconnect from server: symbol => {symbol}...");
+                                UPLogger.SNG.WriteO(this, $"disconnect from server: symbol => {symbol}...");
                                 tokenSource.Cancel();
                                 break;
                             }
@@ -217,7 +217,7 @@ namespace CCXT.Collector.Upbit
 
                 await Task.WhenAll(_sending, _receiving);
 
-                UPLogger.WriteO($"pushing service stopped: symbol => {symbol}...");
+                UPLogger.SNG.WriteO(this, $"pushing service stopped: symbol => {symbol}...");
             }
         }
     }

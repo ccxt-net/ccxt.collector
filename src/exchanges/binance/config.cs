@@ -7,6 +7,8 @@ namespace CCXT.Collector.Binance
     /// </summary>
     public class BNConfig : XConfig
     {
+        public const string DealerName = "Binance";
+
         private static BNConfig _singleton = null;
         public static new BNConfig SNG
         {

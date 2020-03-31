@@ -7,6 +7,8 @@ namespace CCXT.Collector.Bithumb
     /// </summary>
     public class BTConfig : XConfig
     {
+        public const string DealerName = "Bithumb";
+
         private static BTConfig _singleton = null;
         public static new BTConfig SNG
         {

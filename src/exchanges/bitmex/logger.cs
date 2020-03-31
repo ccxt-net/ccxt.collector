@@ -5,44 +5,22 @@ namespace CCXT.Collector.BitMEX
     /// <summary>
     /// bitmex
     /// </summary>
-    public class BMLogger
+    public class BMLogger : CCLogger
     {
-        public const string exchange_name = "bitmex";
-
-        /// <summary>
-        ///
-        /// </summary>
-        /// <param name="message"></param>
-        public static void WriteQ(string message)
+        public BMLogger() : base(BMConfig.DealerName)
         {
-            LoggerQ.WriteQ(message, exchange_name);
         }
 
-        /// <summary>
-        ///
-        /// </summary>
-        /// <param name="message"></param>
-        public static void WriteO(string message)
-        {
-            LoggerQ.WriteO(message, exchange_name);
-        }
+        private static BMLogger _single_instance = null;
 
-        /// <summary>
-        ///
-        /// </summary>
-        /// <param name="message"></param>
-        public static void WriteX(string message)
+        public static BMLogger SNG
         {
-            LoggerQ.WriteX(message, exchange_name);
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="message"></param>
-        public static void WriteC(string message)
-        {
-            LoggerQ.WriteC(message, exchange_name);
+            get
+            {
+                if (_single_instance == null)
+                    _single_instance = new BMLogger();
+                return _single_instance;
+            }
         }
     }
 }

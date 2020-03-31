@@ -11,7 +11,7 @@ namespace CCXT.Collector.Upbit
 {
     public class Polling : KRestClient
     {
-        private CCXT.Collector.Upbit.Public.PublicApi? __public_api = null;
+        private CCXT.Collector.Upbit.Public.PublicApi __public_api = null;
         private CCXT.Collector.Upbit.Public.PublicApi publicApi
         {
             get
@@ -24,7 +24,7 @@ namespace CCXT.Collector.Upbit
 
         public async Task OStart(CancellationTokenSource tokenSource, string symbol, int limit = 32)
         {
-            UPLogger.WriteO($"polling service start: symbol => {symbol}...");
+            UPLogger.SNG.WriteO(this, $"polling service start: symbol => {symbol}...");
 
             var _t_polling = Task.Run(async () =>
             {
@@ -53,7 +53,7 @@ namespace CCXT.Collector.Upbit
                                 Processing.SendReceiveQ(new QMessage
                                 {
                                     command = "AP",
-                                    exchange = UPLogger.exchange_name,
+                                    exchange = UPLogger.SNG.exchange_name,
                                     symbol = symbol,
                                     stream = "trade",
                                     action = "polling",
@@ -65,7 +65,7 @@ namespace CCXT.Collector.Upbit
                                 var _http_status = (int)_t_json_value.StatusCode;
                                 if (_http_status == 403 || _http_status == 418)// || _http_status == 429)
                                 {
-                                    UPLogger.WriteQ($"request-limit: symbol => {symbol}, https_status => {_http_status}");
+                                    UPLogger.SNG.WriteQ(this, $"request-limit: symbol => {symbol}, https_status => {_http_status}");
 
                                     var _waiting = tokenSource.Token.WaitHandle.WaitOne(0);
                                     if (_waiting == true)
@@ -81,7 +81,7 @@ namespace CCXT.Collector.Upbit
                     }
                     catch (Exception ex)
                     {
-                        UPLogger.WriteX(ex.ToString());
+                        UPLogger.SNG.WriteX(this, ex.ToString());
                     }
                     //finally
                     {
@@ -123,7 +123,7 @@ namespace CCXT.Collector.Upbit
                                 Processing.SendReceiveQ(new QMessage
                                 {
                                     command = "AP",
-                                    exchange = UPLogger.exchange_name,
+                                    exchange = UPLogger.SNG.exchange_name,
                                     symbol = symbol,
                                     stream = "orderbook",
                                     action = "polling",
@@ -135,7 +135,7 @@ namespace CCXT.Collector.Upbit
                                 var _http_status = (int)_o_json_value.StatusCode;
                                 if (_http_status == 403 || _http_status == 418)// || _http_status == 429)
                                 {
-                                    UPLogger.WriteQ($"request-limit: symbol => {symbol}, https_status => {_http_status}");
+                                    UPLogger.SNG.WriteQ(this, $"request-limit: symbol => {symbol}, https_status => {_http_status}");
 
                                     var _waiting = tokenSource.Token.WaitHandle.WaitOne(0);
                                     if (_waiting == true)
@@ -151,7 +151,7 @@ namespace CCXT.Collector.Upbit
                     }
                     catch (Exception ex)
                     {
-                        UPLogger.WriteX(ex.ToString());
+                        UPLogger.SNG.WriteX(this, ex.ToString());
                     }
                     //finally
                     {
@@ -169,12 +169,12 @@ namespace CCXT.Collector.Upbit
 
             await Task.WhenAll(_t_polling, _o_polling);
 
-            UPLogger.WriteO($"polling service stopped: symbol => {symbol}...");
+            UPLogger.SNG.WriteO(this, $"polling service stopped: symbol => {symbol}...");
         }
 
         public async Task BStart(CancellationTokenSource tokenSource, string symbol)
         {
-            UPLogger.WriteO($"bpolling service start..");
+            UPLogger.SNG.WriteO(this, $"bpolling service start..");
 
             var _b_polling = Task.Run(async () =>
             {
@@ -214,7 +214,7 @@ namespace CCXT.Collector.Upbit
                             Processing.SendReceiveQ(new QMessage
                             {
                                 command = "AP",
-                                exchange = UPLogger.exchange_name,
+                                exchange = UPLogger.SNG.exchange_name,
                                 symbol = symbol,
                                 stream = "ticker",
                                 action = "polling",
@@ -227,7 +227,7 @@ namespace CCXT.Collector.Upbit
                             var _http_status = (int)_b_json_value.StatusCode;
                             if (_http_status == 403 || _http_status == 418)// || _http_status == 429)
                             {
-                                UPLogger.WriteQ($"request-limit: symbol => {symbol}, https_status => {_http_status}");
+                                UPLogger.SNG.WriteQ(this, $"request-limit: symbol => {symbol}, https_status => {_http_status}");
 
                                 var _waiting = tokenSource.Token.WaitHandle.WaitOne(0);
                                 if (_waiting == true)
@@ -242,7 +242,7 @@ namespace CCXT.Collector.Upbit
                     }
                     catch (Exception ex)
                     {
-                        UPLogger.WriteX(ex.ToString());
+                        UPLogger.SNG.WriteX(this, ex.ToString());
                     }
                     //finally
                     {
@@ -260,7 +260,7 @@ namespace CCXT.Collector.Upbit
 
             await Task.WhenAll(_b_polling);
 
-            UPLogger.WriteO($"bpolling service stopped..");
+            UPLogger.SNG.WriteO(this, $"bpolling service stopped..");
         }
 
         /// <summary>
@@ -274,7 +274,7 @@ namespace CCXT.Collector.Upbit
 
         public async Task EStart(CancellationTokenSource tokenSource)
         {
-            UPLogger.WriteO($"epolling service start..");
+            UPLogger.SNG.WriteO(this, $"epolling service start..");
 
             var _dunamu_url = publicApi.publicClient.ExchangeInfo.GetApiUrl("dunamu");
 
@@ -326,7 +326,7 @@ namespace CCXT.Collector.Upbit
                             var _http_status = (int)_b_json_value.StatusCode;
                             if (_http_status == 403 || _http_status == 418)// || _http_status == 429)
                             {
-                                UPLogger.WriteQ($"https_status => {_http_status}");
+                                UPLogger.SNG.WriteQ(this, $"https_status => {_http_status}");
 
                                 var _waiting = tokenSource.Token.WaitHandle.WaitOne(0);
                                 if (_waiting == true)
@@ -341,7 +341,7 @@ namespace CCXT.Collector.Upbit
                     }
                     catch (Exception ex)
                     {
-                        UPLogger.WriteX(ex.ToString());
+                        UPLogger.SNG.WriteX(this, ex.ToString());
                     }
                     //finally
                     {
@@ -359,7 +359,7 @@ namespace CCXT.Collector.Upbit
 
             await Task.WhenAll(_b_polling);
 
-            UPLogger.WriteO($"epolling service stopped..");
+            UPLogger.SNG.WriteO(this, $"epolling service stopped..");
         }
     }
 }
