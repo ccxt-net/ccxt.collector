@@ -7,7 +7,7 @@ namespace CCXT.Collector.Upbit
     /// </summary>
     public class UPConfig : XConfig
     {
-        public const string DealerName = "Upbit";
+        public const string DealerName = "upbit";
 
         private static UPConfig _singleton = null;
         public static new UPConfig SNG
