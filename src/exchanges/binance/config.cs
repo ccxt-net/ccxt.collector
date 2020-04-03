@@ -26,7 +26,7 @@ namespace CCXT.Collector.Binance
         {
             get
             {
-                return this.GetAppStringSectionName(DealerName, "auto.start.symbol.names").Split(';');
+                return this.GetAppSection(DealerName, "auto.start.symbol.names").Split(';');
             }
         }
 

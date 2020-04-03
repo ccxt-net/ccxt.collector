@@ -11,24 +11,24 @@ namespace CCXT.Collector.BitMEX
 {
     public class Polling : KRestClient
     {
-        private CCXT.Collector.BitMEX.Public.PublicApi __public_api = null;
-        private CCXT.Collector.BitMEX.Public.PublicApi publicApi
+        private Public.PublicApi __public_api = null;
+        private Public.PublicApi publicApi
         {
             get
             {
                 if (__public_api == null)
-                    __public_api = new CCXT.Collector.BitMEX.Public.PublicApi(BMConfig.SNG.BitMexUseLiveServer);
+                    __public_api = new Public.PublicApi(BMConfig.SNG.BitMexUseLiveServer);
                 return __public_api;
             }
         }
 
-        private CCXT.Collector.BitMEX.Private.PrivateApi __private_api = null;
-        private CCXT.Collector.BitMEX.Private.PrivateApi privateApi
+        private Private.PrivateApi __private_api = null;
+        private Private.PrivateApi privateApi
         {
             get
             {
                 if (__private_api == null)
-                    __private_api = new CCXT.Collector.BitMEX.Private.PrivateApi(BMConfig.SNG.BitMexConnectKey, BMConfig.SNG.BitMexSecretKey, BMConfig.SNG.BitMexUseLiveServer);
+                    __private_api = new Private.PrivateApi(BMConfig.SNG.BitMexConnectKey, BMConfig.SNG.BitMexSecretKey, BMConfig.SNG.BitMexUseLiveServer);
                 return __private_api;
             }
         }

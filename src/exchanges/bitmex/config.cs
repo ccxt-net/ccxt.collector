@@ -7,7 +7,7 @@ namespace CCXT.Collector.BitMEX
     /// </summary>
     public class BMConfig : XConfig
     {
-        public const string DealerName = "BitMEX";
+        public const string DealerName = "bitmex";
 
         private static BMConfig _singleton = null;
         public static new BMConfig SNG
@@ -26,7 +26,7 @@ namespace CCXT.Collector.BitMEX
         {
             get
             {
-                return this.GetAppStringSectionName(DealerName, "auto.start.symbol.names").Split(';');
+                return this.GetAppSection(DealerName, "auto.start.symbol.names").Split(';');
             }
         }
 
@@ -58,7 +58,7 @@ namespace CCXT.Collector.BitMEX
         {
             get
             {
-                return this.GetAppStringSectionName(DealerName, "private.connect.key");
+                return this.GetAppSection(DealerName, "private.connect.key");
             }
         }
 
@@ -66,7 +66,7 @@ namespace CCXT.Collector.BitMEX
         {
             get
             {
-                return this.GetAppStringSectionName(DealerName, "private.secret.key");
+                return this.GetAppSection(DealerName, "private.secret.key");
             }
         }
 
@@ -74,7 +74,7 @@ namespace CCXT.Collector.BitMEX
         {
             get
             {
-                return this.GetAppStringSectionName(DealerName, "private.user.name");
+                return this.GetAppSection(DealerName, "private.user.name");
             }
         }
 
