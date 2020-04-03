@@ -22,6 +22,14 @@ namespace CCXT.Collector.Upbit
 
         #region Upbit
 
+        public string[] UpbitStartSymbolNames
+        {
+            get
+            {
+                return this.GetAppStringSectionName(DealerName, "auto.start.symbol.names").Split(';');
+            }
+        }
+
         private int? __websocket_retry = null;
 
         public int WebSocketRetry
@@ -29,7 +37,7 @@ namespace CCXT.Collector.Upbit
             get
             {
                 if (__websocket_retry == null)
-                    __websocket_retry = this.GetAppInteger("upbit.websocket.retry.waiting.milliseconds");
+                    __websocket_retry = this.GetAppInteger(DealerName, "websocket.retry.waiting.milliseconds");
                 return __websocket_retry.Value;
             }
         }
@@ -41,7 +49,7 @@ namespace CCXT.Collector.Upbit
             get
             {
                 if (__polling_sleep == null)
-                    __polling_sleep = this.GetAppInteger("upbit.polling.sleep.milliseconds");
+                    __polling_sleep = this.GetAppInteger(DealerName, "polling.sleep.milliseconds");
                 return __polling_sleep.Value;
             }
         }

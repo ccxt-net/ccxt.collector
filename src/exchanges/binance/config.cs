@@ -22,6 +22,14 @@ namespace CCXT.Collector.Binance
 
         #region Binance
 
+        public string[] BinanceStartSymbolNames
+        {
+            get
+            {
+                return this.GetAppStringSectionName(DealerName, "auto.start.symbol.names").Split(';');
+            }
+        }
+
         private int? __binance_orderbook_counter = null;
 
         public int BinanceOrderBookCounter
@@ -29,7 +37,7 @@ namespace CCXT.Collector.Binance
             get
             {
                 if (__binance_orderbook_counter == null)
-                    __binance_orderbook_counter = this.GetAppInteger("binance.orderbook.snapshot.counter");
+                    __binance_orderbook_counter = this.GetAppInteger(DealerName, "orderbook.snapshot.counter");
                 return __binance_orderbook_counter.Value;
             }
         }
@@ -41,7 +49,7 @@ namespace CCXT.Collector.Binance
             get
             {
                 if (__binance_websocket_retry == null)
-                    __binance_websocket_retry = this.GetAppInteger("binance.websocket.retry.waiting.milliseconds");
+                    __binance_websocket_retry = this.GetAppInteger(DealerName, "websocket.retry.waiting.milliseconds");
                 return __binance_websocket_retry.Value;
             }
         }

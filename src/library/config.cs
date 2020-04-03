@@ -75,36 +75,14 @@ namespace CCXT.Collector.Library
 
         private string __name_start_exchange = null;
 
-        public string StartExchangeNames
+        public string StartExchangeName
         {
             get
             {
                 if (__name_start_exchange == null)
-                    __name_start_exchange = this.GetAppString("auto.start.exchange.names");
+                    __name_start_exchange = this.GetAppString("auto.start.exchange.name");
                 return __name_start_exchange;
             }
-        }
-
-        private Dictionary<string, string> __name_start_symbol_names = null;
-
-        public string GetStartSymbolNames(string exchange)
-        {
-            var _result = "";
-
-            if (__name_start_symbol_names == null)
-                __name_start_symbol_names = new Dictionary<string, string>();
-
-            if (__name_start_symbol_names.ContainsKey(exchange) == false)
-            {
-                _result = this.GetAppString($"{exchange}.auto.start.symbol.names");
-                __name_start_symbol_names.Add(exchange, _result);
-            }
-            else
-            {
-                _result = __name_start_symbol_names[exchange];
-            }
-
-            return _result;
         }
 
         private long? __polling_prev_time = null;

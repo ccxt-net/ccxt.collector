@@ -26,7 +26,7 @@ namespace CCXT.Collector.Bithumb
             get
             {
                 if (__websocket_retry == null)
-                    __websocket_retry = this.GetAppInteger("bithumb.websocket.retry.waiting.milliseconds");
+                    __websocket_retry = this.GetAppInteger(DealerName, "websocket.retry.waiting.milliseconds");
                 return __websocket_retry.Value;
             }
         }
@@ -38,7 +38,7 @@ namespace CCXT.Collector.Bithumb
             get
             {
                 if (__polling_sleep == null)
-                    __polling_sleep = this.GetAppInteger("bithumb.polling.sleep.milliseconds");
+                    __polling_sleep = this.GetAppInteger(DealerName, "polling.sleep.milliseconds");
                 return __polling_sleep.Value;
             }
         }

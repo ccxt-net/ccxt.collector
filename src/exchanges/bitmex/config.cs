@@ -22,11 +22,19 @@ namespace CCXT.Collector.BitMEX
 
         #region BitMEX
 
+        public string[] BitMexStartSymbolNames
+        {
+            get
+            {
+                return this.GetAppStringSectionName(DealerName, "auto.start.symbol.names").Split(';');
+            }
+        }
+
         public bool BitMexUseLiveServer
         {
             get
             {
-                return this.GetAppBoolean("bitmex.use.live.server");
+                return this.GetAppBoolean(DealerName, "use.live.server");
             }
         }
 
@@ -34,7 +42,7 @@ namespace CCXT.Collector.BitMEX
         {
             get
             {
-                return this.GetAppBoolean("bitmex.use.myorder.stream");
+                return this.GetAppBoolean(DealerName, "use.myorder.stream");
             }
         }
 
@@ -42,7 +50,7 @@ namespace CCXT.Collector.BitMEX
         {
             get
             {
-                return this.GetAppBoolean("bitmex.use.polling.orderbook");
+                return this.GetAppBoolean(DealerName, "use.polling.orderbook");
             }
         }
 
@@ -50,7 +58,7 @@ namespace CCXT.Collector.BitMEX
         {
             get
             {
-                return this.GetAppString("bitmex.private.connect.key");
+                return this.GetAppStringSectionName(DealerName, "private.connect.key");
             }
         }
 
@@ -58,7 +66,7 @@ namespace CCXT.Collector.BitMEX
         {
             get
             {
-                return this.GetAppString("bitmex.private.secret.key");
+                return this.GetAppStringSectionName(DealerName, "private.secret.key");
             }
         }
 
@@ -66,7 +74,7 @@ namespace CCXT.Collector.BitMEX
         {
             get
             {
-                return this.GetAppString("bitmex.private.user.name");
+                return this.GetAppStringSectionName(DealerName, "private.user.name");
             }
         }
 
@@ -76,7 +84,7 @@ namespace CCXT.Collector.BitMEX
             get
             {
                 if (__bitmex_orderbook_counter == null)
-                    __bitmex_orderbook_counter = this.GetAppInteger("bitmex.orderbook.snapshot.counter");
+                    __bitmex_orderbook_counter = this.GetAppInteger(DealerName, "orderbook.snapshot.counter");
                 return __bitmex_orderbook_counter.Value;
             }
         }
@@ -87,7 +95,7 @@ namespace CCXT.Collector.BitMEX
             get
             {
                 if (__websocket_retry == null)
-                    __websocket_retry = this.GetAppInteger("bitmex.websocket.retry.waiting.milliseconds");
+                    __websocket_retry = this.GetAppInteger(DealerName, "websocket.retry.waiting.milliseconds");
                 return __websocket_retry.Value;
             }
         }
@@ -99,7 +107,7 @@ namespace CCXT.Collector.BitMEX
             get
             {
                 if (__polling_sleep == null)
-                    __polling_sleep = this.GetAppInteger("bitmex.polling.sleep.milliseconds");
+                    __polling_sleep = this.GetAppInteger(DealerName, "polling.sleep.milliseconds");
                 return __polling_sleep.Value;
             }
         }
