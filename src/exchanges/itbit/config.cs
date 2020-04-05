@@ -7,7 +7,7 @@ namespace CCXT.Collector.ItBit
     /// </summary>
     public class IBConfig : XConfig
     {
-        public const string DealerName = "ItBit";
+        public const string DealerName = "itbit";
 
         private static IBConfig _singleton = null;
         public static new IBConfig SNG
