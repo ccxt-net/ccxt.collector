@@ -7,7 +7,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace CCXT.Collector.BitMEX
+namespace CCXT.Collector.Deribit
 {
     public class Polling : KRestClient
     {
@@ -17,7 +17,7 @@ namespace CCXT.Collector.BitMEX
             get
             {
                 if (__public_api == null)
-                    __public_api = new Public.PublicApi(BMConfig.SNG.UseLiveServer);
+                    __public_api = new Public.PublicApi(DRConfig.SNG.UseLiveServer);
                 return __public_api;
             }
         }
@@ -28,7 +28,7 @@ namespace CCXT.Collector.BitMEX
             get
             {
                 if (__private_api == null)
-                    __private_api = new Private.PrivateApi(BMConfig.SNG.ConnectKey, BMConfig.SNG.SecretKey, BMConfig.SNG.UseLiveServer);
+                    __private_api = new Private.PrivateApi(DRConfig.SNG.ConnectKey, DRConfig.SNG.SecretKey, DRConfig.SNG.UseLiveServer);
                 return __private_api;
             }
         }
@@ -39,7 +39,7 @@ namespace CCXT.Collector.BitMEX
 
             var _m_polling = Task.Run(async () =>
             {
-                while (BMConfig.SNG.UseMyOrderStream)
+                while (DRConfig.SNG.UseMyOrderStream)
                 {
                     try
                     {
@@ -78,7 +78,7 @@ namespace CCXT.Collector.BitMEX
                     if (_cancelled == true)
                         break;
 
-                    await Task.Delay(BMConfig.SNG.PollingSleep * 3);
+                    await Task.Delay(DRConfig.SNG.PollingSleep * 3);
                 }
             },
             cancelToken
@@ -160,7 +160,7 @@ namespace CCXT.Collector.BitMEX
                     if (_cancelled == true)
                         break;
 
-                    await Task.Delay(BMConfig.SNG.PollingSleep * 2);
+                    await Task.Delay(DRConfig.SNG.PollingSleep * 2);
                 }
             },
             cancelToken
@@ -178,7 +178,7 @@ namespace CCXT.Collector.BitMEX
 
                 var _o_request = CreateJsonRequest($"/api/v1/orderBook/L2", _o_params);
 
-                while (BMConfig.SNG.UsePollingOrderboook)
+                while (DRConfig.SNG.UsePollingOrderboook)
                 {
                     try
                     {
@@ -241,7 +241,7 @@ namespace CCXT.Collector.BitMEX
                     if (_cancelled == true)
                         break;
 
-                    await Task.Delay(BMConfig.SNG.PollingSleep * 2);
+                    await Task.Delay(DRConfig.SNG.PollingSleep * 2);
                 }
             },
             cancelToken

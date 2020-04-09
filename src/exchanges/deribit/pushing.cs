@@ -1,4 +1,4 @@
-﻿using CCXT.Collector.BitMEX.Private;
+﻿using CCXT.Collector.Deribit.Private;
 using CCXT.Collector.Library;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -12,7 +12,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace CCXT.Collector.BitMEX
+namespace CCXT.Collector.Deribit
 {
     public class Pushing
     {
@@ -23,10 +23,10 @@ namespace CCXT.Collector.BitMEX
         {
             get
             {
-                if (BMConfig.SNG.UseLiveServer == true)
-                    return $"wss://www.bitmex.com{__end_point}";
+                if (DRConfig.SNG.UseLiveServer == true)
+                    return $"wss://www.deribit.com{__end_point}";
                 else
-                    return $"wss://testnet.bitmex.com{__end_point}";
+                    return $"wss://testnet.deribit.com{__end_point}";
             }
         }
 
@@ -124,7 +124,7 @@ namespace CCXT.Collector.BitMEX
             });
 
             var _private_api = new PrivateApi(connect_key, secret_key);
-            var _private_cli = (BitmexClient)_private_api.privateClient;
+            var _private_cli = (DeribitClient)_private_api.privateClient;
 
             var _expires = (_private_cli.GenerateOnlyNonce(10) + 3600).ToString();
             var _signature = await _private_cli.CreateSignature(RestSharp.Method.GET, __auth_point, _expires);
@@ -168,8 +168,8 @@ namespace CCXT.Collector.BitMEX
 
             await publicOpen(__stream_id, symbol);
 
-            if (BMConfig.SNG.UseMyOrderStream == true)
-                await privateOpen(__stream_id, BMConfig.SNG.ConnectKey, BMConfig.SNG.SecretKey, BMConfig.SNG.LoginName);
+            if (DRConfig.SNG.UseMyOrderStream == true)
+                await privateOpen(__stream_id, DRConfig.SNG.ConnectKey, DRConfig.SNG.SecretKey, DRConfig.SNG.LoginName);
         }
 
         private volatile int __last_receive_time = 0;

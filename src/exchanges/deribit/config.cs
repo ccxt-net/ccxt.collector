@@ -1,26 +1,26 @@
 ﻿using CCXT.Collector.Library;
 
-namespace CCXT.Collector.BitMEX
+namespace CCXT.Collector.Deribit
 {
     /// <summary>
     ///
     /// </summary>
-    public class BMConfig : XConfig
+    public class DRConfig : XConfig
     {
-        public const string DealerName = "bitmex";
+        public const string DealerName = "deribit";
 
-        private static BMConfig _singleton = null;
-        public static new BMConfig SNG
+        private static DRConfig _singleton = null;
+        public static new DRConfig SNG
         {
             get
             {
                 if (_singleton == null)
-                    _singleton = new BMConfig();
+                    _singleton = new DRConfig();
                 return _singleton;
             }
         }
 
-        #region BitMEX
+        #region Deribit
 
         public string[] StartSymbolNames
         {
@@ -112,6 +112,6 @@ namespace CCXT.Collector.BitMEX
             }
         }
 
-        #endregion BitMEX
+        #endregion Deribit
     }
 }

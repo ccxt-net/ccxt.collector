@@ -411,7 +411,7 @@ namespace CCXT.Collector.Binance
                 qob.result.bids.RemoveAll(o => o.quantity == 0);
             }
 
-            if (++settings.orderbook_count == BNConfig.SNG.BinanceOrderBookCounter)
+            if (++settings.orderbook_count == BNConfig.SNG.OrderBookCounter)
             {
                 settings.orderbook_count = 0;
 

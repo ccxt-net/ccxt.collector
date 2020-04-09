@@ -22,7 +22,7 @@ namespace CCXT.Collector.Upbit
 
         #region Upbit
 
-        public string[] UpbitStartSymbolNames
+        public string[] StartSymbolNames
         {
             get
             {
