@@ -54,38 +54,35 @@ namespace CCXT.Collector.Deribit
                     {
                         Countries = new List<string>
                         {
-                            "SC" // Seychelles
+                            "NL" // Netherlands
                         },
                         Urls = new ExchangeUrls
                         {
-                            logo = "https://user-images.githubusercontent.com/1294454/27766319-f653c6e6-5ed4-11e7-933d-f0bc3699ae8f.jpg",
+                            logo = "https://user-images.githubusercontent.com/1294454/41933112-9e2dd65a-798b-11e8-8440-5bab2959fcb8.jpg",
                             api = new Dictionary<string, string>
                             {
                                 { "public", "https://www.deribit.com" },
                                 { "private", "https://www.deribit.com" },
                                 { "trade", "https://www.deribit.com" },
-                                { "udf", "https://www.deribit.com" },
                                 { "wss", "wss://www.deribit.com" },
-                                { "test.public", "https://testnet.deribit.com" },
-                                { "test.private", "https://testnet.deribit.com" },
-                                { "test.trade", "https://testnet.deribit.com" },
-                                { "test.wss", "wss://testnet.deribit.com" }
+                                { "test.public", "https://test.deribit.com" },
+                                { "test.private", "https://test.deribit.com" },
+                                { "test.trade", "https://test.deribit.com" },
+                                { "test.wss", "wss://test.deribit.com" }
                             },
                             www = "https://www.deribit.com",
                             doc = new List<string>
                             {
-                                "https://www.deribit.com/app/apiOverview",
-                                "https://github.com/Deribit/api-connectors/tree/master/official-http"
+                                "https://docs.deribit.com/v2",
+                                "https://github.com/deribit"
                             },
                             fees = new List<string>
                             {
-                                "https://www.deribit.com/app/fees"
+                                "https://www.deribit.com/pages/information/fees"
                             }
                         },
                         AmountMultiplier = new Dictionary<string, decimal>
                         {
-                            { "XBTUSD", 100000000.0m },
-                            { "ETHUSD", 1000000.0m }
                         },
                         RequiredCredentials = new RequiredCredentials
                         {
@@ -99,11 +96,7 @@ namespace CCXT.Collector.Deribit
                         LimitRate = new ExchangeLimitRate
                         {
                             useTotal = true,
-                            token = new ExchangeLimitCalled { rate = 60000 },           // 30 request per minute
-                            @public = new ExchangeLimitCalled { rate = 2000 },
-                            @private = new ExchangeLimitCalled { rate = 2000 },
-                            trade = new ExchangeLimitCalled { rate = 2000 },
-                            total = new ExchangeLimitCalled { rate = 2000 }
+                            total = new ExchangeLimitCalled { rate = 500 }
                         },
                         Fees = new MarketFees
                         {
@@ -112,16 +105,24 @@ namespace CCXT.Collector.Deribit
                                 tierBased = false,          // true for tier-based/progressive
                                 percentage = false,         // fixed commission
 
-                                maker = -0.0250m / 100m,    // https://www.deribit.com/app/fees
-                                taker = 0.0750m / 100m
+                                maker = 0.0004m,
+                                taker = 0.0004m
                             }
                         },
                         Timeframes = new Dictionary<string, string>
                         {
-                            { "1m", "1m"},
-                            { "5m", "5m"},
-                            { "1h", "1h"},
-                            { "1d", "1d" }
+                            {"1m", "1"},
+                            {"3m", "3"},
+                            {"5m", "5"},
+                            {"10m", "10"},
+                            {"15m", "15"},
+                            {"30m", "30"},
+                            {"1h", "60"},
+                            {"2h", "120"},
+                            {"3h", "180"},
+                            {"6h", "360"},
+                            {"12h", "720"},
+                            {"1d", "1D"}                        
                         }
                     };
                 }

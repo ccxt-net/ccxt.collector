@@ -1,266 +1,147 @@
 ﻿using Newtonsoft.Json;
 using OdinSdk.BaseLib.Coin.Public;
+using System;
 
 namespace CCXT.Collector.Deribit.Public
 {
     /// <summary>
     ///
     /// </summary>
-    public class BMarketItem : OdinSdk.BaseLib.Coin.Public.MarketItem, IMarketItem
+    public class DMarketItem : OdinSdk.BaseLib.Coin.Public.MarketItem, IMarketItem
     {
         /// <summary>
-        ///
+        /// Unique instrument identifier
         /// </summary>
-        public string state
-        {
-            get;
-            set;
-        }
-
-        /// <summary>
-        ///
-        /// </summary>
-        [JsonProperty(PropertyName = "symbol")]
+        /// <value>Unique instrument identifier</value>
+        [JsonProperty(PropertyName = "instrumentName")]
         public override string symbol
         {
-            get;
-            set;
+            get; set;
         }
 
         /// <summary>
-        ///
+        /// The underlying currency being traded.
         /// </summary>
-        public string rootSymbol
+        /// <value>The underlying currency being traded.</value>
+        [JsonProperty(PropertyName = "baseCurrency")]
+        public override string baseName
         {
-            get;
-            set;
+            get; set;
         }
 
         /// <summary>
-        ///
+        /// The currency in which the instrument prices are quoted.
         /// </summary>
-        public string underlying
+        /// <value>The currency in which the instrument prices are quoted.</value>
+        [JsonProperty(PropertyName = "currency")]
+        public override string quoteName
         {
-            get;
-            set;
+            get; set;
         }
 
         /// <summary>
-        /// 포지션 계약 단위 (무기한 일때 값 없음)
+        /// Indicates if the instrument can currently be traded.
         /// </summary>
-        public string positionCurrency
+        /// <value>Indicates if the instrument can currently be traded.</value>
+        [JsonProperty(PropertyName = "isActive")]
+        public override bool active
         {
-            get;
-            set;
+            get; set;
         }
 
         /// <summary>
-        ///
+        /// specifies minimal price change and, as follows, the number of decimal places for instrument prices
         /// </summary>
-        public string quoteCurrency
-        {
-            get;
-            set;
-        }
-
-        /// <summary>
-        ///
-        /// </summary>
-        public string settlCurrency
-        {
-            get;
-            set;
-        }
-
-        /// <summary>
-        ///
-        /// </summary>
-        public string orderBase
-        {
-            get;
-            set;
-        }
-
-        /// <summary>
-        ///
-        /// </summary>
-        public string orderQuote
-        {
-            get;
-            set;
-        }
-
-        /// <summary>
-        ///
-        /// </summary>
-        public decimal maxOrderQty
-        {
-            get;
-            set;
-        }
-
-        /// <summary>
-        ///
-        /// </summary>
-        public decimal maxPrice
-        {
-            get;
-            set;
-        }
-
-        /// <summary>
-        ///
-        /// </summary>
-        public decimal lastPrice
-        {
-            get;
-            set;
-        }
-
-        /// <summary>
-        ///
-        /// </summary>
-        public decimal lotSize
-        {
-            get;
-            set;
-        }
-
-        /// <summary>
-        ///
-        /// </summary>
+        /// <value>specifies minimal price change and, as follows, the number of decimal places for instrument prices</value>
+        [JsonProperty(PropertyName = "tickSize")]
         public decimal tickSize
         {
-            get;
-            set;
+            get; set;
         }
 
         /// <summary>
-        ///
+        /// Contract size for instrument
         /// </summary>
-        public decimal multiplier
+        /// <value>Contract size for instrument</value>
+        [JsonProperty(PropertyName = "minTradeSize")]
+        public decimal minTradeSize
         {
-            get;
-            set;
+            get; set;
         }
 
         /// <summary>
-        ///
+        /// Minimum amount for trading. For perpetual and futures - in USD units, for options it is amount of corresponding cryptocurrency contracts, e.g., BTC or ETH.
         /// </summary>
-        public decimal initMargin
+        /// <value>Minimum amount for trading. For perpetual and futures - in USD units, for options it is amount of corresponding cryptocurrency contracts, e.g., BTC or ETH.</value>
+        [JsonProperty(PropertyName = "minTradeAmount")]
+        public decimal minTradeAmount
         {
-            get;
-            set;
+            get; set;
         }
 
         /// <summary>
-        ///
+        /// The strike value. (only for options)
         /// </summary>
-        public decimal maintMargin
+        /// <value>The strike value. (only for options)</value>
+        [JsonProperty(PropertyName = "strike")]
+        public decimal strike
         {
-            get;
-            set;
+            get; set;
         }
 
         /// <summary>
-        ///
+        /// The time when the instrument was first created (milliseconds)
         /// </summary>
-        public decimal riskLimit
+        /// <value>The time when the instrument was first created (milliseconds)</value>
+        [JsonProperty(PropertyName = "created")]
+        public DateTime created
         {
-            get;
-            set;
+            get; set;
         }
 
         /// <summary>
-        ///
+        /// The time when the instrument will expire (milliseconds)
         /// </summary>
-        public decimal riskStep
+        /// <value>The time when the instrument will expire (milliseconds)</value>
+        [JsonProperty(PropertyName = "expiration")]
+        public DateTime expiration
         {
-            get;
-            set;
+            get; set;
         }
 
         /// <summary>
-        ///
+        /// The settlement period.
         /// </summary>
-        public decimal settlementFee
+        /// <value>The settlement period.</value>
+        [JsonProperty(PropertyName = "settlement")]
+        public string settlement
         {
-            get;
-            set;
+            get; set;
         }
 
         /// <summary>
-        ///
+        /// The option type (only for options)
         /// </summary>
-        public decimal insuranceFee
+        /// <value>The option type (only for options)</value>
+        [JsonProperty(PropertyName = "optionType")]
+        public string optionType
         {
-            get;
-            set;
+            get; set;
         }
 
         /// <summary>
-        ///
+        /// Instrument kind, "future" or "option"
         /// </summary>
-        [JsonProperty(PropertyName = "takerFee")]
-        public override decimal takerFee
+        /// <value>Instrument kind, "future" or "option"</value>
+        [JsonProperty(PropertyName = "kind")]
+        public string kind
         {
-            get;
-            set;
+            get; set;
         }
 
-        /// <summary>
-        ///
-        /// </summary>
-        [JsonProperty(PropertyName = "makerFee")]
-        public override decimal makerFee
+        public int pricePrecision
         {
-            get;
-            set;
-        }
-
-        /// <summary>
-        ///
-        /// </summary>
-        public bool future
-        {
-            get;
-            set;
-        }
-
-        /// <summary>
-        ///
-        /// </summary>
-        public bool prediction
-        {
-            get;
-            set;
-        }
-
-        /// <summary>
-        ///
-        /// </summary>
-        public string type
-        {
-            get;
-            set;
-        }
-
-        /// <summary>
-        ///
-        /// </summary>
-        public bool swap
-        {
-            get;
-            set;
-        }
-
-        /// <summary>
-        ///
-        /// </summary>
-        public int maxLeverage
-        {
-            get;
-            set;
+            get; set;
         }
     }
 }
