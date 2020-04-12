@@ -4,6 +4,26 @@ using System;
 
 namespace CCXT.Collector.Deribit.Public
 {
+    /*
+    {
+        "instrument_name":"BTC-26JUN20-8000-C"
+        "base_currency":"BTC"
+        "quote_currency":"USD"
+        "is_active":true
+        "tick_size":0.0005
+        "min_trade_amount":0.1
+        "kind":"option"
+        "contract_size":1
+        "strike":8000
+        "expiration_timestamp":1593158400000
+        "creation_timestamp":1571905490000
+        "option_type":"call"
+        "settlement_period":"month"
+        "taker_commission":0.0004
+        "maker_commission":0.0004
+    }
+    */
+
     /// <summary>
     ///
     /// </summary>
@@ -13,8 +33,8 @@ namespace CCXT.Collector.Deribit.Public
         /// Unique instrument identifier
         /// </summary>
         /// <value>Unique instrument identifier</value>
-        [JsonProperty(PropertyName = "instrumentName")]
-        public override string symbol
+        [JsonProperty(PropertyName = "instrument_name")]
+        public override string marketId
         {
             get; set;
         }
@@ -23,8 +43,8 @@ namespace CCXT.Collector.Deribit.Public
         /// The underlying currency being traded.
         /// </summary>
         /// <value>The underlying currency being traded.</value>
-        [JsonProperty(PropertyName = "baseCurrency")]
-        public override string baseName
+        [JsonProperty(PropertyName = "base_currency")]
+        public override string baseId
         {
             get; set;
         }
@@ -33,8 +53,36 @@ namespace CCXT.Collector.Deribit.Public
         /// The currency in which the instrument prices are quoted.
         /// </summary>
         /// <value>The currency in which the instrument prices are quoted.</value>
-        [JsonProperty(PropertyName = "currency")]
-        public override string quoteName
+        [JsonProperty(PropertyName = "quote_currency")]
+        public override string quoteId
+        {
+            get; set;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        [JsonProperty(PropertyName = "taker_commission")]
+        public decimal taker
+        {
+            get; set;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        [JsonProperty(PropertyName = "maker_commission")]
+        public decimal maker
+        {
+            get; set;
+        }
+
+        /// <summary>
+        /// Instrument kind, "future" or "option"
+        /// </summary>
+        /// <value>Instrument kind, "future" or "option"</value>
+        [JsonProperty(PropertyName = "kind")]
+        public string type
         {
             get; set;
         }
@@ -43,8 +91,18 @@ namespace CCXT.Collector.Deribit.Public
         /// Indicates if the instrument can currently be traded.
         /// </summary>
         /// <value>Indicates if the instrument can currently be traded.</value>
-        [JsonProperty(PropertyName = "isActive")]
+        [JsonProperty(PropertyName = "is_active")]
         public override bool active
+        {
+            get; set;
+        }
+
+        /// <summary>
+        /// Minimum amount for trading. For perpetual and futures - in USD units, for options it is amount of corresponding cryptocurrency contracts, e.g., BTC or ETH.
+        /// </summary>
+        /// <value>Minimum amount for trading. For perpetual and futures - in USD units, for options it is amount of corresponding cryptocurrency contracts, e.g., BTC or ETH.</value>
+        [JsonProperty(PropertyName = "min_trade_amount")]
+        public decimal minTradeAmount
         {
             get; set;
         }
@@ -53,7 +111,7 @@ namespace CCXT.Collector.Deribit.Public
         /// specifies minimal price change and, as follows, the number of decimal places for instrument prices
         /// </summary>
         /// <value>specifies minimal price change and, as follows, the number of decimal places for instrument prices</value>
-        [JsonProperty(PropertyName = "tickSize")]
+        [JsonProperty(PropertyName = "tick_size")]
         public decimal tickSize
         {
             get; set;
@@ -63,18 +121,8 @@ namespace CCXT.Collector.Deribit.Public
         /// Contract size for instrument
         /// </summary>
         /// <value>Contract size for instrument</value>
-        [JsonProperty(PropertyName = "minTradeSize")]
-        public decimal minTradeSize
-        {
-            get; set;
-        }
-
-        /// <summary>
-        /// Minimum amount for trading. For perpetual and futures - in USD units, for options it is amount of corresponding cryptocurrency contracts, e.g., BTC or ETH.
-        /// </summary>
-        /// <value>Minimum amount for trading. For perpetual and futures - in USD units, for options it is amount of corresponding cryptocurrency contracts, e.g., BTC or ETH.</value>
-        [JsonProperty(PropertyName = "minTradeAmount")]
-        public decimal minTradeAmount
+        [JsonProperty(PropertyName = "contract_size")]
+        public decimal contractSize
         {
             get; set;
         }
@@ -93,8 +141,8 @@ namespace CCXT.Collector.Deribit.Public
         /// The time when the instrument was first created (milliseconds)
         /// </summary>
         /// <value>The time when the instrument was first created (milliseconds)</value>
-        [JsonProperty(PropertyName = "created")]
-        public DateTime created
+        [JsonProperty(PropertyName = "creation_timestamp")]
+        public long CreationTimestamp
         {
             get; set;
         }
@@ -103,18 +151,8 @@ namespace CCXT.Collector.Deribit.Public
         /// The time when the instrument will expire (milliseconds)
         /// </summary>
         /// <value>The time when the instrument will expire (milliseconds)</value>
-        [JsonProperty(PropertyName = "expiration")]
-        public DateTime expiration
-        {
-            get; set;
-        }
-
-        /// <summary>
-        /// The settlement period.
-        /// </summary>
-        /// <value>The settlement period.</value>
-        [JsonProperty(PropertyName = "settlement")]
-        public string settlement
+        [JsonProperty(PropertyName = "expiration_timestamp")]
+        public long ExpirationTimestamp
         {
             get; set;
         }
@@ -123,25 +161,20 @@ namespace CCXT.Collector.Deribit.Public
         /// The option type (only for options)
         /// </summary>
         /// <value>The option type (only for options)</value>
-        [JsonProperty(PropertyName = "optionType")]
+        [JsonProperty(PropertyName = "option_type")]
         public string optionType
         {
             get; set;
         }
 
         /// <summary>
-        /// Instrument kind, "future" or "option"
+        /// The settlement period.
         /// </summary>
-        /// <value>Instrument kind, "future" or "option"</value>
-        [JsonProperty(PropertyName = "kind")]
-        public string kind
+        /// <value>The settlement period.</value>
+        [JsonProperty(PropertyName = "settlement_period")]
+        public string settlementPeriod
         {
             get; set;
         }
-
-        public int pricePrecision
-        {
-            get; set;
-        }
-    }
+   }
 }

@@ -79,19 +79,19 @@ namespace CCXT.Collector.Binance.Public
                             amount = _market["quotePrecision"].Value<int>()
                         };
 
-                        var _lot = (decimal)(-1.0 * Math.Log10(_precision.quantity));
+                        var _lot = (decimal)(-1.0 * Math.Log10((double)_precision.quantity));
                         var _active = _market["status"].ToString().ToUpper() == "TRADING";
 
                         var _limits = new MarketLimits
                         {
                             quantity = new MarketMinMax
                             {
-                                min = (decimal)Math.Pow(10, -_precision.quantity),
+                                min = (decimal)Math.Pow(10, -(double)_precision.quantity),
                                 max = decimal.MaxValue
                             },
                             price = new MarketMinMax
                             {
-                                min = (decimal)Math.Pow(10, -_precision.price),
+                                min = (decimal)Math.Pow(10, -(double)_precision.price),
                                 max = decimal.MaxValue
                             },
                             amount = new MarketMinMax

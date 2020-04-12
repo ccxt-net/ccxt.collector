@@ -80,12 +80,12 @@ namespace CCXT.Collector.Upbit.Public
                         {
                             quantity = new MarketMinMax
                             {
-                                min = (decimal)Math.Pow(10, -_market.precision.quantity),
+                                min = (decimal)Math.Pow(10, -(double)_market.precision.quantity),
                                 max = decimal.MaxValue
                             },
                             price = new MarketMinMax
                             {
-                                min = (decimal)Math.Pow(10, -_market.precision.price),
+                                min = (decimal)Math.Pow(10, -(double)_market.precision.price),
                                 max = decimal.MaxValue
                             },
                             amount = new MarketMinMax

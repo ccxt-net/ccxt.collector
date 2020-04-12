@@ -115,7 +115,7 @@ namespace CCXT.Collector.Deribit
                             }
                             else if (_message.stream == "trade")
                             {
-                                var _w_trades = JsonConvert.DeserializeObject<List<BCompleteOrderItem>>(_message.payload ?? "");
+                                var _w_trades = JsonConvert.DeserializeObject<List<DCompleteOrderItem>>(_message.payload ?? "");
 
                                 var _s_trade = new SCompleteOrders
                                 {
@@ -146,7 +146,7 @@ namespace CCXT.Collector.Deribit
                             }
                             else if (_message.stream == "orderbook")
                             {
-                                var _w_orderbooks = JsonConvert.DeserializeObject<List<BOrderBookItem>>(_message.payload ?? "");
+                                var _w_orderbooks = JsonConvert.DeserializeObject<List<DOrderBookItem>>(_message.payload ?? "");
 
                                 var _timestamp = CUnixTime.NowMilli;
                                 var _asks = _w_orderbooks.Where(o => o.sideType == SideType.Ask);
@@ -243,7 +243,7 @@ namespace CCXT.Collector.Deribit
                             }
                             else if (_message.stream == "trade")
                             {
-                                var _a_trades = JsonConvert.DeserializeObject<List<BCompleteOrderItem>>(_message.payload ?? "");
+                                var _a_trades = JsonConvert.DeserializeObject<List<DCompleteOrderItem>>(_message.payload ?? "");
 
                                 var _s_trade = new SCompleteOrders
                                 {
@@ -274,7 +274,7 @@ namespace CCXT.Collector.Deribit
                             }
                             else if (_message.stream == "orderbook")
                             {
-                                var _a_orderbooks = JsonConvert.DeserializeObject<List<BOrderBookItem>>(_message.payload ?? "");
+                                var _a_orderbooks = JsonConvert.DeserializeObject<List<DOrderBookItem>>(_message.payload ?? "");
 
                                 var _timestamp = CUnixTime.NowMilli;
                                 var _asks = _a_orderbooks.Where(o => o.sideType == SideType.Ask);

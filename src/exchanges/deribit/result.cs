@@ -5,7 +5,7 @@ namespace CCXT.Collector.Deribit
     /// <summary>
     ///
     /// </summary>
-    public class DRResult<T>
+    public class DRResult
     {
         public string jsonrpc
         {
@@ -31,11 +31,32 @@ namespace CCXT.Collector.Deribit
         {
             get; set;
         }
+    }
 
+    /// <summary>
+    ///
+    /// </summary>
+    public class DRResultList<T> : DRResult
+    {
         /// <summary>
         ///
         /// </summary>
         public List<T> result
+        {
+            get;
+            set;
+        }
+    }
+
+    /// <summary>
+    ///
+    /// </summary>
+    public class DRResults<T> : DRResult
+    {
+        /// <summary>
+        ///
+        /// </summary>
+        public T result
         {
             get;
             set;

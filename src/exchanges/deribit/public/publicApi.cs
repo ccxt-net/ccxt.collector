@@ -2,7 +2,6 @@
 using OdinSdk.BaseLib.Coin.Public;
 using OdinSdk.BaseLib.Coin.Types;
 using OdinSdk.BaseLib.Configuration;
-using OdinSdk.BaseLib.Converter;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -64,26 +63,54 @@ namespace CCXT.Collector.Deribit.Public
             var _result = new Markets();
 
             publicClient.ExchangeInfo.ApiCallWait(TradeType.Public);
+
+            var _json_currencies = await publicClient.CallApiGet1Async("/api/v2/public/get_currencies");
+            var _currencies = publicClient.DeserializeObject<DRResultList<DCurrency>>(_json_currencies.Content);
+
+            foreach(var _c in _currencies.result)
             {
                 var _params = publicClient.MergeParamsAndArgs(args);
+                {
+                    _params.Add("currency", _c.currency);
+                }
 
-                var _json_value = await publicClient.CallApiGet1Async("/api/v2/public/getinstruments", _params);
-#if RAWJSON
-                _result.rawJson = _json_value.Content;
-#endif
+                var _json_value = await publicClient.CallApiGet1Async("/api/v2/public/get_instruments", _params);
+
                 var _json_result = publicClient.GetResponseMessage(_json_value.Response);
                 if (_json_result.success == true)
                 {
-                    var _markets = publicClient.DeserializeObject<DRResult<DMarketItem>>(_json_value.Content);
+                    var _markets = publicClient.DeserializeObject<DRResultList<DMarketItem>>(_json_value.Content);
 
                     foreach (var _m in _markets.result)
                     {
                         if (_m.active == false)
                             continue;
 
-                        _m.marketId = _m.symbol;
-                        _m.baseId = _m.baseName;
-                        _m.quoteId = _m.quoteName;
+                        _m.symbol = _m.marketId;
+                        _m.precision = new MarketPrecision
+                        {
+                            amount = _m.minTradeAmount,
+                            price = _m.tickSize
+                        };
+                        _m.limits = new MarketLimits
+                        {
+                            quantity = new MarketMinMax
+                            {
+                                min = _m.minTradeAmount,
+                                max = Decimal.MaxValue
+                            },
+                            price = new MarketMinMax
+                            {
+                                min = _m.tickSize,
+                                max = Decimal.MaxValue
+                            },
+                            amount = new MarketMinMax
+                            {
+                                min = Decimal.MinValue,
+                                max = Decimal.MaxValue
+                            }
+                        };
+                        _m.withdrawEnabled = false;
 
                         _result.result.Add(_m.marketId, _m);
                     }
@@ -102,20 +129,25 @@ namespace CCXT.Collector.Deribit.Public
         /// <param name="timeframe">Time interval to bucket by. Available options: [1m,5m,1h,1d].</param>
         /// <param name="limits">Number of results to fetch.</param>
         /// <returns></returns>
-        public async ValueTask<OHLCVs> GetOHLCVs(string symbol, string timeframe = "1h", int limits = 12)
+        public async ValueTask<OHLCVs> GetOHLCVs(string symbol, string timeframe = "1h", int limits = 24)
         {
             var _result = new OHLCVs();
 
             var _params = new Dictionary<string, object>();
             {
-                _params.Add("symbol", symbol);
-                _params.Add("binSize", timeframe);      // Time interval to bucket by. Available options: [1m,5m,1h,1d].
-                _params.Add("count", limits);            // Number of results to fetch.
-                _params.Add("partial", false);          // If true, will send in-progress (incomplete) bins for the current time period.
-                _params.Add("reverse", true);           // If true, will sort results newest first.
+                var _resolution = publicClient.ExchangeInfo.GetTimeframe(timeframe);
+                var _duration = publicClient.ExchangeInfo.GetTimestamp(timeframe);
+
+                var _end_timestamp = (CUnixTime.NowMilli / _duration) * _duration;
+                var _start_timestamp = _end_timestamp - (limits - 1) * _duration * 1000;
+
+                _params.Add("instrument_name", symbol);
+                _params.Add("resolution", _resolution);      
+                _params.Add("start_timestamp", _start_timestamp);
+                _params.Add("end_timestamp", _end_timestamp);
             }
 
-            var _response = await publicClient.CallApiGet2Async("/api/v1/trade/bucketed", _params);
+            var _response = await publicClient.CallApiGet2Async("/api/v2/public/get_tradingview_chart_data", _params);
             if (_response != null)
             {
 #if RAWJSON
@@ -123,24 +155,24 @@ namespace CCXT.Collector.Deribit.Public
 #endif
                 if (_response.IsSuccessful == true)
                 {
-                    var _tickers = publicClient.DeserializeObject<List<BTickerItem>>(_response.Content);
-
-                    _result.result.AddRange(
-                         _tickers
-                             .Select(x => new OHLCVItem
-                             {
-                                 timestamp = x.timestamp,
-                                 openPrice = x.openPrice,
-                                 highPrice = x.highPrice,
-                                 lowPrice = x.lowPrice,
-                                 closePrice = x.closePrice,
-                                 amount = x.quoteVolume,
-                                 vwap = x.vwap,
-                                 count = x.trades,
-                                 volume = x.baseVolume
-                             })
-                             .OrderByDescending(o => o.timestamp)
-                         );
+                    var _tickers = publicClient.DeserializeObject<DRResults<DTickerItem>>(_response.Content);
+                    for (var i = 0; i < _tickers.result.ticks.Length; i++)
+                    {
+                        _result.result.Add(
+                               new OHLCVItem
+                               {
+                                   timestamp = _tickers.result.ticks[i],
+                                   openPrice = _tickers.result.open[i],
+                                   highPrice = _tickers.result.high[i],
+                                   lowPrice = _tickers.result.low[i],
+                                   closePrice = _tickers.result.close[i],
+                                   amount = _tickers.result.cost[i],
+                                   vwap = 0,
+                                   count = 0,
+                                   volume = _tickers.result.volume[i]
+                               }
+                           );
+                    }
 
                     _result.SetSuccess();
                 }
@@ -160,22 +192,19 @@ namespace CCXT.Collector.Deribit.Public
         /// <param name="symbol">The type of trading base-currency of which information you want to query for.</param>
         /// <param name="limits">maximum number of items (optional): default 25</param>
         /// <returns></returns>
-        public async ValueTask<CompleteOrders> GetCompleteOrders(string symbol, int limits = 25)
+        public async ValueTask<CompleteOrders> GetCompleteOrders(string symbol, int limits = 100)
         {
             var _result = new CompleteOrders();
 
             var _params = new Dictionary<string, object>();
             {
-                var _limits = limits <= 1 ? 1
-                            : limits <= 500 ? limits
-                            : 500;
-
-                _params.Add("symbol", symbol);
-                _params.Add("count", _limits);
-                _params.Add("reverse", true);
+                _params.Add("instrument_name", symbol);
+                _params.Add("count", limits);
+                _params.Add("include_old", "true");
+                _params.Add("sorting", "desc");
             }
 
-            var _response = await publicClient.CallApiGet2Async("/api/v1/trade", _params);
+            var _response = await publicClient.CallApiGet2Async("/api/v2/public/get_last_trades_by_instrument", _params);
             if (_response != null)
             {
 #if RAWJSON
@@ -183,12 +212,13 @@ namespace CCXT.Collector.Deribit.Public
 #endif
                 if (_response.IsSuccessful == true)
                 {
-                    var _orders = publicClient.DeserializeObject<List<BCompleteOrderItem>>(_response.Content);
+                    var _orders = publicClient.DeserializeObject<DRResults<DCompleteOrders>>(_response.Content);
 
-                    foreach (var _o in _orders)
+                    foreach (var _o in _orders.result.trades)
                     {
                         _o.orderType = OrderType.Limit;
                         _o.fillType = FillType.Fill;
+                        _o.makerType = MakerType.Taker;
 
                         _o.amount = _o.quantity * _o.price;
                         _result.result.Add(_o);
@@ -218,11 +248,11 @@ namespace CCXT.Collector.Deribit.Public
 
             var _params = new Dictionary<string, object>();
             {
-                _params.Add("symbol", symbol);
+                _params.Add("instrument_name", symbol);
                 _params.Add("depth", count);
             }
 
-            var _response = await publicClient.CallApiGet2Async("/api/v1/orderBook/L2", _params);
+            var _response = await publicClient.CallApiGet2Async("/api/v2/public/get_order_book", _params);
             if (_response != null)
             {
 #if RAWJSON
@@ -230,13 +260,13 @@ namespace CCXT.Collector.Deribit.Public
 #endif
                 if (_response.IsSuccessful == true)
                 {
-                    var _orderbooks = publicClient.DeserializeObject<List<BOrderBookItem>>(_response.Content);
+                    var _orderbooks = publicClient.DeserializeObject<DRResultList<DOrderBookItem>>(_response.Content);
                     if (_orderbooks != null)
                     {
                         _result.result.asks = new List<OrderBookItem>();
                         _result.result.bids = new List<OrderBookItem>();
 
-                        foreach (var _o in _orderbooks)
+                        foreach (var _o in _orderbooks.result)
                         {
                             _o.amount = _o.quantity * _o.price;
                             _o.count = 1;
