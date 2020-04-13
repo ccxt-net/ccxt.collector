@@ -4,7 +4,6 @@ using OdinSdk.BaseLib.Coin.Types;
 using OdinSdk.BaseLib.Configuration;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace CCXT.Collector.Deribit.Public
@@ -151,7 +150,7 @@ namespace CCXT.Collector.Deribit.Public
             if (_response != null)
             {
 #if RAWJSON
-            _result.rawJson = _response.Content;
+                _result.rawJson = _response.Content;
 #endif
                 if (_response.IsSuccessful == true)
                 {
@@ -208,7 +207,7 @@ namespace CCXT.Collector.Deribit.Public
             if (_response != null)
             {
 #if RAWJSON
-            _result.rawJson = _response.Content;
+                _result.rawJson = _response.Content;
 #endif
                 if (_response.IsSuccessful == true)
                 {
@@ -256,26 +255,15 @@ namespace CCXT.Collector.Deribit.Public
             if (_response != null)
             {
 #if RAWJSON
-            _result.rawJson = _response.Content;
+                _result.rawJson = _response.Content;
 #endif
                 if (_response.IsSuccessful == true)
                 {
-                    var _orderbooks = publicClient.DeserializeObject<DRResultList<DOrderBookItem>>(_response.Content);
+                    var _orderbooks = publicClient.DeserializeObject<DRResults<DOrderBook>>(_response.Content);
                     if (_orderbooks != null)
                     {
-                        _result.result.asks = new List<OrderBookItem>();
-                        _result.result.bids = new List<OrderBookItem>();
-
-                        foreach (var _o in _orderbooks.result)
-                        {
-                            _o.amount = _o.quantity * _o.price;
-                            _o.count = 1;
-
-                            if (_o.sideType == SideType.Ask)
-                                _result.result.asks.Add(_o);
-                            else
-                                _result.result.bids.Add(_o);
-                        }
+                        _result.result.asks = _orderbooks.result.asks;
+                        _result.result.bids = _orderbooks.result.bids;
 
                         _result.result.symbol = symbol;
                         _result.result.timestamp = CUnixTime.NowMilli;

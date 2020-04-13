@@ -1,6 +1,8 @@
-﻿using Newtonsoft.Json;
+﻿using System.Linq;
+using Newtonsoft.Json;
 using OdinSdk.BaseLib.Coin.Public;
 using OdinSdk.BaseLib.Coin.Types;
+using System.Collections.Generic;
 
 namespace CCXT.Collector.Deribit.Public
 {
@@ -34,85 +36,181 @@ namespace CCXT.Collector.Deribit.Public
         "best_ask_amount":56330
         "bids":[ price, qty ]
         "asks":[ price, qty ]
+    }
     */
+
+    public class DOrderBookStates
+    {
+        public decimal volume_usd
+        {
+            get; set;
+        }
+        
+        public decimal volume
+        {
+            get; set;
+        }
+        
+        public decimal price_change
+        {
+            get; set;
+        }
+        
+        public decimal low
+        {
+            get; set;
+        }
+
+        public decimal high
+        {
+            get; set;
+        }
+    }
 
     /// <summary>
     ///
     /// </summary>
-    public class DOrderBookItem : OdinSdk.BaseLib.Coin.Public.OrderBookItem, IOrderBookItem
+    public class DOrderBook : OdinSdk.BaseLib.Coin.Public.OrderBook, IOrderBook
     {
         /// <summary>
         ///
         /// </summary>
-        [JsonProperty(PropertyName = "symbol")]
-        public string symbol
+        [JsonProperty(PropertyName = "instrument_name")]
+        public override string symbol
         {
             get;
             set;
         }
 
         /// <summary>
-        ///
+        /// 
         /// </summary>
-        [JsonProperty(PropertyName = "id")]
-        public long id
+        public override long timestamp
         {
-            get;
-            set;
+            get; set;
         }
 
-        /// <summary>
-        ///
-        /// </summary>
-        [JsonProperty(PropertyName = "originSide")]
-        public SideType sideType
+        public DOrderBookStates states
         {
-            get;
-            set;
+            get; set;
         }
 
-        /// <summary>
-        /// 주문 종류1 (partial, update)
-        /// </summary>
-        [JsonProperty(PropertyName = "side")]
-        private string sideValue
+        public string state
+        {
+            get; set;
+        }
+
+        public decimal settlement_price
+        {
+            get; set;
+        }
+
+        public decimal open_interest
+        {
+            get; set;
+        }
+
+        public decimal min_price
+        {
+            get; set;
+        }
+
+        public decimal max_price
+        {
+            get; set;
+        }
+
+        public decimal mark_price
+        {
+            get; set;
+        }
+
+        public decimal last_price
+        {
+            get; set;
+        }
+
+        public decimal index_price
+        {
+            get; set;
+        }
+
+        public decimal funding_8h
+        {
+            get; set;
+        }
+
+        public decimal estimated_delivery_price
+        {
+            get; set;
+        }
+
+        public decimal current_funding
+        {
+            get; set;
+        }
+
+        public long change_id
+        {
+            get; set;
+        }
+
+        public decimal best_bid_price
+        {
+            get; set;
+        }
+
+        public decimal best_bid_amount
+        {
+            get; set;
+        }
+
+        public decimal best_ask_price
+        {
+            get; set;
+        }
+
+        public decimal best_ask_amount
+        {
+            get; set;
+        }
+
+        [JsonProperty(PropertyName = "bids")]
+        public decimal[][] bid_array
         {
             set
             {
-                sideType = SideTypeConverter.FromString(value);
+                this.bids = new List<OrderBookItem>();
+                foreach (var _b in value)
+                {
+                    this.bids.Add(new OrderBookItem
+                    {
+                        price = _b[0],
+                        quantity = _b[1],
+                        amount = _b[0] * _b[1],
+                        count = 1
+                    });
+                }
             }
         }
 
-        /// <summary>
-        /// 주문 종류2 (insert, delete)
-        /// </summary>
-        [JsonProperty(PropertyName = "sideType")]
-        private string sideValue2
+        [JsonProperty(PropertyName = "asks")]
+        public decimal[][] ask_array
         {
             set
             {
-                sideType = SideTypeConverter.FromString(value);
+                this.asks = new List<OrderBookItem>();
+                foreach (var _a in value)
+                {
+                    this.asks.Add(new OrderBookItem
+                    {
+                        price = _a[0],
+                        quantity = _a[1],
+                        amount = _a[0] * _a[1],
+                        count = 1
+                    });
+                }
             }
-        }
-
-        /// <summary>
-        ///
-        /// </summary>
-        [JsonProperty(PropertyName = "size")]
-        public override decimal quantity
-        {
-            get;
-            set;
-        }
-
-        /// <summary>
-        ///
-        /// </summary>
-        [JsonProperty(PropertyName = "price")]
-        public override decimal price
-        {
-            get;
-            set;
         }
     }
 }

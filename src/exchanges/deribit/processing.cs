@@ -146,11 +146,11 @@ namespace CCXT.Collector.Deribit
                             }
                             else if (_message.stream == "orderbook")
                             {
-                                var _w_orderbooks = JsonConvert.DeserializeObject<List<DOrderBookItem>>(_message.payload ?? "");
+                                var _w_orderbooks = JsonConvert.DeserializeObject<DRResults<DOrderBook>>(_message.payload ?? "");
 
                                 var _timestamp = CUnixTime.NowMilli;
-                                var _asks = _w_orderbooks.Where(o => o.sideType == SideType.Ask);
-                                var _bids = _w_orderbooks.Where(o => o.sideType == SideType.Bid);
+                                var _asks = _w_orderbooks.result.asks;
+                                var _bids = _w_orderbooks.result.bids;
 
                                 var _s_orderbooks = new SOrderBooks
                                 {
@@ -173,7 +173,7 @@ namespace CCXT.Collector.Deribit
                                                 quantity = o.quantity,
                                                 price = o.price,
                                                 amount = o.quantity * o.price,
-                                                id = o.id,
+                                                id = 0,
                                                 count = 1
                                             };
                                         }).ToList(),
@@ -184,7 +184,7 @@ namespace CCXT.Collector.Deribit
                                                 quantity = o.quantity,
                                                 price = o.price,
                                                 amount = o.quantity * o.price,
-                                                id = o.id,
+                                                id = 0,
                                                 count = 1
                                             };
                                         }).ToList()
@@ -274,11 +274,11 @@ namespace CCXT.Collector.Deribit
                             }
                             else if (_message.stream == "orderbook")
                             {
-                                var _a_orderbooks = JsonConvert.DeserializeObject<List<DOrderBookItem>>(_message.payload ?? "");
+                                var _a_orderbooks = JsonConvert.DeserializeObject<DRResults<DOrderBook>>(_message.payload ?? "");
 
                                 var _timestamp = CUnixTime.NowMilli;
-                                var _asks = _a_orderbooks.Where(o => o.sideType == SideType.Ask);
-                                var _bids = _a_orderbooks.Where(o => o.sideType == SideType.Bid);
+                                var _asks = _a_orderbooks.result.asks;
+                                var _bids = _a_orderbooks.result.bids;
 
                                 var _s_orderbooks = new SOrderBooks
                                 {
@@ -301,7 +301,7 @@ namespace CCXT.Collector.Deribit
                                                 quantity = o.quantity,
                                                 price = o.price,
                                                 amount = o.quantity * o.price,
-                                                id = o.id,
+                                                id = 0,
                                                 count = 1
                                             };
                                         }).ToList(),
@@ -312,7 +312,7 @@ namespace CCXT.Collector.Deribit
                                                 quantity = o.quantity,
                                                 price = o.price,
                                                 amount = o.quantity * o.price,
-                                                id = o.id,
+                                                id = 0,
                                                 count = 1
                                             };
                                         }).ToList()
