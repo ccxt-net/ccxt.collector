@@ -159,31 +159,8 @@ namespace CCXT.Collector.Deribit
 
             if (IsAuthentication == true)
             {
-                //var _post_data = ToQueryString(_request.Parameters);
-                //_request.Parameters.Clear();
-
-                var _nonce = (GenerateOnlyNonce(10) + 3600).ToString();
-                //if (args != null && args.Count > 0)
-                //    endpoint += $"?{_post_data}";
-
-                var _json_body = "";
-                if (args != null && args.Count > 0)
-                {
-                    _json_body = Regex.Unescape(this.SerializeObject(args, Formatting.None));
-
-                    _request.AddParameter(new Parameter(
-                            "application/json", _json_body, ParameterType.RequestBody
-                        ));
-
-                    //_request.Resource += $"?{_post_data}";
-                }
-
-                var _signature = await CreateSignature(_request.Method, endpoint, _nonce, _json_body);
-                {
-                    _request.AddHeader("api-expires", _nonce);
-                    _request.AddHeader("api-key", ConnectKey);
-                    _request.AddHeader("api-signature", _signature);
-                }
+                var _basic_auth = "Basic " + Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes($"{ConnectKey}:{SecretKey}"));
+                _request.AddHeader("Authorization", _basic_auth);
             }
 
             return await Task.FromResult(_request);
@@ -201,24 +178,8 @@ namespace CCXT.Collector.Deribit
 
             if (IsAuthentication == true)
             {
-                var _nonce = (GenerateOnlyNonce(10) + 3600).ToString();
-
-                var _json_body = "";
-                if (args != null && args.Count > 0)
-                {
-                    _json_body = Regex.Unescape(this.SerializeObject(args, Formatting.None));
-
-                    _request.AddParameter(new Parameter(
-                            "application/json", _json_body, ParameterType.RequestBody
-                        ));
-                }
-
-                var _signature = await CreateSignature(_request.Method, endpoint, _nonce, _json_body);
-                {
-                    _request.AddHeader("api-expires", _nonce);
-                    _request.AddHeader("api-key", ConnectKey);
-                    _request.AddHeader("api-signature", _signature);
-                }
+                var _basic_auth = "Basic " + Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes($"{ConnectKey}:{SecretKey}"));
+                _request.AddHeader("Authorization", _basic_auth);
             }
 
             return await Task.FromResult(_request);
@@ -236,19 +197,8 @@ namespace CCXT.Collector.Deribit
 
             if (IsAuthentication == true)
             {
-                var _post_data = ToQueryString(_request.Parameters);
-                //_request.Parameters.Clear();
-
-                var _nonce = (GenerateOnlyNonce(10) + 3600).ToString();
-                if (args != null && args.Count > 0)
-                    endpoint += $"?{_post_data}";
-
-                var _signature = await CreateSignature(_request.Method, endpoint, _nonce);
-                {
-                    _request.AddHeader("api-expires", _nonce);
-                    _request.AddHeader("api-key", ConnectKey);
-                    _request.AddHeader("api-signature", _signature);
-                }
+                var _basic_auth = "Basic " + Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes($"{ConnectKey}:{SecretKey}"));
+                _request.AddHeader("Authorization", _basic_auth);
             }
 
             return await Task.FromResult(_request);
@@ -266,31 +216,8 @@ namespace CCXT.Collector.Deribit
 
             if (IsAuthentication == true)
             {
-                //var _post_data = ToQueryString(_request.Parameters);
-                //_request.Parameters.Clear();
-
-                var _nonce = (GenerateOnlyNonce(10) + 3600).ToString();
-                //if (args != null && args.Count > 0)
-                //    endpoint += $"?{_post_data}";
-
-                var _json_body = "";
-                if (args != null && args.Count > 0)
-                {
-                    _json_body = Regex.Unescape(this.SerializeObject(args, Formatting.None));
-
-                    _request.AddParameter(new Parameter(
-                            "application/json", _json_body, ParameterType.RequestBody
-                        ));
-
-                    //_request.Resource += $"?{_post_data}";
-                }
-
-                var _signature = await CreateSignature(_request.Method, endpoint, _nonce, _json_body);
-                {
-                    _request.AddHeader("api-expires", _nonce);
-                    _request.AddHeader("api-key", ConnectKey);
-                    _request.AddHeader("api-signature", _signature);
-                }
+                var _basic_auth = "Basic " + Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes($"{ConnectKey}:{SecretKey}"));
+                _request.AddHeader("Authorization", _basic_auth);
             }
 
             return await Task.FromResult(_request);

@@ -1,68 +1,39 @@
 ﻿using Newtonsoft.Json;
 using OdinSdk.BaseLib.Coin.Private;
-using System.Collections.Generic;
 
 namespace CCXT.Collector.Deribit.Private
 {
     /*
      {
-        "count": 2,
-        "data": [
-            {
-                "amount": 0.2,
-                "created_timestamp": 1550579457727,
-                "currency": "BTC",
-                "direction": "payment",
-                "id": 2,
-                "other_side": "2MzyQc5Tkik61kJbEpJV5D5H9VfWHZK9Sgy",
-                "state": "prepared",
-                "type": "user",
-                "updated_timestamp": 1550579457727
-            },
-            {
-                "amount": 0.3,
-                "created_timestamp": 1550579255800,
-                "currency": "BTC",
-                "direction": "payment",
-                "id": 1,
-                "other_side": "new_user_1_1",
-                "state": "confirmed",
-                "type": "subaccount",
-                "updated_timestamp": 1550579255800
-            }
-        ]
+        "address": "2NBqqD5GRJ8wHy1PYyCXTe9ke5226FhavBz",
+        "amount": 0.4,
+        "confirmed_timestamp": null,
+        "created_timestamp": 1550574558607,
+        "currency": "BTC",
+        "fee": 0.0001,
+        "id": 4,
+        "priority": 1,
+        "state": "unconfirmed",
+        "transaction_id": null,
+        "updated_timestamp": 1550574558607
     }
     */
 
     /// <summary>
     ///
     /// </summary>
-    public class DTransfer
+    public class DWithdraw : OdinSdk.BaseLib.Coin.Private.TransferItem, ITransferItem
     {
         /// <summary>
-        /// 
+        ///
         /// </summary>
-        public int count
+        [JsonProperty(PropertyName = "address")]
+        public override string toAddress
         {
             get;
             set;
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        public List<DTransferItem> data
-        {
-            get;
-            set;
-        }
-    }
-
-    /// <summary>
-    ///
-    /// </summary>
-    public class DTransferItem : OdinSdk.BaseLib.Coin.Private.TransferItem, ITransferItem
-    {
         /// <summary>
         /// 
         /// </summary>
@@ -92,9 +63,9 @@ namespace CCXT.Collector.Deribit.Private
         }
 
         /// <summary>
-        ///
+        /// 
         /// </summary>
-        public string direction
+        public override decimal fee
         {
             get;
             set;
@@ -112,8 +83,7 @@ namespace CCXT.Collector.Deribit.Private
         /// <summary>
         ///
         /// </summary>
-        [JsonProperty(PropertyName = "other_side")]
-        public override string toAddress
+        public int priority
         {
             get;
             set;
@@ -131,7 +101,8 @@ namespace CCXT.Collector.Deribit.Private
         /// <summary>
         ///
         /// </summary>
-        public string type
+        [JsonProperty(PropertyName = "transaction_id")]
+        public override string transactionId
         {
             get;
             set;

@@ -1,600 +1,304 @@
-﻿using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using OdinSdk.BaseLib.Coin;
-using System;
-using System.Collections.Generic;
+﻿using OdinSdk.BaseLib.Coin;
 
 namespace CCXT.Collector.Deribit.Private
 {
+    /*
+     {
+        "available_funds": 75.20590014,
+        "available_withdrawal_funds": 75.20590014,
+        "balance": 78.28121225,
+        "creation_timestamp": 1581505544344,
+        "currency": "BTC",
+        "delta_total": -10.1566,
+        "email": "user_AAA@email.com",
+        "equity": 78.44878563,
+        "futures_pl": 2.2229243,
+        "futures_session_rpl": 0,
+        "futures_session_upl": -0.04632662,
+        "id": 3,
+        "initial_margin": 3.24288549,
+        "interuser_transfers_enabled": false,
+        "limits": {
+            "matching_engine": 200,
+            "matching_engine_burst": 200,
+            "non_matching_engine": 200,
+            "non_matching_engine_burst": 300
+        },
+        "maintenance_margin": 2.4945273,
+        "margin_balance": 78.23488563,
+        "options_delta": 5.107,
+        "options_gamma": 0.0117,
+        "options_pl": -0.7061,
+        "options_session_rpl": 0,
+        "options_session_upl": -0.2346,
+        "options_theta": -562.1021,
+        "options_value": 0.2139,
+        "options_vega": 53.409,
+        "portfolio_margining_enabled": true,
+        "projected_initial_margin": 4.508373444269301,
+        "projected_maintenance_margin": 3.467979572514847,
+        "referrer_id": null,
+        "session_funding": 0,
+        "session_rpl": 0,
+        "session_upl": -0.28092662,
+        "system_name": "user_1",
+        "tfa_enabled": false,
+        "total_pl": 1.5168243,
+        "type": "main",
+        "username": "user_1"
+    }
+    */
+
+    public class DUserInfoLimits
+    {
+        public decimal matching_engine
+        {
+            get;
+            set;
+        }
+
+        public decimal matching_engine_burst
+        {
+            get;
+            set;
+        }
+
+        public decimal non_matching_engine
+        {
+            get;
+            set;
+        }
+
+        public decimal non_matching_engine_burst
+        {
+            get;
+            set;
+        }
+    }
+
     /// <summary>
     ///
     /// </summary>
-    public class BUserPreferences
+    public class DUserInfoItem
     {
-        /// <summary>
-        ///
-        /// </summary>
-        public bool alertOnLiquidations
+        public decimal available_funds
         {
-            get; set;
+            get;
+            set;
         }
 
-        /// <summary>
-        ///
-        /// </summary>
-        public bool animationsEnabled
+        public decimal available_withdrawal_funds
         {
-            get; set;
+            get;
+            set;
         }
 
-        /// <summary>
-        ///
-        /// </summary>
-        public DateTime announcementsLastSeen
+        public decimal balance
         {
-            get; set;
+            get;
+            set;
         }
 
-        /// <summary>
-        ///
-        /// </summary>
-        public int chatChannelID
+        public long creation_timestamp
         {
-            get; set;
+            get;
+            set;
         }
 
-        /// <summary>
-        ///
-        /// </summary>
-        public string colorTheme
-        {
-            get; set;
-        }
-
-        /// <summary>
-        ///
-        /// </summary>
         public string currency
         {
-            get; set;
+            get;
+            set;
         }
 
-        /// <summary>
-        ///
-        /// </summary>
-        public bool debug
-        {
-            get; set;
-        }
-
-        /// <summary>
-        ///
-        /// </summary>
-        public List<string> disableEmails
-        {
-            get; set;
-        }
-
-        /// <summary>
-        ///
-        /// </summary>
-        public List<string> disablePush
-        {
-            get; set;
-        }
-
-        /// <summary>
-        ///
-        /// </summary>
-        public List<string> hideConfirmDialogs
-        {
-            get; set;
-        }
-
-        /// <summary>
-        ///
-        /// </summary>
-        public bool hideConnectionModal
-        {
-            get; set;
-        }
-
-        /// <summary>
-        ///
-        /// </summary>
-        public bool hideFromLeaderboard
-        {
-            get; set;
-        }
-
-        /// <summary>
-        ///
-        /// </summary>
-        public bool hideNameFromLeaderboard
-        {
-            get; set;
-        }
-
-        /// <summary>
-        ///
-        /// </summary>
-        public List<string> hideNotifications
-        {
-            get; set;
-        }
-
-        /// <summary>
-        ///
-        /// </summary>
-        public string locale
-        {
-            get; set;
-        }
-
-        /// <summary>
-        ///
-        /// </summary>
-        public List<string> msgsSeen
-        {
-            get; set;
-        }
-
-        /// <summary>
-        ///
-        /// </summary>
-        public JToken orderBookBinning
+        public decimal delta_total
         {
             get;
             set;
         }
 
-        /// <summary>
-        ///
-        /// </summary>
-        public string orderBookType
-        {
-            get; set;
-        }
-
-        /// <summary>
-        ///
-        /// </summary>
-        public bool orderClearImmediate
-        {
-            get; set;
-        }
-
-        /// <summary>
-        ///
-        /// </summary>
-        public bool orderControlsPlusMinus
-        {
-            get; set;
-        }
-
-        /// <summary>
-        ///
-        /// </summary>
-        public bool showLocaleNumbers
-        {
-            get; set;
-        }
-
-        /// <summary>
-        ///
-        /// </summary>
-        public List<string> sounds
-        {
-            get; set;
-        }
-
-        /// <summary>
-        ///
-        /// </summary>
-        public bool strictIPCheck
-        {
-            get; set;
-        }
-
-        /// <summary>
-        ///
-        /// </summary>
-        public bool strictTimeout
-        {
-            get; set;
-        }
-
-        /// <summary>
-        ///
-        /// </summary>
-        public string tickerGroup
-        {
-            get; set;
-        }
-
-        /// <summary>
-        ///
-        /// </summary>
-        public bool tickerPinned
-        {
-            get; set;
-        }
-
-        /// <summary>
-        ///
-        /// </summary>
-        public string tradeLayout
-        {
-            get; set;
-        }
-    }
-
-    /// <summary>
-    ///
-    /// </summary>
-    public interface IUserInfoItem
-    {
-        /// <summary>
-        ///
-        /// </summary>
-        string id
-        {
-            get;
-            set;
-        }
-
-        /// <summary>
-        ///
-        /// </summary>
-        string ownerId
-        {
-            get;
-            set;
-        }
-
-        /// <summary>
-        ///
-        /// </summary>
-        string firstName
-        {
-            get;
-            set;
-        }
-
-        /// <summary>
-        ///
-        /// </summary>
-        string lastName
-        {
-            get;
-            set;
-        }
-
-        /// <summary>
-        ///
-        /// </summary>
-        string userName
-        {
-            get;
-            set;
-        }
-
-        /// <summary>
-        ///
-        /// </summary>
-        string email
-        {
-            get;
-            set;
-        }
-
-        /// <summary>
-        ///
-        /// </summary>
-        string phone
-        {
-            get;
-            set;
-        }
-
-        /// <summary>
-        ///
-        /// </summary>
-        DateTime created
-        {
-            get;
-            set;
-        }
-
-        /// <summary>
-        ///
-        /// </summary>
-        DateTime lastUpdated
-        {
-            get;
-            set;
-        }
-
-        /// <summary>
-        ///
-        /// </summary>
-        BUserPreferences preferences
-        {
-            get;
-            set;
-        }
-
-        /// <summary>
-        ///
-        /// </summary>
-        JToken restrictedEngineFields
-        {
-            get;
-            set;
-        }
-
-        /// <summary>
-        ///
-        /// </summary>
-        string TFAEnabled
-        {
-            get;
-            set;
-        }
-
-        /// <summary>
-        ///
-        /// </summary>
-        string affiliateId
-        {
-            get;
-            set;
-        }
-
-        /// <summary>
-        ///
-        /// </summary>
-        string pgpPubKey
-        {
-            get;
-            set;
-        }
-
-        /// <summary>
-        ///
-        /// </summary>
-        string country
-        {
-            get;
-            set;
-        }
-
-        /// <summary>
-        ///
-        /// </summary>
-        string geoipCountry
-        {
-            get;
-            set;
-        }
-
-        /// <summary>
-        ///
-        /// </summary>
-        string geoipRegion
-        {
-            get;
-            set;
-        }
-
-        /// <summary>
-        ///
-        /// </summary>
-        string typ
-        {
-            get;
-            set;
-        }
-
-        /// <summary>
-        ///
-        /// </summary>
-        bool isRestricted
-        {
-            get;
-            set;
-        }
-
-        /// <summary>
-        ///
-        /// </summary>
-        JArray roles
-        {
-            get;
-            set;
-        }
-    }
-
-    /// <summary>
-    ///
-    /// </summary>
-    public class BUserInfoItem : IUserInfoItem
-    {
-        /// <summary>
-        ///
-        /// </summary>
-        public string id
-        {
-            get;
-            set;
-        }
-
-        /// <summary>
-        ///
-        /// </summary>
-        public string ownerId
-        {
-            get;
-            set;
-        }
-
-        /// <summary>
-        ///
-        /// </summary>
-        public string firstName
-        {
-            get;
-            set;
-        }
-
-        /// <summary>
-        ///
-        /// </summary>
-        public string lastName
-        {
-            get;
-            set;
-        }
-
-        /// <summary>
-        ///
-        /// </summary>
-        public string userName
-        {
-            get;
-            set;
-        }
-
-        /// <summary>
-        ///
-        /// </summary>
         public string email
         {
             get;
             set;
         }
 
-        /// <summary>
-        ///
-        /// </summary>
-        public string phone
+        public decimal equity
         {
             get;
             set;
         }
 
-        /// <summary>
-        ///
-        /// </summary>
-        public DateTime created
+        public decimal futures_pl
         {
             get;
             set;
         }
 
-        /// <summary>
-        ///
-        /// </summary>
-        public DateTime lastUpdated
+        public decimal futures_session_rpl
         {
             get;
             set;
         }
 
-        /// <summary>
-        ///
-        /// </summary>
-        public BUserPreferences preferences
+        public decimal futures_session_upl
         {
             get;
             set;
         }
 
-        /// <summary>
-        ///
-        /// </summary>
-        public JToken restrictedEngineFields
+        public int id
         {
             get;
             set;
         }
 
-        /// <summary>
-        ///
-        /// </summary>
-        public string TFAEnabled
+        public decimal initial_margin
         {
             get;
             set;
         }
 
-        /// <summary>
-        ///
-        /// </summary>
-        public string affiliateId
+        public bool interuser_transfers_enabled
         {
             get;
             set;
         }
 
-        /// <summary>
-        ///
-        /// </summary>
-        public string pgpPubKey
+
+        public DUserInfoLimits limits
         {
             get;
             set;
         }
 
-        /// <summary>
-        ///
-        /// </summary>
-        public string country
+        public decimal maintenance_margin
         {
             get;
             set;
         }
 
-        /// <summary>
-        ///
-        /// </summary>
-        public string geoipCountry
+        public decimal margin_balance
         {
             get;
             set;
         }
 
-        /// <summary>
-        ///
-        /// </summary>
-        public string geoipRegion
+        public decimal options_delta
         {
             get;
             set;
         }
 
-        /// <summary>
-        ///
-        /// </summary>
-        public string typ
+        public decimal options_gamma
         {
             get;
             set;
         }
 
-        /// <summary>
-        ///
-        /// </summary>
-        public bool isRestricted
+        public decimal options_pl
         {
             get;
             set;
         }
 
-        /// <summary>
-        ///
-        /// </summary>
-        public JArray roles
+        public decimal options_session_rpl
+        {
+            get;
+            set;
+        }
+
+        public decimal options_session_upl
+        {
+            get;
+            set;
+        }
+
+        public decimal options_theta
+        {
+            get;
+            set;
+        }
+
+        public decimal options_value
+        {
+            get;
+            set;
+        }
+
+        public decimal options_vega
+        {
+            get;
+            set;
+        }
+
+        public bool portfolio_margining_enabled
+        {
+            get;
+            set;
+        }
+
+        public decimal projected_initial_margin
+        {
+            get;
+            set;
+        }
+
+        public decimal projected_maintenance_margin
+        {
+            get;
+            set;
+        }
+
+        public string referrer_id
+        {
+            get;
+            set;
+        }
+
+        public decimal session_funding
+        {
+            get;
+            set;
+        }
+
+        public decimal session_rpl
+        {
+            get;
+            set;
+        }
+
+        public decimal session_upl
+        {
+            get;
+            set;
+        }
+
+        public string system_name
+        {
+            get;
+            set;
+        }
+
+        public bool tfa_enabled
+        {
+            get;
+            set;
+        }
+
+        public decimal total_pl
+        {
+            get;
+            set;
+        }
+
+        public string type
+        {
+            get;
+            set;
+        }
+
+        public string username
         {
             get;
             set;
@@ -604,33 +308,14 @@ namespace CCXT.Collector.Deribit.Private
     /// <summary>
     ///
     /// </summary>
-    public interface IUserInfo : IApiResult<IUserInfoItem>
-    {
-#if RAWJSON
-
-        /// <summary>
-        ///
-        /// </summary>
-        string rawJson
-        {
-            get;
-            set;
-        }
-
-#endif
-    }
-
-    /// <summary>
-    ///
-    /// </summary>
-    public class BUserInfo : ApiResult<IUserInfoItem>, IUserInfo
+    public class BUserInfo : ApiResult<DUserInfoItem>
     {
         /// <summary>
         ///
         /// </summary>
         public BUserInfo()
         {
-            this.result = new BUserInfoItem();
+            this.result = new DUserInfoItem();
         }
 
 #if RAWJSON
