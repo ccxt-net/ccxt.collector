@@ -1,8 +1,10 @@
-﻿using CCXT.Collector.Deribit.Private;
+﻿using CCXT.Collector.BitMEX.Private;
+using CCXT.Collector.Deribit.Private;
 using CCXT.Collector.Deribit.Public;
 using CCXT.Collector.Library;
 using CCXT.Collector.Service;
 using Newtonsoft.Json;
+using OdinSdk.BaseLib.Coin.Public;
 using OdinSdk.BaseLib.Coin.Types;
 using OdinSdk.BaseLib.Configuration;
 using System;

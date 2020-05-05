@@ -1,5 +1,6 @@
 ﻿using OdinSdk.BaseLib.Coin;
 using OdinSdk.BaseLib.Coin.Private;
+using OdinSdk.BaseLib.Coin.Trade;
 using OdinSdk.BaseLib.Coin.Types;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -225,5 +226,22 @@ namespace CCXT.Collector.Deribit.Private
 
             return _result;
         }
+
+        /// <summary>
+        /// To get open orders on a symbol.
+        /// </summary>
+        /// <param name="symbol">Instrument symbol. Send a bare series (e.g. XBT) to get data for the nearest expiring contract in that series.</param>        
+        /// <param name="count">Number of results to fetch.</param>
+        /// <param name="start">Starting point for results.</param>
+        /// <returns></returns>
+        public async ValueTask<MyOrders> GetOrders(string symbol, long count = 0, long start = 0)
+        {
+            var _result = new MyOrders();
+
+            await Task.Delay(0);
+
+            return _result;
+        }
+
     }
 }
