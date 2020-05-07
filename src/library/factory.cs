@@ -1,4 +1,5 @@
-﻿using OdinSdk.BaseLib.Queue;
+﻿using Microsoft.Extensions.Configuration;
+using OdinSdk.BaseLib.Queue;
 using System;
 
 namespace CCXT.Collector.Library
@@ -87,6 +88,23 @@ namespace CCXT.Collector.Library
             ) 
             : base(host_name, ip_address, virtual_host, user_name, password, queue_name)
         {
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="configuration"></param>
+        /// <param name="queue_name"></param>
+        public FactoryX(IConfiguration configuration, string queue_name)
+        {
+            var _section = configuration.GetSection("default-queue");
+
+            this.HostName = _section["hostName"];
+            this.IpAddress = _section["ipAddress"];
+            this.VirtualHost = _section["virtualHost"];
+            this.UserName = _section["userName"];
+            this.Password = _section["password"];
+            this.QueueName = queue_name;
         }
     }
 }
