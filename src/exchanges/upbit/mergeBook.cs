@@ -284,7 +284,7 @@ namespace CCXT.Collector.Upbit
                 qob.result.bids.RemoveAll(o => o.quantity == 0);
             }
 
-            if (++settings.orderbook_count == UPConfig.SNG.SnapshotSkipCounter)
+            if (++settings.orderbook_count == __upconfig.SnapshotSkipCounter)
             {
                 qob.sequentialId = cob.sequentialId;
                 await snapshotOrderbook(_nob.symbol);
@@ -310,7 +310,7 @@ namespace CCXT.Collector.Upbit
         {
             var _result = false;
 
-            if (UPConfig.SNG.UsePublishTrade == true)
+            if (__upconfig.UsePublishTrade == true)
                 await publishTrading(cco);
 
             SOrderBooks _qob;

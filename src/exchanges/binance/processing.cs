@@ -1,6 +1,7 @@
 ﻿using CCXT.Collector.Binance.Public;
 using CCXT.Collector.Library;
 using CCXT.Collector.Service;
+using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Concurrent;
@@ -25,6 +26,13 @@ namespace CCXT.Collector.Binance
 
                 return __recv_queue;
             }
+        }
+
+        private readonly BNConfig __bnconfig;
+
+        public Processing(IConfiguration configuration)
+        {
+            __bnconfig = new BNConfig(configuration);
         }
 
         /// <summary>

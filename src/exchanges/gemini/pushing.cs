@@ -78,7 +78,7 @@ namespace CCXT.Collector.Gemini
                             await Task.Delay(0);
 
                             var _waiting_time = CUnixTime.NowMilli - __last_receive_time;
-                            if (_waiting_time > GMConfig.SNG.WebSocketRetry * 1000)
+                            if (_waiting_time > __gmconfig.WebSocketRetry * 1000)
                             {
                                 __last_receive_time = CUnixTime.NowMilli;
                                 await Open(cancelToken, _cws, symbol);

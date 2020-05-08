@@ -23,7 +23,7 @@ namespace CCXT.Collector.Deribit
         {
             get
             {
-                if (DRConfig.SNG.UseLiveServer == true)
+                if (__drconfig.UseLiveServer == true)
                     return $"wss://www.deribit.com{__end_point}";
                 else
                     return $"wss://testnet.deribit.com{__end_point}";
@@ -168,8 +168,8 @@ namespace CCXT.Collector.Deribit
 
             await publicOpen(__stream_id, symbol);
 
-            if (DRConfig.SNG.UseMyOrderStream == true)
-                await privateOpen(__stream_id, DRConfig.SNG.ConnectKey, DRConfig.SNG.SecretKey, DRConfig.SNG.LoginName);
+            if (__drconfig.UseMyOrderStream == true)
+                await privateOpen(__stream_id, __drconfig.ConnectKey, __drconfig.SecretKey, __drconfig.LoginName);
         }
 
         private volatile int __last_receive_time = 0;

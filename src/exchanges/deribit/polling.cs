@@ -17,7 +17,7 @@ namespace CCXT.Collector.Deribit
             get
             {
                 if (__public_api == null)
-                    __public_api = new Public.PublicApi(DRConfig.SNG.UseLiveServer);
+                    __public_api = new Public.PublicApi(__drconfig.UseLiveServer);
                 return __public_api;
             }
         }
@@ -28,7 +28,7 @@ namespace CCXT.Collector.Deribit
             get
             {
                 if (__private_api == null)
-                    __private_api = new Private.PrivateApi(DRConfig.SNG.ConnectKey, DRConfig.SNG.SecretKey, DRConfig.SNG.UseLiveServer);
+                    __private_api = new Private.PrivateApi(__drconfig.ConnectKey, __drconfig.SecretKey, __drconfig.UseLiveServer);
                 return __private_api;
             }
         }
@@ -39,7 +39,7 @@ namespace CCXT.Collector.Deribit
 
             var _m_polling = Task.Run(async () =>
             {
-                while (DRConfig.SNG.UseMyOrderStream)
+                while (__drconfig.UseMyOrderStream)
                 {
                     try
                     {
@@ -78,7 +78,7 @@ namespace CCXT.Collector.Deribit
                     if (_cancelled == true)
                         break;
 
-                    await Task.Delay(DRConfig.SNG.PollingSleep * 3);
+                    await Task.Delay(__drconfig.PollingSleep * 3);
                 }
             },
             cancelToken
@@ -160,7 +160,7 @@ namespace CCXT.Collector.Deribit
                     if (_cancelled == true)
                         break;
 
-                    await Task.Delay(DRConfig.SNG.PollingSleep * 2);
+                    await Task.Delay(__drconfig.PollingSleep * 2);
                 }
             },
             cancelToken
@@ -178,7 +178,7 @@ namespace CCXT.Collector.Deribit
 
                 var _o_request = CreateJsonRequest($"/api/v1/orderBook/L2", _o_params);
 
-                while (DRConfig.SNG.UsePollingOrderboook)
+                while (__drconfig.UsePollingOrderboook)
                 {
                     try
                     {
@@ -241,7 +241,7 @@ namespace CCXT.Collector.Deribit
                     if (_cancelled == true)
                         break;
 
-                    await Task.Delay(DRConfig.SNG.PollingSleep * 2);
+                    await Task.Delay(__drconfig.PollingSleep * 2);
                 }
             },
             cancelToken

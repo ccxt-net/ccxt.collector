@@ -1,6 +1,7 @@
 ﻿using CCXT.Collector.Library;
 using CCXT.Collector.Service;
 using CCXT.Collector.Upbit.Public;
+using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Concurrent;
@@ -27,6 +28,13 @@ namespace CCXT.Collector.Upbit
 
                 return __recv_queue;
             }
+        }
+
+        private readonly UPConfig __upconfig;
+
+        public Processing(IConfiguration configuration)
+        {
+            __upconfig = new UPConfig(configuration);
         }
 
         /// <summary>

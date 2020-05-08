@@ -1,4 +1,5 @@
 ﻿using CCXT.Collector.Library;
+using Microsoft.Extensions.Configuration;
 
 namespace CCXT.Collector.ItBit
 {
@@ -9,15 +10,9 @@ namespace CCXT.Collector.ItBit
     {
         public const string DealerName = "itbit";
 
-        private static IBConfig _singleton = null;
-        public static new IBConfig SNG
+        public IBConfig(IConfiguration configuration)
+                : base(configuration)
         {
-            get
-            {
-                if (_singleton == null)
-                    _singleton = new IBConfig();
-                return _singleton;
-            }
         }
 
         private int? __websocket_retry = null;

@@ -1,4 +1,5 @@
 ﻿using CCXT.Collector.Library;
+using Microsoft.Extensions.Configuration;
 
 namespace CCXT.Collector.BitMEX
 {
@@ -9,15 +10,9 @@ namespace CCXT.Collector.BitMEX
     {
         public const string DealerName = "bitmex";
 
-        private static BMConfig _singleton = null;
-        public static new BMConfig SNG
+        public BMConfig(IConfiguration configuration)
+                : base(configuration)
         {
-            get
-            {
-                if (_singleton == null)
-                    _singleton = new BMConfig();
-                return _singleton;
-            }
         }
 
         #region BitMEX

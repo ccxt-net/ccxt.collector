@@ -1,4 +1,5 @@
 ﻿using CCXT.Collector.Library;
+using Microsoft.Extensions.Configuration;
 
 namespace CCXT.Collector.Binance
 {
@@ -9,15 +10,9 @@ namespace CCXT.Collector.Binance
     {
         public const string DealerName = "binance";
 
-        private static BNConfig _singleton = null;
-        public static new BNConfig SNG
+        public BNConfig(IConfiguration configuration)
+            : base(configuration)
         {
-            get
-            {
-                if (_singleton == null)
-                    _singleton = new BNConfig();
-                return _singleton;
-            }
         }
 
         #region Binance

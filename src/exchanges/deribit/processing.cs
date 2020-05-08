@@ -3,6 +3,7 @@ using CCXT.Collector.Deribit.Private;
 using CCXT.Collector.Deribit.Public;
 using CCXT.Collector.Library;
 using CCXT.Collector.Service;
+using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using OdinSdk.BaseLib.Coin.Public;
 using OdinSdk.BaseLib.Coin.Types;
@@ -32,6 +33,13 @@ namespace CCXT.Collector.Deribit
 
                 return __recv_queue;
             }
+        }
+        
+        private readonly DRConfig __drconfig;
+
+        public Processing(IConfiguration configuration)
+        {
+            __drconfig = new DRConfig(configuration);
         }
 
         /// <summary>

@@ -91,7 +91,7 @@ namespace CCXT.Collector.Binance
                             await Task.Delay(0);
 
                             var _waiting_time = CUnixTime.NowMilli - __last_receive_time;
-                            if (_waiting_time > BNConfig.SNG.WebSocketRetry * 1000)
+                            if (_waiting_time > __bnconfig.WebSocketRetry * 1000)
                             {
                                 __last_receive_time = CUnixTime.NowMilli;
                                 await Open(cancelToken, _cws, symbol);

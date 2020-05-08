@@ -1,4 +1,5 @@
 ﻿using CCXT.Collector.Library;
+using Microsoft.Extensions.Configuration;
 
 namespace CCXT.Collector.Deribit
 {
@@ -8,16 +9,9 @@ namespace CCXT.Collector.Deribit
     public class DRConfig : XConfig
     {
         public const string DealerName = "deribit";
-
-        private static DRConfig _singleton = null;
-        public static new DRConfig SNG
+        public DRConfig(IConfiguration configuration)
+                : base(configuration)
         {
-            get
-            {
-                if (_singleton == null)
-                    _singleton = new DRConfig();
-                return _singleton;
-            }
         }
 
         #region Deribit

@@ -289,7 +289,7 @@ namespace CCXT.Collector.Gemini
                 qob.result.bids.RemoveAll(o => o.quantity == 0);
             }
 
-            if (++settings.orderbook_count == GMConfig.SNG.SnapshotSkipCounter)
+            if (++settings.orderbook_count == __gmconfig.SnapshotSkipCounter)
             {
                 qob.sequentialId = cob.sequentialId;
                 await snapshotOrderbook(_nob.symbol);
@@ -315,7 +315,7 @@ namespace CCXT.Collector.Gemini
         {
             var _result = false;
 
-            if (GMConfig.SNG.UsePublishTrade == true)
+            if (__gmconfig.UsePublishTrade == true)
                 await publishTrading(cco);
 
             if (cco.symbol != null)

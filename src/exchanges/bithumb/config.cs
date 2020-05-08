@@ -1,4 +1,5 @@
 ﻿using CCXT.Collector.Library;
+using Microsoft.Extensions.Configuration;
 
 namespace CCXT.Collector.Bithumb
 {
@@ -9,17 +10,11 @@ namespace CCXT.Collector.Bithumb
     {
         public const string DealerName = "bithumb";
 
-        private static BTConfig _singleton = null;
-        public static new BTConfig SNG
+        public BTConfig(IConfiguration configuration)
+              : base(configuration)
         {
-            get
-            {
-                if (_singleton == null)
-                    _singleton = new BTConfig();
-                return _singleton;
-            }
         }
-        
+
         private int? __websocket_retry = null;
         public int WebSocketRetry
         {

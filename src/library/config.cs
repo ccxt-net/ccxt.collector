@@ -1,5 +1,5 @@
-﻿using OdinSdk.BaseLib.Configuration;
-using System.Collections.Generic;
+﻿using Microsoft.Extensions.Configuration;
+using OdinSdk.BaseLib.Configuration;
 
 namespace CCXT.Collector.Library
 {
@@ -8,15 +8,9 @@ namespace CCXT.Collector.Library
     /// </summary>
     public class XConfig : CConfig
     {
-        private static XConfig _singleton = null;
-        public static XConfig SNG
+        public XConfig(IConfiguration configuration)
+            : base(configuration)
         {
-            get
-            {
-                if (_singleton == null)
-                    _singleton = new XConfig();
-                return _singleton;
-            }
         }
 
         private bool? __use_polling_ticker = null;

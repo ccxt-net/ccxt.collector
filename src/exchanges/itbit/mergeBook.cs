@@ -284,7 +284,7 @@ namespace CCXT.Collector.ItBit
                 qob.result.bids.RemoveAll(o => o.quantity == 0);
             }
 
-            if (++settings.orderbook_count == IBConfig.SNG.SnapshotSkipCounter)
+            if (++settings.orderbook_count == __ibconfig.SnapshotSkipCounter)
             {
                 qob.sequentialId = cob.sequentialId;
                 await snapshotOrderbook(_nob.symbol);
@@ -310,7 +310,7 @@ namespace CCXT.Collector.ItBit
         {
             var _result = false;
 
-            if (IBConfig.SNG.UsePublishTrade == true)
+            if (__ibconfig.UsePublishTrade == true)
                 await publishTrading(cco);
 
             SOrderBooks _qob;

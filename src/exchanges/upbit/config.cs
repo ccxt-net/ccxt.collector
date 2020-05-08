@@ -1,4 +1,5 @@
 ﻿using CCXT.Collector.Library;
+using Microsoft.Extensions.Configuration;
 
 namespace CCXT.Collector.Upbit
 {
@@ -9,15 +10,9 @@ namespace CCXT.Collector.Upbit
     {
         public const string DealerName = "upbit";
 
-        private static UPConfig _singleton = null;
-        public static new UPConfig SNG
+        public UPConfig(IConfiguration configuration)
+                : base(configuration)
         {
-            get
-            {
-                if (_singleton == null)
-                    _singleton = new UPConfig();
-                return _singleton;
-            }
         }
 
         #region Upbit

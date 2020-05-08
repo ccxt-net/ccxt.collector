@@ -1,4 +1,5 @@
 ﻿using CCXT.Collector.Library;
+using Microsoft.Extensions.Configuration;
 
 namespace CCXT.Collector.Gemini
 {
@@ -9,15 +10,9 @@ namespace CCXT.Collector.Gemini
     {
         public const string DealerName = "gemini";
 
-        private static GMConfig _singleton = null;
-        public static new GMConfig SNG
+        public GMConfig(IConfiguration configuration)
+             : base(configuration)
         {
-            get
-            {
-                if (_singleton == null)
-                    _singleton = new GMConfig();
-                return _singleton;
-            }
         }
 
         private int? __websocket_retry = null;

@@ -2,6 +2,7 @@
 using CCXT.Collector.BitMEX.Public;
 using CCXT.Collector.Library;
 using CCXT.Collector.Service;
+using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using OdinSdk.BaseLib.Coin.Types;
 using OdinSdk.BaseLib.Configuration;
@@ -30,6 +31,13 @@ namespace CCXT.Collector.BitMEX
 
                 return __recv_queue;
             }
+        }
+        
+        private readonly BMConfig __bmconfig;
+
+        public Processing(IConfiguration configuration)
+        {
+            __bmconfig = new BMConfig(configuration);
         }
 
         /// <summary>

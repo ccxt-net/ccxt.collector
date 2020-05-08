@@ -42,7 +42,7 @@ namespace CCXT.Collector.ItBit
                 {
                     try
                     {
-                        await Task.Delay(IBConfig.SNG.PollingSleep);
+                        await Task.Delay(__ibconfig.PollingSleep);
 
                         // trades
                         var _t_json_value = await RestExecuteAsync(_client, _t_request);
@@ -109,7 +109,7 @@ namespace CCXT.Collector.ItBit
                 {
                     try
                     {
-                        await Task.Delay(IBConfig.SNG.PollingSleep);
+                        await Task.Delay(__ibconfig.PollingSleep);
 
                         // orderbook
                         var _o_json_value = await RestExecuteAsync(_client, _o_request);
@@ -189,7 +189,7 @@ namespace CCXT.Collector.ItBit
                     {
                         await Task.Delay(0);
 
-                        var _waiting_milli_secs = (CUnixTime.NowMilli - IBConfig.SNG.PollingPrevTime) / IBConfig.SNG.PollingTermTime;
+                        var _waiting_milli_secs = (CUnixTime.NowMilli - __ibconfig.PollingPrevTime) / __ibconfig.PollingTermTime;
                         if (_waiting_milli_secs == _last_limit_milli_secs)
                         {
                             var _waiting = cancelToken.WaitHandle.WaitOne(0);
@@ -228,7 +228,7 @@ namespace CCXT.Collector.ItBit
                                 if (_waiting == true)
                                     break;
 
-                                await Task.Delay(IBConfig.SNG.PollingSleep);
+                                await Task.Delay(__ibconfig.PollingSleep);
                             }
                         }
                     }
@@ -327,7 +327,7 @@ namespace CCXT.Collector.ItBit
                                 if (_waiting == true)
                                     break;
 
-                                await Task.Delay(IBConfig.SNG.PollingSleep);
+                                await Task.Delay(__ibconfig.PollingSleep);
                             }
                         }
                     }

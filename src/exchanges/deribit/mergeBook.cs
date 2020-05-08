@@ -233,7 +233,7 @@ namespace CCXT.Collector.Deribit
                 qob.result.bids.RemoveAll(o => o.quantity == 0);
             }
 
-            if (++settings.orderbook_count == DRConfig.SNG.SnapshotSkipCounter)
+            if (++settings.orderbook_count == __drconfig.SnapshotSkipCounter)
             {
                 qob.sequentialId = cob.sequentialId;
                 await snapshotOrderbook(_nob.symbol);
@@ -404,7 +404,7 @@ namespace CCXT.Collector.Deribit
                 qob.result.bids.RemoveAll(o => o.quantity == 0);
             }
 
-            if (++settings.orderbook_count == DRConfig.SNG.SnapshotSkipCounter)
+            if (++settings.orderbook_count == __drconfig.SnapshotSkipCounter)
             {
                 qob.sequentialId = cob.sequentialId;
                 await snapshotOrderbook(_nob.symbol);
@@ -430,7 +430,7 @@ namespace CCXT.Collector.Deribit
         {
             var _result = false;
 
-            if (DRConfig.SNG.UsePublishTrade == true)
+            if (__drconfig.UsePublishTrade == true)
                 await publishTrading(cco);
 
             SOrderBooks _qob;
