@@ -40,14 +40,6 @@ namespace CCXT.Collector.Deribit
             }
         }
 
-        public bool UsePollingOrderboook
-        {
-            get
-            {
-                return this.GetAppBoolean(DealerName, "use.polling.orderbook");
-            }
-        }
-
         public string ConnectKey
         {
             get

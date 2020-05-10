@@ -1,6 +1,7 @@
 ﻿using CCXT.Collector.Binance.Public;
 using CCXT.Collector.Library;
 using CCXT.Collector.Service;
+using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using OdinSdk.BaseLib.Configuration;
 using System;
@@ -63,6 +64,13 @@ namespace CCXT.Collector.Binance
                     __public_api = new CCXT.Collector.Binance.Public.PublicApi();
                 return __public_api;
             }
+        }
+        
+        private readonly BNConfig __bnconfig;
+
+        public Polling(IConfiguration configuration)
+        {
+            __bnconfig = new BNConfig(configuration);
         }
 
         public async Task OStart(CancellationToken cancelToken, string symbol)

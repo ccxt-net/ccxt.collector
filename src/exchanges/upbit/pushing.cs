@@ -1,4 +1,5 @@
 ﻿using CCXT.Collector.Library;
+using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using OdinSdk.BaseLib.Configuration;
 using System;
@@ -26,6 +27,13 @@ namespace CCXT.Collector.Upbit
 
                 return __command_queue;
             }
+        }
+
+        private readonly UPConfig __upconfig;
+
+        public Pushing(IConfiguration configuration)
+        {
+            __upconfig = new UPConfig(configuration);
         }
 
         /// <summary>

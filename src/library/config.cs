@@ -8,6 +8,10 @@ namespace CCXT.Collector.Library
     /// </summary>
     public class XConfig : CConfig
     {
+        public XConfig()
+        {
+        }
+
         public XConfig(IConfiguration configuration)
             : base(configuration)
         {
@@ -22,6 +26,14 @@ namespace CCXT.Collector.Library
                 if (__use_polling_ticker == null)
                     __use_polling_ticker = this.GetAppBoolean("use.polling.ticker");
                 return __use_polling_ticker.Value;
+            }
+        }
+
+        public bool UsePollingOrderboook
+        {
+            get
+            {
+                return this.GetAppBoolean("use.polling.orderbook");
             }
         }
 

@@ -1,5 +1,6 @@
 ﻿using CCXT.Collector.Deribit.Private;
 using CCXT.Collector.Library;
+using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using OdinSdk.BaseLib.Configuration;
@@ -44,6 +45,13 @@ namespace CCXT.Collector.Deribit
 
                 return __command_queue;
             }
+        }
+
+        private readonly DRConfig __drconfig;
+
+        public Pushing(IConfiguration configuration)
+        {
+            __drconfig = new DRConfig(configuration);
         }
 
         /// <summary>
@@ -176,7 +184,7 @@ namespace CCXT.Collector.Deribit
 
         public async Task Start(CancellationToken cancelToken, string symbol)
         {
-            BMLogger.SNG.WriteO(this, $"pushing service start: symbol => {symbol}...");
+            DRLogger.SNG.WriteO(this, $"pushing service start: symbol => {symbol}...");
 
             using (var _cws = new ClientWebSocket())
             {
@@ -221,7 +229,7 @@ namespace CCXT.Collector.Deribit
                         }
                         catch (Exception ex)
                         {
-                            BMLogger.SNG.WriteX(this, ex.ToString());
+                            DRLogger.SNG.WriteX(this, ex.ToString());
                         }
                         //finally
                         {
@@ -278,21 +286,21 @@ namespace CCXT.Collector.Deribit
                                     if (_json[0] != '[')
                                     {
                                         if (_json != "pong")
-                                            BMLogger.SNG.WriteO(this, _json);
+                                            DRLogger.SNG.WriteO(this, _json);
                                         break;
                                     }
 
                                     var _packet = JsonConvert.DeserializeObject<JArray>(_json);
                                     if (_packet.Count < 4)
                                     {
-                                        BMLogger.SNG.WriteO(this, _json);
+                                        DRLogger.SNG.WriteO(this, _json);
                                         break;
                                     }
 
                                     var _selector = _packet[3].ToObject<WsData>();
                                     if (_selector == null || String.IsNullOrEmpty(_selector.table) || String.IsNullOrEmpty(_selector.action))
                                     {
-                                        BMLogger.SNG.WriteO(this, _json);
+                                        DRLogger.SNG.WriteO(this, _json);
                                         break;
                                     }
 
@@ -302,7 +310,7 @@ namespace CCXT.Collector.Deribit
                                     Processing.SendReceiveQ(new QMessage
                                     {
                                         command = "WS",
-                                        exchange = BMLogger.SNG.exchange_name,
+                                        exchange = DRLogger.SNG.exchange_name,
                                         symbol = symbol,
                                         stream = _selector.table,
                                         action = _selector.action,
@@ -319,7 +327,7 @@ namespace CCXT.Collector.Deribit
                             {
                                 await _cws.CloseOutputAsync(WebSocketCloseStatus.NormalClosure, "", cancelToken);
 
-                                BMLogger.SNG.WriteO(this, $"receive close message from server: symbol => {symbol}...");
+                                DRLogger.SNG.WriteO(this, $"receive close message from server: symbol => {symbol}...");
                                 //cancelToken.Cancel();
                                 break;
                             }
@@ -329,13 +337,13 @@ namespace CCXT.Collector.Deribit
                         }
                         catch (Exception ex)
                         {
-                            BMLogger.SNG.WriteX(this, ex.ToString());
+                            DRLogger.SNG.WriteX(this, ex.ToString());
                         }
                         //finally
                         {
                             if (_cws.State != WebSocketState.Open && _cws.State != WebSocketState.Connecting)
                             {
-                                BMLogger.SNG.WriteO(this, $"disconnect from server: symbol => {symbol}...");
+                                DRLogger.SNG.WriteO(this, $"disconnect from server: symbol => {symbol}...");
                                 //cancelToken.Cancel();
                                 break;
                             }
@@ -353,7 +361,7 @@ namespace CCXT.Collector.Deribit
 
                 await Task.WhenAll(_sending, _receiving);
 
-                BMLogger.SNG.WriteO(this, $"pushing service stopped: symbol => {symbol}...");
+                DRLogger.SNG.WriteO(this, $"pushing service stopped: symbol => {symbol}...");
             }
         }
     }

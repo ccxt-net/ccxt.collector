@@ -1,4 +1,5 @@
 ﻿using CCXT.Collector.Library;
+using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using OdinSdk.BaseLib.Configuration;
 using System;
@@ -26,6 +27,13 @@ namespace CCXT.Collector.Bithumb
 
                 return __command_queue;
             }
+        }
+
+        private readonly BTConfig __btconfig;
+
+        public Pushing(IConfiguration configuration)
+        {
+            __btconfig = new BTConfig(configuration);
         }
 
         /// <summary>

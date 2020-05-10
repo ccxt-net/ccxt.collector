@@ -1,5 +1,6 @@
 ﻿using CCXT.Collector.BitMEX.Private;
 using CCXT.Collector.Library;
+using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using OdinSdk.BaseLib.Configuration;
@@ -44,6 +45,13 @@ namespace CCXT.Collector.BitMEX
 
                 return __command_queue;
             }
+        }
+
+        private readonly BMConfig __bmconfig;
+
+        public Pushing(IConfiguration configuration)
+        {
+            __bmconfig = new BMConfig(configuration);
         }
 
         /// <summary>

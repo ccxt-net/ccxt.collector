@@ -5,20 +5,20 @@ namespace CCXT.Collector.Deribit
     /// <summary>
     /// deribit
     /// </summary>
-    public class BMLogger : CCLogger
+    public class DRLogger : CCLogger
     {
-        public BMLogger() : base(DRConfig.DealerName)
+        public DRLogger() : base(DRConfig.DealerName)
         {
         }
 
-        private static BMLogger _single_instance = null;
+        private static DRLogger _single_instance = null;
 
-        public static BMLogger SNG
+        public static DRLogger SNG
         {
             get
             {
                 if (_single_instance == null)
-                    _single_instance = new BMLogger();
+                    _single_instance = new DRLogger();
                 return _single_instance;
             }
         }

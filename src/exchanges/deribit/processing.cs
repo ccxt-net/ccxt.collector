@@ -1,12 +1,8 @@
-﻿using CCXT.Collector.BitMEX.Private;
-using CCXT.Collector.Deribit.Private;
-using CCXT.Collector.Deribit.Public;
+﻿using CCXT.Collector.Deribit.Public;
 using CCXT.Collector.Library;
 using CCXT.Collector.Service;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
-using OdinSdk.BaseLib.Coin.Public;
-using OdinSdk.BaseLib.Coin.Types;
 using OdinSdk.BaseLib.Configuration;
 using System;
 using System.Collections.Concurrent;
@@ -53,7 +49,7 @@ namespace CCXT.Collector.Deribit
 
         public async Task Start(CancellationToken cancelToken)
         {
-            BMLogger.SNG.WriteO(this, $"processing service start...");
+            DRLogger.SNG.WriteO(this, $"processing service start...");
 
             var _processing = Task.Run(async () =>
             {
@@ -78,52 +74,7 @@ namespace CCXT.Collector.Deribit
 
                         if (_message.command == "WS")
                         {
-                            if (_message.stream == "order")
-                            {
-                                var _w_orders = JsonConvert.DeserializeObject<List<BMyOrderItem>>(_message.payload ?? "");
-
-                                var _s_order = new SMyOrders
-                                {
-                                    exchange = _message.exchange,
-                                    stream = _message.stream,
-                                    symbol = _message.symbol,
-                                    action = _message.action,
-                                    sequentialId = _w_orders.Max(t => t.timestamp),
-
-                                    result = _w_orders.Select(o =>
-                                    {
-                                        return new SMyOrderItem
-                                        {
-                                            orderId = o.orderId ?? "",
-                                            symbol = o.symbol ?? "",
-                                            sideType = o.sideType,
-
-                                            timestamp = o.timestamp,
-
-                                            makerType = MakerType.Maker,
-                                            orderStatus = o.orderStatus,
-                                            orderType = o.orderType,
-
-                                            quantity = o.quantity,
-                                            price = o.price,
-                                            amount = o.amount,
-                                            filled = o.filled,
-                                            remaining = o.remaining,
-
-                                            workingIndicator = o.workingIndicator,
-                                            avgPx = o.avgPx.HasValue ? o.avgPx.Value : 0,
-                                            fee = o.fee,
-                                            cost = o.cost,
-
-                                            count = o.count
-                                        };
-                                    })
-                                    .ToList<ISMyOrderItem>()
-                                };
-
-                                await mergeMyOrder(_s_order);
-                            }
-                            else if (_message.stream == "trade")
+                            if (_message.stream == "trade")
                             {
                                 var _w_trades = JsonConvert.DeserializeObject<List<DCompleteOrderItem>>(_message.payload ?? "");
 
@@ -206,54 +157,9 @@ namespace CCXT.Collector.Deribit
                         }
                         else if (_message.command == "AP")
                         {
-                            if (_message.stream == "order")
+                            if (_message.stream == "trade")
                             {
-                                var _w_orders = JsonConvert.DeserializeObject<List<BMyOrderItem>>(_message.payload ?? "");
-
-                                var _s_order = new SMyOrders
-                                {
-                                    exchange = _message.exchange,
-                                    stream = _message.stream,
-                                    symbol = _message.symbol,
-                                    action = _message.action,
-                                    sequentialId = _w_orders.Max(t => t.timestamp),
-
-                                    result = _w_orders.Select(o =>
-                                    {
-                                        return new SMyOrderItem
-                                        {
-                                            orderId = o.orderId ?? "",
-                                            symbol = o.symbol ?? "",
-                                            sideType = o.sideType,
-
-                                            timestamp = o.timestamp,
-
-                                            makerType = o.makerType,
-                                            orderStatus = o.orderStatus,
-                                            orderType = o.orderType,
-
-                                            quantity = o.quantity,
-                                            price = o.price,
-                                            amount = o.amount,
-                                            filled = o.filled,
-                                            remaining = o.remaining,
-
-                                            workingIndicator = o.workingIndicator,
-                                            avgPx = o.avgPx.HasValue ? o.avgPx.Value : 0,
-                                            fee = o.fee,
-                                            cost = o.cost,
-
-                                            count = o.count
-                                        };
-                                    })
-                                    .ToList<ISMyOrderItem>()
-                                };
-
-                                await mergeMyOrder(_s_order);
-                            }
-                            else if (_message.stream == "trade")
-                            {
-                                var _a_trades = JsonConvert.DeserializeObject<List<DCompleteOrderItem>>(_message.payload ?? "");
+                                var _a_trades = JsonConvert.DeserializeObject<DRResults<DCompleteOrders>>(_message.payload ?? "");
 
                                 var _s_trade = new SCompleteOrders
                                 {
@@ -261,9 +167,9 @@ namespace CCXT.Collector.Deribit
                                     symbol = _message.symbol,
                                     stream = _message.stream,
                                     action = _message.action,
-                                    sequentialId = _a_trades.Max(t => t.timestamp),
+                                    sequentialId = _a_trades.result.trades.Max(t => t.timestamp),
 
-                                    result = _a_trades.Where(t => t.timestamp > _last_polling_trade).Select(t =>
+                                    result = _a_trades.result.trades.Where(t => t.timestamp > _last_polling_trade).Select(t =>
                                     {
                                         return new SCompleteOrderItem
                                         {
@@ -286,7 +192,7 @@ namespace CCXT.Collector.Deribit
                             {
                                 var _a_orderbooks = JsonConvert.DeserializeObject<DRResults<DOrderBook>>(_message.payload ?? "");
 
-                                var _timestamp = CUnixTime.NowMilli;
+                                var _timestamp = _a_orderbooks.result.timestamp;
                                 var _asks = _a_orderbooks.result.asks;
                                 var _bids = _a_orderbooks.result.bids;
 
@@ -338,7 +244,7 @@ namespace CCXT.Collector.Deribit
                         }
 #if DEBUG
                         else
-                            BMLogger.SNG.WriteO(this, _message.payload);
+                            DRLogger.SNG.WriteO(this, _message.payload);
 #endif
                         if (cancelToken.IsCancellationRequested == true)
                             break;
@@ -348,7 +254,7 @@ namespace CCXT.Collector.Deribit
                     }
                     catch (Exception ex)
                     {
-                        BMLogger.SNG.WriteX(this, ex.ToString());
+                        DRLogger.SNG.WriteX(this, ex.ToString());
                     }
                 }
             },
@@ -357,7 +263,7 @@ namespace CCXT.Collector.Deribit
 
             await Task.WhenAll(_processing);
 
-            BMLogger.SNG.WriteO(this, $"processing service stop...");
+            DRLogger.SNG.WriteO(this, $"processing service stop...");
         }
     }
 }

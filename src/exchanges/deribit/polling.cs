@@ -1,4 +1,5 @@
 ﻿using CCXT.Collector.Library;
+using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using OdinSdk.BaseLib.Configuration;
 using System;
@@ -32,57 +33,17 @@ namespace CCXT.Collector.Deribit
                 return __private_api;
             }
         }
+        
+        private readonly DRConfig __drconfig;
+
+        public Polling(IConfiguration configuration)
+        {
+            __drconfig = new DRConfig(configuration);
+        }
 
         public async Task Start(CancellationToken cancelToken, string symbol, int limits = 25)
         {
-            BMLogger.SNG.WriteO(this, $"polling service start: symbol => {symbol}...");
-
-            var _m_polling = Task.Run(async () =>
-            {
-                while (__drconfig.UseMyOrderStream)
-                {
-                    try
-                    {
-                        await Task.Delay(0);
-
-                        // my orders
-                        var _orders = await privateApi.GetOrders(symbol);
-
-                        if (_orders.success == true)
-                        {
-                            Processing.SendReceiveQ(new QMessage
-                            {
-                                command = "AP",
-                                exchange = BMLogger.SNG.exchange_name,
-                                symbol = symbol,
-                                stream = "order",
-                                action = "polling",
-                                payload = JsonConvert.SerializeObject(_orders.result)
-                            });
-                        }
-                    }
-                    catch (TaskCanceledException)
-                    {
-                    }
-                    catch (Exception ex)
-                    {
-                        BMLogger.SNG.WriteX(this, ex.ToString());
-                    }
-                    //finally
-                    {
-                        if (cancelToken.IsCancellationRequested == true)
-                            break;
-                    }
-
-                    var _cancelled = cancelToken.WaitHandle.WaitOne(0);
-                    if (_cancelled == true)
-                        break;
-
-                    await Task.Delay(__drconfig.PollingSleep * 3);
-                }
-            },
-            cancelToken
-            );
+            DRLogger.SNG.WriteO(this, $"polling service start: symbol => {symbol}...");
 
             var _t_polling = Task.Run(async () =>
             {
@@ -90,12 +51,13 @@ namespace CCXT.Collector.Deribit
 
                 var _t_params = new Dictionary<string, object>();
                 {
-                    _t_params.Add("symbol", symbol);
+                    _t_params.Add("instrument_name", symbol);
                     _t_params.Add("count", limits);
-                    _t_params.Add("reverse", true);
+                    _t_params.Add("include_old", "true");
+                    _t_params.Add("sorting", "desc");
                 }
 
-                var _t_request = CreateJsonRequest($"/api/v1/trade", _t_params);
+                var _t_request = CreateJsonRequest($"/api/v2/public/get_last_trades_by_instrument", _t_params);
 
                 while (true)
                 {
@@ -105,12 +67,12 @@ namespace CCXT.Collector.Deribit
 
                         //trades
                         var _t_json_value = await RestExecuteAsync(_client, _t_request);
-                        if (_t_json_value.IsSuccessful && _t_json_value.Content[0] == '[')
+                        if (_t_json_value.IsSuccessful)
                         {
                             Processing.SendReceiveQ(new QMessage
                             {
                                 command = "AP",
-                                exchange = BMLogger.SNG.exchange_name,
+                                exchange = DRLogger.SNG.exchange_name,
                                 symbol = symbol,
                                 stream = "trade",
                                 action = "polling",
@@ -122,7 +84,7 @@ namespace CCXT.Collector.Deribit
                             var _http_status = (int)_t_json_value.StatusCode;
                             if (_http_status == 403 || _http_status == 418 || _http_status == 429)
                             {
-                                BMLogger.SNG.WriteQ(this, $"request-limit: symbol => {symbol}, https_status => {_http_status}");
+                                DRLogger.SNG.WriteQ(this, $"request-limit: symbol => {symbol}, https_status => {_http_status}");
 
                                 var _waiting = cancelToken.WaitHandle.WaitOne(0);
                                 if (_waiting == true)
@@ -148,7 +110,7 @@ namespace CCXT.Collector.Deribit
                     }
                     catch (Exception ex)
                     {
-                        BMLogger.SNG.WriteX(this, ex.ToString());
+                        DRLogger.SNG.WriteX(this, ex.ToString());
                     }
                     //finally
                     {
@@ -160,7 +122,7 @@ namespace CCXT.Collector.Deribit
                     if (_cancelled == true)
                         break;
 
-                    await Task.Delay(__drconfig.PollingSleep * 2);
+                    await Task.Delay(__drconfig.PollingSleep);
                 }
             },
             cancelToken
@@ -172,13 +134,14 @@ namespace CCXT.Collector.Deribit
 
                 var _o_params = new Dictionary<string, object>();
                 {
-                    _o_params.Add("symbol", symbol);
+                    _o_params.Add("instrument_name", symbol);
                     _o_params.Add("depth", 25);
                 }
 
-                var _o_request = CreateJsonRequest($"/api/v1/orderBook/L2", _o_params);
+                var _o_request = CreateJsonRequest($"/api/v2/public/get_order_book", _o_params);
 
-                while (__drconfig.UsePollingOrderboook)
+                var _use_orderbook = __drconfig.UsePollingOrderboook;
+                while (_use_orderbook)
                 {
                     try
                     {
@@ -186,12 +149,12 @@ namespace CCXT.Collector.Deribit
 
                         // orderbook
                         var _o_json_value = await RestExecuteAsync(_client, _o_request);
-                        if (_o_json_value.IsSuccessful && _o_json_value.Content[0] == '[')
+                        if (_o_json_value.IsSuccessful)
                         {
                             Processing.SendReceiveQ(new QMessage
                             {
                                 command = "AP",
-                                exchange = BMLogger.SNG.exchange_name,
+                                exchange = DRLogger.SNG.exchange_name,
                                 symbol = symbol,
                                 stream = "orderbook",
                                 action = "polling",
@@ -203,7 +166,7 @@ namespace CCXT.Collector.Deribit
                             var _http_status = (int)_o_json_value.StatusCode;
                             if (_http_status == 403 || _http_status == 418 || _http_status == 429)
                             {
-                                BMLogger.SNG.WriteQ(this, $"request-limit: symbol => {symbol}, https_status => {_http_status}");
+                                DRLogger.SNG.WriteQ(this, $"request-limit: symbol => {symbol}, https_status => {_http_status}");
 
                                 var _waiting = cancelToken.WaitHandle.WaitOne(0);
                                 if (_waiting == true)
@@ -229,7 +192,7 @@ namespace CCXT.Collector.Deribit
                     }
                     catch (Exception ex)
                     {
-                        BMLogger.SNG.WriteX(this, ex.ToString());
+                        DRLogger.SNG.WriteX(this, ex.ToString());
                     }
                     //finally
                     {
@@ -241,15 +204,15 @@ namespace CCXT.Collector.Deribit
                     if (_cancelled == true)
                         break;
 
-                    await Task.Delay(__drconfig.PollingSleep * 2);
+                    await Task.Delay(__drconfig.PollingSleep);
                 }
             },
             cancelToken
             );
 
-            await Task.WhenAll(_m_polling, _t_polling, _o_polling);
+            await Task.WhenAll(_t_polling, _o_polling);
 
-            BMLogger.SNG.WriteO(this, $"polling service stopped: symbol => {symbol}...");
+            DRLogger.SNG.WriteO(this, $"polling service stopped: symbol => {symbol}...");
         }
     }
 }

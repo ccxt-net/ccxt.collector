@@ -1,5 +1,6 @@
 ﻿using CCXT.Collector.Library;
 using CCXT.Collector.Upbit.Public;
+using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using OdinSdk.BaseLib.Configuration;
 using System;
@@ -20,6 +21,13 @@ namespace CCXT.Collector.Upbit
                     __public_api = new CCXT.Collector.Upbit.Public.PublicApi();
                 return __public_api;
             }
+        }
+
+        private readonly UPConfig __upconfig;
+
+        public Polling(IConfiguration configuration)
+        {
+            __upconfig = new UPConfig(configuration);
         }
 
         public async Task OStart(CancellationToken cancelToken, string symbol, int limit = 32)

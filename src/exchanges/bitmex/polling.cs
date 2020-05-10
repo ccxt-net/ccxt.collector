@@ -1,4 +1,5 @@
 ﻿using CCXT.Collector.Library;
+using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using OdinSdk.BaseLib.Configuration;
 using System;
@@ -33,13 +34,21 @@ namespace CCXT.Collector.BitMEX
             }
         }
 
+        private readonly BMConfig __bmconfig;
+
+        public Polling(IConfiguration configuration)
+        {
+            __bmconfig = new BMConfig(configuration);
+        }
+
         public async Task Start(CancellationToken cancelToken, string symbol, int limits = 25)
         {
             BMLogger.SNG.WriteO(this, $"polling service start: symbol => {symbol}...");
 
             var _m_polling = Task.Run(async () =>
             {
-                while (__bmconfig.UseMyOrderStream)
+                var _use_myorder = __bmconfig.UseMyOrderStream;
+                while (_use_myorder)
                 {
                     try
                     {
@@ -178,7 +187,8 @@ namespace CCXT.Collector.BitMEX
 
                 var _o_request = CreateJsonRequest($"/api/v1/orderBook/L2", _o_params);
 
-                while (__bmconfig.UsePollingOrderboook)
+                var _use_orderbook = __bmconfig.UsePollingOrderboook;
+                while (_use_orderbook)
                 {
                     try
                     {

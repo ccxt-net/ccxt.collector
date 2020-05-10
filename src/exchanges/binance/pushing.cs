@@ -1,4 +1,5 @@
 ﻿using CCXT.Collector.Library;
+using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using OdinSdk.BaseLib.Configuration;
 using System;
@@ -41,6 +42,13 @@ namespace CCXT.Collector.Binance
 
                 return __command_queue;
             }
+        }
+
+        private readonly BNConfig __bnconfig;
+
+        public Pushing(IConfiguration configuration)
+        {
+            __bnconfig = new BNConfig(configuration);
         }
 
         /// <summary>
