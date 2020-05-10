@@ -58,8 +58,8 @@ namespace CCXT.Collector.Deribit
                     _t_params.Add("count", limits);
                     _t_params.Add("start_timestamp", _start_timestamp);
                     _t_params.Add("end_timestamp", _end_timestamp);
-                    _t_params.Add("include_old", "true");
-                    _t_params.Add("sorting", "desc");
+                    //_t_params.Add("include_old", "true");
+                    //_t_params.Add("sorting", "desc");
                 }
 
                 while (true)
@@ -128,7 +128,7 @@ namespace CCXT.Collector.Deribit
                         if (cancelToken.IsCancellationRequested == true)
                             break;
 
-                        _start_timestamp = _end_timestamp++;
+                        _start_timestamp = ++_end_timestamp;
                     }
 
                     var _cancelled = cancelToken.WaitHandle.WaitOne(0);
