@@ -57,7 +57,7 @@ namespace CCXT.Collector.Deribit
                     _t_params.Add("instrument_name", symbol);
                     _t_params.Add("count", limits);
                     _t_params.Add("start_timestamp", _start_timestamp);
-                    _t_params.Add("end_timestamp", _end_timestamp);
+                    //_t_params.Add("end_timestamp", _end_timestamp);
                     //_t_params.Add("include_old", "true");
                     //_t_params.Add("sorting", "desc");
                 }
@@ -71,7 +71,7 @@ namespace CCXT.Collector.Deribit
                         _end_timestamp = CUnixTime.NowMilli;
                         {
                             _t_params["start_timestamp"] = _start_timestamp;
-                            _t_params["end_timestamp"] = _end_timestamp;
+                            //_t_params["end_timestamp"] = _end_timestamp;
                         }
 
                         var _t_request = CreateJsonRequest($"/api/v2/public/get_last_trades_by_instrument_and_time", _t_params);
