@@ -148,7 +148,7 @@ namespace CCXT.Collector.Deribit
                 var _o_params = new Dictionary<string, object>();
                 {
                     _o_params.Add("instrument_name", symbol);
-                    _o_params.Add("depth", 25);
+                    _o_params.Add("depth", 10);
                 }
 
                 var _o_request = CreateJsonRequest($"/api/v2/public/get_order_book", _o_params);
