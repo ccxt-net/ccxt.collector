@@ -41,9 +41,12 @@ namespace CCXT.Collector.Deribit
             __drconfig = new DRConfig(configuration);
         }
 
-        public async Task Start(CancellationToken cancelToken, string symbol, int limits = 25)
+        public async Task Start(CancellationToken cancelToken, string symbol, int limits = 128)
         {
             DRLogger.SNG.WriteO(this, $"polling service start: symbol => {symbol}...");
+
+            var _start_timestamp = CUnixTime.NowMilli;
+            var _end_timestamp = _start_timestamp;
 
             var _t_polling = Task.Run(async () =>
             {
@@ -53,17 +56,25 @@ namespace CCXT.Collector.Deribit
                 {
                     _t_params.Add("instrument_name", symbol);
                     _t_params.Add("count", limits);
+                    _t_params.Add("start_timestamp", _start_timestamp);
+                    _t_params.Add("end_timestamp", _end_timestamp);
                     _t_params.Add("include_old", "true");
                     _t_params.Add("sorting", "desc");
                 }
-
-                var _t_request = CreateJsonRequest($"/api/v2/public/get_last_trades_by_instrument", _t_params);
 
                 while (true)
                 {
                     try
                     {
                         await Task.Delay(0);
+
+                        _end_timestamp = CUnixTime.NowMilli;
+                        {
+                            _t_params["start_timestamp"] = _start_timestamp;
+                            _t_params["end_timestamp"] = _end_timestamp;
+                        }
+
+                        var _t_request = CreateJsonRequest($"/api/v2/public/get_last_trades_by_instrument_and_time", _t_params);
 
                         //trades
                         var _t_json_value = await RestExecuteAsync(_client, _t_request);
@@ -116,6 +127,8 @@ namespace CCXT.Collector.Deribit
                     {
                         if (cancelToken.IsCancellationRequested == true)
                             break;
+
+                        _start_timestamp = _end_timestamp++;
                     }
 
                     var _cancelled = cancelToken.WaitHandle.WaitOne(0);

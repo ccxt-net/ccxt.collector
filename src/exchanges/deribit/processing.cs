@@ -109,7 +109,7 @@ namespace CCXT.Collector.Deribit
                             {
                                 var _w_orderbooks = JsonConvert.DeserializeObject<DRResults<DOrderBook>>(_message.payload ?? "");
 
-                                var _timestamp = CUnixTime.NowMilli;
+                                var _timestamp = _w_orderbooks.result.timestamp;
                                 var _asks = _w_orderbooks.result.asks;
                                 var _bids = _w_orderbooks.result.bids;
 
