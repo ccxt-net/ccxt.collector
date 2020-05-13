@@ -56,7 +56,8 @@ namespace CCXT.Sample
             var provider = CodePagesEncodingProvider.Instance;
             Encoding.RegisterProvider(provider);
 
-            //XConfig.SNG.SetConfigRoot();
+            var _xconfig = new XConfig();
+            //_xconfig.SetConfigRoot();
 
             try
             {
@@ -64,28 +65,28 @@ namespace CCXT.Sample
                 FactoryX.RootQName = "odin";
 #endif
 
-                Console.Out.WriteLine($"{FactoryX.RootQName} collector {XConfig.SNG.CollectorVersion} start...");
+                Console.Out.WriteLine($"{FactoryX.RootQName} collector {_xconfig.CollectorVersion} start...");
 
-                if (XConfig.SNG.IsWindows == false)
-                {
-                    MainTasks.Add((new TickerQ()).Start(MainTokenSource));
-                    MainTasks.Add((new OrderbookQ()).Start(MainTokenSource));
+                //if (_xconfig.IsWindows == false)
+                //{
+                //    MainTasks.Add((new TickerQ()).Start(MainTokenSource));
+                //    MainTasks.Add((new OrderbookQ()).Start(MainTokenSource));
 
-                    MainTasks.Add((new LoggerQ()).Start(MainTokenSource));
-                    MainTasks.Add((new SnapshotQ()).Start(MainTokenSource));
+                //    MainTasks.Add((new LoggerQ()).Start(MainTokenSource));
+                //    MainTasks.Add((new SnapshotQ()).Start(MainTokenSource));
 
-                    Task.WaitAll(MainTasks.ToArray(), MainTokenSource.Token);
+                //    Task.WaitAll(MainTasks.ToArray(), MainTokenSource.Token);
 
-                    Console.Out.WriteLine($"{FactoryX.RootQName} collector {XConfig.SNG.CollectorVersion} stop...");
-                }
-                else
-                {
-                    MainTasks.Add((new TickerQ()).Start(MainTokenSource));
-                    MainTasks.Add((new OrderbookQ()).Start(MainTokenSource));
+                //    Console.Out.WriteLine($"{FactoryX.RootQName} collector {_xconfig.CollectorVersion} stop...");
+                //}
+                //else
+                //{
+                //    MainTasks.Add((new TickerQ()).Start(MainTokenSource));
+                //    MainTasks.Add((new OrderbookQ()).Start(MainTokenSource));
 
-                    MainTasks.Add((new LoggerQ()).Start(MainTokenSource));
-                    MainTasks.Add((new SnapshotQ()).Start(MainTokenSource));
-                }
+                //    MainTasks.Add((new LoggerQ()).Start(MainTokenSource));
+                //    MainTasks.Add((new SnapshotQ()).Start(MainTokenSource));
+                //}
             }
             catch (TaskCanceledException)
             {
@@ -95,7 +96,7 @@ namespace CCXT.Sample
                 Console.Out.WriteLine($"thread exit: {ex.Message}");
             }
 
-            if (XConfig.SNG.IsWindows == true)
+            if (_xconfig.IsWindows == true)
             {
                 while (Console.ReadKey().Key != ConsoleKey.Escape)
                     Console.Out.WriteLine("Enter 'ESC' to stop the services and end the process...");

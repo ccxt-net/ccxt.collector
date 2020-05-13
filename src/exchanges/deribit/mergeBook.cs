@@ -35,7 +35,7 @@ namespace CCXT.Collector.Deribit
                     var _settings = GetSettings(cob.symbol);
                     _result = await modifyOrderbook(_qob, cob, _settings);
                 }
-                else
+                else 
                 {
                     _result = await insertOrderbook(cob);
                 }
@@ -534,8 +534,8 @@ namespace CCXT.Collector.Deribit
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private async ValueTask<SOrderBooks> createOrderbook(SOrderBooks cob)
         {
-            cob.result.asks.ForEach(a => a.action = "insert");
-            cob.result.bids.ForEach(a => a.action = "insert");
+            cob.result.asks.Where(a => a.action == "new").ToList().ForEach(a => a.action = "insert");
+            cob.result.bids.Where(a => a.action == "new").ToList().ForEach(a => a.action = "insert");
 
             return await Task.FromResult(cob);
         }

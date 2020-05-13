@@ -107,18 +107,34 @@ namespace CCXT.Collector.Deribit
                             }
                             else if (_message.stream == "orderbook")
                             {
-                                var _w_orderbooks = JsonConvert.DeserializeObject<DRResults<DOrderBook>>(_message.payload ?? "");
+                                var _w_orderbooks = JsonConvert.DeserializeObject<DWsOrderBook>(_message.payload ?? "");
 
-                                var _timestamp = _w_orderbooks.result.timestamp;
-                                var _asks = _w_orderbooks.result.asks;
-                                var _bids = _w_orderbooks.result.bids;
+                                var _timestamp = _w_orderbooks.timestamp;
+
+                                var _asks = new List<SOrderBookItem>();
+                                foreach (var _a in _w_orderbooks.asks)
+                                    _asks.Add(new SOrderBookItem
+                                    {
+                                        action = _a[0].ToString(),
+                                        quantity = Convert.ToDecimal(_a[2]),
+                                        price = Convert.ToDecimal(_a[1])
+                                    });
+
+                                var _bids = new List<SOrderBookItem>();
+                                foreach (var _a in _w_orderbooks.bids)
+                                    _bids.Add(new SOrderBookItem
+                                    {
+                                        action = _a[0].ToString(),
+                                        quantity = Convert.ToDecimal(_a[2]),
+                                        price = Convert.ToDecimal(_a[1])
+                                    });
 
                                 var _s_orderbooks = new SOrderBooks
                                 {
                                     exchange = _message.exchange,
                                     symbol = _message.symbol,
                                     stream = _message.stream,
-                                    action = _message.action,
+                                    action = _w_orderbooks.type,
                                     sequentialId = _timestamp,
 
                                     result = new SOrderBook
@@ -131,6 +147,7 @@ namespace CCXT.Collector.Deribit
                                         {
                                             return new SOrderBookItem
                                             {
+                                                action = o.action,
                                                 quantity = o.quantity,
                                                 price = o.price,
                                                 amount = o.quantity * o.price,
@@ -142,6 +159,7 @@ namespace CCXT.Collector.Deribit
                                         {
                                             return new SOrderBookItem
                                             {
+                                                action = o.action,
                                                 quantity = o.quantity,
                                                 price = o.price,
                                                 amount = o.quantity * o.price,

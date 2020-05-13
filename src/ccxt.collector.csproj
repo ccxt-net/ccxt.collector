@@ -72,5 +72,9 @@
   <ItemGroup>
     <ProjectReference Include="..\..\..\..\odinsoft-git\public\open-sdk\src\OdinSdk.BaseLib\OdinSdk.BaseLib.csproj" />
   </ItemGroup>
+  
+  <ItemGroup>
+    <Folder Include="exchanges\deribit\private\" />
+  </ItemGroup>
 
 </Project>

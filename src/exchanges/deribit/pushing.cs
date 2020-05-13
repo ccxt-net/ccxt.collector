@@ -17,31 +17,33 @@ namespace CCXT.Collector.Deribit
 {
     public class Pushing
     {
-        private const string __auth_point = "/realtime";
-        private const string __end_point = __auth_point + "md";
+        private const string __auth_point = "/ws/api/v2";
+        
+        private long __last_receive_time = 0;
+        private int __request_id = 0;
 
         private string webSocketUrl
         {
             get
             {
                 if (__drconfig.UseLiveServer == true)
-                    return $"wss://www.deribit.com{__end_point}";
+                    return $"wss://www.deribit.com{__auth_point}";
                 else
-                    return $"wss://testnet.deribit.com{__end_point}";
+                    return $"wss://test.deribit.com{__auth_point}";
             }
         }
 
-        private static ConcurrentQueue<QMessage> __command_queue = null;
+        private static ConcurrentQueue<JsonRpcRequest> __command_queue = null;
 
         /// <summary>
         ///
         /// </summary>
-        private static ConcurrentQueue<QMessage> CommandQ
+        private static ConcurrentQueue<JsonRpcRequest> CommandQ
         {
             get
             {
                 if (__command_queue == null)
-                    __command_queue = new ConcurrentQueue<QMessage>();
+                    __command_queue = new ConcurrentQueue<JsonRpcRequest>();
 
                 return __command_queue;
             }
@@ -58,129 +60,49 @@ namespace CCXT.Collector.Deribit
         ///
         /// </summary>
         /// <param name="message"></param>
-        public static void SendCommandQ(QMessage message)
+        public static void SendCommandQ(JsonRpcRequest message)
         {
             CommandQ.Enqueue(message);
         }
 
-        private async Task sendMessage(CancellationToken cancelToken, ClientWebSocket cws, string message)
+        private JsonRpcRequest getMessage(string method, object @params)
         {
-            var _cmd_bytes = Encoding.UTF8.GetBytes(message);
+            return new JsonRpcRequest
+            {
+                jsonrpc = "2.0",
+                id = __request_id++,
+                method = method,
+                @params = @params
+            };
+        }
+
+        private async Task sendMessage(CancellationToken cancelToken, ClientWebSocket cws, JsonRpcRequest request)
+        {
+            var _json_string = JsonConvert.SerializeObject(request);
+            DRLogger.SNG.WriteC(this, _json_string);
+
+            var _message = Encoding.UTF8.GetBytes(_json_string);
             await cws.SendAsync(
-                        new ArraySegment<byte>(_cmd_bytes),
+                        new ArraySegment<byte>(_message),
                         WebSocketMessageType.Text,
                         endOfMessage: true,
                         cancellationToken: cancelToken
                     );
         }
 
-        private async Task sendMuxMessage(CancellationToken cancelToken, ClientWebSocket cws, string id, string topic, int type, string payload = "")
-        {
-            var _mux_msg = "["
-                         + $"{type},'{id}','{topic}'"
-                         + $"{(String.IsNullOrEmpty(payload) == false ? ", " + payload : "")}"
-                         + "]";
-
-            await sendMessage(cancelToken, cws, _mux_msg.Replace('\'', '\"'));
-        }
-
-        private async Task publicOpen(string id, string symbol, string topic = "public")
+        private async Task Subscribe(string symbol)
         {
             await Task.Delay(0);
 
-            SendCommandQ(new QMessage
-            {
-                command = "OPEN",
-                type = 1,
-                id = id,
-                topic = topic,
-                payload = ""
-            });
-
-            var _args = new List<string>();
-            {
-                _args.Add($"'trade:{symbol}'");
-                _args.Add($"'orderBookL2_25:{symbol}'");
-                //_args.Add($"'instrument:{symbol}'");
-            }
-
-            var _json_msg = "{"
-                         + " 'op': 'subscribe', "
-                         //+ " 'args': ['chat','liquidation','connected'," + String.Join(",", _args) + "] "
-                         + " 'args': [" + String.Join(",", _args) + "] "
-                         + "}";
-
-            SendCommandQ(new QMessage
-            {
-                command = "SUBC",
-                type = 0,
-                id = id,
-                topic = topic,
-                payload = _json_msg
-            });
+            SendCommandQ(getMessage("public/subscribe", new
+                    {
+                        channels = new List<string>
+                        {
+                            $"book.{symbol}.100ms"
+                        }
+                    })
+                );
         }
-
-        private async Task privateOpen(string id, string connect_key, string secret_key, string topic)
-        {
-            SendCommandQ(new QMessage
-            {
-                command = "OPEN",
-                type = 1,
-                id = id,
-                topic = topic,
-                payload = ""
-            });
-
-            var _private_api = new PrivateApi(connect_key, secret_key);
-            var _private_cli = (DeribitClient)_private_api.privateClient;
-
-            var _expires = (_private_cli.GenerateOnlyNonce(10) + 3600).ToString();
-            var _signature = await _private_cli.CreateSignature(RestSharp.Method.GET, __auth_point, _expires);
-
-            var _json_sign = "{ "
-                           + $"'op': 'authKeyExpires', "
-                           + $"'args': ['{connect_key}', {_expires}, '{_signature}']"
-                           + "}";
-
-            SendCommandQ(new QMessage
-            {
-                command = "SIGN",
-                type = 0,
-                id = id,
-                topic = topic,
-                payload = _json_sign
-            });
-
-            var _json_subc = "{"
-                         + " 'op': 'subscribe', "
-                         + " 'args': ['order'] "
-                         //+ " 'args': ['position','execution','order'] "
-                         //+ " 'args': ['margin'] "
-                         + "}";
-
-            SendCommandQ(new QMessage
-            {
-                command = "SUBC",
-                type = 0,
-                id = id,
-                topic = topic,
-                payload = _json_subc
-            });
-        }
-
-        private volatile static string __stream_id = "";
-
-        private async Task Open(string symbol)
-        {
-            __stream_id = CExtension.GenerateRandomString(13);
-
-            await publicOpen(__stream_id, symbol);
-
-            if (__drconfig.UseMyOrderStream == true)
-                await privateOpen(__stream_id, __drconfig.ConnectKey, __drconfig.SecretKey, __drconfig.LoginName);
-        }
-
-        private volatile int __last_receive_time = 0;
 
         public async Task Start(CancellationToken cancelToken, string symbol)
         {
@@ -192,8 +114,6 @@ namespace CCXT.Collector.Deribit
 
                 var _sending = Task.Run(async () =>
                 {
-                    await Open(symbol);
-
                     while (true)
                     {
                         try
@@ -201,19 +121,25 @@ namespace CCXT.Collector.Deribit
                             await Task.Delay(0);
 
                             var _waiting_time = CUnixTime.Now - __last_receive_time;
-                            if (_waiting_time > 60 && __last_receive_time > 0)
+                            if (_waiting_time > 30)
                             {
-                                await Open(symbol);
-                            }
-                            else if (_waiting_time > 5)
-                            {
-                                await sendMessage(cancelToken, _cws, "ping");
-                                __last_receive_time = (int)CUnixTime.Now;
+                                if (_waiting_time > 60)
+                                {
+                                    await Subscribe(symbol);
+                                }
+                                else 
+                                {
+                                    await sendMessage(cancelToken, _cws, getMessage("public/test", new
+                                    {
+                                    }));
+                                }
+
+                                __last_receive_time = CUnixTime.Now;
                             }
 
-                            var _message = (QMessage)null;
+                            var _request = (JsonRpcRequest)null;
 
-                            if (CommandQ.TryDequeue(out _message) == false)
+                            if (CommandQ.TryDequeue(out _request) == false)
                             {
                                 var _cancelled = cancelToken.WaitHandle.WaitOne(10);
                                 if (_cancelled == true)
@@ -221,10 +147,7 @@ namespace CCXT.Collector.Deribit
                             }
                             else
                             {
-                                await sendMuxMessage(
-                                        cancelToken, _cws,
-                                        _message.id, _message.topic, _message.type, _message.payload
-                                    );
+                                await sendMessage(cancelToken, _cws,_request);
                             }
                         }
                         catch (Exception ex)
@@ -275,46 +198,33 @@ namespace CCXT.Collector.Deribit
                                 continue;
                             }
 
-                            __last_receive_time = (int)CUnixTime.Now;
+                            __last_receive_time = CUnixTime.Now;
 
                             if (_result.MessageType == WebSocketMessageType.Text)
                             {
-                                var _json = Encoding.UTF8.GetString(_buffer, 0, _offset);
+                                var _json_string = Encoding.UTF8.GetString(_buffer, 0, _offset);
 
                                 while (true)
                                 {
-                                    if (_json[0] != '[')
+                                    var _response = JsonConvert.DeserializeObject<JsonRpcResponse<JToken>>(_json_string);
+                                    if (_response.method != "subscription")
                                     {
-                                        if (_json != "pong")
-                                            DRLogger.SNG.WriteO(this, _json);
+                                        DRLogger.SNG.WriteO(this, _json_string);
                                         break;
                                     }
 
-                                    var _packet = JsonConvert.DeserializeObject<JArray>(_json);
-                                    if (_packet.Count < 4)
-                                    {
-                                        DRLogger.SNG.WriteO(this, _json);
-                                        break;
-                                    }
-
-                                    var _selector = _packet[3].ToObject<WsData>();
-                                    if (_selector == null || String.IsNullOrEmpty(_selector.table) || String.IsNullOrEmpty(_selector.action))
-                                    {
-                                        DRLogger.SNG.WriteO(this, _json);
-                                        break;
-                                    }
-
-                                    if (_selector.table == "orderBookL2_25")
-                                        _selector.table = "orderbook";
+                                    var _stream = "";
+                                    if (_response.@params.channel.Contains("book"))
+                                        _stream = "orderbook";
 
                                     Processing.SendReceiveQ(new QMessage
                                     {
                                         command = "WS",
                                         exchange = DRLogger.SNG.exchange_name,
                                         symbol = symbol,
-                                        stream = _selector.table,
-                                        action = _selector.action,
-                                        payload = _selector.data.ToString(Formatting.None)
+                                        stream = _stream,
+                                        action = "",
+                                        payload = _response.@params.data.ToString(Formatting.None)
                                     });
 
                                     break;
