@@ -1,5 +1,6 @@
 ﻿namespace CCXT.Collector.Deribit
 {
+
     public class JsonRpc
     {
         public string jsonrpc
@@ -26,7 +27,7 @@
         }
     }
 
-    public class JsonRpcData<T> : JsonRpc
+    public class JsonRpcData<T>
     {
         /// <summary>
         ///
