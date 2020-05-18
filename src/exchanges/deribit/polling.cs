@@ -41,9 +41,12 @@ namespace CCXT.Collector.Deribit
             __drconfig = new DRConfig(configuration);
         }
 
-        public async Task Start(CancellationToken cancelToken, string symbol, int limits = 128)
+        public async Task Start(CancellationToken cancelToken, string symbol)
         {
             DRLogger.SNG.WriteO(this, $"polling service start: symbol => {symbol}...");
+
+            var _orderbook_size = 25;
+            var _trades_size = 25;
 
             var _t_polling = Task.Run(async () =>
             {
@@ -52,7 +55,7 @@ namespace CCXT.Collector.Deribit
                 var _t_params = new Dictionary<string, object>();
                 {
                     _t_params.Add("instrument_name", symbol);
-                    _t_params.Add("count", limits);
+                    _t_params.Add("count", _trades_size);
                     _t_params.Add("include_old", "true");
                     _t_params.Add("sorting", "desc");
                 }
@@ -135,7 +138,7 @@ namespace CCXT.Collector.Deribit
                 var _o_params = new Dictionary<string, object>();
                 {
                     _o_params.Add("instrument_name", symbol);
-                    _o_params.Add("depth", 10);
+                    _o_params.Add("depth", _orderbook_size);
                 }
 
                 var _o_request = CreateJsonRequest($"/api/v2/public/get_order_book", _o_params);

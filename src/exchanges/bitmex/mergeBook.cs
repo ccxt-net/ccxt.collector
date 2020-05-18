@@ -588,7 +588,7 @@ namespace CCXT.Collector.BitMEX
                 await publishOrderbook(_nob);
 
                 settings.orderbook_count = 0;
-                settings.trades_flag = true;
+                //settings.trades_flag = true;
             }
 
             return true;

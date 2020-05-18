@@ -1,7 +1,5 @@
-﻿using System.Linq;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using OdinSdk.BaseLib.Coin.Public;
-using OdinSdk.BaseLib.Coin.Types;
 using System.Collections.Generic;
 
 namespace CCXT.Collector.Deribit.Public

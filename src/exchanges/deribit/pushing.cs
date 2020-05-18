@@ -18,7 +18,7 @@ namespace CCXT.Collector.Deribit
     public class Pushing
     {
         private const string __auth_point = "/ws/api/v2";
-        
+
         private long __last_receive_time = 0;
         private int __request_id = 0;
 
@@ -65,8 +65,13 @@ namespace CCXT.Collector.Deribit
             CommandQ.Enqueue(message);
         }
 
-        private JsonRpcRequest getMessage(string method, object @params)
+        private JsonRpcRequest getMessage(string method, object @params = null)
         {
+            if (@params == null)
+                @params = new
+                {
+                };
+
             return new JsonRpcRequest
             {
                 jsonrpc = "2.0",
@@ -79,7 +84,9 @@ namespace CCXT.Collector.Deribit
         private async Task sendMessage(CancellationToken cancelToken, ClientWebSocket cws, JsonRpcRequest request)
         {
             var _json_string = JsonConvert.SerializeObject(request);
+#if DEBUG
             DRLogger.SNG.WriteC(this, _json_string);
+#endif
 
             var _message = Encoding.UTF8.GetBytes(_json_string);
             await cws.SendAsync(
@@ -94,14 +101,16 @@ namespace CCXT.Collector.Deribit
         {
             await Task.Delay(0);
 
-            SendCommandQ(getMessage("public/subscribe", new
-                    {
-                        channels = new List<string>
+            SendCommandQ(
+                getMessage("public/subscribe", new
+                {
+                    channels = new List<string>
                         {
-                            $"book.{symbol}.100ms"
+                            $"book.{symbol}.100ms",
+                            $"trades.{symbol}.100ms"
                         }
-                    })
-                );
+                })
+            );
         }
 
         public async Task Start(CancellationToken cancelToken, string symbol)
@@ -127,11 +136,9 @@ namespace CCXT.Collector.Deribit
                                 {
                                     await Subscribe(symbol);
                                 }
-                                else 
+                                else
                                 {
-                                    await sendMessage(cancelToken, _cws, getMessage("public/test", new
-                                    {
-                                    }));
+                                    await sendMessage(cancelToken, _cws, getMessage("public/test"));
                                 }
 
                                 __last_receive_time = CUnixTime.Now;
@@ -147,7 +154,7 @@ namespace CCXT.Collector.Deribit
                             }
                             else
                             {
-                                await sendMessage(cancelToken, _cws,_request);
+                                await sendMessage(cancelToken, _cws, _request);
                             }
                         }
                         catch (Exception ex)
@@ -214,8 +221,10 @@ namespace CCXT.Collector.Deribit
                                     }
 
                                     var _stream = "";
-                                    if (_response.@params.channel.Contains("book"))
+                                    if (_response.@params.channel.Contains("book."))
                                         _stream = "orderbook";
+                                    else if (_response.@params.channel.Contains("trades."))
+                                        _stream = "trade";
 
                                     Processing.SendReceiveQ(new QMessage
                                     {
@@ -223,7 +232,7 @@ namespace CCXT.Collector.Deribit
                                         exchange = DRLogger.SNG.exchange_name,
                                         symbol = symbol,
                                         stream = _stream,
-                                        action = "",
+                                        action = "pushing",
                                         payload = _response.@params.data.ToString(Formatting.None)
                                     });
 
