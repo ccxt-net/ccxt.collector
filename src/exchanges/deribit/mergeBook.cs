@@ -94,6 +94,23 @@ namespace CCXT.Collector.Deribit
 
                         _nob.result.askSumQty += _ca.quantity;
                     }
+                    else if (_ca.quantity == 0)
+                    {
+                        _nob.result.asks.Add(new SOrderBookItem
+                        {
+                            action = "delete",
+                            id = _qa.id,
+                            price = _qa.price,
+                            quantity = _qa.quantity,
+                            amount = _qa.price * _qa.quantity,
+                            count = 1
+                        });
+
+                        _nob.result.askSumQty -= _qa.quantity;
+
+                        _qa.quantity = 0;
+                        _qa.amount = 0;
+                    }
                     else if (_qa.quantity != _ca.quantity)
                     {
                         _nob.result.asks.Add(new SOrderBookItem
@@ -133,6 +150,23 @@ namespace CCXT.Collector.Deribit
 
                         _nob.result.bidSumQty += _cb.quantity;
                     }
+                    else if (_cb.quantity == 0)
+                    {
+                        _nob.result.bids.Add(new SOrderBookItem
+                        {
+                            action = "delete",
+                            id = _qb.id,
+                            price = _qb.price,
+                            quantity = _qb.quantity,
+                            amount = _qb.price * _qb.quantity,
+                            count = 1
+                        });
+
+                        _nob.result.bidSumQty -= _qb.quantity;
+
+                        _qb.quantity = 0;
+                        _qb.amount = 0;
+                    }
                     else if (_qb.quantity != _cb.quantity)
                     {
                         _nob.result.bids.Add(new SOrderBookItem
@@ -149,50 +183,6 @@ namespace CCXT.Collector.Deribit
                         _qb.amount = _qb.quantity * _qb.price;
 
                         _nob.result.bidSumQty += _cb.quantity;
-                    }
-                }
-
-                foreach (var _qa in qob.result.asks)
-                {
-                    var _ca = cob.result.asks.Where(o => o.price == _qa.price).SingleOrDefault();
-                    if (_ca == null)
-                    {
-                        _nob.result.asks.Add(new SOrderBookItem
-                        {
-                            action = "delete",
-                            id = _qa.id,
-                            price = _qa.price,
-                            quantity = _qa.quantity,
-                            amount = _qa.price * _qa.quantity,
-                            count = 1
-                        });
-
-                        _nob.result.askSumQty -= _qa.quantity;
-
-                        _qa.quantity = 0;
-                        _qa.amount = 0;
-                    }
-                }
-
-                foreach (var _qb in qob.result.bids)
-                {
-                    var _cb = cob.result.bids.Where(o => o.price == _qb.price).SingleOrDefault();
-                    if (_cb == null)
-                    {
-                        _nob.result.bids.Add(new SOrderBookItem
-                        {
-                            action = "delete",
-                            id = _qb.id,
-                            price = _qb.price,
-                            quantity = _qb.quantity,
-                            amount = _qb.price * _qb.quantity,
-                            count = 1
-                        });
-
-                        _nob.result.bidSumQty -= _qb.quantity;
-
-                        _qb.quantity = 0;
-                        _qb.amount = 0;
                     }
                 }
 
