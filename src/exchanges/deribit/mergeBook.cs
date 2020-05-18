@@ -244,7 +244,7 @@ namespace CCXT.Collector.Deribit
         {
             var _result = false;
 
-            if (__drconfig.UsePublishTrade == true)
+            if (__drconfig.UsePublishTrade == true && cco.action == "pushing")
                 await publishTrading(cco);
 
             SOrderBooks _qob;

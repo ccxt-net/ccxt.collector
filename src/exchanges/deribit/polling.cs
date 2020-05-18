@@ -46,7 +46,8 @@ namespace CCXT.Collector.Deribit
             DRLogger.SNG.WriteO(this, $"polling service start: symbol => {symbol}...");
 
             var _orderbook_size = 25;
-            var _trades_size = 25;
+            var _trades_size = 128;
+            //var _start_timestamp = CUnixTime.NowMilli;
 
             var _t_polling = Task.Run(async () =>
             {
@@ -56,8 +57,9 @@ namespace CCXT.Collector.Deribit
                 {
                     _t_params.Add("instrument_name", symbol);
                     _t_params.Add("count", _trades_size);
-                    _t_params.Add("include_old", "true");
-                    _t_params.Add("sorting", "desc");
+                    //_t_params.Add("start_timestamp", _start_timestamp);
+                    //_t_params.Add("include_old", "true");
+                    //_t_params.Add("sorting", "desc");
                 }
 
                 var _t_request = CreateJsonRequest($"/api/v2/public/get_last_trades_by_instrument", _t_params);

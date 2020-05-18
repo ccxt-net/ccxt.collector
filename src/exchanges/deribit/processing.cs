@@ -84,6 +84,7 @@ namespace CCXT.Collector.Deribit
                                     stream = _message.stream,       // trade
                                     symbol = _message.symbol,       // BTC-PERPETUAL
                                     action = _message.action,       // pushing
+
                                     sequentialId = _w_trades.Max(t => t.timestamp),
 
                                     result = _w_trades.Select(t =>
@@ -172,6 +173,7 @@ namespace CCXT.Collector.Deribit
                                         symbol = _message.symbol,       // BTC-PERPETUAL
                                         stream = _message.stream,       // trade
                                         action = _message.action,       // polling
+
                                         sequentialId = _a_trades.result.trades.Max(t => t.timestamp),
 
                                         result = _a_trades.result.trades.Where(t => t.timestamp > _last_polling_trade).Select(t =>
