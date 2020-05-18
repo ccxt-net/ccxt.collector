@@ -35,9 +35,10 @@ namespace CCXT.Collector.Deribit
                     var _settings = GetSettings(cob.symbol);
                     _result = await updateOrderbooks(_qob, cob, _settings);
                 }
-                else
+                else 
                 {
-                    _result = await insertOrderbooks(cob);
+                    if (cob.action == "snapshot" || cob.action == "polling")
+                        _result = await insertOrderbooks(cob);
                 }
             }
 

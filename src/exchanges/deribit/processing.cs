@@ -118,6 +118,7 @@ namespace CCXT.Collector.Deribit
                                         symbol = _message.symbol,           // BTC-PERPETUAL
                                         stream = _message.stream,           // orderbook
                                         action = _w_orderbooks.type,        // snapshot, change
+
                                         sequentialId = _timestamp,
 
                                         result = new SOrderBook
@@ -138,7 +139,7 @@ namespace CCXT.Collector.Deribit
                                             action = _a[0].ToString(),
                                             quantity = Convert.ToDecimal(_a[2]),
                                             price = Convert.ToDecimal(_a[1]),
-                                            amount = Convert.ToDecimal(_a[2]) * Convert.ToDecimal(_a[1]),
+                                            amount = 0,
                                             id = 0,
                                             count = 1
                                         });
@@ -149,7 +150,7 @@ namespace CCXT.Collector.Deribit
                                             action = _b[0].ToString(),
                                             quantity = Convert.ToDecimal(_b[2]),
                                             price = Convert.ToDecimal(_b[1]),
-                                            amount = Convert.ToDecimal(_b[2]) * Convert.ToDecimal(_b[1]),
+                                            amount = 0,
                                             id = 0,
                                             count = 1
                                         });
@@ -222,7 +223,7 @@ namespace CCXT.Collector.Deribit
                                                 {
                                                     quantity = o.quantity,
                                                     price = o.price,
-                                                    amount = o.amount,
+                                                    amount = 0,
                                                     id = 0,
                                                     count = 1
                                                 };
@@ -235,7 +236,7 @@ namespace CCXT.Collector.Deribit
                                                 {
                                                     quantity = o.quantity,
                                                     price = o.price,
-                                                    amount = o.amount,
+                                                    amount = 0,
                                                     id = 0,
                                                     count = 1
                                                 };
