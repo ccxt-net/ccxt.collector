@@ -1,4 +1,5 @@
-﻿using OdinSdk.BaseLib.Coin;
+﻿using CCXT.Collector.Deribit.Model;
+using OdinSdk.BaseLib.Coin;
 using OdinSdk.BaseLib.Coin.Private;
 using OdinSdk.BaseLib.Coin.Trade;
 using OdinSdk.BaseLib.Coin.Types;

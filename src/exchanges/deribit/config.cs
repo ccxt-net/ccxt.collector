@@ -98,6 +98,18 @@ namespace CCXT.Collector.Deribit
             }
         }
 
+        private int? __ticker_save_term = null;
+
+        public int TickerSaveTerm
+        {
+            get
+            {
+                if (__ticker_save_term == null)
+                    __ticker_save_term = this.GetAppInteger(DealerName, "ticker.save.term.milliseconds");
+                return __ticker_save_term.Value;
+            }
+        }
+
         #endregion Deribit
     }
 }

@@ -33,16 +33,42 @@ namespace CCXT.Collector.Deribit
                     _qob.stream = cob.stream;
 
                     var _settings = GetSettings(cob.symbol);
-                    _result = await updateOrderbooks(_qob, cob, _settings);
+                    if (cob.action == "polling")
+                        _result = await cleanOrderbooks(_qob, cob, _settings);
+                    else
+                        _result = await updateOrderbooks(_qob, cob, _settings);
                 }
-                else 
+                else
                 {
-                    if (cob.action == "snapshot" || cob.action == "polling")
+                    if (cob.action == "snapshot")
                         _result = await insertOrderbooks(cob);
                 }
             }
 
             return _result;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="cob"></param>
+        /// <returns></returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private async ValueTask<bool> cleanOrderbooks(SOrderBooks qob, SOrderBooks cob, Settings settings)
+        {
+            qob.result.asks.Clear();
+            qob.result.bids.Clear();
+
+            cob.result.asks.ForEach(a => a.action = "insert");
+            cob.result.bids.ForEach(a => a.action = "insert");
+
+            qob.result.asks.AddRange(cob.result.asks);
+            qob.result.bids.AddRange(cob.result.bids);
+
+            settings.orderbook_count = 0;
+            await snapshotOrderbook(qob);
+
+            return true;
         }
 
         /// <summary>
@@ -193,7 +219,7 @@ namespace CCXT.Collector.Deribit
             if (++settings.orderbook_count == __drconfig.SnapshotSkipCounter)
             {
                 qob.sequentialId = cob.sequentialId;
-                await snapshotOrderbook(_nob.symbol);
+                await snapshotOrderbook(qob);
             }
             else 
             {
@@ -228,7 +254,7 @@ namespace CCXT.Collector.Deribit
                     _settings.orderbook_count = 0;
                 }
 
-                await snapshotOrderbook(cob.symbol);
+                await snapshotOrderbook(cob);
                 _result = true;
             }
 
@@ -407,18 +433,19 @@ namespace CCXT.Collector.Deribit
             return true;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private async Task snapshotOrderbook(string symbol)
         {
             SOrderBooks _qob;
+            if (__qOrderBooks.TryGetValue(symbol, out _qob) == true)
+                await snapshotOrderbook(_qob);
+        }
 
-            lock (__qOrderBooks)
-            {
-                if (__qOrderBooks.TryGetValue(symbol, out _qob) == true)
-                    _qob.stream = "snapshot";
-            }
-
-            if (_qob != null)
-                await publishOrderbook(_qob);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private async Task snapshotOrderbook(SOrderBooks qob)
+        {
+            qob.stream = "snapshot";
+            await publishOrderbook(qob);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

@@ -1,4 +1,5 @@
-﻿using CCXT.Collector.Deribit.Public;
+﻿using CCXT.Collector.Deribit.Model;
+using CCXT.Collector.Deribit.Public;
 using CCXT.Collector.Library;
 using CCXT.Collector.Service;
 using Microsoft.Extensions.Configuration;

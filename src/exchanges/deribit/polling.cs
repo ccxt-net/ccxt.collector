@@ -1,6 +1,5 @@
 ﻿using CCXT.Collector.Library;
 using Microsoft.Extensions.Configuration;
-using Newtonsoft.Json;
 using OdinSdk.BaseLib.Configuration;
 using System;
 using System.Collections.Generic;

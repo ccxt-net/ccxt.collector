@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
 using OdinSdk.BaseLib.Coin.Public;
 using System;
+using System.Collections.Generic;
 
 namespace CCXT.Collector.Deribit.Public
 {
@@ -142,7 +143,7 @@ namespace CCXT.Collector.Deribit.Public
         /// </summary>
         /// <value>The time when the instrument was first created (milliseconds)</value>
         [JsonProperty(PropertyName = "creation_timestamp")]
-        public long CreationTimestamp
+        public long creationTimestamp
         {
             get; set;
         }
@@ -152,7 +153,7 @@ namespace CCXT.Collector.Deribit.Public
         /// </summary>
         /// <value>The time when the instrument will expire (milliseconds)</value>
         [JsonProperty(PropertyName = "expiration_timestamp")]
-        public long ExpirationTimestamp
+        public long expirationTimestamp
         {
             get; set;
         }
@@ -176,5 +177,18 @@ namespace CCXT.Collector.Deribit.Public
         {
             get; set;
         }
-   }
+    }
+
+    public class DMarketComparer : IEqualityComparer<DMarketItem>
+    {
+        public bool Equals(DMarketItem item1, DMarketItem item2)
+        {
+            return item1.marketId == item2.marketId;
+        }
+
+        public int GetHashCode(DMarketItem marketItem)
+        {
+            return base.GetHashCode();
+        }
+    }
 }

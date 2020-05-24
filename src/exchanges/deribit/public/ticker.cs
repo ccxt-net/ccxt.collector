@@ -5,7 +5,7 @@ namespace CCXT.Collector.Deribit.Public
     /// <summary>
     ///
     /// </summary>
-    public class DTickerItem : OdinSdk.BaseLib.Coin.Public.TickerItem, ITickerItem
+    public class DTickerItem 
     {
         /// <summary>
         /// 

@@ -30,7 +30,7 @@
         }
 
         /// <summary>
-        /// for Binance
+        /// 
         /// </summary>
         public virtual string stream
         {
