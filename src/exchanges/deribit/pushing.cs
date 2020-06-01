@@ -112,13 +112,13 @@ namespace CCXT.Collector.Deribit
             );
         }
 
-        public async Task Start(CancellationToken cancelToken, string symbol)
+        public async Task Start(CancellationTokenSource cancelTokenSource, string symbol)
         {
             DRLogger.SNG.WriteO(this, $"pushing service start: symbol => {symbol}...");
 
             using (var _cws = new ClientWebSocket())
             {
-                await _cws.ConnectAsync(new Uri(webSocketUrl), cancelToken);
+                await _cws.ConnectAsync(new Uri(webSocketUrl), cancelTokenSource.Token);
 
                 var _sending = Task.Run(async () =>
                 {
@@ -137,7 +137,7 @@ namespace CCXT.Collector.Deribit
                                 }
                                 else
                                 {
-                                    await sendMessage(cancelToken, _cws, getMessage("public/test"));
+                                    await sendMessage(cancelTokenSource.Token, _cws, getMessage("public/test"));
                                 }
 
                                 __last_receive_time = CUnixTime.Now;
@@ -147,13 +147,13 @@ namespace CCXT.Collector.Deribit
 
                             if (CommandQ.TryDequeue(out _request) == false)
                             {
-                                var _cancelled = cancelToken.WaitHandle.WaitOne(10);
+                                var _cancelled = cancelTokenSource.Token.WaitHandle.WaitOne(10);
                                 if (_cancelled == true)
                                     break;
                             }
                             else
                             {
-                                await sendMessage(cancelToken, _cws, _request);
+                                await sendMessage(cancelTokenSource.Token, _cws, _request);
                             }
                         }
                         catch (Exception ex)
@@ -162,18 +162,12 @@ namespace CCXT.Collector.Deribit
                         }
                         //finally
                         {
-                            if (_cws.State != WebSocketState.Open && _cws.State != WebSocketState.Connecting)
-                            {
-                                //tokenSource.Cancel();
-                                break;
-                            }
-
-                            if (cancelToken.IsCancellationRequested == true)
+                            if (cancelTokenSource.Token.IsCancellationRequested == true)
                                 break;
                         }
                     }
                 },
-                cancelToken
+                cancelTokenSource.Token
                 );
 
                 var _receiving = Task.Run(async () =>
@@ -188,7 +182,7 @@ namespace CCXT.Collector.Deribit
                     {
                         try
                         {
-                            var _result = await _cws.ReceiveAsync(new ArraySegment<byte>(_buffer, _offset, _free), cancelToken);
+                            var _result = await _cws.ReceiveAsync(new ArraySegment<byte>(_buffer, _offset, _free), cancelTokenSource.Token);
 
                             _offset += _result.Count;
                             _free -= _result.Count;
@@ -243,7 +237,7 @@ namespace CCXT.Collector.Deribit
                             }
                             else if (_result.MessageType == WebSocketMessageType.Close)
                             {
-                                await _cws.CloseOutputAsync(WebSocketCloseStatus.NormalClosure, "", cancelToken);
+                                await _cws.CloseOutputAsync(WebSocketCloseStatus.NormalClosure, "", cancelTokenSource.Token);
 
                                 DRLogger.SNG.WriteO(this, $"receive close message from server: symbol => {symbol}...");
                                 //cancelToken.Cancel();
@@ -262,11 +256,12 @@ namespace CCXT.Collector.Deribit
                             if (_cws.State != WebSocketState.Open && _cws.State != WebSocketState.Connecting)
                             {
                                 DRLogger.SNG.WriteO(this, $"disconnect from server: symbol => {symbol}...");
-                                //cancelToken.Cancel();
+
+                                cancelTokenSource.Cancel();
                                 break;
                             }
 
-                            if (cancelToken.IsCancellationRequested == true)
+                            if (cancelTokenSource.Token.IsCancellationRequested == true)
                                 break;
 
                             _offset = 0;
@@ -274,7 +269,7 @@ namespace CCXT.Collector.Deribit
                         }
                     }
                 },
-                cancelToken
+                cancelTokenSource.Token
                 );
 
                 await Task.WhenAll(_sending, _receiving);

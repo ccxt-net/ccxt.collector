@@ -47,7 +47,7 @@ namespace CCXT.Collector.Deribit
             ReceiveQ.Enqueue(message);
         }
 
-        public async Task Start(CancellationToken cancelToken)
+        public async Task Start(CancellationTokenSource cancelTokenSource)
         {
             DRLogger.SNG.WriteO(this, $"processing service start...");
 
@@ -65,7 +65,7 @@ namespace CCXT.Collector.Deribit
                         var _message = (QMessage)null;
                         if (ReceiveQ.TryDequeue(out _message) == false)
                         {
-                            var _cancelled = cancelToken.WaitHandle.WaitOne(0);
+                            var _cancelled = cancelTokenSource.Token.WaitHandle.WaitOne(0);
                             if (_cancelled == true)
                                 break;
 
@@ -260,7 +260,7 @@ namespace CCXT.Collector.Deribit
                         else
                             DRLogger.SNG.WriteO(this, _message.payload);
 #endif
-                        if (cancelToken.IsCancellationRequested == true)
+                        if (cancelTokenSource.Token.IsCancellationRequested == true)
                             break;
                     }
                     catch (TaskCanceledException)
@@ -272,7 +272,7 @@ namespace CCXT.Collector.Deribit
                     }
                 }
             },
-            cancelToken
+            cancelTokenSource.Token
             );
 
             await Task.WhenAll(_processing);
