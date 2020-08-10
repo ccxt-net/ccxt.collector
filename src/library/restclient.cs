@@ -79,15 +79,17 @@ namespace CCXT.Collector.Library
 
             for (var _retry_count = 0; _retry_count < max_retry; _retry_count++)
             {
-                var _tcs = new TaskCompletionSource<IRestResponse>();
-                {
-                    var _handle = client.ExecuteAsync(request, response =>
-                    {
-                        _tcs.SetResult(response);
-                    });
+                //var _tcs = new TaskCompletionSource<IRestResponse>();
+                //{
+                    //var _handle = client.ExecuteAsync(request, response =>
+                    //{
+                    //    _tcs.SetResult(response);
+                    //});
 
-                    _result = await _tcs.Task;
-                }
+                    //_result = await _tcs.Task;
+                //}
+
+                _result = await client.ExecuteAsync(request);
 
                 if (_result.ResponseStatus != ResponseStatus.TimedOut && _result.StatusCode != HttpStatusCode.RequestTimeout)
                     break;
@@ -111,16 +113,17 @@ namespace CCXT.Collector.Library
 
             for (var _retry_count = 0; _retry_count < max_retry; _retry_count++)
             {
-                var _tcs = new TaskCompletionSource<byte[]>();
-                {
-                    var _handle = client.ExecuteAsync(request, response =>
-                    {
-                        _tcs.SetResult(response.RawBytes);
-                    });
+                //var _tcs = new TaskCompletionSource<byte[]>();
+                //{
+                //    var _handle = client.ExecuteAsync(request, response =>
+                //    {
+                //        _tcs.SetResult(response.RawBytes);
+                //    });
 
-                    _result = await _tcs.Task;
-                }
+                //    _result = await _tcs.Task;
+                //}
 
+                _result = (await client.ExecuteAsync(request)).RawBytes;
                 if (_result != null)
                     break;
 
