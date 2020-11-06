@@ -169,10 +169,7 @@ namespace CCXT.Collector.BitMEX
                 if (args != null && args.Count > 0)
                 {
                     _json_body = Regex.Unescape(this.SerializeObject(args, Formatting.None));
-
-                    _request.AddParameter(new Parameter(
-                            "application/json", _json_body, ParameterType.RequestBody
-                        ));
+                    _request.AddParameter("application/json", _json_body, ParameterType.RequestBody);
 
                     //_request.Resource += $"?{_post_data}";
                 }
@@ -206,10 +203,7 @@ namespace CCXT.Collector.BitMEX
                 if (args != null && args.Count > 0)
                 {
                     _json_body = Regex.Unescape(this.SerializeObject(args, Formatting.None));
-
-                    _request.AddParameter(new Parameter(
-                            "application/json", _json_body, ParameterType.RequestBody
-                        ));
+                    _request.AddParameter("application/json", _json_body, ParameterType.RequestBody);
                 }
 
                 var _signature = await CreateSignature(_request.Method, endpoint, _nonce, _json_body);
@@ -276,10 +270,7 @@ namespace CCXT.Collector.BitMEX
                 if (args != null && args.Count > 0)
                 {
                     _json_body = Regex.Unescape(this.SerializeObject(args, Formatting.None));
-
-                    _request.AddParameter(new Parameter(
-                            "application/json", _json_body, ParameterType.RequestBody
-                        ));
+                    _request.AddParameter("application/json", _json_body, ParameterType.RequestBody);
 
                     //_request.Resource += $"?{_post_data}";
                 }
