@@ -1,14 +1,14 @@
 ﻿using CCXT.Collector.Deribit.Model;
-using OdinSdk.BaseLib.Coin;
-using OdinSdk.BaseLib.Coin.Private;
-using OdinSdk.BaseLib.Coin.Trade;
-using OdinSdk.BaseLib.Coin.Types;
+using CCXT.NET.Shared.Coin;
+using CCXT.NET.Shared.Coin.Private;
+using CCXT.NET.Shared.Coin.Trade;
+using CCXT.NET.Shared.Coin.Types;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace CCXT.Collector.Deribit.Private
 {
-    public class PrivateApi : OdinSdk.BaseLib.Coin.Private.PrivateApi, IPrivateApi
+    public class PrivateApi : CCXT.NET.Shared.Coin.Private.PrivateApi, IPrivateApi
     {
         private readonly string __connect_key;
         private readonly string __secret_key;

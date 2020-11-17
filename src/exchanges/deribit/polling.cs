@@ -1,6 +1,6 @@
 ﻿using CCXT.Collector.Library;
+using CCXT.NET.Shared.Configuration;
 using Microsoft.Extensions.Configuration;
-using OdinSdk.BaseLib.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Linq;

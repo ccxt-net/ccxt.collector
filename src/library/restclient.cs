@@ -1,4 +1,4 @@
-﻿using OdinSdk.BaseLib.Serialize;
+﻿using CCXT.NET.Shared.Serialize;
 using RestSharp;
 using System.Net;
 using System.Text;
@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace CCXT.Collector.Library
 {
-    public class KRestClient : OdinSdk.BaseLib.Coin.XApiClient
+    public class KRestClient : CCXT.NET.Shared.Coin.XApiClient
     {
         private const string __content_type = "application/json";
         private const string __user_agent = "odinsoft - ccxt.collector / 1.0.2019.08";

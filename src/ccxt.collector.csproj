@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFrameworks>net472;netstandard2.1</TargetFrameworks>
+        <TargetFrameworks>net472;netstandard2.1;net5.0</TargetFrameworks>
         <AssemblyName>CCXT.Collector</AssemblyName>
         <RootNamespace>CCXT.Collector</RootNamespace>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
@@ -12,13 +12,14 @@
         <Description>CCXT.Collector – CryptoCurrency eXchange Data Collect Library for .NET</Description>
         <Copyright>Copyright OdinSoftware Co., Ltd. 2020</Copyright>
         <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
-        <PackageProjectUrl>https://github.com/lisa3907/ccxt.collector</PackageProjectUrl>
+        <PackageProjectUrl>https://github.com/ccxt-net/ccxt.collector</PackageProjectUrl>
         <PackageIcon>ccxt.net.api.png</PackageIcon>
-        <PackageTags>cryptocurrency;exchange;trading;market-data;exchange-markets;bot;crypto</PackageTags>
+        <PackageTags>cryptocurrency;exchange;trading;market-data;exchange-markets;bot;crypto;korean</PackageTags>
         <PackageReleaseNotes></PackageReleaseNotes>
         <Platforms>AnyCPU;x64;x86</Platforms>
-        <Version>1.2.0</Version>
+        <Version>1.3.0</Version>
         <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
+        <AssemblyVersion>1.3.0.0</AssemblyVersion>
     </PropertyGroup>
 
     <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
@@ -50,14 +51,15 @@
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="Microsoft.Extensions.Configuration" Version="3.1.9" />
-        <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="3.1.9" />
-        <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="3.1.9" />
-        <PackageReference Include="Microsoft.Extensions.Configuration.FileExtensions" Version="3.1.9" />
-        <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="3.1.9" />
+        <PackageReference Include="CCXT.NET" Version="1.3.8" />
+        <PackageReference Include="Microsoft.Extensions.Configuration" Version="5.0.0" />
+        <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="5.0.0" />
+        <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="5.0.0" />
+        <PackageReference Include="Microsoft.Extensions.Configuration.FileExtensions" Version="5.0.0" />
+        <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="5.0.0" />
         <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
-        <PackageReference Include="OdinSdk.BaseLib" Version="2.2.9" />
         <PackageReference Include="RabbitMQ.Client" Version="6.2.1" />
+        <PackageReference Include="System.ServiceModel.Primitives" Version="4.8.0" />
     </ItemGroup>
 
     <ItemGroup>

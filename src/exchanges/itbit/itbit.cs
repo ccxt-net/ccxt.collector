@@ -1,6 +1,6 @@
 ﻿using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json.Linq;
-using OdinSdk.BaseLib.Coin;
+using CCXT.NET.Shared.Coin;
 using RestSharp;
 using System;
 using System.Collections.Generic;
@@ -13,7 +13,7 @@ namespace CCXT.Collector.ItBit
     /// <summary>
     ///
     /// </summary>
-    public sealed class ItBitClient : OdinSdk.BaseLib.Coin.XApiClient, IXApiClient
+    public sealed class ItBitClient : CCXT.NET.Shared.Coin.XApiClient, IXApiClient
     {
         /// <summary>
         ///

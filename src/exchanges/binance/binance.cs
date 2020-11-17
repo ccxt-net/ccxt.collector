@@ -1,6 +1,6 @@
-﻿using Newtonsoft.Json.Linq;
-using OdinSdk.BaseLib.Coin;
-using OdinSdk.BaseLib.Configuration;
+﻿using CCXT.NET.Shared.Coin;
+using CCXT.NET.Shared.Configuration;
+using Newtonsoft.Json.Linq;
 using RestSharp;
 using System;
 using System.Collections.Generic;
@@ -13,7 +13,7 @@ namespace CCXT.Collector.Binance
     /// <summary>
     ///
     /// </summary>
-    public sealed class BinanceClient : OdinSdk.BaseLib.Coin.XApiClient, IXApiClient
+    public sealed class BinanceClient : CCXT.NET.Shared.Coin.XApiClient, IXApiClient
     {
         /// <summary>
         ///

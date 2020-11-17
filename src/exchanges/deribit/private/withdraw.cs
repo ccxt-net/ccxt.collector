@@ -1,5 +1,5 @@
 ﻿using Newtonsoft.Json;
-using OdinSdk.BaseLib.Coin.Private;
+using CCXT.NET.Shared.Coin.Private;
 
 namespace CCXT.Collector.Deribit.Private
 {
@@ -22,7 +22,7 @@ namespace CCXT.Collector.Deribit.Private
     /// <summary>
     ///
     /// </summary>
-    public class DWithdraw : OdinSdk.BaseLib.Coin.Private.TransferItem, ITransferItem
+    public class DWithdraw : CCXT.NET.Shared.Coin.Private.TransferItem, ITransferItem
     {
         /// <summary>
         ///

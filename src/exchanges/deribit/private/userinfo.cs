@@ -1,4 +1,4 @@
-﻿using OdinSdk.BaseLib.Coin;
+﻿using CCXT.NET.Shared.Coin;
 
 namespace CCXT.Collector.Deribit.Private
 {

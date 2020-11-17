@@ -1,4 +1,4 @@
-﻿using OdinSdk.BaseLib.Coin.Private;
+﻿using CCXT.NET.Shared.Coin.Private;
 using Newtonsoft.Json;
 
 namespace CCXT.Collector.Upbit.Private
@@ -6,7 +6,7 @@ namespace CCXT.Collector.Upbit.Private
     /// <summary>
     ///전체 계좌 조회: 내가 보유한 자산 리스트를 보여줍니다.
     /// </summary>
-    public class UBalanceItem : OdinSdk.BaseLib.Coin.Private.BalanceItem, IBalanceItem
+    public class UBalanceItem : CCXT.NET.Shared.Coin.Private.BalanceItem, IBalanceItem
     {
         /// <summary>
         /// 주문가능 금액/수량

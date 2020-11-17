@@ -1,12 +1,12 @@
 ﻿using Newtonsoft.Json;
-using OdinSdk.BaseLib.Coin.Private;
+using CCXT.NET.Shared.Coin.Private;
 
 namespace CCXT.Collector.Upbit.Private
 {
     /// <summary>
     /// 입금 주소
     /// </summary>
-    public class UAddress : OdinSdk.BaseLib.Coin.Private.AddressItem, IAddressItem
+    public class UAddress : CCXT.NET.Shared.Coin.Private.AddressItem, IAddressItem
     {
         /// <summary>
         /// 화폐를 의미하는 영문 대문자 코드

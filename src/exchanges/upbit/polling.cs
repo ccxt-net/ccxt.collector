@@ -1,8 +1,8 @@
 ﻿using CCXT.Collector.Library;
 using CCXT.Collector.Upbit.Public;
+using CCXT.NET.Shared.Configuration;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
-using OdinSdk.BaseLib.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Threading;

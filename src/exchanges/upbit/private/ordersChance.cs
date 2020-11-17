@@ -1,5 +1,5 @@
 ﻿using Newtonsoft.Json;
-using OdinSdk.BaseLib.Coin;
+using CCXT.NET.Shared.Coin;
 
 namespace CCXT.Collector.Upbit.Private
 {

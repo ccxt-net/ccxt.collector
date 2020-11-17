@@ -1,6 +1,6 @@
 ﻿using CCXT.Collector.Service;
-using OdinSdk.BaseLib.Coin;
-using OdinSdk.BaseLib.Coin.Public;
+using CCXT.NET.Shared.Coin;
+using CCXT.NET.Shared.Coin.Public;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace CCXT.Collector.Upbit.Public
 {
-    public class PublicApi : OdinSdk.BaseLib.Coin.Public.PublicApi, IPublicApi
+    public class PublicApi : CCXT.NET.Shared.Coin.Public.PublicApi, IPublicApi
     {
         /// <summary>
         ///

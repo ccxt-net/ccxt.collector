@@ -1,5 +1,5 @@
 ﻿using Newtonsoft.Json;
-using OdinSdk.BaseLib.Coin.Private;
+using CCXT.NET.Shared.Coin.Private;
 using System.Collections.Generic;
 
 namespace CCXT.Collector.Deribit.Private
@@ -61,7 +61,7 @@ namespace CCXT.Collector.Deribit.Private
     /// <summary>
     ///
     /// </summary>
-    public class DTransferItem : OdinSdk.BaseLib.Coin.Private.TransferItem, ITransferItem
+    public class DTransferItem : CCXT.NET.Shared.Coin.Private.TransferItem, ITransferItem
     {
         /// <summary>
         /// 

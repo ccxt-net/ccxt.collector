@@ -1,6 +1,6 @@
-﻿using Newtonsoft.Json;
-using OdinSdk.BaseLib.Coin.Public;
-using OdinSdk.BaseLib.Configuration;
+﻿using CCXT.NET.Shared.Coin.Public;
+using CCXT.NET.Shared.Configuration;
+using Newtonsoft.Json;
 using System;
 
 namespace CCXT.Collector.BitMEX.Public
@@ -8,7 +8,7 @@ namespace CCXT.Collector.BitMEX.Public
     /// <summary>
     ///
     /// </summary>
-    public class BTickerItem : OdinSdk.BaseLib.Coin.Public.TickerItem, ITickerItem
+    public class BTickerItem : CCXT.NET.Shared.Coin.Public.TickerItem, ITickerItem
     {
         /// <summary>
         /// string symbol of the market ('BTCUSD', 'ETHBTC', ...)

@@ -1,8 +1,8 @@
-﻿using OdinSdk.BaseLib.Coin;
-using OdinSdk.BaseLib.Coin.Public;
-using OdinSdk.BaseLib.Coin.Types;
-using OdinSdk.BaseLib.Configuration;
-using OdinSdk.BaseLib.Converter;
+﻿using CCXT.NET.Shared.Coin;
+using CCXT.NET.Shared.Coin.Public;
+using CCXT.NET.Shared.Coin.Types;
+using CCXT.NET.Shared.Configuration;
+using CCXT.NET.Shared.Converter;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,7 +13,7 @@ namespace CCXT.Collector.BitMEX.Public
     /// <summary>
     /// exchange's public API implement class
     /// </summary>
-    public class PublicApi : OdinSdk.BaseLib.Coin.Public.PublicApi, IPublicApi
+    public class PublicApi : CCXT.NET.Shared.Coin.Public.PublicApi, IPublicApi
     {
         /// <summary>
         ///

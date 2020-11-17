@@ -1,6 +1,6 @@
-﻿using Newtonsoft.Json;
-using OdinSdk.BaseLib.Coin.Trade;
-using OdinSdk.BaseLib.Configuration;
+﻿using CCXT.NET.Shared.Coin.Trade;
+using CCXT.NET.Shared.Configuration;
+using Newtonsoft.Json;
 using System;
 
 namespace CCXT.Collector.BitMEX.Private
@@ -8,7 +8,7 @@ namespace CCXT.Collector.BitMEX.Private
     /// <summary>
     ///
     /// </summary>
-    public class BMyPositionItem : OdinSdk.BaseLib.Coin.Trade.MyPositionItem, IMyPositionItem
+    public class BMyPositionItem : CCXT.NET.Shared.Coin.Trade.MyPositionItem, IMyPositionItem
     {
         /// <summary>
         /// Your unique account ID.

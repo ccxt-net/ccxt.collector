@@ -2,10 +2,10 @@
 using CCXT.Collector.BitMEX.Public;
 using CCXT.Collector.Library;
 using CCXT.Collector.Service;
+using CCXT.NET.Shared.Coin.Types;
+using CCXT.NET.Shared.Configuration;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
-using OdinSdk.BaseLib.Coin.Types;
-using OdinSdk.BaseLib.Configuration;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;

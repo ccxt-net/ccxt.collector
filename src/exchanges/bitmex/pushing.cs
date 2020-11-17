@@ -1,10 +1,9 @@
 ﻿using CCXT.Collector.BitMEX.Private;
 using CCXT.Collector.Library;
+using CCXT.NET.Shared.Configuration;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using OdinSdk.BaseLib.Configuration;
-using OdinSdk.BaseLib.Extension;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;

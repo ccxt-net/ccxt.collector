@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using OdinSdk.BaseLib.Coin;
+using CCXT.NET.Shared.Coin;
 using RestSharp;
 using System;
 using System.Collections.Generic;
@@ -14,7 +14,7 @@ namespace CCXT.Collector.Deribit
     /// <summary>
     ///
     /// </summary>
-    public sealed class DeribitClient : OdinSdk.BaseLib.Coin.XApiClient, IXApiClient
+    public sealed class DeribitClient : CCXT.NET.Shared.Coin.XApiClient, IXApiClient
     {
         /// <summary>
         ///

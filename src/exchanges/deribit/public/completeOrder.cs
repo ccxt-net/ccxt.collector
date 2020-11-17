@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
-using OdinSdk.BaseLib.Coin.Public;
-using OdinSdk.BaseLib.Coin.Types;
+using CCXT.NET.Shared.Coin.Public;
+using CCXT.NET.Shared.Coin.Types;
 using System.Collections.Generic;
 
 namespace CCXT.Collector.Deribit.Public
@@ -22,7 +22,7 @@ namespace CCXT.Collector.Deribit.Public
     /// <summary>
     /// recent trade data
     /// </summary>
-    public class DCompleteOrderItem : OdinSdk.BaseLib.Coin.Public.CompleteOrderItem, ICompleteOrderItem
+    public class DCompleteOrderItem : CCXT.NET.Shared.Coin.Public.CompleteOrderItem, ICompleteOrderItem
     {
         /// <summary>
         /// The sequence number of the trade within instrument

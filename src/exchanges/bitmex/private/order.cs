@@ -1,7 +1,7 @@
-﻿using Newtonsoft.Json;
-using OdinSdk.BaseLib.Coin.Trade;
-using OdinSdk.BaseLib.Coin.Types;
-using OdinSdk.BaseLib.Configuration;
+﻿using CCXT.NET.Shared.Coin.Trade;
+using CCXT.NET.Shared.Coin.Types;
+using CCXT.NET.Shared.Configuration;
+using Newtonsoft.Json;
 using System;
 
 namespace CCXT.Collector.BitMEX.Private
@@ -9,7 +9,7 @@ namespace CCXT.Collector.BitMEX.Private
     /// <summary>
     ///
     /// </summary>
-    public class BMyOrderItem : OdinSdk.BaseLib.Coin.Trade.MyOrderItem, IMyOrderItem
+    public class BMyOrderItem : CCXT.NET.Shared.Coin.Trade.MyOrderItem, IMyOrderItem
     {
         /// <summary>
         ///

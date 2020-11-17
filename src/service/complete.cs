@@ -1,8 +1,8 @@
-﻿using Newtonsoft.Json;
+﻿using CCXT.NET.Shared.Coin;
+using CCXT.NET.Shared.Coin.Types;
+using CCXT.NET.Shared.Configuration;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
-using OdinSdk.BaseLib.Coin;
-using OdinSdk.BaseLib.Coin.Types;
-using OdinSdk.BaseLib.Configuration;
 using System.Collections.Generic;
 
 namespace CCXT.Collector.Service

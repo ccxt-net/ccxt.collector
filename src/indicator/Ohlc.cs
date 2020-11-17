@@ -1,6 +1,6 @@
 ﻿namespace CCXT.Collector.Indicator
 {
-    public class Ohlcv : OdinSdk.BaseLib.Coin.Public.OHLCVItem
+    public class Ohlcv : CCXT.NET.Shared.Coin.Public.OHLCVItem
     {
         /// <summary>
         ///

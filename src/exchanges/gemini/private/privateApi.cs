@@ -1,9 +1,9 @@
-﻿using OdinSdk.BaseLib.Coin;
-using OdinSdk.BaseLib.Coin.Private;
+﻿using CCXT.NET.Shared.Coin;
+using CCXT.NET.Shared.Coin.Private;
 
 namespace CCXT.Collector.Gemini.Private
 {
-    public class PrivateApi : OdinSdk.BaseLib.Coin.Private.PrivateApi, IPrivateApi
+    public class PrivateApi : CCXT.NET.Shared.Coin.Private.PrivateApi, IPrivateApi
     {
         private readonly string __connect_key;
         private readonly string __secret_key;

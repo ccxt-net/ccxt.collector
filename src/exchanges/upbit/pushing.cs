@@ -1,7 +1,7 @@
 ﻿using CCXT.Collector.Library;
+using CCXT.NET.Shared.Configuration;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
-using OdinSdk.BaseLib.Configuration;
 using System;
 using System.Collections.Concurrent;
 using System.Net.WebSockets;

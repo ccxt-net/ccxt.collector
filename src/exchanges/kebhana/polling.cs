@@ -1,8 +1,8 @@
 ﻿using CCXT.Collector.KebHana.Public;
 using CCXT.Collector.KebHana.Types;
 using CCXT.Collector.Library;
+using CCXT.NET.Shared.Configuration;
 using Newtonsoft.Json;
-using OdinSdk.BaseLib.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Linq;

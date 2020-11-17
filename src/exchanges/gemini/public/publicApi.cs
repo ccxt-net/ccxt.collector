@@ -1,9 +1,9 @@
-﻿using OdinSdk.BaseLib.Coin;
-using OdinSdk.BaseLib.Coin.Public;
+﻿using CCXT.NET.Shared.Coin;
+using CCXT.NET.Shared.Coin.Public;
 
 namespace CCXT.Collector.Gemini.Public
 {
-    public class PublicApi : OdinSdk.BaseLib.Coin.Public.PublicApi, IPublicApi
+    public class PublicApi : CCXT.NET.Shared.Coin.Public.PublicApi, IPublicApi
     {
         /// <summary>
         ///

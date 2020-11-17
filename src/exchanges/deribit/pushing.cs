@@ -1,9 +1,9 @@
-﻿using CCXT.Collector.Deribit.Model;
+﻿using CCXT.NET.Shared.Configuration;
+using CCXT.Collector.Deribit.Model;
 using CCXT.Collector.Library;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using OdinSdk.BaseLib.Configuration;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;

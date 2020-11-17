@@ -1,5 +1,5 @@
 ﻿using Newtonsoft.Json;
-using OdinSdk.BaseLib.Coin.Public;
+using CCXT.NET.Shared.Coin.Public;
 using System.Collections.Generic;
 
 namespace CCXT.Collector.Deribit.Public
@@ -68,7 +68,7 @@ namespace CCXT.Collector.Deribit.Public
     /// <summary>
     ///
     /// </summary>
-    public class DOrderBook : OdinSdk.BaseLib.Coin.Public.OrderBook, IOrderBook
+    public class DOrderBook : CCXT.NET.Shared.Coin.Public.OrderBook, IOrderBook
     {
         /// <summary>
         ///
