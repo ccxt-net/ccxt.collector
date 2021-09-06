@@ -49,7 +49,7 @@ namespace CCXT.Collector.BitMEX
             ReceiveQ.Enqueue(message);
         }
 
-        public async Task Start(CancellationToken cancelToken)
+        public async ValueTask Start(CancellationToken cancelToken)
         {
             BMLogger.SNG.WriteO(this, $"processing service start...");
 

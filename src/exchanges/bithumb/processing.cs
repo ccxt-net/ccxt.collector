@@ -46,7 +46,7 @@ namespace CCXT.Collector.Bithumb
             ReceiveQ.Enqueue(message);
         }
 
-        public async Task Start(CancellationToken cancelToken)
+        public async ValueTask Start(CancellationToken cancelToken)
         {
             BTLogger.SNG.WriteO(this, $"processing service start...");
 

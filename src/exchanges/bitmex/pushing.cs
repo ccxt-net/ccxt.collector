@@ -62,7 +62,7 @@ namespace CCXT.Collector.BitMEX
             CommandQ.Enqueue(message);
         }
 
-        private async Task sendMessage(CancellationToken cancelToken, ClientWebSocket cws, string message)
+        private async ValueTask sendMessage(CancellationToken cancelToken, ClientWebSocket cws, string message)
         {
             var _cmd_bytes = Encoding.UTF8.GetBytes(message);
             await cws.SendAsync(
@@ -73,7 +73,7 @@ namespace CCXT.Collector.BitMEX
                     );
         }
 
-        private async Task sendMuxMessage(CancellationToken cancelToken, ClientWebSocket cws, string id, string topic, int type, string payload = "")
+        private async ValueTask sendMuxMessage(CancellationToken cancelToken, ClientWebSocket cws, string id, string topic, int type, string payload = "")
         {
             var _mux_msg = "["
                          + $"{type},'{id}','{topic}'"
@@ -83,7 +83,7 @@ namespace CCXT.Collector.BitMEX
             await sendMessage(cancelToken, cws, _mux_msg.Replace('\'', '\"'));
         }
 
-        private async Task publicOpen(string id, string symbol, string topic = "public")
+        private async ValueTask publicOpen(string id, string symbol, string topic = "public")
         {
             await Task.Delay(0);
 
@@ -119,7 +119,7 @@ namespace CCXT.Collector.BitMEX
             });
         }
 
-        private async Task privateOpen(string id, string connect_key, string secret_key, string topic)
+        private async ValueTask privateOpen(string id, string connect_key, string secret_key, string topic)
         {
             SendCommandQ(new QMessage
             {
@@ -169,7 +169,7 @@ namespace CCXT.Collector.BitMEX
 
         private volatile static string __stream_id = "";
 
-        private async Task Open(string symbol)
+        private async ValueTask Open(string symbol)
         {
             __stream_id = CExtension.GenerateRandomString(13);
 
@@ -181,7 +181,7 @@ namespace CCXT.Collector.BitMEX
 
         private volatile int __last_receive_time = 0;
 
-        public async Task Start(CancellationToken cancelToken, string symbol)
+        public async ValueTask Start(CancellationToken cancelToken, string symbol)
         {
             BMLogger.SNG.WriteO(this, $"pushing service start: symbol => {symbol}...");
 

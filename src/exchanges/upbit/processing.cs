@@ -46,7 +46,7 @@ namespace CCXT.Collector.Upbit
             ReceiveQ.Enqueue(message);
         }
 
-        public async Task Start(CancellationToken cancelToken)
+        public async ValueTask Start(CancellationToken cancelToken)
         {
             UPLogger.SNG.WriteO(this, $"processing service start...");
 

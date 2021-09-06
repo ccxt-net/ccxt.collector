@@ -80,7 +80,7 @@ namespace CCXT.Collector.KebHana
 
         private static Encoding HanaEncoding = Encoding.GetEncoding("euc-kr");
 
-        public async Task Start(CancellationToken cancelToken)
+        public async ValueTask Start(CancellationToken cancelToken)
         {
             KELogger.SNG.WriteO(this, $"polling service start...");
 

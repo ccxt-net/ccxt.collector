@@ -46,7 +46,7 @@ namespace CCXT.Collector.ItBit
             ReceiveQ.Enqueue(message);
         }
 
-        public async Task Start(CancellationToken cancelToken)
+        public async ValueTask Start(CancellationToken cancelToken)
         {
             IBLogger.SNG.WriteO(this, $"processing service start...");
 

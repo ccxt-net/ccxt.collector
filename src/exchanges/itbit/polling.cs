@@ -30,7 +30,7 @@ namespace CCXT.Collector.ItBit
             __ibconfig = new IBConfig(configuration);
         }
 
-        public async Task OStart(CancellationToken cancelToken, string symbol, int limit = 32)
+        public async ValueTask OStart(CancellationToken cancelToken, string symbol, int limit = 32)
         {
             IBLogger.SNG.WriteO(this, $"polling service start: symbol => {symbol}...");
 
@@ -174,7 +174,7 @@ namespace CCXT.Collector.ItBit
             IBLogger.SNG.WriteO(this, $"polling service stopped: symbol => {symbol}...");
         }
 
-        public async Task BStart(CancellationToken cancelToken, string[] symbols)
+        public async ValueTask BStart(CancellationToken cancelToken, string[] symbols)
         {
             IBLogger.SNG.WriteO(this, $"bpolling service start..");
 
@@ -275,7 +275,7 @@ namespace CCXT.Collector.ItBit
             set;
         }
 
-        public async Task EStart(CancellationToken cancelToken)
+        public async ValueTask EStart(CancellationToken cancelToken)
         {
             IBLogger.SNG.WriteO(this, $"epolling service start..");
 

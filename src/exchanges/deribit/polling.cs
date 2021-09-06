@@ -40,7 +40,7 @@ namespace CCXT.Collector.Deribit
             __drconfig = new DRConfig(configuration);
         }
 
-        public async Task Start(CancellationTokenSource cancelTokenSource, string symbol)
+        public async ValueTask Start(CancellationTokenSource cancelTokenSource, string symbol)
         {
             DRLogger.SNG.WriteO(this, $"polling service start: symbol => {symbol}...");
 

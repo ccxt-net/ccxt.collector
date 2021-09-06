@@ -30,7 +30,7 @@ namespace CCXT.Collector.Gemini
             __gmconfig = new GMConfig(configuration);
         }
 
-        public async Task OStart(CancellationToken cancelToken, string symbol, int limit = 32)
+        public async ValueTask OStart(CancellationToken cancelToken, string symbol, int limit = 32)
         {
             GMLogger.SNG.WriteO(this, $"polling service start: symbol => {symbol}...");
 
@@ -174,7 +174,7 @@ namespace CCXT.Collector.Gemini
             GMLogger.SNG.WriteO(this, $"polling service stopped: symbol => {symbol}...");
         }
 
-        public async Task BStart(CancellationToken cancelToken, string[] symbols)
+        public async ValueTask BStart(CancellationToken cancelToken, string[] symbols)
         {
             GMLogger.SNG.WriteO(this, $"bpolling service start..");
 
@@ -275,7 +275,7 @@ namespace CCXT.Collector.Gemini
             set;
         }
 
-        public async Task EStart(CancellationToken cancelToken)
+        public async ValueTask EStart(CancellationToken cancelToken)
         {
             GMLogger.SNG.WriteO(this, $"epolling service start..");
 

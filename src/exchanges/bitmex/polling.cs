@@ -41,7 +41,7 @@ namespace CCXT.Collector.BitMEX
             __bmconfig = new BMConfig(configuration);
         }
 
-        public async Task Start(CancellationToken cancelToken, string symbol, int limits = 25)
+        public async ValueTask Start(CancellationToken cancelToken, string symbol, int limits = 25)
         {
             BMLogger.SNG.WriteO(this, $"polling service start: symbol => {symbol}...");
 

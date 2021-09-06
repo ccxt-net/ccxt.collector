@@ -434,7 +434,7 @@ namespace CCXT.Collector.Deribit
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private async Task snapshotOrderbook(string symbol)
+        private async ValueTask snapshotOrderbook(string symbol)
         {
             SOrderBooks _qob;
             if (__qOrderBooks.TryGetValue(symbol, out _qob) == true)
@@ -442,14 +442,14 @@ namespace CCXT.Collector.Deribit
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private async Task snapshotOrderbook(SOrderBooks qob)
+        private async ValueTask snapshotOrderbook(SOrderBooks qob)
         {
             qob.stream = "snapshot";
             await publishOrderbook(qob);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private async Task publishOrderbook(SOrderBooks sob)
+        private async ValueTask publishOrderbook(SOrderBooks sob)
         {
             await Task.Delay(0);
 
@@ -458,7 +458,7 @@ namespace CCXT.Collector.Deribit
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private async Task publishTrading(SCompleteOrders sco)
+        private async ValueTask publishTrading(SCompleteOrders sco)
         {
             await Task.Delay(0);
 

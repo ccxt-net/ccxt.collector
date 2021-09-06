@@ -541,7 +541,7 @@ namespace CCXT.Collector.Gemini
             return await Task.FromResult(cob);
         }
 
-        private async Task snapshotOrderbook(string symbol)
+        private async ValueTask snapshotOrderbook(string symbol)
         {
             if (symbol != null)
             {
@@ -559,7 +559,7 @@ namespace CCXT.Collector.Gemini
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private async Task publishOrderbook(SOrderBooks sob)
+        private async ValueTask publishOrderbook(SOrderBooks sob)
         {
             await Task.Delay(0);
 
@@ -568,7 +568,7 @@ namespace CCXT.Collector.Gemini
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private async Task publishTrading(SCompleteOrders sco)
+        private async ValueTask publishTrading(SCompleteOrders sco)
         {
             await Task.Delay(0);
 
@@ -577,7 +577,7 @@ namespace CCXT.Collector.Gemini
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private async Task publishTicker(STickers stk)
+        private async ValueTask publishTicker(STickers stk)
         {
             await Task.Delay(0);
 

@@ -73,7 +73,7 @@ namespace CCXT.Collector.Binance
             __bnconfig = new BNConfig(configuration);
         }
 
-        public async Task OStart(CancellationToken cancelToken, string symbol)
+        public async ValueTask OStart(CancellationToken cancelToken, string symbol)
         {
             BNLogger.SNG.WriteO(this, $"polling service start: symbol => {symbol}...");
 
@@ -173,7 +173,7 @@ namespace CCXT.Collector.Binance
             BNLogger.SNG.WriteO(this, $"polling service stopped: symbol => {symbol}...");
         }
 
-        public async Task BStart(CancellationToken cancelToken, string symbol)
+        public async ValueTask BStart(CancellationToken cancelToken, string symbol)
         {
             BNLogger.SNG.WriteO(this, $"bpolling service start...");
 

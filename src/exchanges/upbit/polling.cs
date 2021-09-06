@@ -30,7 +30,7 @@ namespace CCXT.Collector.Upbit
             __upconfig = new UPConfig(configuration);
         }
 
-        public async Task OStart(CancellationToken cancelToken, string symbol, int limit = 32)
+        public async ValueTask OStart(CancellationToken cancelToken, string symbol, int limit = 32)
         {
             UPLogger.SNG.WriteO(this, $"polling service start: symbol => {symbol}...");
 
@@ -180,7 +180,7 @@ namespace CCXT.Collector.Upbit
             UPLogger.SNG.WriteO(this, $"polling service stopped: symbol => {symbol}...");
         }
 
-        public async Task BStart(CancellationToken cancelToken, string symbol)
+        public async ValueTask BStart(CancellationToken cancelToken, string symbol)
         {
             UPLogger.SNG.WriteO(this, $"bpolling service start..");
 
@@ -280,7 +280,7 @@ namespace CCXT.Collector.Upbit
             set;
         }
 
-        public async Task EStart(CancellationToken cancelToken)
+        public async ValueTask EStart(CancellationToken cancelToken)
         {
             UPLogger.SNG.WriteO(this, $"epolling service start..");
 

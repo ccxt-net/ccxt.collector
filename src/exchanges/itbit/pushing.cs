@@ -45,7 +45,7 @@ namespace CCXT.Collector.ItBit
             CommandQ.Enqueue(message);
         }
 
-        private async Task SendAsync(CancellationToken cancelToken, ClientWebSocket cws, string message)
+        private async ValueTask SendAsync(CancellationToken cancelToken, ClientWebSocket cws, string message)
         {
             var _cmd_bytes = Encoding.UTF8.GetBytes(message.Replace('\'', '\"'));
             await cws.SendAsync(
@@ -56,7 +56,7 @@ namespace CCXT.Collector.ItBit
                     );
         }
 
-        private async Task Open(CancellationToken cancelToken, ClientWebSocket cws, string symbol, bool reopen = true)
+        private async ValueTask Open(CancellationToken cancelToken, ClientWebSocket cws, string symbol, bool reopen = true)
         {
             if (cws.State == WebSocketState.Open)
                 await cws.CloseAsync(WebSocketCloseStatus.NormalClosure, "reopen", cancelToken);
@@ -71,7 +71,7 @@ namespace CCXT.Collector.ItBit
 
         private long __last_receive_time = 0;
 
-        public async Task Start(CancellationToken cancelToken, string symbol)
+        public async ValueTask Start(CancellationToken cancelToken, string symbol)
         {
             IBLogger.SNG.WriteO(this, $"pushing service start: symbol => {symbol}...");
 

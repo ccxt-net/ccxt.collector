@@ -424,7 +424,7 @@ namespace CCXT.Collector.Binance
             return true;
         }
 
-        private async Task snapshotOrderbook(string exchange, string symbol)
+        private async ValueTask snapshotOrderbook(string exchange, string symbol)
         {
             if (exchange == BNLogger.SNG.exchange_name)
             {
@@ -444,7 +444,7 @@ namespace CCXT.Collector.Binance
             }
         }
 
-        private async Task publishOrderbook(SOrderBooks sob)
+        private async ValueTask publishOrderbook(SOrderBooks sob)
         {
             await Task.Delay(0);
 
@@ -455,7 +455,7 @@ namespace CCXT.Collector.Binance
             }
         }
 
-        private async Task publishTicker(STickers sbt)
+        private async ValueTask publishTicker(STickers sbt)
         {
             await Task.Delay(0);
 

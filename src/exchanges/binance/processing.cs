@@ -44,7 +44,7 @@ namespace CCXT.Collector.Binance
             ReceiveQ.Enqueue(message);
         }
 
-        public async Task Start(CancellationToken cancelToken)
+        public async ValueTask Start(CancellationToken cancelToken)
         {
             BNLogger.SNG.WriteO(this, $"processing service start...");
 

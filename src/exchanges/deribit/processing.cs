@@ -47,7 +47,7 @@ namespace CCXT.Collector.Deribit
             ReceiveQ.Enqueue(message);
         }
 
-        public async Task Start(CancellationTokenSource cancelTokenSource)
+        public async ValueTask Start(CancellationTokenSource cancelTokenSource)
         {
             DRLogger.SNG.WriteO(this, $"processing service start...");
 

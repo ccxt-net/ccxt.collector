@@ -80,7 +80,7 @@ namespace CCXT.Collector.Deribit
             };
         }
 
-        private async Task sendMessage(CancellationToken cancelToken, ClientWebSocket cws, JsonRpcRequest request)
+        private async ValueTask sendMessage(CancellationToken cancelToken, ClientWebSocket cws, JsonRpcRequest request)
         {
             var _json_string = JsonConvert.SerializeObject(request);
 #if DEBUG
@@ -96,7 +96,7 @@ namespace CCXT.Collector.Deribit
                     );
         }
 
-        private async Task Subscribe(string symbol)
+        private async ValueTask Subscribe(string symbol)
         {
             await Task.Delay(0);
 
@@ -112,7 +112,7 @@ namespace CCXT.Collector.Deribit
             );
         }
 
-        public async Task Start(CancellationTokenSource cancelTokenSource, string symbol)
+        public async ValueTask Start(CancellationTokenSource cancelTokenSource, string symbol)
         {
             DRLogger.SNG.WriteO(this, $"pushing service start: symbol => {symbol}...");
 
