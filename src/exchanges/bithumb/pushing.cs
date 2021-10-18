@@ -61,11 +61,18 @@ namespace CCXT.Collector.Bithumb
             if (cws.State == WebSocketState.Open)
                 await cws.CloseAsync(WebSocketCloseStatus.NormalClosure, "reopen", cancelToken);
 
-            await cws.ConnectAsync(new Uri("wss://api.upbit.com/websocket/v1"), cancelToken);
+            await cws.ConnectAsync(new Uri("wss://pubwss.bithumb.com/pub/ws"), cancelToken);
 
             await SendAsync(cancelToken, cws,
-                //"[{'ticket':'ccxt-collector'},{'type':'orderbook','codes':['" + symbol + "']},{'format':'SIMPLE'},{'type':'trade','codes':['" + symbol + "']},{'format':'SIMPLE'}]"
-                "[{'ticket':'ccxt-collector'},{'type':'orderbook','codes':['" + symbol + "']},{'format':'DEFAULT'},{'type':'trade','codes':['" + symbol + "']},{'format':'DEFAULT'}]"
+                "{'type':'ticker', 'symbols': ['BTC_KRW', 'ETH_KRW'], 'tickTypes': ['30M', '1H', '12H', '24H', 'MID' ]}"
+            );
+
+            await SendAsync(cancelToken, cws,
+                "{'type':'transaction', 'symbols':['BTC_KRW' , 'ETH_KRW']}"
+            );
+
+            await SendAsync(cancelToken, cws,
+                "{'type':'orderbookdepth', 'symbols':['BTC_KRW' , 'ETH_KRW']}"
             );
         }
 
