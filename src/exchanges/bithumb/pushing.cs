@@ -64,16 +64,16 @@ namespace CCXT.Collector.Bithumb
             await cws.ConnectAsync(new Uri("wss://pubwss.bithumb.com/pub/ws"), cancelToken);
 
             await SendAsync(cancelToken, cws,
-                "{'type':'ticker', 'symbols': ['BTC_KRW', 'ETH_KRW'], 'tickTypes': ['30M', '1H', '12H', '24H', 'MID' ]}"
+                "{'type':'ticker', 'symbols': ['" + symbol + "'], 'tickTypes': ['30M', '1H', '12H', '24H', 'MID' ]}"
             );
 
-            await SendAsync(cancelToken, cws,
-                "{'type':'transaction', 'symbols':['BTC_KRW' , 'ETH_KRW']}"
-            );
+            // await SendAsync(cancelToken, cws,
+            //     "{'type':'transaction', 'symbols':['BTC_KRW' , 'ETH_KRW']}"
+            // );
 
-            await SendAsync(cancelToken, cws,
-                "{'type':'orderbookdepth', 'symbols':['BTC_KRW' , 'ETH_KRW']}"
-            );
+            // await SendAsync(cancelToken, cws,
+            //     "{'type':'orderbookdepth', 'symbols':['BTC_KRW' , 'ETH_KRW']}"
+            // );
         }
 
         private long __last_receive_time = 0;
