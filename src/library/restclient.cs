@@ -31,18 +31,21 @@ namespace CCXT.Collector.Library
         /// </summary>
         /// <param name="baseurl"></param>
         /// <returns></returns>
-        public override IRestClient CreateJsonClient(string baseurl)
+        public override RestClient CreateJsonClient(string baseurl)
         {
-            var _client = new RestClient(baseurl)
+            var _options = new RestClientOptions
             {
+                BaseUrl = new System.Uri(baseurl),
                 Timeout = 5 * 1000,
-                ReadWriteTimeout = 32 * 1000,
+                //ReadWriteTimeout = 32 * 1000,
                 UserAgent = __user_agent,
                 Encoding = Encoding.GetEncoding(65001)
             };
 
-            _client.RemoveHandler(__content_type);
-            _client.AddHandler(__content_type, () => new RestSharpJsonNetDeserializer());
+            var _client = new RestClient(_options);
+
+            //_client.RemoveHandler(__content_type);
+            //_client.AddHandler(__content_type, () => new RestSharpJsonNetDeserializer());
 
             return _client;
         }
@@ -52,16 +55,19 @@ namespace CCXT.Collector.Library
         /// </summary>
         /// <param name="baseurl"></param>
         /// <returns></returns>
-        public IRestClient CreateJsonBytesClient(string baseurl)
+        public RestClient CreateJsonBytesClient(string baseurl)
         {
-            var _client = new RestClient(baseurl)
+            var _options = new RestClientOptions
             {
+                BaseUrl =new System.Uri(baseurl),
                 Timeout = 10 * 1000,
                 UserAgent = __user_agent
             };
 
-            _client.RemoveHandler(__content_type);
-            _client.AddHandler(__content_type, () => new RestSharpJsonNetDeserializer());
+            var _client = new RestClient(_options);
+
+            //_client.RemoveHandler(__content_type);
+            //_client.AddHandler(__content_type, () => new RestSharpJsonNetDeserializer());
 
             return _client;
         }
@@ -73,13 +79,13 @@ namespace CCXT.Collector.Library
         /// <param name="max_retry"></param>
         /// <param name="delay_milliseconds"></param>
         /// <returns></returns>
-        public async ValueTask<IRestResponse> RestExecuteAsync(IRestClient client, IRestRequest request, int max_retry = 3, int delay_milliseconds = 1000)
+        public async ValueTask<RestResponse> RestExecuteAsync(RestClient client, RestRequest request, int max_retry = 3, int delay_milliseconds = 1000)
         {
-            var _result = (IRestResponse)null;
+            var _result = (RestResponse)null;
 
             for (var _retry_count = 0; _retry_count < max_retry; _retry_count++)
             {
-                //var _tcs = new TaskCompletionSource<IRestResponse>();
+                //var _tcs = new TaskCompletionSource<RestResponse>();
                 //{
                     //var _handle = client.ExecuteAsync(request, response =>
                     //{
@@ -107,7 +113,7 @@ namespace CCXT.Collector.Library
         /// <param name="max_retry"></param>
         /// <param name="delay_milliseconds"></param>
         /// <returns></returns>
-        public async ValueTask<byte[]> RestExecuteBytesAsync(IRestClient client, IRestRequest request, int max_retry = 3, int delay_milliseconds = 1000)
+        public async ValueTask<byte[]> RestExecuteBytesAsync(RestClient client, RestRequest request, int max_retry = 3, int delay_milliseconds = 1000)
         {
             var _result = (byte[])null;
 

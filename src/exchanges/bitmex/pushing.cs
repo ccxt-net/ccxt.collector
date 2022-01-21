@@ -134,7 +134,7 @@ namespace CCXT.Collector.BitMEX
             var _private_cli = (BitmexClient)_private_api.privateClient;
 
             var _expires = (_private_cli.GenerateOnlyNonce(10) + 3600).ToString();
-            var _signature = await _private_cli.CreateSignature(RestSharp.Method.GET, __auth_point, _expires);
+            var _signature = await _private_cli.CreateSignature(RestSharp.Method.Get, __auth_point, _expires);
 
             var _json_sign = "{ "
                            + $"'op': 'authKeyExpires', "

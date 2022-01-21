@@ -83,7 +83,7 @@ namespace CCXT.Collector.Deribit.Public
         /// </summary>
         /// <value>Instrument kind, "future" or "option"</value>
         [JsonProperty(PropertyName = "kind")]
-        public string type
+        public override string type
         {
             get; set;
         }
