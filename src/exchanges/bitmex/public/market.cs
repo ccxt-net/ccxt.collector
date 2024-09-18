@@ -221,7 +221,7 @@ namespace CCXT.Collector.BitMEX.Public
         /// <summary>
         ///
         /// </summary>
-        public override bool future
+        public bool future
         {
             get;
             set;
@@ -239,7 +239,7 @@ namespace CCXT.Collector.BitMEX.Public
         /// <summary>
         ///
         /// </summary>
-        public override string type
+        public string type
         {
             get;
             set;

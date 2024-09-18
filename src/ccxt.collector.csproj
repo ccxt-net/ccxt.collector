@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFrameworks>net472;netstandard2.1;net6.0</TargetFrameworks>
+        <TargetFramework>net8.0</TargetFramework>
         <AssemblyName>CCXT.Collector</AssemblyName>
         <RootNamespace>CCXT.Collector</RootNamespace>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
@@ -10,62 +10,55 @@
         <Product>CCXT</Product>
         <Company>ODINSOFT</Company>
         <Description>CCXT.Collector – CryptoCurrency eXchange Data Collect Library for .NET</Description>
-        <Copyright>Copyright OdinSoftware Co., Ltd. 2020</Copyright>
+        <Copyright>Copyright OdinSoftware Co., Ltd. 2015~2024</Copyright>
         <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
         <PackageProjectUrl>https://github.com/ccxt-net/ccxt.collector</PackageProjectUrl>
         <PackageIcon>ccxt.net.api.png</PackageIcon>
-        <PackageTags>cryptocurrency;exchange;trading;market-data;exchange-markets;bot;crypto;korean</PackageTags>
-        <PackageReleaseNotes>Upgrade to net6.0 and update nuget.</PackageReleaseNotes>
+        <PackageTags>cryptocurrency;exchange;trading;market-data;exchange-markets;bot;crypto</PackageTags>
+        <PackageReleaseNotes>upgrade net8.0</PackageReleaseNotes>
         <Platforms>AnyCPU;x64;x86</Platforms>
-        <Version>1.4.12</Version>
+        <Version>1.5.1</Version>
         <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
-        <AssemblyVersion>1.4.12.2</AssemblyVersion>
-		<LangVersion>9.0</LangVersion>
-		<FileVersion>1.4.12.2</FileVersion>
+        <AssemblyVersion>1.5.1.13</AssemblyVersion>
+		<FileVersion>1.5.1.13</FileVersion>
+		<LangVersion>11.0</LangVersion>
+		<ApplicationIcon>ccxt.net.ico</ApplicationIcon>
+		<Title>CryptoCurrency eXchange Data Collect</Title>
+		<RepositoryUrl>https://github.com/ccxt-net/ccxt.collector</RepositoryUrl>
+		<PackageReadmeFile>README.md</PackageReadmeFile>
+		<RepositoryType>git</RepositoryType>
 	</PropertyGroup>
-
-    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-        <PlatformTarget>AnyCPU</PlatformTarget>
-        <NoWarn>1701;1702;8632</NoWarn>
-    </PropertyGroup>
-
-    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-        <PlatformTarget>AnyCPU</PlatformTarget>
-        <NoWarn>1701;1702;8632</NoWarn>
-    </PropertyGroup>
 
     <ItemGroup>
         <None Include="..\LICENSE.txt">
             <Pack>True</Pack>
             <PackagePath></PackagePath>
         </None>
-    </ItemGroup>
-
-    <ItemGroup>
         <None Include="..\logo-files\ccxt.net.api.png">
             <Pack>True</Pack>
             <PackagePath></PackagePath>
         </None>
-    </ItemGroup>
-
-    <ItemGroup>
+        <None Include="..\README.md">
+          <Pack>True</Pack>
+          <PackagePath>\</PackagePath>
+        </None>
         <Content Include="..\LICENSE.txt" Link="LICENSE.txt" />
+        <Content Include="ccxt.net.ico" />
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="CCXT.NET" Version="1.4.12" />
-        <PackageReference Include="Microsoft.Extensions.Configuration" Version="6.0.0" />
-        <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="6.0.0" />
-        <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="6.0.0" />
-        <PackageReference Include="Microsoft.Extensions.Configuration.FileExtensions" Version="6.0.0" />
-        <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="6.0.0" />
-        <PackageReference Include="Newtonsoft.Json" Version="13.0.2" />
-        <PackageReference Include="RabbitMQ.Client" Version="6.2.2" />
-        <PackageReference Include="System.ServiceModel.Primitives" Version="4.9.0" />
-    </ItemGroup>
-
-    <ItemGroup>
-        <Folder Include="exchanges\deribit\private\" />
+        <PackageReference Include="CCXT.NET" Version="1.5.1" />
+        <PackageReference Include="Microsoft.Extensions.Configuration" Version="8.0.0" />
+        <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="8.0.0" />
+        <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="8.0.0" />
+        <PackageReference Include="Microsoft.Extensions.Configuration.FileExtensions" Version="8.0.1" />
+        <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="8.0.0" />
+        <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+        <PackageReference Include="RabbitMQ.Client" Version="6.8.1" />
+        <PackageReference Include="System.Text.Json" Version="8.0.4" />
+        <PackageReference Include="System.ServiceModel.Primitives">
+            <Version>8.0.0</Version>
+        </PackageReference>
     </ItemGroup>
 
 </Project>

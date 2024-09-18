@@ -178,7 +178,7 @@ namespace CCXT.Collector.Binance
                     foreach (var _param in _request.Parameters)
                         _params.Add(_param.Name, _param.Value);
 
-                    _request.ParametersClear();
+                    //_request.ParametersClear();
                 }
 
                 _params.Add("recvWindow", 60 * 1000);
@@ -244,7 +244,7 @@ namespace CCXT.Collector.Binance
                     foreach (var _param in _request.Parameters)
                         _params.Add(_param.Name, _param.Value);
 
-                    _request.ParametersClear();
+                    //_request.ParametersClear();
                 }
 
                 _params.Add("recvWindow", 60 * 1000);

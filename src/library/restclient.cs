@@ -36,7 +36,7 @@ namespace CCXT.Collector.Library
             var _options = new RestClientOptions
             {
                 BaseUrl = new System.Uri(baseurl),
-                Timeout = 5 * 1000,
+                Timeout = System.TimeSpan.FromSeconds(5),
                 //ReadWriteTimeout = 32 * 1000,
                 UserAgent = __user_agent,
                 Encoding = Encoding.GetEncoding(65001)
@@ -60,7 +60,7 @@ namespace CCXT.Collector.Library
             var _options = new RestClientOptions
             {
                 BaseUrl =new System.Uri(baseurl),
-                Timeout = 10 * 1000,
+                Timeout = System.TimeSpan.FromSeconds(10),
                 UserAgent = __user_agent
             };
 

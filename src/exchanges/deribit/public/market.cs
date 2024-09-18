@@ -1,6 +1,5 @@
-﻿using Newtonsoft.Json;
-using CCXT.NET.Shared.Coin.Public;
-using System;
+﻿using CCXT.NET.Shared.Coin.Public;
+using Newtonsoft.Json;
 using System.Collections.Generic;
 
 namespace CCXT.Collector.Deribit.Public
@@ -83,7 +82,7 @@ namespace CCXT.Collector.Deribit.Public
         /// </summary>
         /// <value>Instrument kind, "future" or "option"</value>
         [JsonProperty(PropertyName = "kind")]
-        public override string type
+        public string type
         {
             get; set;
         }
