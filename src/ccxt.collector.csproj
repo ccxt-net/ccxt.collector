@@ -1,7 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>net8.0</TargetFramework>
+        <TargetFrameworks>net8.0;net9.0</TargetFrameworks>
+		
         <AssemblyName>CCXT.Collector</AssemblyName>
         <RootNamespace>CCXT.Collector</RootNamespace>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
@@ -17,13 +18,15 @@
         <PackageTags>cryptocurrency;exchange;trading;market-data;exchange-markets;bot;crypto</PackageTags>
         <PackageReleaseNotes>upgrade net8.0</PackageReleaseNotes>
         <Platforms>AnyCPU;x64;x86</Platforms>
-        <Version>1.5.1</Version>
-        <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
-        <AssemblyVersion>1.5.1.13</AssemblyVersion>
-		<FileVersion>1.5.1.13</FileVersion>
-		<LangVersion>11.0</LangVersion>
+        
+		<Version>1.5.2</Version>
+        <AssemblyVersion>1.5.2.14</AssemblyVersion>
+		<FileVersion>1.5.2.14</FileVersion>
+
 		<ApplicationIcon>ccxt.net.ico</ApplicationIcon>
+		<PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
 		<Title>CryptoCurrency eXchange Data Collect</Title>
+		
 		<RepositoryUrl>https://github.com/ccxt-net/ccxt.collector</RepositoryUrl>
 		<PackageReadmeFile>README.md</PackageReadmeFile>
 		<RepositoryType>git</RepositoryType>
@@ -34,10 +37,10 @@
             <Pack>True</Pack>
             <PackagePath></PackagePath>
         </None>
-        <None Include="..\logo-files\ccxt.net.api.png">
-            <Pack>True</Pack>
-            <PackagePath></PackagePath>
-        </None>
+		<None Include="..\docs\logo-files\ccxt.net.api.png">
+			<Pack>True</Pack>
+			<PackagePath></PackagePath>
+		</None>
         <None Include="..\README.md">
           <Pack>True</Pack>
           <PackagePath>\</PackagePath>
@@ -47,17 +50,17 @@
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="CCXT.NET" Version="1.5.1" />
-        <PackageReference Include="Microsoft.Extensions.Configuration" Version="8.0.0" />
-        <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="8.0.0" />
-        <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="8.0.0" />
-        <PackageReference Include="Microsoft.Extensions.Configuration.FileExtensions" Version="8.0.1" />
-        <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="8.0.0" />
+        <PackageReference Include="CCXT.NET" Version="1.5.2" />
+        <PackageReference Include="Microsoft.Extensions.Configuration" Version="9.0.8" />
+        <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="9.0.8" />
+        <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="9.0.8" />
+        <PackageReference Include="Microsoft.Extensions.Configuration.FileExtensions" Version="9.0.8" />
+        <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="9.0.8" />
         <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
-        <PackageReference Include="RabbitMQ.Client" Version="6.8.1" />
-        <PackageReference Include="System.Text.Json" Version="8.0.4" />
+        <PackageReference Include="RabbitMQ.Client" Version="7.1.2" />
+        <PackageReference Include="System.Text.Json" Version="9.0.8" />
         <PackageReference Include="System.ServiceModel.Primitives">
-            <Version>8.0.0</Version>
+            <Version>8.1.2</Version>
         </PackageReference>
     </ItemGroup>
 
