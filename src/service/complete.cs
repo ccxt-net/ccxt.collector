@@ -397,7 +397,7 @@ namespace CCXT.Collector.Service
             get;
             set;
         }
-#if RAWJSON
+#if DEBUG
         /// <summary>
         ///
         /// </summary>
@@ -508,7 +508,7 @@ namespace CCXT.Collector.Service
             get;
             set;
         }
-#if RAWJSON
+#if DEBUG
         /// <summary>
         ///
         /// </summary>

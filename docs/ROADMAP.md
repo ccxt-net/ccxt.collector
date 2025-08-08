@@ -1,10 +1,24 @@
-# CCXT.Collector Roadmap
-
-## Overview
-This document outlines the medium to long-term development roadmap for CCXT.Collector, a real-time cryptocurrency data collection system using WebSocket connections.
+# CCXT.Collector Roadmap & Tasks
 
 ## Vision
 To become the most comprehensive and reliable real-time cryptocurrency data aggregation platform supporting all major exchanges globally with unified data models and advanced analytics capabilities.
+
+## Current Sprint Tasks (August 2025)
+
+### 🔴 Critical Priority
+- [ ] **Complete Exchange Implementations** - Finish Bithumb, Coinbase, Kraken WebSocket implementations
+- [ ] **Fix Authentication Security** - Implement proper authentication for private channels
+- [ ] **Production Stability** - Enhance reconnection logic with exponential backoff
+
+### 🟠 High Priority  
+- [ ] **Technical Indicators** - Implement real-time RSI, MACD, Bollinger Bands, VWAP
+- [ ] **Integration Tests** - Comprehensive test suite for all exchanges
+- [ ] **Performance Optimization** - Message batching, parallel processing, JSON optimization
+
+### 🟡 Medium Priority
+- [ ] **Rate Limiting** - Per-exchange rate limits with adaptive throttling
+- [ ] **Enhanced Logging** - Structured logging with Serilog, correlation IDs
+- [ ] **Documentation** - Complete API examples, troubleshooting guide
 
 ## Roadmap Phases
 

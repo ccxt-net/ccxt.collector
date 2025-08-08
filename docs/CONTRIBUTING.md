@@ -1,18 +1,12 @@
 # Contributing to CCXT.Collector
 
-Thank you for your interest in contributing to CCXT.Collector! We welcome contributions from the community and are grateful for any help you can provide.
+Thank you for your interest in contributing! We welcome contributions from the community.
 
-## Table of Contents
-
+## Quick Links
 - [Code of Conduct](#code-of-conduct)
 - [Getting Started](#getting-started)
-- [How to Contribute](#how-to-contribute)
 - [Development Process](#development-process)
-- [Coding Standards](#coding-standards)
-- [Testing](#testing)
-- [Documentation](#documentation)
 - [Pull Request Process](#pull-request-process)
-- [Community](#community)
 
 ## Code of Conduct
 

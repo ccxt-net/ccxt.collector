@@ -69,6 +69,29 @@ dotnet add package CCXT.Collector --version 2.0.0
 
 ## 🚀 Quick Start
 
+### Prerequisites
+- .NET 8.0 or 9.0 SDK installed
+- Visual Studio 2022 or VS Code (optional)
+- Basic knowledge of C# and async/await
+
+### Installation
+
+#### Create a new project
+```bash
+dotnet new console -n CryptoTracker
+cd CryptoTracker
+```
+
+#### Add CCXT.Collector package
+```bash
+dotnet add package CCXT.Collector --version 2.0.0
+```
+
+Or add to your `.csproj`:
+```xml
+<PackageReference Include="CCXT.Collector" Version="2.0.0" />
+```
+
 ### Basic WebSocket Connection
 
 ```csharp
@@ -106,12 +129,18 @@ class Program
         await client.SubscribeTickerAsync("BTC/USDT");
         
         // Keep the connection alive
-        Console.ReadLine();
+        Console.WriteLine("Press any key to stop...");
+        Console.ReadKey();
         
         // Cleanup
         await client.DisconnectAsync();
     }
 }
+```
+
+#### Run the program
+```bash
+dotnet run
 ```
 
 ### Technical Indicator Analysis
@@ -344,11 +373,20 @@ We welcome contributions! Please see our [Contributing Guide](docs/CONTRIBUTING.
 
 This project is licensed under the MIT License - see the [LICENSE.txt](LICENSE.txt) file for details.
 
+## 📚 Documentation
+
+- [API Reference](docs/API_REFERENCE.md) - Complete API documentation and examples
+- [Architecture](docs/ARCHITECTURE.md) - System design and technical details
+- [Deployment Guide](docs/DEPLOYMENT.md) - Production deployment instructions
+- [Roadmap & Tasks](docs/ROADMAP.md) - Development roadmap and current tasks
+- [Contributing](docs/CONTRIBUTING.md) - How to contribute to the project
+- [Changelog](docs/CHANGELOG.md) - Version history and migration guide
+
 ## 🔗 Links
 
 - [NuGet Package](https://www.nuget.org/packages/CCXT.Collector)
 - [GitHub Repository](https://github.com/ccxt-net/ccxt.collector)
-- [Documentation](https://github.com/ccxt-net/ccxt.collector/wiki)
+- [Documentation Wiki](https://github.com/ccxt-net/ccxt.collector/wiki)
 - [Bug Reports](https://github.com/ccxt-net/ccxt.collector/issues)
 
 ## 👥 Related Projects

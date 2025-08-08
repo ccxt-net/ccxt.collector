@@ -1,4 +1,5 @@
 ﻿using CCXT.Collector.Library;
+using Newtonsoft.Json;
 using System.Collections.Generic;
 
 namespace CCXT.Collector.Service
@@ -125,7 +126,7 @@ namespace CCXT.Collector.Service
     /// </summary>
     public class SOrderBooks : SApiResult<SOrderBook>
     {
-#if RAWJSON
+#if DEBUG
         /// <summary>
         ///
         /// </summary>

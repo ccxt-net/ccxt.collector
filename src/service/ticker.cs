@@ -1,4 +1,5 @@
 ﻿using CCXT.Collector.Library;
+using Newtonsoft.Json;
 using System.Collections.Generic;
 
 namespace CCXT.Collector.Service
@@ -76,7 +77,7 @@ namespace CCXT.Collector.Service
             get;
             set;
         }
-#if RAWJSON
+#if DEBUG
         /// <summary>
         ///
         /// </summary>

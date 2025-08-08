@@ -107,57 +107,36 @@ This major release represents a complete architectural transformation, expanding
 
 ---
 
-## Migration Guide
+## Migration from v1.x to v2.0
 
-### From v1.5.2 to Current
+### Breaking Changes
+- **Architecture**: Moved from REST API polling to WebSocket streaming
+- **Namespaces**: `CCXT.Collector.Data` → `CCXT.Collector.Service`, `CCXT.Collector.Models` → `CCXT.Collector.Library`
+- **Client Initialization**: No more division parameter needed
+- **Data Reception**: Callback-based instead of polling loops
+- **Data Models**: Now using unified models (`SOrderBooks`, `SCompleteOrders`, `STicker`)
 
-#### WebSocket Client Usage
+### Quick Migration Example
 
-**Old (REST-based):**
+**Old (v1.x - REST):**
 ```csharp
 var client = new BinanceClient("public");
-client.StartPolling();
+while (running) {
+    var orderbook = client.GetOrderbook("BTC/USDT");
+    ProcessOrderbook(orderbook);
+    Thread.Sleep(1000);
+}
 ```
 
-**New (WebSocket-based):**
+**New (v2.0 - WebSocket):**
 ```csharp
 var client = new BinanceWebSocketClient();
+client.OnOrderbookReceived += ProcessOrderbook;
 await client.ConnectAsync();
 await client.SubscribeOrderbookAsync("BTC/USDT");
 ```
 
-#### Callback Registration
-
-**Old:**
-```csharp
-// Data received through RabbitMQ
-var consumer = new RabbitMQConsumer();
-consumer.OnMessage += ProcessMessage;
-```
-
-**New:**
-```csharp
-// Direct callbacks
-client.OnOrderbookReceived += (orderbook) => ProcessOrderbook(orderbook);
-client.OnTradeReceived += (trade) => ProcessTrade(trade);
-```
-
-#### Data Models
-
-**Old:**
-```csharp
-Orderbook orderbook = client.GetOrderbook("BTC/USDT");
-```
-
-**New:**
-```csharp
-// Unified data model
-client.OnOrderbookReceived += (SOrderBooks orderbook) =>
-{
-    var bestBid = orderbook.result.bids[0];
-    var bestAsk = orderbook.result.asks[0];
-};
-```
+For detailed migration instructions, see [API_REFERENCE.md](docs/API_REFERENCE.md)
 
 ## Upgrade Recommendations
 

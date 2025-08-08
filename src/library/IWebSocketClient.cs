@@ -92,7 +92,7 @@ namespace CCXT.Collector.Library
         /// <summary>
         /// 1. Ticker/Trade data received callback (시세/체결)
         /// </summary>
-        event Action<STicker> OnTickerReceived;
+        event Action<STickers> OnTickerReceived;
 
         /// <summary>
         /// Trade execution data received callback (개별 체결)

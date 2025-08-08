@@ -1,13 +1,11 @@
+using CCXT.Collector.Service;
 using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
+using System.Linq;
 using System.Net.WebSockets;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using CCXT.Collector.Service;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 
 namespace CCXT.Collector.Library
 {
@@ -41,7 +39,7 @@ namespace CCXT.Collector.Library
 
         #region Events - Public Data
 
-        public event Action<STicker> OnTickerReceived;
+        public event Action<STickers> OnTickerReceived;
         public event Action<SCompleteOrders> OnTradeReceived;
         public event Action<SOrderBooks> OnOrderbookReceived;
         public event Action<SCandlestick> OnCandleReceived;
@@ -216,11 +214,11 @@ namespace CCXT.Collector.Library
                     {
                         result = await socket.ReceiveAsync(buffer, _cancellationTokenSource.Token);
                         
-                        if (result.MessageType == WebSocketMessageType.Text)
+                        if (result.MessageType == WebSocketMessageType.Data)
                         {
                             messageBuilder.Append(Encoding.UTF8.GetString(buffer.Array, 0, result.Count));
                         }
-                        else if (result.MessageType == WebSocketMessageType.Close)
+                        else if (result.MessageType == WebSocketMessageType.Error)
                         {
                             await HandleDisconnectAsync();
                             return;
@@ -385,7 +383,7 @@ namespace CCXT.Collector.Library
         #region Protected Helper Methods
 
         // Public data callbacks
-        protected void InvokeTickerCallback(STicker ticker)
+        protected void InvokeTickerCallback(STickers ticker)
         {
             OnTickerReceived?.Invoke(ticker);
         }
