@@ -19,9 +19,9 @@
         <PackageReleaseNotes>upgrade net8.0</PackageReleaseNotes>
         <Platforms>AnyCPU;x64;x86</Platforms>
         
-		<Version>1.5.2</Version>
-        <AssemblyVersion>1.5.2.14</AssemblyVersion>
-		<FileVersion>1.5.2.14</FileVersion>
+		<Version>2.0.0</Version>
+        <AssemblyVersion>2.0.0.14</AssemblyVersion>
+		<FileVersion>2.0.0.14</FileVersion>
 
 		<ApplicationIcon>ccxt.net.ico</ApplicationIcon>
 		<PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
@@ -50,7 +50,6 @@
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="CCXT.NET" Version="1.5.2" />
         <PackageReference Include="Microsoft.Extensions.Configuration" Version="9.0.8" />
         <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="9.0.8" />
         <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="9.0.8" />

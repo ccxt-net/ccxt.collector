@@ -25,17 +25,30 @@ CCXT.Collector is a comprehensive library that connects to cryptocurrency exchan
 - 🔐 **Automatic Reconnection** - Resilient WebSocket connection management
 - 📦 **RabbitMQ Integration** - Optional message queue support for distributed systems
 
-### 🏢 Supported Exchanges
+### 🏢 Supported Exchanges (132 Total)
 
-| Exchange | WebSocket | REST API | Orderbook | Trades | Ticker | Technical Analysis |
-|----------|-----------|----------|-----------|---------|--------|-------------------|
-| Binance | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| Upbit | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| Bithumb | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| BitMEX | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| Deribit | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| Gemini | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| itBit | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+#### Major Exchanges by Region
+
+| Region | Exchanges | Count |
+|--------|-----------|-------|
+| 🇺🇸 United States | Coinbase, Kraken, Gemini, Bittrex, Poloniex, Phemex, and 20 more | 26 |
+| 🇨🇳 China | Binance*, OKX, Huobi, Bybit, KuCoin, Gate.io, MEXC, and 17 more | 24 |
+| 🇰🇷 South Korea | Upbit, Bithumb, Coinone, Korbit, Gopax, Probit, OKCoinKR | 7 |
+| 🇯🇵 Japan | bitFlyer, Coincheck, Bitbank, Zaif, and 4 more | 8 |
+| 🇪🇺 Europe | Bitstamp, Bitfinex, Bitvavo, EXMO, WhiteBIT, and 8 more | 13 |
+| 🇬🇧 United Kingdom | Bitfinex, Bitstamp, CEX.IO, Luno, and 3 more | 7 |
+| 🇸🇬 Singapore | BitMEX*, Bitrue, Coins.ph, and 5 more | 8 |
+| 🌍 Other Regions | Deribit (UAE), BTC Markets (AU), Bitso (MX), NDAX (CA), and more | 39 |
+
+*Note: Exchange locations indicate registration/headquarters, not service availability
+
+#### Implementation Status
+
+| Feature | Implemented | In Progress | Planned |
+|---------|------------|-------------|----------|
+| WebSocket Clients | 132 | - | - |
+| API Documentation | 44 | 88 | - |
+| Full Implementation | 3 (Binance, Upbit, Bithumb) | 10 | 119 |
 
 ## 📦 Installation
 
@@ -51,7 +64,7 @@ dotnet add package CCXT.Collector --version 2.0.0
 
 ### Package Reference
 ```xml
-<PackageReference Include="CCXT.Collector" Version="1.5.2" />
+<PackageReference Include="CCXT.Collector" Version="2.0.0" />
 ```
 
 ## 🚀 Quick Start
@@ -257,23 +270,39 @@ class MultiExchangeCollector
 ```
 CCXT.Collector/
 ├── src/
-│   ├── library/          # Core library components
+│   ├── library/          # Core library components (CCXT.Collector.Library)
 │   │   ├── IWebSocketClient.cs      # WebSocket interface with callbacks
 │   │   ├── WebSocketClientBase.cs   # Base WebSocket implementation
-│   │   └── ...
-│   ├── exchanges/        # Exchange-specific WebSocket implementations
-│   │   ├── binance/
-│   │   │   ├── BinanceWebSocketClient.cs  # Binance WebSocket client
-│   │   │   └── ...
-│   │   ├── upbit/
-│   │   │   ├── UpbitWebSocketClient.cs    # Upbit WebSocket client
-│   │   │   └── ...
-│   │   ├── bithumb/
-│   │   │   ├── BithumbWebSocketClient.cs  # Bithumb WebSocket client
-│   │   │   └── ...
-│   │   └── ...
-│   ├── indicator/        # Technical indicator calculators
-│   └── service/          # Unified data models
+│   │   ├── config.cs                # Configuration management
+│   │   ├── restclient.cs            # REST API client
+│   │   └── ...                      # Factory, settings, extensions
+│   ├── service/          # Service layer (CCXT.Collector.Service)
+│   │   ├── orderbook.cs             # Order book data models
+│   │   ├── ticker.cs                # Ticker data models
+│   │   ├── trading.cs               # Trading data models
+│   │   ├── complete.cs              # Complete order models
+│   │   └── ...                      # OHLCV, account, candle models
+│   ├── indicator/        # Technical indicators (CCXT.Collector.Indicator)
+│   │   ├── IndicatorCalculatorBase.cs # Base indicator class
+│   │   ├── RSI.cs, MACD.cs, SMA.cs   # Momentum indicators
+│   │   ├── BollingerBand.cs, ATR.cs  # Volatility indicators
+│   │   └── ...                       # 25+ indicators total
+│   └── exchanges/        # Exchange implementations (by country code)
+│       ├── kr/           # South Korea (7 exchanges)
+│       │   ├── upbit/UpbitWebSocketClient.cs
+│       │   ├── bithumb/BithumbWebSocketClient.cs
+│       │   └── coinone/, korbit/, gopax/, probit/, okcoinkr/
+│       ├── us/           # United States (26 exchanges)
+│       │   ├── coinbase/CoinbaseWebSocketClient.cs
+│       │   ├── kraken/KrakenWebSocketClient.cs
+│       │   └── gemini/, bittrex/, poloniex/, and 21 more/
+│       ├── cn/           # China (24 exchanges)
+│       │   ├── okx/OkxWebSocketClient.cs
+│       │   ├── huobi/HuobiWebSocketClient.cs
+│       │   └── bybit/, kucoin/, gateio/, mexc/, and 18 more/
+│       ├── hk/           # Hong Kong
+│       │   └── binance/BinanceWebSocketClient.cs
+│       └── ...           # 18 more country/region folders
 ├── tests/
 │   ├── exchanges/        # Exchange-specific test suites
 │   │   ├── BinanceTests.cs
@@ -287,6 +316,10 @@ CCXT.Collector/
 │   │   └── BithumbSample.cs
 │   └── WebSocketExample.cs  # WebSocket usage examples
 └── docs/                 # Documentation
+    ├── ARCHITECTURE.md   # System architecture
+    ├── API_REFERENCE.md  # API documentation
+    ├── CHANGELOG.md      # Version history
+    └── MIGRATION_GUIDE.md # Migration guide
 ```
 
 ### Data Flow
