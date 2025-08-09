@@ -866,14 +866,6 @@ client.OnCandleReceived += (candle) =>
     "auto.start.exchange.name": "binance",
     "auto.start.symbol.names": "BTC/USDT,ETH/USDT"
   },
-  "rabbitmq": {
-    "enabled": "false",
-    "hostName": "localhost",
-    "port": "5672",
-    "virtualHost": "/",
-    "userName": "guest",
-    "password": "guest"
-  },
   "logging": {
     "level": "Information",
     "console": "true",

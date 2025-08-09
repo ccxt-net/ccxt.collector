@@ -32,7 +32,7 @@ To become the most comprehensive and reliable real-time cryptocurrency data aggr
 - [ ] Enhanced reconnection logic with exponential backoff
 - [ ] Connection pool management for multiple exchanges
 - [ ] Distributed architecture support for horizontal scaling
-- [ ] Message queue integration (RabbitMQ/Kafka)
+- [ ] Message queue integration (Kafka/Redis Streams)
 - [ ] Comprehensive logging and monitoring system
 - [ ] Performance optimization for high-frequency data
 
@@ -160,7 +160,7 @@ To become the most comprehensive and reliable real-time cryptocurrency data aggr
 - **Testing**: xUnit
 
 ### Planned Additions
-- **Message Queue**: Apache Kafka / RabbitMQ
+- **Message Queue**: Apache Kafka / Redis Streams
 - **Cache**: Redis
 - **Time-series DB**: InfluxDB / TimescaleDB
 - **Search**: Elasticsearch

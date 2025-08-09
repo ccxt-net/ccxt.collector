@@ -109,14 +109,6 @@ dotnet publish -c Release -r ubuntu.18.04-x64 -f net8.0
    - **WebSocket Client** (e.g., `BinanceWebSocketClient.cs`) - Real-time data streaming
    - **Callback Events**: OnOrderbookReceived, OnTradeReceived, OnTickerReceived, etc.
 
-### Message Queue Integration
-
-The system uses RabbitMQ for message queue communication with predefined exchange names and queue patterns:
-- Snapshot queue: `{RootQName}_snapshot_queue`
-- Logger exchange: `{RootQName}_logger_exchange`
-- Orderbook exchange: `{RootQName}_orderbook_exchange`
-- Ticker exchange: `{RootQName}_ticker_exchange`
-- Trading exchange: `{RootQName}_trading_exchange`
 
 ### WebSocket-based Data Flow Architecture
 
@@ -160,18 +152,17 @@ The system uses RabbitMQ for message queue communication with predefined exchang
 
 ### Key Dependencies
 
-- **RabbitMQ.Client**: For message queue communication
 - **Newtonsoft.Json**: JSON serialization
 - **Microsoft.Extensions.Configuration**: Configuration management
 - **System.Text.Json**: Additional JSON support
+- **RestSharp**: REST API communication
 
 ### Configuration
 
 The application uses `appsettings.json` for configuration:
 - Exchange-specific settings (polling intervals, snapshot counters)
-- RabbitMQ connection settings
 - Auto-start configuration for exchanges and symbols
-- WebSocket retry settings
+- WebSocket retry settings and reconnection parameters
 
 ### Key Features
 

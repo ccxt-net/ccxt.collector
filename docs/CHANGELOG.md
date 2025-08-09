@@ -271,7 +271,6 @@ This major release represents a complete architectural transformation, expanding
 
 ### Core Features
 - Basic REST API integration for exchanges
-- RabbitMQ message queue support
 - Technical indicator calculations
 - Polling-based data collection
 
@@ -327,7 +326,6 @@ For detailed migration instructions, see [API_REFERENCE.md](docs/API_REFERENCE.m
 
 - `BinanceClient`, `UpbitClient`, `BithumbClient` REST clients are deprecated
 - Polling services (`polling.cs`) are deprecated in favor of WebSocket
-- RabbitMQ direct integration is now optional
 
 ## Known Issues
 

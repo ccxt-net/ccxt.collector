@@ -271,18 +271,6 @@ services:
     networks:
       - ccxt-network
 
-  rabbitmq:
-    image: rabbitmq:3-management
-    restart: unless-stopped
-    ports:
-      - "5672:5672"
-      - "15672:15672"
-    environment:
-      - RABBITMQ_DEFAULT_USER=guest
-      - RABBITMQ_DEFAULT_PASS=guest
-    networks:
-      - ccxt-network
-
 networks:
   ccxt-network:
     driver: bridge
@@ -419,14 +407,6 @@ spec:
     "auto.start.exchange.name": "binance",
     "auto.start.symbol.names": "BTC/USDT,ETH/USDT"
   },
-  "rabbitmq": {
-    "enabled": "true",
-    "hostName": "rabbitmq",
-    "port": "5672",
-    "virtualHost": "/",
-    "userName": "guest",
-    "password": "guest"
-  },
   "Logging": {
     "LogLevel": {
       "Default": "Information",
@@ -443,8 +423,7 @@ spec:
 ```csharp
 // Add to Startup.cs
 services.AddHealthChecks()
-    .AddCheck("websocket", new WebSocketHealthCheck())
-    .AddRabbitMQ(rabbitConnectionString);
+    .AddCheck("websocket", new WebSocketHealthCheck());
 
 app.UseHealthChecks("/health");
 ```

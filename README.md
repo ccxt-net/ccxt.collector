@@ -19,7 +19,6 @@ CCXT.Collector is a comprehensive library that connects to cryptocurrency exchan
 - 📈 **25+ Technical Indicators** - Real-time calculation per exchange/market
 - 🔌 **Callback Architecture** - Asynchronous event-driven data handling
 - 🔐 **Automatic Reconnection** - Resilient WebSocket connection management
-- 📦 **RabbitMQ Integration** - Optional message queue support for distributed systems
 
 ### 🏢 Supported Exchanges (132 Total)
 
@@ -162,13 +161,6 @@ The library includes 25+ technical indicators. See the [Developer Guide](docs/GU
     "use.auto.start": "true",
     "auto.start.exchange.name": "binance",
     "auto.start.symbol.names": "BTC/USDT,ETH/USDT"
-  },
-  "rabbitmq": {
-    "hostName": "localhost",
-    "port": "5672",
-    "virtualHost": "/",
-    "userName": "guest",
-    "password": "guest"
   }
 }
 ```
@@ -256,7 +248,6 @@ CCXT.Collector는 전 세계 암호화폐 거래소의 WebSocket을 통해 실�
 - 📈 **25개 이상의 기술 지표** - 거래소/마켓별 실시간 계산
 - 🔌 **콜백 아키텍처** - 비동기 이벤트 기반 데이터 처리
 - 🔐 **자동 재연결** - 탄력적인 WebSocket 연결 관리
-- 📦 **RabbitMQ 통합** - 분산 시스템을 위한 메시지 큐 지원
 
 자세한 내용은 [Developer Guide](docs/GUIDE.md)를 참조하세요.
 

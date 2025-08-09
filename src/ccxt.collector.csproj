@@ -61,7 +61,6 @@
         <PackageReference Include="Microsoft.Extensions.Configuration.FileExtensions" Version="9.0.8" />
         <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="9.0.8" />
         <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
-        <PackageReference Include="RabbitMQ.Client" Version="7.1.2" />
         <PackageReference Include="System.Text.Json" Version="9.0.8" />
         <PackageReference Include="System.ServiceModel.Primitives">
             <Version>8.1.2</Version>
