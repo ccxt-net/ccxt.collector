@@ -83,13 +83,13 @@ namespace CCXT.Collector.Binance
                                 await ProcessOrderbookUpdate(json);
                                 break;
                             case "trade":
-                                await ProcessTrade(json);
+                                await ProcessTradeData(json);
                                 break;
                             case "24hrTicker":
-                                await ProcessTicker(json);
+                                await ProcessTickerData(json);
                                 break;
                             case "kline":
-                                await ProcessKline(json);
+                                await ProcessKlineData(json);
                                 break;
                             case "error":
                                 RaiseError($"Binance error: {json["m"]}");
@@ -195,7 +195,7 @@ namespace CCXT.Collector.Binance
             }
         }
 
-        private async Task ProcessTrade(JObject json)
+        private async Task ProcessTradeData(JObject json)
         {
             try
             {
@@ -227,7 +227,7 @@ namespace CCXT.Collector.Binance
             }
         }
 
-        private async Task ProcessTicker(JObject json)
+        private async Task ProcessTickerData(JObject json)
         {
             try
             {
@@ -493,7 +493,7 @@ namespace CCXT.Collector.Binance
             }
         }
 
-        private async Task ProcessKline(JObject json)
+        private async Task ProcessKlineData(JObject json)
         {
             try
             {

@@ -31,7 +31,6 @@ namespace CCXT.Collector.Upbit
     public class UpbitWebSocketClient : WebSocketClientBase
     {
         private readonly Dictionary<string, SOrderBooks> _orderbookCache;
-        private readonly Dictionary<string, string> _marketCodeMap;
 
         public override string ExchangeName => "Upbit";
         protected override string WebSocketUrl => "wss://api.upbit.com/websocket/v1";
@@ -40,21 +39,6 @@ namespace CCXT.Collector.Upbit
         public UpbitWebSocketClient()
         {
             _orderbookCache = new Dictionary<string, SOrderBooks>();
-            _marketCodeMap = new Dictionary<string, string>();
-            InitializeMarketCodes();
-        }
-
-        private void InitializeMarketCodes()
-        {
-            // Common market code mappings
-            _marketCodeMap["BTC/KRW"] = "KRW-BTC";
-            _marketCodeMap["ETH/KRW"] = "KRW-ETH";
-            _marketCodeMap["XRP/KRW"] = "KRW-XRP";
-            _marketCodeMap["ADA/KRW"] = "KRW-ADA";
-            _marketCodeMap["SOL/KRW"] = "KRW-SOL";
-            _marketCodeMap["DOGE/KRW"] = "KRW-DOGE";
-            _marketCodeMap["BTC/USDT"] = "USDT-BTC";
-            _marketCodeMap["ETH/USDT"] = "USDT-ETH";
         }
 
         protected override async Task ProcessMessageAsync(string message, bool isPrivate = false)
@@ -99,7 +83,7 @@ namespace CCXT.Collector.Upbit
                                 await ProcessTrade(json);
                                 break;
                             case "ticker":
-                                await ProcessTicker(json);
+                                await ProcessTickerData(json);
                                 break;
                             case "candle":
                                 await ProcessCandle(json);
@@ -221,7 +205,7 @@ namespace CCXT.Collector.Upbit
             }
         }
 
-        private async Task ProcessTicker(JObject json)
+        private async Task ProcessTickerData(JObject json)
         {
             try
             {
@@ -272,6 +256,38 @@ namespace CCXT.Collector.Upbit
             }
         }
 
+        public override async Task<bool> SubscribeOrderbookAsync(Market market)
+        {
+            try
+            {
+                var upbitCode = FormatSymbol(market);
+                
+                var subscription = new List<object>
+                {
+                    new { ticket = Guid.NewGuid().ToString() },
+                    new { type = "orderbook", codes = new[] { upbitCode } }
+                };
+
+                await SendMessageAsync(JsonConvert.SerializeObject(subscription));
+                
+                var key = CreateSubscriptionKey("orderbook", market.ToString());
+                _subscriptions[key] = new SubscriptionInfo
+                {
+                    Channel = "orderbook",
+                    Symbol = market.ToString(),
+                    SubscribedAt = DateTime.UtcNow,
+                    IsActive = true
+                };
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                RaiseError($"Subscribe orderbook error: {ex.Message}");
+                return false;
+            }
+        }
+
         public override async Task<bool> SubscribeOrderbookAsync(string symbol)
         {
             try
@@ -300,6 +316,38 @@ namespace CCXT.Collector.Upbit
             catch (Exception ex)
             {
                 RaiseError($"Subscribe orderbook error: {ex.Message}");
+                return false;
+            }
+        }
+
+        public override async Task<bool> SubscribeTradesAsync(Market market)
+        {
+            try
+            {
+                var upbitCode = FormatSymbol(market);
+                
+                var subscription = new List<object>
+                {
+                    new { ticket = Guid.NewGuid().ToString() },
+                    new { type = "trade", codes = new[] { upbitCode } }
+                };
+
+                await SendMessageAsync(JsonConvert.SerializeObject(subscription));
+                
+                var key = CreateSubscriptionKey("trade", market.ToString());
+                _subscriptions[key] = new SubscriptionInfo
+                {
+                    Channel = "trade",
+                    Symbol = market.ToString(),
+                    SubscribedAt = DateTime.UtcNow,
+                    IsActive = true
+                };
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                RaiseError($"Subscribe trades error: {ex.Message}");
                 return false;
             }
         }
@@ -336,6 +384,38 @@ namespace CCXT.Collector.Upbit
             }
         }
 
+        public override async Task<bool> SubscribeTickerAsync(Market market)
+        {
+            try
+            {
+                var upbitCode = FormatSymbol(market);
+                
+                var subscription = new List<object>
+                {
+                    new { ticket = Guid.NewGuid().ToString() },
+                    new { type = "ticker", codes = new[] { upbitCode } }
+                };
+
+                await SendMessageAsync(JsonConvert.SerializeObject(subscription));
+                
+                var key = CreateSubscriptionKey("ticker", market.ToString());
+                _subscriptions[key] = new SubscriptionInfo
+                {
+                    Channel = "ticker",
+                    Symbol = market.ToString(),
+                    SubscribedAt = DateTime.UtcNow,
+                    IsActive = true
+                };
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                RaiseError($"Subscribe ticker error: {ex.Message}");
+                return false;
+            }
+        }
+
         public override async Task<bool> SubscribeTickerAsync(string symbol)
         {
             try
@@ -364,6 +444,27 @@ namespace CCXT.Collector.Upbit
             catch (Exception ex)
             {
                 RaiseError($"Subscribe ticker error: {ex.Message}");
+                return false;
+            }
+        }
+
+        public override async Task<bool> UnsubscribeAsync(string channel, Market market)
+        {
+            try
+            {
+                // Upbit doesn't support explicit unsubscribe
+                // We just mark the subscription as inactive
+                var key = CreateSubscriptionKey(channel, market.ToString());
+                if (_subscriptions.TryGetValue(key, out var sub))
+                {
+                    sub.IsActive = false;
+                }
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                RaiseError($"Unsubscribe error: {ex.Message}");
                 return false;
             }
         }
@@ -414,17 +515,14 @@ namespace CCXT.Collector.Upbit
 
         private string ConvertToUpbitCode(string symbol)
         {
-            // Try to find in map first
-            if (_marketCodeMap.ContainsKey(symbol))
-                return _marketCodeMap[symbol];
-
             // Convert from "BTC/KRW" to "KRW-BTC"
+            // Upbit uses Quote-Base format (reversed)
             var parts = symbol.Split('/');
             if (parts.Length == 2)
             {
-                var quote = parts[1];
-                var baseSymbol = parts[0];
-                return $"{quote}-{baseSymbol}";
+                var baseCoin = parts[0];  // BTC
+                var quoteCoin = parts[1];  // KRW
+                return $"{quoteCoin}-{baseCoin}";
             }
             
             return symbol;
@@ -432,21 +530,27 @@ namespace CCXT.Collector.Upbit
 
         private string ConvertFromUpbitCode(string code)
         {
-            // Find in reverse map
-            var entry = _marketCodeMap.FirstOrDefault(x => x.Value == code);
-            if (entry.Key != null)
-                return entry.Key;
-
             // Convert from "KRW-BTC" to "BTC/KRW"
             var parts = code.Split('-');
             if (parts.Length == 2)
             {
-                var quote = parts[0];
-                var baseSymbol = parts[1];
-                return $"{baseSymbol}/{quote}";
+                var quoteCoin = parts[0];  // KRW
+                var baseCoin = parts[1];   // BTC
+                return $"{baseCoin}/{quoteCoin}";
             }
             
             return code;
+        }
+
+        /// <summary>
+        /// Formats a Market object to Upbit-specific symbol format
+        /// </summary>
+        /// <param name="market">Market to format</param>
+        /// <returns>Formatted symbol (e.g., "KRW-BTC")</returns>
+        protected override string FormatSymbol(Market market)
+        {
+            // Upbit uses Quote-Base format (reversed) with hyphen separator and uppercase
+            return $"{market.Quote.ToUpper()}-{market.Base.ToUpper()}";
         }
 
         #endregion
@@ -488,6 +592,39 @@ namespace CCXT.Collector.Upbit
             catch (Exception ex)
             {
                 RaiseError($"Candle processing error: {ex.Message}");
+            }
+        }
+
+        public override async Task<bool> SubscribeCandlesAsync(Market market, string interval)
+        {
+            try
+            {
+                var upbitCode = FormatSymbol(market);
+                var upbitInterval = ConvertToUpbitInterval(interval);
+                
+                var subscription = new List<object>
+                {
+                    new { ticket = Guid.NewGuid().ToString() },
+                    new { type = "candle", codes = new[] { upbitCode }, unit = upbitInterval }
+                };
+
+                await SendMessageAsync(JsonConvert.SerializeObject(subscription));
+                
+                var key = CreateSubscriptionKey($"candle:{interval}", market.ToString());
+                _subscriptions[key] = new SubscriptionInfo
+                {
+                    Channel = "candle",
+                    Symbol = market.ToString(),
+                    SubscribedAt = DateTime.UtcNow,
+                    IsActive = true
+                };
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                RaiseError($"Subscribe candles error: {ex.Message}");
+                return false;
             }
         }
 

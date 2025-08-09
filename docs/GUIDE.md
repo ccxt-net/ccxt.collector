@@ -42,7 +42,7 @@ CCXT.Collector is a comprehensive .NET library designed for real-time cryptocurr
 - **Event-Driven**: Callback-based architecture for asynchronous data handling
 - **Modular Design**: Clear separation between library, service, indicator, and exchange layers
 - **Resilient Connections**: Automatic reconnection with exponential backoff
-- **Performance Optimized**: Direct callback invocation without intermediate queuing
+- **Performance Optimized**: Direct JSON to standard model conversion without intermediate objects
 
 ## Project Structure
 
@@ -232,19 +232,22 @@ public class SCompleteOrders
 ### Message Processing Pipeline
 
 ```
-WebSocket Message → Parse JSON → Identify Message Type → 
-Convert to Unified Format → Validate Data → Invoke Callback
+WebSocket Message → Parse to JObject → Identify Message Type → 
+Direct Convert to Standard Model → Validate Data → Invoke Callback
 ```
+
+**Performance Note**: For optimal performance, we convert directly from JObject to standard models without creating intermediate exchange-specific model objects. This eliminates unnecessary object allocation and serialization overhead.
 
 ### Exchange-Specific Implementations
 
 Each exchange has its own WebSocket client that:
 - Implements exchange-specific WebSocket protocol
-- Handles exchange-specific message formats
-- Converts data to unified format
+- Parses messages directly using JObject/JToken
+- Converts directly from JSON to standard unified models
 - Manages exchange-specific authentication
 
-Example structure:
+#### Standard Conversion Pattern
+
 ```csharp
 public class BinanceWebSocketClient : WebSocketClientBase
 {
@@ -253,12 +256,59 @@ public class BinanceWebSocketClient : WebSocketClientBase
     
     protected override async Task ProcessMessageAsync(string message, bool isPrivate)
     {
-        // Parse Binance-specific message format
-        // Convert to unified data model
-        // Invoke appropriate callback
+        // 1. Parse to JObject for efficient access
+        var json = JObject.Parse(message);
+        
+        // 2. Identify message type
+        var messageType = json["e"]?.ToString();
+        
+        // 3. Direct conversion to standard model (no intermediate objects)
+        switch (messageType)
+        {
+            case "depthUpdate":
+                await ProcessOrderbook(json);
+                break;
+            case "trade":
+                await ProcessTrade(json);
+                break;
+        }
+    }
+    
+    private async Task ProcessOrderbook(JObject json)
+    {
+        // Direct conversion from JObject to standard model
+        var orderbook = new SOrderBooks
+        {
+            exchange = ExchangeName,
+            symbol = ConvertSymbol(json["s"].ToString()),
+            timestamp = json["E"].Value<long>(),
+            result = new SOrderBook
+            {
+                bids = json["b"].Select(bid => new SOrderBookItem
+                {
+                    price = bid[0].Value<decimal>(),
+                    quantity = bid[1].Value<decimal>()
+                }).ToList(),
+                asks = json["a"].Select(ask => new SOrderBookItem
+                {
+                    price = ask[0].Value<decimal>(),
+                    quantity = ask[1].Value<decimal>()
+                }).ToList()
+            }
+        };
+        
+        // Invoke callback with standard model
+        InvokeOrderbookCallback(orderbook);
     }
 }
 ```
+
+### Why Direct Conversion?
+
+1. **Performance**: Eliminates intermediate object creation and garbage collection overhead
+2. **Simplicity**: Reduces code complexity by removing unnecessary mapping layers
+3. **Flexibility**: Easy to adapt to API changes without modifying intermediate models
+4. **Memory Efficiency**: Lower memory footprint with fewer object allocations
 
 ## Data Flow
 
@@ -1062,7 +1112,7 @@ public void ProcessData() { }
 
 // Local variables, parameters: camelCase
 string symbolName = "BTC/USDT";
-void ProcessTicker(string symbol) { }
+void ProcessTickerData(string symbol) { }
 
 // Private fields: _camelCase with underscore
 private readonly string _apiKey;

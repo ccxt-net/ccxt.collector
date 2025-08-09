@@ -8,7 +8,6 @@ A powerful .NET library for real-time cryptocurrency exchange data collection wi
 
 ---
 
-<a name="english"></a>
 ## 📊 Overview
 
 CCXT.Collector is a comprehensive library that connects to cryptocurrency exchanges worldwide via WebSocket to receive real-time market data and calculate technical indicators. It provides a unified interface for handling data from multiple exchanges, making it easy to build trading bots, market analysis tools, and data collection systems.
@@ -44,56 +43,33 @@ CCXT.Collector is a comprehensive library that connects to cryptocurrency exchan
 | Feature | Implemented | In Progress | Planned |
 |---------|------------|-------------|----------|
 | WebSocket Clients | 132 | - | - |
+| Korean Exchange WebSockets | 5 (Upbit, Bithumb, Coinone, Korbit, Gopax) | 2 (OKCoinKR, Probit) | - |
 | API Documentation | 44 | 88 | - |
-| Full Implementation | 3 (Binance, Upbit, Bithumb) | 10 | 119 |
+| Full Implementation | 5 (Binance, Upbit, Bithumb, Coinone, Korbit) | 8 | 119 |
 
 ## 📦 Installation
 
 ### NuGet Package Manager
 ```bash
-Install-Package CCXT.Collector -Version 2.0.0
+Install-Package CCXT.Collector -Version 2.1.0
 ```
 
 ### .NET CLI
 ```bash
-dotnet add package CCXT.Collector --version 2.0.0
+dotnet add package CCXT.Collector --version 2.1.0
 ```
 
 ### Package Reference
 ```xml
-<PackageReference Include="CCXT.Collector" Version="2.0.0" />
+<PackageReference Include="CCXT.Collector" Version="2.1.0" />
 ```
 
 ## 🚀 Quick Start
-
-### Prerequisites
-- .NET 8.0 or 9.0 SDK installed
-- Visual Studio 2022 or VS Code (optional)
-- Basic knowledge of C# and async/await
-
-### Installation
-
-#### Create a new project
-```bash
-dotnet new console -n CryptoTracker
-cd CryptoTracker
-```
-
-#### Add CCXT.Collector package
-```bash
-dotnet add package CCXT.Collector --version 2.0.0
-```
-
-Or add to your `.csproj`:
-```xml
-<PackageReference Include="CCXT.Collector" Version="2.0.0" />
-```
 
 ### Basic WebSocket Connection
 
 ```csharp
 using CCXT.Collector.Binance;
-using CCXT.Collector.Core.Abstractions;
 using CCXT.Collector.Service;
 using System;
 using System.Threading.Tasks;
@@ -113,18 +89,18 @@ class Program
             Console.WriteLine($"Best ask: {orderbook.result.asks[0].price} @ {orderbook.result.asks[0].quantity}");
         };
         
-        client.OnTradeReceived += (trade) =>
-        {
-            Console.WriteLine($"Trade: {trade.symbol} - Price: {trade.result.price}, Amount: {trade.result.amount}");
-        };
-        
         client.OnConnected += () => Console.WriteLine("✅ Connected to Binance");
         client.OnError += (error) => Console.WriteLine($"❌ Error: {error}");
         
         // Connect and subscribe to markets
         await client.ConnectAsync();
-        await client.SubscribeOrderbookAsync("BTC/USDT");
-        await client.SubscribeTradesAsync("BTC/USDT");
+        
+        // Using the new Market-based subscription (more efficient)
+        var market = new Market("BTC", "USDT");
+        await client.SubscribeOrderbookAsync(market);
+        await client.SubscribeTradesAsync(market);
+        
+        // Or using traditional string format (backward compatible)
         await client.SubscribeTickerAsync("BTC/USDT");
         
         // Keep the connection alive
@@ -137,143 +113,47 @@ class Program
 }
 ```
 
-#### Run the program
-```bash
-dotnet run
-```
-
-### Technical Indicator Analysis
-
-```csharp
-using CCXT.Collector.Indicators.Momentum;
-using CCXT.Collector.Indicators.Trend;
-using CCXT.Collector.Indicators.Volatility;
-using System;
-
-class TechnicalAnalysis
-{
-    static void SetupIndicators(ExchangeClient client)
-    {
-        // Create indicator calculators
-        var rsi = new RSI(14);
-        var macd = new MACD(12, 26, 9);
-        var bb = new BollingerBand(20, 2);
-        
-        // Register callback for OHLCV data
-        client.OnOhlcvReceived += (ohlcv) =>
-        {
-            // Update indicators with new data
-            rsi.Calculate(ohlcv);
-            macd.Calculate(ohlcv);
-            bb.Calculate(ohlcv);
-            
-            // Get indicator values
-            Console.WriteLine($"RSI: {rsi.Value}");
-            Console.WriteLine($"MACD: {macd.MACD}, Signal: {macd.Signal}");
-            Console.WriteLine($"BB Upper: {bb.Upper}, Middle: {bb.Middle}, Lower: {bb.Lower}");
-        };
-    }
-}
-```
-
 ### Multi-Exchange Data Collection
 
 ```csharp
 using CCXT.Collector.Binance;
 using CCXT.Collector.Upbit;
-using CCXT.Collector.Bithumb;
-using System.Threading.Tasks;
+using CCXT.Collector.Service;
 
-class MultiExchangeCollector
+// Initialize multiple exchanges
+var binanceClient = new BinanceWebSocketClient();
+var upbitClient = new UpbitWebSocketClient();
+
+// Set up unified callbacks - all exchanges use same data format
+Action<STicker> processTicker = (ticker) =>
 {
-    public async Task StartCollection()
-    {
-        // Initialize WebSocket clients for multiple exchanges
-        var binanceClient = new BinanceWebSocketClient();
-        var upbitClient = new UpbitWebSocketClient();
-        var bithumbClient = new BithumbWebSocketClient();
-        
-        // Set up unified callbacks - all exchanges use same data format
-        binanceClient.OnTickerReceived += (ticker) =>
-        {
-            ProcessUnifiedTicker("Binance", ticker);
-        };
-        
-        upbitClient.OnTickerReceived += (ticker) =>
-        {
-            ProcessUnifiedTicker("Upbit", ticker);
-        };
-        
-        bithumbClient.OnTickerReceived += (ticker) =>
-        {
-            ProcessUnifiedTicker("Bithumb", ticker);
-        };
-        
-        // Connect all exchanges
-        await Task.WhenAll(
-            binanceClient.ConnectAsync(),
-            upbitClient.ConnectAsync(),
-            bithumbClient.ConnectAsync()
-        );
-        
-        // Subscribe to markets
-        await binanceClient.SubscribeTickerAsync("BTC/USDT");
-        await upbitClient.SubscribeTickerAsync("BTC/KRW");
-        await bithumbClient.SubscribeTickerAsync("BTC/KRW");
-    }
-    
-    private void ProcessUnifiedTicker(string exchange, STicker ticker)
-    {
-        // All data is in unified format regardless of exchange
-        Console.WriteLine($"[{exchange}] {ticker.symbol}: Price={ticker.result.closePrice:F2}, " +
-                         $"Volume={ticker.result.volume:F2}, Change={ticker.result.percentage:F2}%");
-    }
-}
+    Console.WriteLine($"[{ticker.exchange}] {ticker.symbol}: " +
+                     $"Price={ticker.result.closePrice:F2}, " +
+                     $"Volume={ticker.result.volume:F2}");
+};
+
+binanceClient.OnTickerReceived += processTicker;
+upbitClient.OnTickerReceived += processTicker;
+
+// Connect and subscribe
+await Task.WhenAll(
+    binanceClient.ConnectAsync(),
+    upbitClient.ConnectAsync()
+);
+
+// Use Market struct for cleaner code
+var btcUsdt = new Market("BTC", "USDT");
+var btcKrw = new Market("BTC", "KRW");
+
+await binanceClient.SubscribeTickerAsync(btcUsdt);
+await upbitClient.SubscribeTickerAsync(btcKrw);
 ```
 
-## 📊 Available Technical Indicators
+## 📊 Technical Indicators
 
-### Trend Indicators
-- **SMA** (Simple Moving Average)
-- **EMA** (Exponential Moving Average)
-- **WMA** (Weighted Moving Average)
-- **DEMA** (Double Exponential Moving Average)
-- **ZLEMA** (Zero Lag Exponential Moving Average)
-- **MACD** (Moving Average Convergence Divergence)
-- **SAR** (Parabolic SAR)
-
-### Momentum Indicators
-- **RSI** (Relative Strength Index)
-- **CMO** (Chande Momentum Oscillator)
-- **Momentum**
-- **ROC** (Rate of Change)
-- **TRIX** (Triple Exponential Average)
-
-### Volatility Indicators
-- **Bollinger Bands**
-- **ATR** (Average True Range)
-- **Envelope**
-- **DPO** (Detrended Price Oscillator)
-
-### Volume Indicators
-- **OBV** (On Balance Volume)
-- **ADL** (Accumulation/Distribution Line)
-- **CMF** (Chaikin Money Flow)
-- **PVT** (Price Volume Trend)
-- **VROC** (Volume Rate of Change)
-
-### Market Strength
-- **ADX** (Average Directional Index)
-- **Aroon**
-- **CCI** (Commodity Channel Index)
-- **WPR** (Williams %R)
-
-### Advanced
-- **Ichimoku Cloud**
+The library includes 25+ technical indicators. See the [Developer Guide](docs/GUIDE.md#technical-indicators) for the complete list and usage examples.
 
 ## ⚙️ Configuration
-
-### appsettings.json
 
 ```json
 {
@@ -295,96 +175,37 @@ class MultiExchangeCollector
 
 ## 🏗️ Architecture
 
-### WebSocket-Based Architecture
+For detailed architecture and system design, see the [Developer Guide](docs/GUIDE.md#system-overview).
+
+### Project Structure
 
 ```
 CCXT.Collector/
 ├── src/
 │   ├── Core/             # Core framework components
-│   │   ├── Abstractions/           # Interfaces and base classes
-│   │   │   ├── IWebSocketClient.cs # WebSocket interface
-│   │   │   └── WebSocketClientBase.cs # Base implementation
-│   │   ├── Configuration/          # Configuration management
-│   │   │   ├── config.cs           # Configuration classes
-│   │   │   └── settings.cs         # Application settings
-│   │   └── Infrastructure/         # Infrastructure components
-│   │       ├── factory.cs          # Factory patterns
-│   │       ├── logger.cs           # Logging infrastructure
-│   │       └── selector.cs         # Selector utilities
 │   ├── Models/           # Data models and structures
-│   │   ├── Market/                 # Market data models
-│   │   │   ├── orderbook.cs        # Order book structures
-│   │   │   ├── ticker.cs           # Ticker structures
-│   │   │   ├── ohlcv.cs            # OHLCV candle data
-│   │   │   └── candle.cs           # Candlestick data
-│   │   ├── Trading/                # Trading models
-│   │   │   ├── account.cs          # Account/balance
-│   │   │   ├── trading.cs          # Trading structures
-│   │   │   └── complete.cs         # Complete orders
-│   │   └── WebSocket/              # WebSocket models
-│   │       ├── apiResult.cs        # API results
-│   │       ├── wsResult.cs         # WebSocket results
-│   │       └── message.cs          # Message structures
-│   ├── Indicators/       # Technical indicators (organized by category)
-│   │   ├── Base/                   # Base indicator classes
-│   │   ├── Trend/                  # SMA, EMA, WMA, MACD, SAR
-│   │   ├── Momentum/               # RSI, CMO, ROC, TRIX
-│   │   ├── Volatility/             # BollingerBand, ATR, Envelope
-│   │   ├── Volume/                 # OBV, ADL, CMF, PVT, VROC
-│   │   ├── MarketStrength/         # ADX, Aroon, CCI, WPR
-│   │   ├── Advanced/               # Ichimoku
-│   │   └── Series/                 # Indicator series data
+│   ├── Indicators/       # Technical indicators (25+ indicators)
 │   ├── Utilities/        # Utility classes
-│   │   ├── extension.cs            # Extension methods
-│   │   ├── Statistics.cs           # Statistical calculations
-│   │   ├── Ohlc.cs                 # OHLC utilities
-│   │   └── logger.cs               # Logging utilities
-│   └── exchanges/        # Exchange implementations (by country code)
+│   └── exchanges/        # Exchange implementations (132 exchanges)
 │       ├── kr/           # South Korea (7 exchanges)
-│       │   ├── upbit/UpbitWebSocketClient.cs
-│       │   ├── bithumb/BithumbWebSocketClient.cs
-│       │   └── coinone/, korbit/, gopax/, probit/, okcoinkr/
 │       ├── us/           # United States (26 exchanges)
-│       │   ├── coinbase/CoinbaseWebSocketClient.cs
-│       │   ├── kraken/KrakenWebSocketClient.cs
-│       │   └── gemini/, bittrex/, poloniex/, and 21 more/
 │       ├── cn/           # China (24 exchanges)
-│       │   ├── okx/OkxWebSocketClient.cs
-│       │   ├── huobi/HuobiWebSocketClient.cs
-│       │   └── bybit/, kucoin/, gateio/, mexc/, and 18 more/
-│       ├── hk/           # Hong Kong
-│       │   └── binance/BinanceWebSocketClient.cs
 │       └── ...           # 18 more country/region folders
-├── tests/
-│   ├── exchanges/        # Exchange-specific test suites
-│   │   ├── BinanceTests.cs
-│   │   ├── UpbitTests.cs
-│   │   └── BithumbTests.cs
-│   └── Program.cs        # Test orchestrator
-├── samples/
-│   ├── exchanges/        # Exchange-specific examples
-│   │   ├── BinanceSample.cs
-│   │   ├── UpbitSample.cs
-│   │   └── BithumbSample.cs
-│   └── WebSocketExample.cs  # WebSocket usage examples
+├── tests/                # Test suites
+├── samples/              # Example implementations
 └── docs/                 # Documentation
-    ├── ARCHITECTURE.md   # System architecture
-    ├── API_REFERENCE.md  # API documentation
-    ├── CHANGELOG.md      # Version history
-    └── MIGRATION_GUIDE.md # Migration guide
 ```
 
-### Data Flow
+## 📚 Documentation
 
-1. **WebSocket Connection** → Each exchange client maintains persistent WebSocket connection
-2. **Subscribe to Channels** → Subscribe to orderbook, trades, ticker channels per symbol
-3. **Receive & Process** → Raw data converted to unified format
-4. **Callback Invocation** → Direct delivery to registered callback functions
-5. **Technical Analysis** → Optional indicator calculation on received data
+- [Developer Guide](docs/GUIDE.md) - Complete architecture, API reference, and contributing guide
+- [Deployment Guide](docs/DEPLOYMENT.md) - Production deployment instructions
+- [Roadmap & Tasks](docs/ROADMAP.md) - Development roadmap and current tasks
+- [Changelog](docs/CHANGELOG.md) - Version history and release notes
 
 ## 🤝 Contributing
 
-We welcome contributions! Please see our [Developer Guide](docs/GUIDE.md#contributing) for details.
+We welcome contributions! Please see our [Contributing Guide](docs/GUIDE.md#contributing) for details.
 
 1. Fork the repository
 2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
@@ -395,14 +216,6 @@ We welcome contributions! Please see our [Developer Guide](docs/GUIDE.md#contrib
 ## 📄 License
 
 This project is licensed under the MIT License - see the [LICENSE.txt](LICENSE.txt) file for details.
-
-## 📚 Documentation
-
-- [Developer Guide](docs/GUIDE.md) - Complete architecture, API reference, and contributing guide
-- [Deployment Guide](docs/DEPLOYMENT.md) - Production deployment instructions
-- [Roadmap & Tasks](docs/ROADMAP.md) - Development roadmap and current tasks
-- [Changelog](docs/CHANGELOG.md) - Version history and migration guide
-- [Migration Guide](docs/MIGRATION_GUIDE.md) - Guide for migrating from v1.x to v2.0
 
 ## 🔗 Links
 
@@ -416,22 +229,6 @@ This project is licensed under the MIT License - see the [LICENSE.txt](LICENSE.t
 - [CCXT.NET](https://github.com/ccxt-net/ccxt.net) - The base CCXT library for .NET
 - [CCXT.Simple](https://github.com/ccxt-net/ccxt.simple) - Simplified exchange interface
 
----
-
-<a name="korean"></a>
-## 📊 개요
-
-CCXT.Collector는 전 세계 암호화폐 거래소의 WebSocket을 통해 실시간 시장 데이터를 수신하고 기술적 지표를 계산하는 종합적인 라이브러리입니다. 여러 거래소의 데이터를 처리하기 위한 통합 인터페이스를 제공하여 트레이딩 봇, 시장 분석 도구, 데이터 수집 시스템을 쉽게 구축할 수 있습니다.
-
-### ✨ 주요 기능
-
-- 🚀 **실시간 WebSocket 스트리밍** - 저지연 시장 데이터 스트리밍
-- 🔄 **통합 데이터 클래스** - 모든 거래소에서 일관된 데이터 형식
-- 📈 **25개 이상의 기술 지표** - 거래소/마켓별 실시간 계산
-- 🔌 **콜백 아키텍처** - 비동기 이벤트 기반 데이터 처리
-- 🔐 **자동 재연결** - 탄력적인 WebSocket 연결 관리
-- 📦 **RabbitMQ 통합** - 분산 시스템을 위한 메시지 큐 지원
-
 ## 💬 Support
 
 - **Issues**: [GitHub Issues](https://github.com/ccxt-net/ccxt.collector/issues)
@@ -444,6 +241,24 @@ CCXT.Collector는 전 세계 암호화폐 거래소의 WebSocket을 통해 실�
 - **SEONGAHN** - Lead Developer & Project Architect ([lisa@odinsoft.co.kr](mailto:lisa@odinsoft.co.kr))
 - **YUJIN** - Senior Developer & Exchange Integration Specialist ([yoojin@odinsoft.co.kr](mailto:yoojin@odinsoft.co.kr))
 - **SEJIN** - Software Developer & API Implementation ([saejin@odinsoft.co.kr](mailto:saejin@odinsoft.co.kr))
+
+---
+
+<a name="korean"></a>
+## 📊 한국어 개요
+
+CCXT.Collector는 전 세계 암호화폐 거래소의 WebSocket을 통해 실시간 시장 데이터를 수신하고 기술적 지표를 계산하는 종합적인 라이브러리입니다. 
+
+### ✨ 주요 기능
+
+- 🚀 **실시간 WebSocket 스트리밍** - 저지연 시장 데이터 스트리밍
+- 🔄 **통합 데이터 클래스** - 모든 거래소에서 일관된 데이터 형식
+- 📈 **25개 이상의 기술 지표** - 거래소/마켓별 실시간 계산
+- 🔌 **콜백 아키텍처** - 비동기 이벤트 기반 데이터 처리
+- 🔐 **자동 재연결** - 탄력적인 WebSocket 연결 관리
+- 📦 **RabbitMQ 통합** - 분산 시스템을 위한 메시지 큐 지원
+
+자세한 내용은 [Developer Guide](docs/GUIDE.md)를 참조하세요.
 
 ---
 

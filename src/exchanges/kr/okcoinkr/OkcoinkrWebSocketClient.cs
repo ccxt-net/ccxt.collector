@@ -43,6 +43,39 @@ namespace CCXT.Collector.Okcoinkr
             }
         }
 
+        public override async Task<bool> SubscribeOrderbookAsync(Market market)
+        {
+            try
+            {
+                var exchangeSymbol = FormatSymbol(market);
+                // TODO: Implement Okcoinkr-specific orderbook subscription
+                var subscription = new
+                {
+                    type = "subscribe",
+                    channel = "orderbook",
+                    symbol = exchangeSymbol
+                };
+
+                await SendMessageAsync(JsonConvert.SerializeObject(subscription));
+                
+                var key = CreateSubscriptionKey("orderbook", market.ToString());
+                _subscriptions[key] = new SubscriptionInfo
+                {
+                    Channel = "orderbook",
+                    Symbol = market.ToString(),
+                    SubscribedAt = DateTime.UtcNow,
+                    IsActive = true
+                };
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                RaiseError($"Subscribe orderbook error: {ex.Message}");
+                return false;
+            }
+        }
+
         public override async Task<bool> SubscribeOrderbookAsync(string symbol)
         {
             try
@@ -71,6 +104,39 @@ namespace CCXT.Collector.Okcoinkr
             catch (Exception ex)
             {
                 RaiseError($"Subscribe orderbook error: {ex.Message}");
+                return false;
+            }
+        }
+
+        public override async Task<bool> SubscribeTradesAsync(Market market)
+        {
+            try
+            {
+                var exchangeSymbol = FormatSymbol(market);
+                // TODO: Implement Okcoinkr-specific trades subscription
+                var subscription = new
+                {
+                    type = "subscribe",
+                    channel = "trades",
+                    symbol = exchangeSymbol
+                };
+
+                await SendMessageAsync(JsonConvert.SerializeObject(subscription));
+                
+                var key = CreateSubscriptionKey("trades", market.ToString());
+                _subscriptions[key] = new SubscriptionInfo
+                {
+                    Channel = "trades",
+                    Symbol = market.ToString(),
+                    SubscribedAt = DateTime.UtcNow,
+                    IsActive = true
+                };
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                RaiseError($"Subscribe trades error: {ex.Message}");
                 return false;
             }
         }
@@ -107,6 +173,39 @@ namespace CCXT.Collector.Okcoinkr
             }
         }
 
+        public override async Task<bool> SubscribeTickerAsync(Market market)
+        {
+            try
+            {
+                var exchangeSymbol = FormatSymbol(market);
+                // TODO: Implement Okcoinkr-specific ticker subscription
+                var subscription = new
+                {
+                    type = "subscribe",
+                    channel = "ticker",
+                    symbol = exchangeSymbol
+                };
+
+                await SendMessageAsync(JsonConvert.SerializeObject(subscription));
+                
+                var key = CreateSubscriptionKey("ticker", market.ToString());
+                _subscriptions[key] = new SubscriptionInfo
+                {
+                    Channel = "ticker",
+                    Symbol = market.ToString(),
+                    SubscribedAt = DateTime.UtcNow,
+                    IsActive = true
+                };
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                RaiseError($"Subscribe ticker error: {ex.Message}");
+                return false;
+            }
+        }
+
         public override async Task<bool> SubscribeTickerAsync(string symbol)
         {
             try
@@ -135,6 +234,36 @@ namespace CCXT.Collector.Okcoinkr
             catch (Exception ex)
             {
                 RaiseError($"Subscribe ticker error: {ex.Message}");
+                return false;
+            }
+        }
+
+        public override async Task<bool> UnsubscribeAsync(string channel, Market market)
+        {
+            try
+            {
+                var exchangeSymbol = FormatSymbol(market);
+                // TODO: Implement Okcoinkr-specific unsubscription
+                var unsubscription = new
+                {
+                    type = "unsubscribe",
+                    channel = channel,
+                    symbol = exchangeSymbol
+                };
+
+                await SendMessageAsync(JsonConvert.SerializeObject(unsubscription));
+                
+                var key = CreateSubscriptionKey(channel, market.ToString());
+                if (_subscriptions.TryRemove(key, out var sub))
+                {
+                    sub.IsActive = false;
+                }
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                RaiseError($"Unsubscribe error: {ex.Message}");
                 return false;
             }
         }
@@ -192,6 +321,42 @@ namespace CCXT.Collector.Okcoinkr
 
         #region Candlestick/K-Line Implementation
 
+        public override async Task<bool> SubscribeCandlesAsync(Market market, string interval)
+        {
+            try
+            {
+                var exchangeSymbol = FormatSymbol(market);
+                // TODO: Implement Okcoinkr-specific candles subscription
+                // This is a placeholder implementation - needs exchange-specific protocol
+                var subscription = new
+                {
+                    type = "subscribe",
+                    channel = "candles",
+                    symbol = exchangeSymbol,
+                    interval = interval
+                };
+
+                await SendMessageAsync(JsonConvert.SerializeObject(subscription));
+                
+                var key = CreateSubscriptionKey($"candles:{interval}", market.ToString());
+                _subscriptions[key] = new SubscriptionInfo
+                {
+                    Channel = "candles",
+                    Symbol = market.ToString(),
+                    SubscribedAt = DateTime.UtcNow,
+                    IsActive = true,
+                    Extra = interval // Store interval for resubscription
+                };
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                RaiseError($"Subscribe candles error: {ex.Message}");
+                return false;
+            }
+        }
+
         public override async Task<bool> SubscribeCandlesAsync(string symbol, string interval)
         {
             try
@@ -236,6 +401,18 @@ namespace CCXT.Collector.Okcoinkr
             // TODO: Implement symbol conversion if needed for Okcoinkr
             // Convert from "BTC/USDT" to exchange-specific format
             return symbol;
+        }
+
+        /// <summary>
+        /// Formats a Market object to Okcoinkr-specific symbol format
+        /// </summary>
+        /// <param name="market">Market to format</param>
+        /// <returns>Formatted symbol (default format until specific implementation)</returns>
+        protected override string FormatSymbol(Market market)
+        {
+            // TODO: Implement Okcoinkr-specific symbol formatting when protocol is implemented
+            // For now, use the default BTC/KRW format
+            return market.ToString();
         }
 
         #endregion

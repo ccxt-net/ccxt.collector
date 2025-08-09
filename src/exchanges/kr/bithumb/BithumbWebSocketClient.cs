@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using CCXT.Collector.Core.Abstractions;
@@ -10,33 +11,87 @@ using Newtonsoft.Json.Linq;
 
 namespace CCXT.Collector.Bithumb
 {
-        /*
-         * Bithumb Support Markets: KRW
-         *
-         * API Documentation:
-         *     https://apidocs.bithumb.com/
-         *     https://api.bithumb.com/
-         *
-         * WebSocket API:
-         *     https://apidocs.bithumb.com/docs/websocket_api
-         *
-         * Fees:
-         *     https://www.bithumb.com/react/site/charge/trading-fee
-         */
+    /*
+     * Bithumb Exchange (One of Korea's Largest Exchanges)
+     * 
+     * API Documentation:
+     *     https://apidocs.bithumb.com/
+     *     https://api.bithumb.com/
+     * 
+     * WebSocket API:
+     *     https://apidocs.bithumb.com/docs/websocket_api
+     *     wss://pubwss.bithumb.com/pub/ws
+     * 
+     * Supported Markets: KRW
+     * 
+     * Rate Limits:
+     *     - REST API: 1,400 requests per second
+     *     - WebSocket: No specific limit
+     * 
+     * Features:
+     *     - Real-time orderbook depth updates
+     *     - Trade stream (transaction)
+     *     - Ticker updates (24H, 30M, 1H, 12H, MID)
+     *     - Incremental orderbook updates
+     */
+
     /// <summary>
-    /// Bithumb WebSocket client for real-time data streaming
+    /// Bithumb WebSocket client for real-time market data streaming
     /// </summary>
     public class BithumbWebSocketClient : WebSocketClientBase
     {
         private readonly Dictionary<string, SOrderBooks> _orderbookCache;
+        private readonly Dictionary<string, List<SOrderBookItem>> _localOrderbook;
+        private readonly object _lockObject = new object();
 
         public override string ExchangeName => "Bithumb";
-        protected override string WebSocketUrl => "wss://pubwss.bithumb.com/pub/ws"; // TODO: Update with actual WebSocket URL
+        protected override string WebSocketUrl => "wss://pubwss.bithumb.com/pub/ws";
         protected override int PingIntervalMs => 30000; // 30 seconds
 
         public BithumbWebSocketClient()
         {
             _orderbookCache = new Dictionary<string, SOrderBooks>();
+            _localOrderbook = new Dictionary<string, List<SOrderBookItem>>();
+        }
+
+        private string ConvertSymbol(string symbol)
+        {
+            // Convert format: BTC/KRW -> BTC_KRW
+            // Bithumb uses underscore separator with uppercase
+            var parts = symbol.Split('/');
+            if (parts.Length == 2)
+            {
+                var baseCoin = parts[0].ToUpper();  // BTC
+                var quoteCoin = parts[1].ToUpper(); // KRW
+                return $"{baseCoin}_{quoteCoin}";
+            }
+
+            return symbol.Replace("/", "_").ToUpper();
+        }
+
+        private string ConvertSymbolBack(string bithumbSymbol)
+        {
+            // Convert format: BTC_KRW -> BTC/KRW
+            var parts = bithumbSymbol.Split('_');
+            if (parts.Length == 2)
+            {
+                var baseCoin = parts[0];  // BTC
+                var quoteCoin = parts[1]; // KRW
+                return $"{baseCoin}/{quoteCoin}";
+            }
+
+            return bithumbSymbol.Replace("_", "/");
+        }
+
+        /// <summary>
+        /// Formats a Market object to Bithumb-specific symbol format
+        /// </summary>
+        /// <param name="market">Market to format</param>
+        /// <returns>Formatted symbol (e.g., "BTC_KRW")</returns>
+        protected override string FormatSymbol(Market market)
+        {
+            // Bithumb uses underscore separator with uppercase: BASE_QUOTE
+            return $"{market.Base.ToUpper()}_{market.Quote.ToUpper()}";
         }
 
         protected override async Task ProcessMessageAsync(string message, bool isPrivate = false)
@@ -44,15 +99,321 @@ namespace CCXT.Collector.Bithumb
             try
             {
                 var json = JObject.Parse(message);
-                
-                // TODO: Implement message processing based on Bithumb WebSocket protocol
-                // Handle different message types (orderbook, trades, ticker, etc.)
-                
-                RaiseError("Bithumb WebSocket implementation not yet completed");
+
+                // Check for status messages
+                if (json["status"] != null)
+                {
+                    var status = json["status"].ToString();
+                    if (status != "0000")
+                    {
+                        RaiseError($"Bithumb error status: {status}, message: {json["msg"]}");
+                        return;
+                    }
+                }
+
+                // Handle different message types
+                if (json["type"] != null)
+                {
+                    var messageType = json["type"].ToString();
+                    var content = json["content"];
+
+                    if (content == null) return;
+
+                    switch (messageType)
+                    {
+                        case "ticker":
+                            await ProcessTickerData(content);
+                            break;
+                        case "orderbookdepth":
+                            await ProcessOrderbookDepth(content);
+                            break;
+                        case "transaction":
+                            await ProcessTransaction(content);
+                            break;
+                    }
+                }
             }
             catch (Exception ex)
             {
-                RaiseError($"Message processing error: {ex.Message}");
+                RaiseError($"Error processing message: {ex.Message}");
+            }
+        }
+
+        private async Task ProcessTickerData(JToken content)
+        {
+            try
+            {
+                var bithumbSymbol = content["symbol"]?.ToString();
+                if (string.IsNullOrEmpty(bithumbSymbol)) return;
+
+                var symbol = ConvertSymbolBack(bithumbSymbol);
+                
+                // Parse date and time to timestamp
+                var date = content["date"]?.ToString();
+                var time = content["time"]?.ToString();
+                var timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+                
+                if (!string.IsNullOrEmpty(date) && !string.IsNullOrEmpty(time))
+                {
+                    try
+                    {
+                        var dateTime = DateTime.ParseExact(
+                            date + time,
+                            "yyyyMMddHHmmss",
+                            CultureInfo.InvariantCulture,
+                            DateTimeStyles.AssumeLocal
+                        );
+                        timestamp = new DateTimeOffset(dateTime).ToUnixTimeMilliseconds();
+                    }
+                    catch { }
+                }
+
+                var ticker = new STicker
+                {
+                    exchange = ExchangeName,
+                    symbol = symbol,
+                    timestamp = timestamp,
+                    result = new STickerItem
+                    {
+                        timestamp = timestamp,
+                        closePrice = content["closePrice"]?.Value<decimal>() ?? 0,
+                        openPrice = content["openPrice"]?.Value<decimal>() ?? 0,
+                        highPrice = content["highPrice"]?.Value<decimal>() ?? 0,
+                        lowPrice = content["lowPrice"]?.Value<decimal>() ?? 0,
+                        volume = content["volume"]?.Value<decimal>() ?? 0,
+                        quoteVolume = content["value"]?.Value<decimal>() ?? 0,
+                        percentage = content["chgRate"]?.Value<decimal>() ?? 0,
+                        change = content["chgAmt"]?.Value<decimal>() ?? 0,
+                        bidPrice = 0, // Will be updated from orderbook
+                        askPrice = 0, // Will be updated from orderbook
+                        vwap = 0,
+                        prevClosePrice = content["prevClosePrice"]?.Value<decimal>() ?? 0,
+                        bidQuantity = 0,
+                        askQuantity = 0
+                    }
+                };
+
+                // Try to get bid/ask from orderbook cache
+                lock (_lockObject)
+                {
+                    if (_orderbookCache.ContainsKey(symbol))
+                    {
+                        var ob = _orderbookCache[symbol].result;
+                        if (ob.bids.Count > 0)
+                        {
+                            ticker.result.bidPrice = ob.bids[0].price;
+                            ticker.result.bidQuantity = ob.bids[0].quantity;
+                        }
+                        if (ob.asks.Count > 0)
+                        {
+                            ticker.result.askPrice = ob.asks[0].price;
+                            ticker.result.askQuantity = ob.asks[0].quantity;
+                        }
+                    }
+                }
+
+                InvokeTickerCallback(ticker);
+            }
+            catch (Exception ex)
+            {
+                RaiseError($"Error processing ticker: {ex.Message}");
+            }
+        }
+
+        private async Task ProcessOrderbookDepth(JToken content)
+        {
+            try
+            {
+                var list = content["list"] as JArray;
+                if (list == null || list.Count == 0) return;
+
+                // Group by symbol
+                var symbolGroups = list.GroupBy(item => item["symbol"]?.ToString());
+
+                foreach (var group in symbolGroups)
+                {
+                    var bithumbSymbol = group.Key;
+                    if (string.IsNullOrEmpty(bithumbSymbol)) continue;
+
+                    var symbol = ConvertSymbolBack(bithumbSymbol);
+                    var timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+
+                    // Get or create local orderbook for incremental updates
+                    if (!_localOrderbook.ContainsKey(symbol + "_asks"))
+                        _localOrderbook[symbol + "_asks"] = new List<SOrderBookItem>();
+                    if (!_localOrderbook.ContainsKey(symbol + "_bids"))
+                        _localOrderbook[symbol + "_bids"] = new List<SOrderBookItem>();
+
+                    var localAsks = _localOrderbook[symbol + "_asks"];
+                    var localBids = _localOrderbook[symbol + "_bids"];
+
+                    // Process incremental updates
+                    foreach (var item in group)
+                    {
+                        var orderType = item["orderType"]?.ToString();
+                        var price = item["price"]?.Value<decimal>() ?? 0;
+                        var quantity = item["quantity"]?.Value<decimal>() ?? 0;
+
+                        if (orderType == "ask")
+                        {
+                            var existing = localAsks.FirstOrDefault(x => x.price == price);
+                            if (existing != null)
+                            {
+                                if (quantity == 0)
+                                    localAsks.Remove(existing);
+                                else
+                                    existing.quantity = quantity;
+                            }
+                            else if (quantity > 0)
+                            {
+                                localAsks.Add(new SOrderBookItem { price = price, quantity = quantity });
+                            }
+                        }
+                        else if (orderType == "bid")
+                        {
+                            var existing = localBids.FirstOrDefault(x => x.price == price);
+                            if (existing != null)
+                            {
+                                if (quantity == 0)
+                                    localBids.Remove(existing);
+                                else
+                                    existing.quantity = quantity;
+                            }
+                            else if (quantity > 0)
+                            {
+                                localBids.Add(new SOrderBookItem { price = price, quantity = quantity });
+                            }
+                        }
+                    }
+
+                    // Sort and trim orderbook
+                    localAsks.Sort((a, b) => a.price.CompareTo(b.price));
+                    localBids.Sort((a, b) => b.price.CompareTo(a.price));
+
+                    if (localAsks.Count > 30)
+                        localAsks.RemoveRange(30, localAsks.Count - 30);
+                    if (localBids.Count > 30)
+                        localBids.RemoveRange(30, localBids.Count - 30);
+
+                    // Create orderbook snapshot
+                    var orderbook = new SOrderBooks
+                    {
+                        exchange = ExchangeName,
+                        symbol = symbol,
+                        timestamp = timestamp,
+                        result = new SOrderBook
+                        {
+                            timestamp = timestamp,
+                            bids = new List<SOrderBookItem>(localBids),
+                            asks = new List<SOrderBookItem>(localAsks)
+                        }
+                    };
+
+                    // Cache and invoke callback
+                    lock (_lockObject)
+                    {
+                        _orderbookCache[symbol] = orderbook;
+                    }
+                    InvokeOrderbookCallback(orderbook);
+                }
+            }
+            catch (Exception ex)
+            {
+                RaiseError($"Error processing orderbook: {ex.Message}");
+            }
+        }
+
+        private async Task ProcessTransaction(JToken content)
+        {
+            try
+            {
+                var list = content["list"] as JArray;
+                if (list == null || list.Count == 0) return;
+
+                // Group by symbol
+                var symbolGroups = list.GroupBy(item => item["symbol"]?.ToString());
+
+                foreach (var group in symbolGroups)
+                {
+                    var bithumbSymbol = group.Key;
+                    if (string.IsNullOrEmpty(bithumbSymbol)) continue;
+
+                    var symbol = ConvertSymbolBack(bithumbSymbol);
+                    var timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+
+                    var completeOrders = new SCompleteOrders
+                    {
+                        exchange = ExchangeName,
+                        symbol = symbol,
+                        timestamp = timestamp,
+                        result = new List<SCompleteOrderItem>()
+                    };
+
+                    foreach (var item in group)
+                    {
+                        var txTimestamp = timestamp;
+                        
+                        // Try to parse transaction date/time
+                        var contDate = item["contDtm"]?.ToString();
+                        if (!string.IsNullOrEmpty(contDate))
+                        {
+                            try
+                            {
+                                var dateTime = DateTime.ParseExact(
+                                    contDate,
+                                    "yyyy-MM-dd HH:mm:ss.ffffff",
+                                    CultureInfo.InvariantCulture,
+                                    DateTimeStyles.AssumeLocal
+                                );
+                                txTimestamp = new DateTimeOffset(dateTime).ToUnixTimeMilliseconds();
+                            }
+                            catch { }
+                        }
+
+                        var buySellGb = item["buySellGb"]?.ToString();
+                        var sideType = (buySellGb == "1") ? SideType.Bid : SideType.Ask;
+
+                        completeOrders.result.Add(new SCompleteOrderItem
+                        {
+                            orderId = item["contNo"]?.ToString() ?? Guid.NewGuid().ToString(),
+                            sideType = sideType,
+                            orderType = OrderType.Limit,
+                            price = item["contPrice"]?.Value<decimal>() ?? 0,
+                            quantity = item["contQty"]?.Value<decimal>() ?? 0,
+                            amount = (item["contPrice"]?.Value<decimal>() ?? 0) * (item["contQty"]?.Value<decimal>() ?? 0),
+                            timestamp = txTimestamp
+                        });
+                    }
+
+                    if (completeOrders.result.Count > 0)
+                        InvokeTradeCallback(completeOrders);
+                }
+            }
+            catch (Exception ex)
+            {
+                RaiseError($"Error processing transaction: {ex.Message}");
+            }
+        }
+
+        public override async Task<bool> SubscribeOrderbookAsync(Market market)
+        {
+            try
+            {
+                var bithumbSymbol = FormatSymbol(market);
+                var subscribeMessage = new
+                {
+                    type = "orderbookdepth",
+                    symbols = new[] { bithumbSymbol }
+                };
+
+                var json = JsonConvert.SerializeObject(subscribeMessage);
+                await SendMessageAsync(json);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                RaiseError($"Error subscribing to orderbook: {ex.Message}");
+                return false;
             }
         }
 
@@ -60,30 +421,42 @@ namespace CCXT.Collector.Bithumb
         {
             try
             {
-                // TODO: Implement Bithumb-specific orderbook subscription
-                var subscription = new
+                var bithumbSymbol = ConvertSymbol(symbol);
+                var subscribeMessage = new
                 {
-                    type = "subscribe",
-                    channel = "orderbook",
-                    symbol = symbol
+                    type = "orderbookdepth",
+                    symbols = new[] { bithumbSymbol }
                 };
 
-                await SendMessageAsync(JsonConvert.SerializeObject(subscription));
-                
-                var key = CreateSubscriptionKey("orderbook", symbol);
-                _subscriptions[key] = new SubscriptionInfo
-                {
-                    Channel = "orderbook",
-                    Symbol = symbol,
-                    SubscribedAt = DateTime.UtcNow,
-                    IsActive = true
-                };
-
+                var json = JsonConvert.SerializeObject(subscribeMessage);
+                await SendMessageAsync(json);
                 return true;
             }
             catch (Exception ex)
             {
-                RaiseError($"Subscribe orderbook error: {ex.Message}");
+                RaiseError($"Error subscribing to orderbook: {ex.Message}");
+                return false;
+            }
+        }
+
+        public override async Task<bool> SubscribeTradesAsync(Market market)
+        {
+            try
+            {
+                var bithumbSymbol = FormatSymbol(market);
+                var subscribeMessage = new
+                {
+                    type = "transaction",
+                    symbols = new[] { bithumbSymbol }
+                };
+
+                var json = JsonConvert.SerializeObject(subscribeMessage);
+                await SendMessageAsync(json);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                RaiseError($"Error subscribing to trades: {ex.Message}");
                 return false;
             }
         }
@@ -92,30 +465,43 @@ namespace CCXT.Collector.Bithumb
         {
             try
             {
-                // TODO: Implement Bithumb-specific trades subscription
-                var subscription = new
+                var bithumbSymbol = ConvertSymbol(symbol);
+                var subscribeMessage = new
                 {
-                    type = "subscribe",
-                    channel = "trades",
-                    symbol = symbol
+                    type = "transaction",
+                    symbols = new[] { bithumbSymbol }
                 };
 
-                await SendMessageAsync(JsonConvert.SerializeObject(subscription));
-                
-                var key = CreateSubscriptionKey("trades", symbol);
-                _subscriptions[key] = new SubscriptionInfo
-                {
-                    Channel = "trades",
-                    Symbol = symbol,
-                    SubscribedAt = DateTime.UtcNow,
-                    IsActive = true
-                };
-
+                var json = JsonConvert.SerializeObject(subscribeMessage);
+                await SendMessageAsync(json);
                 return true;
             }
             catch (Exception ex)
             {
-                RaiseError($"Subscribe trades error: {ex.Message}");
+                RaiseError($"Error subscribing to trades: {ex.Message}");
+                return false;
+            }
+        }
+
+        public override async Task<bool> SubscribeTickerAsync(Market market)
+        {
+            try
+            {
+                var bithumbSymbol = FormatSymbol(market);
+                var subscribeMessage = new
+                {
+                    type = "ticker",
+                    symbols = new[] { bithumbSymbol },
+                    tickTypes = new[] { "24H" } // Can also use 30M, 1H, 12H, MID
+                };
+
+                var json = JsonConvert.SerializeObject(subscribeMessage);
+                await SendMessageAsync(json);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                RaiseError($"Error subscribing to ticker: {ex.Message}");
                 return false;
             }
         }
@@ -124,30 +510,36 @@ namespace CCXT.Collector.Bithumb
         {
             try
             {
-                // TODO: Implement Bithumb-specific ticker subscription
-                var subscription = new
+                var bithumbSymbol = ConvertSymbol(symbol);
+                var subscribeMessage = new
                 {
-                    type = "subscribe",
-                    channel = "ticker",
-                    symbol = symbol
+                    type = "ticker",
+                    symbols = new[] { bithumbSymbol },
+                    tickTypes = new[] { "24H" } // Can also use 30M, 1H, 12H, MID
                 };
 
-                await SendMessageAsync(JsonConvert.SerializeObject(subscription));
-                
-                var key = CreateSubscriptionKey("ticker", symbol);
-                _subscriptions[key] = new SubscriptionInfo
-                {
-                    Channel = "ticker",
-                    Symbol = symbol,
-                    SubscribedAt = DateTime.UtcNow,
-                    IsActive = true
-                };
-
+                var json = JsonConvert.SerializeObject(subscribeMessage);
+                await SendMessageAsync(json);
                 return true;
             }
             catch (Exception ex)
             {
-                RaiseError($"Subscribe ticker error: {ex.Message}");
+                RaiseError($"Error subscribing to ticker: {ex.Message}");
+                return false;
+            }
+        }
+
+        public override async Task<bool> UnsubscribeAsync(string channel, Market market)
+        {
+            try
+            {
+                // Bithumb doesn't support explicit unsubscribe
+                // Just remove from local tracking
+                return true;
+            }
+            catch (Exception ex)
+            {
+                RaiseError($"Error unsubscribing: {ex.Message}");
                 return false;
             }
         }
@@ -156,82 +548,84 @@ namespace CCXT.Collector.Bithumb
         {
             try
             {
-                // TODO: Implement Bithumb-specific unsubscription
-                var unsubscription = new
-                {
-                    type = "unsubscribe",
-                    channel = channel,
-                    symbol = symbol
-                };
+                // Bithumb doesn't support explicit unsubscribe
+                // Just remove from local tracking
+                return true;
+            }
+            catch (Exception ex)
+            {
+                RaiseError($"Error unsubscribing: {ex.Message}");
+                return false;
+            }
+        }
 
-                await SendMessageAsync(JsonConvert.SerializeObject(unsubscription));
-                
-                var key = CreateSubscriptionKey(channel, symbol);
-                if (_subscriptions.TryRemove(key, out var sub))
+        protected override async Task SendPingAsync()
+        {
+            // Bithumb doesn't require explicit ping messages
+            // WebSocket connection is maintained automatically
+            await Task.CompletedTask;
+        }
+
+        public async Task<bool> SubscribeMultipleAsync(List<string> symbols, List<string> channels)
+        {
+            try
+            {
+                var bithumbSymbols = symbols.Select(s => ConvertSymbol(s)).ToArray();
+
+                foreach (var channel in channels)
                 {
-                    sub.IsActive = false;
+                    object subscribeMessage = null;
+
+                    switch (channel.ToLower())
+                    {
+                        case "orderbook":
+                            subscribeMessage = new
+                            {
+                                type = "orderbookdepth",
+                                symbols = bithumbSymbols
+                            };
+                            break;
+                        case "ticker":
+                            subscribeMessage = new
+                            {
+                                type = "ticker",
+                                symbols = bithumbSymbols,
+                                tickTypes = new[] { "24H" }
+                            };
+                            break;
+                        case "trades":
+                            subscribeMessage = new
+                            {
+                                type = "transaction",
+                                symbols = bithumbSymbols
+                            };
+                            break;
+                    }
+
+                    if (subscribeMessage != null)
+                    {
+                        var json = JsonConvert.SerializeObject(subscribeMessage);
+                        await SendMessageAsync(json);
+                    }
                 }
 
                 return true;
             }
             catch (Exception ex)
             {
-                RaiseError($"Unsubscribe error: {ex.Message}");
+                RaiseError($"Error subscribing to multiple channels: {ex.Message}");
                 return false;
             }
         }
 
-        protected override string CreatePingMessage()
-        {
-            // TODO: Implement Bithumb-specific ping message
-            return JsonConvert.SerializeObject(new { type = "ping" });
-        }
-
-        protected override async Task ResubscribeAsync(SubscriptionInfo subscription)
-        {
-            switch (subscription.Channel)
-            {
-                case "orderbook":
-                    await SubscribeOrderbookAsync(subscription.Symbol);
-                    break;
-                case "trades":
-                    await SubscribeTradesAsync(subscription.Symbol);
-                    break;
-                case "ticker":
-                    await SubscribeTickerAsync(subscription.Symbol);
-                    break;
-            }
-        }
-
-        #region Candlestick/K-Line Implementation
-
-        public override async Task<bool> SubscribeCandlesAsync(string symbol, string interval)
+        public override async Task<bool> SubscribeCandlesAsync(Market market, string interval)
         {
             try
             {
-                // TODO: Implement Bithumb-specific candles subscription
-                // This is a placeholder implementation - needs exchange-specific protocol
-                var subscription = new
-                {
-                    type = "subscribe",
-                    channel = "candles",
-                    symbol = symbol,
-                    interval = interval
-                };
-
-                await SendMessageAsync(JsonConvert.SerializeObject(subscription));
-                
-                var key = CreateSubscriptionKey($"candles:{interval}", symbol);
-                _subscriptions[key] = new SubscriptionInfo
-                {
-                    Channel = "candles",
-                    Symbol = symbol,
-                    SubscribedAt = DateTime.UtcNow,
-                    IsActive = true,
-                    Extra = interval // Store interval for resubscription
-                };
-
-                return true;
+                // Bithumb doesn't have a specific candles WebSocket channel
+                // You would need to construct candles from trades or use REST API
+                RaiseError("Bithumb doesn't support candles via WebSocket. Use REST API instead.");
+                return false;
             }
             catch (Exception ex)
             {
@@ -240,18 +634,21 @@ namespace CCXT.Collector.Bithumb
             }
         }
 
-        #endregion
-
-        #region Helper Methods
-
-        private string ConvertSymbol(string symbol)
+        public override async Task<bool> SubscribeCandlesAsync(string symbol, string interval)
         {
-            // TODO: Implement symbol conversion if needed for Bithumb
-            // Convert from "BTC/USDT" to exchange-specific format
-            return symbol;
+            try
+            {
+                // Bithumb doesn't have a specific candles WebSocket channel
+                // You would need to construct candles from trades or use REST API
+                RaiseError("Bithumb doesn't support candles via WebSocket. Use REST API instead.");
+                return false;
+            }
+            catch (Exception ex)
+            {
+                RaiseError($"Subscribe candles error: {ex.Message}");
+                return false;
+            }
         }
-
-        #endregion
     }
 }
 

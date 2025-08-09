@@ -88,7 +88,7 @@ namespace CCXT.Collector.Core.Abstractions
                 if (IsConnected)
                 {
                     _reconnectAttempts = 0;
-                    OnConnected?.Invoke();
+                    RaiseConnected();
                     
                     // Start receive loop
                     _ = Task.Run(() => ReceiveLoop(_webSocket, false));
@@ -153,7 +153,7 @@ namespace CCXT.Collector.Core.Abstractions
                     await Task.Delay(1000);
                     
                     _isAuthenticated = true;
-                    OnAuthenticated?.Invoke();
+                    RaiseAuthenticated();
                     return true;
                 }
                 
@@ -185,7 +185,7 @@ namespace CCXT.Collector.Core.Abstractions
                 _webSocket?.Dispose();
                 _webSocket = null;
                 
-                OnDisconnected?.Invoke();
+                RaiseDisconnected();
             }
             catch (Exception ex)
             {
@@ -297,7 +297,7 @@ namespace CCXT.Collector.Core.Abstractions
 
         protected async Task HandleDisconnectAsync()
         {
-            OnDisconnected?.Invoke();
+            RaiseDisconnected();
             await HandleReconnectAsync();
         }
 
@@ -337,6 +337,38 @@ namespace CCXT.Collector.Core.Abstractions
         public abstract Task<bool> SubscribeTradesAsync(string symbol);
         public abstract Task<bool> SubscribeCandlesAsync(string symbol, string interval);
         public abstract Task<bool> UnsubscribeAsync(string channel, string symbol);
+        
+        // Market-based overloads - virtual with default implementation for backward compatibility
+        public virtual Task<bool> SubscribeOrderbookAsync(Market market)
+        {
+            return SubscribeOrderbookAsync(market.ToString());
+        }
+        
+        public virtual Task<bool> SubscribeTradesAsync(Market market)
+        {
+            return SubscribeTradesAsync(market.ToString());
+        }
+        
+        public virtual Task<bool> SubscribeTickerAsync(Market market)
+        {
+            return SubscribeTickerAsync(market.ToString());
+        }
+        
+        public virtual Task<bool> SubscribeCandlesAsync(Market market, string interval)
+        {
+            return SubscribeCandlesAsync(market.ToString(), interval);
+        }
+        
+        public virtual Task<bool> UnsubscribeAsync(string channel, Market market)
+        {
+            return UnsubscribeAsync(channel, market.ToString());
+        }
+        
+        // Virtual method for exchange-specific symbol formatting - default implementation uses ToString()
+        protected virtual string FormatSymbol(Market market)
+        {
+            return market.ToString();
+        }
 
         #endregion
 
