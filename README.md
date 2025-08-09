@@ -96,6 +96,8 @@ Or add to your `.csproj`:
 
 ```csharp
 using CCXT.Collector.Binance;
+using CCXT.Collector.Core.Abstractions;
+using CCXT.Collector.Service;
 using System;
 using System.Threading.Tasks;
 

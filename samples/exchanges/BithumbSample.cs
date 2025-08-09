@@ -1,4 +1,5 @@
 using CCXT.Collector.Bithumb;
+using CCXT.Collector.Core.Abstractions;
 using CCXT.Collector.Library;
 using CCXT.Collector.Service;
 using CCXT.Collector.Indicator;

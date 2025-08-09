@@ -5,6 +5,56 @@ All notable changes to CCXT.Collector will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Changed - Code Reorganization (2025-08-09)
+
+#### 📁 Complete Source Code Restructuring
+- **Core Framework** (`src/Core/`): Reorganized core components
+  - `Abstractions/`: Moved `IWebSocketClient.cs` and `WebSocketClientBase.cs`
+  - `Configuration/`: Consolidated `config.cs` and `settings.cs`
+  - `Infrastructure/`: Grouped `factory.cs`, `logger.cs`, and `selector.cs`
+
+- **Data Models** (`src/Models/`): Categorized all data structures
+  - `Market/`: Market data models (orderbook, ticker, ohlcv, candle)
+  - `Trading/`: Trading models (account, trading, complete orders)
+  - `WebSocket/`: WebSocket specific models (apiResult, wsResult, message)
+
+- **Technical Indicators** (`src/Indicators/`): Reorganized by category
+  - `Trend/`: SMA, EMA, WMA, DEMA, ZLEMA, MACD, SAR
+  - `Momentum/`: RSI, CMO, Momentum, ROC, TRIX
+  - `Volatility/`: BollingerBand, ATR, Envelope, DPO
+  - `Volume/`: OBV, ADL, CMF, PVT, VROC, Volume
+  - `MarketStrength/`: ADX, Aroon, CCI, WPR
+  - `Advanced/`: Ichimoku Cloud
+  - `Base/`: Base indicator classes
+  - `Series/`: Indicator series data classes
+
+- **Utilities** (`src/Utilities/`): Consolidated utility classes
+  - Extension methods, statistics, OHLC utilities, and logging helpers
+
+#### 📝 Namespace Updates
+- `CCXT.Collector.Library` → `CCXT.Collector.Core.Abstractions` (WebSocket interfaces and base classes)
+- `CCXT.Collector.Library` → `CCXT.Collector.Core.Configuration` (config and settings)
+- `CCXT.Collector.Library` → `CCXT.Collector.Core.Infrastructure` (factory, logger, selector)
+- `CCXT.Collector.Library` → `CCXT.Collector.Models.WebSocket` (apiResult, wsResult, message)
+- `CCXT.Collector.Service` → Retained for data models (orderbook, ticker, trading models)
+- `CCXT.Collector.Indicator` → `CCXT.Collector.Indicators.*` (subcategorized by type)
+- Exchange implementations now use new Core.Abstractions namespace
+
+#### 📚 Documentation Updates
+- Updated all documentation to reflect new project structure
+- Modified code examples with correct namespace imports
+- Added migration notes for namespace changes
+- Updated architecture diagrams with new folder hierarchy
+
+### Fixed
+- Build errors resolved after reorganization (526 errors fixed)
+- All exchange implementations updated with correct using statements for Core.Abstractions
+- Namespace references corrected: BinanceWebSocketClient now properly uses CCXT.Collector.Core.Abstractions
+- Test projects and samples updated to use new namespaces
+- Complete.cs and other service models retained in CCXT.Collector.Service namespace for compatibility
+
 ## [2.0.0] - 2025-08-09
 
 ### 🚀 Complete WebSocket Architecture Overhaul - 132 Exchange Support

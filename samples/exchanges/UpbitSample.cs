@@ -1,4 +1,5 @@
 using CCXT.Collector.Upbit;
+using CCXT.Collector.Core.Abstractions;
 using CCXT.Collector.Library;
 using CCXT.Collector.Service;
 using CCXT.Collector.Indicator;

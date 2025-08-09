@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using CCXT.Collector.Binance;
 using CCXT.Collector.Upbit;
 using CCXT.Collector.Bithumb;
+using CCXT.Collector.Core.Abstractions;
 using CCXT.Collector.Library;
 using CCXT.Collector.Service;
 

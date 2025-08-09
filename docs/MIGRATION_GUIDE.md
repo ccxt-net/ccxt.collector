@@ -33,8 +33,10 @@ Version 2.0 of CCXT.Collector represents a complete architectural transformation
 | v1.x | v2.0 |
 |------|------|
 | `CCXT.Collector.Data` | `CCXT.Collector.Service` |
-| `CCXT.Collector.Models` | `CCXT.Collector.Library` |
+| `CCXT.Collector.Models` | `CCXT.Collector.Models.Market` / `CCXT.Collector.Models.Trading` |
+| `CCXT.Collector.Library` | `CCXT.Collector.Core.Abstractions` |
 | `CCXT.Collector.Exchanges.Binance` | `CCXT.Collector.Binance` |
+| `CCXT.Collector.Indicator` | `CCXT.Collector.Indicators.*` (subcategorized) |
 
 ### 3. Client Initialization
 
@@ -46,6 +48,10 @@ client.Initialize(config);
 
 **v2.0:**
 ```csharp
+using CCXT.Collector.Binance;
+using CCXT.Collector.Core.Abstractions;
+using CCXT.Collector.Service;
+
 var client = new BinanceWebSocketClient();
 // No initialization needed - configuration is automatic
 ```
@@ -275,6 +281,7 @@ using CCXT.Collector.Exchanges.Binance;
 
 // Add
 using CCXT.Collector.Service;
+using CCXT.Collector.Core.Abstractions;
 using CCXT.Collector.Library;
 using CCXT.Collector.Binance;
 ```

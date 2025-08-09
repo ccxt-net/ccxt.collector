@@ -16,6 +16,11 @@ CCXT.Collector is a .NET library that connects to cryptocurrency exchanges world
 - Comprehensive test suites separated by exchange with performance and integration tests
 - Sample projects demonstrating real-world usage patterns for each exchange
 - Full documentation suite including API reference and migration guide
+- **Code Reorganization**: Complete restructuring of source code into logical categories:
+  - Core abstractions and infrastructure moved to `Core/` folder
+  - Data models categorized into `Models/Market/`, `Models/Trading/`, and `Models/WebSocket/`
+  - Technical indicators reorganized by type in `Indicators/` with subcategories
+  - Utility classes consolidated in `Utilities/` folder
 
 ## Build and Development Commands
 
@@ -55,53 +60,54 @@ dotnet publish -c Release -r ubuntu.18.04-x64 -f net8.0
 
 ## Architecture Overview
 
-### Core Components
+### Core Components (After Reorganization)
 
-1. **WebSocket Client Architecture** (`src/library/`):
-   - `IWebSocketClient.cs` - WebSocket client interface defining callback events
-   - `WebSocketClientBase.cs` - Base implementation with reconnection, ping/pong, subscription management
-   
-2. **Exchange WebSocket Implementations** (`src/exchanges/`): Each exchange has:
-   - **WebSocket Client** (e.g., `BinanceWebSocketClient.cs`) - Real-time data streaming via WebSocket
-   - **Callback Events**:
-     - `OnOrderbookReceived` - Orderbook updates callback
-     - `OnTradeReceived` - Trade data callback  
-     - `OnTickerReceived` - Ticker updates callback
-     - `OnConnected` - Connection established callback
-     - `OnDisconnected` - Connection lost callback
-     - `OnError` - Error notification callback
-   - **Original Components** (legacy REST API support):
-     - Main exchange client class (e.g., `binance.cs`)
-     - Configuration (`config.cs`) - Exchange-specific settings
-     - Logger implementation (`logger.cs`) - Logging for debugging
-     - Order book merger (`mergeBook.cs`) - Merges incremental orderbook updates
-     - Polling service (`polling.cs`) - Fallback REST API polling
-     - Data processing (`processing.cs`) - Normalizes exchange data
-     - Data pushing service (`pushing.cs`) - Sends data to queues
-     - Public/Private API implementations
+1. **Core Framework** (`src/Core/`):
+   - **Abstractions** (`Core/Abstractions/`):
+     - `IWebSocketClient.cs` - WebSocket client interface defining callback events
+     - `WebSocketClientBase.cs` - Base implementation with reconnection, ping/pong, subscription management
+   - **Configuration** (`Core/Configuration/`):
+     - `config.cs` - Configuration classes
+     - `settings.cs` - Application settings
+   - **Infrastructure** (`Core/Infrastructure/`):
+     - `factory.cs` - Factory pattern implementations
+     - `logger.cs` - Logging infrastructure
+     - `selector.cs` - Selector utilities
 
-2. **Service Layer** (`src/service/`): Core service classes for:
-   - Order book management (`orderbook.cs`)
-   - OHLCV data (`ohlcv.cs`)
-   - Ticker data (`ticker.cs`)
-   - Trading operations (`trading.cs`)
-   - Complete orders (`complete.cs`)
+2. **Data Models** (`src/Models/`):
+   - **Market Models** (`Models/Market/`):
+     - `orderbook.cs` - Order book data structures
+     - `ticker.cs` - Ticker data structures
+     - `ohlcv.cs` - OHLCV candle data
+     - `candle.cs` - Candlestick data
+   - **Trading Models** (`Models/Trading/`):
+     - `account.cs` - Account/balance structures
+     - `trading.cs` - Trading data structures
+     - `complete.cs` - Complete order structures
+   - **WebSocket Models** (`Models/WebSocket/`):
+     - `apiResult.cs` - API result models
+     - `wsResult.cs` - WebSocket result models
+     - `message.cs` - Message structures
 
-3. **Library Components** (`src/library/`):
-   - Factory pattern for queue management (`factory.cs`)
-   - Configuration management (`config.cs`, `settings.cs`)
-   - REST API client (`restclient.cs`)
-   - Message handling (`message.cs`)
-   - WebSocket results (`wsResult.cs`)
+3. **Technical Indicators** (`src/Indicators/`): Organized by category:
+   - **Base** (`Indicators/Base/`): `IndicatorCalculatorBase.cs`
+   - **Trend** (`Indicators/Trend/`): SMA, EMA, WMA, DEMA, ZLEMA, MACD, SAR
+   - **Momentum** (`Indicators/Momentum/`): RSI, CMO, Momentum, ROC, TRIX
+   - **Volatility** (`Indicators/Volatility/`): BollingerBand, ATR, Envelope, DPO
+   - **Volume** (`Indicators/Volume/`): OBV, ADL, CMF, PVT, VROC, Volume
+   - **MarketStrength** (`Indicators/MarketStrength/`): ADX, Aroon, CCI, WPR
+   - **Advanced** (`Indicators/Advanced/`): Ichimoku
+   - **Series** (`Indicators/Series/`): Various serie classes for indicator data
 
-4. **Technical Indicators** (`src/indicator/`): Real-time calculation of technical indicators for each exchange/market pair:
-   - **Trend Indicators**: SMA, EMA, WMA, DEMA, ZLEMA, MACD, SAR
-   - **Momentum Indicators**: RSI, CMO, Momentum, ROC, TRIX
-   - **Volatility Indicators**: Bollinger Bands, ATR, Envelope, DPO
-   - **Volume Indicators**: OBV, ADL, CMF, PVT, VROC
-   - **Market Strength**: ADX, Aroon, CCI, WPR
-   - **Advanced**: Ichimoku Cloud
-   - Each indicator inherits from `IndicatorCalculatorBase` and implements real-time calculation
+4. **Utilities** (`src/Utilities/`):
+   - `extension.cs` - Extension methods
+   - `Statistics.cs` - Statistical calculations
+   - `Ohlc.cs` - OHLC utilities
+   - `logger.cs` - Logging utilities
+
+5. **Exchange Implementations** (`src/exchanges/`): Each exchange has:
+   - **WebSocket Client** (e.g., `BinanceWebSocketClient.cs`) - Real-time data streaming
+   - **Callback Events**: OnOrderbookReceived, OnTradeReceived, OnTickerReceived, etc.
 
 ### Message Queue Integration
 

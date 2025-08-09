@@ -15,7 +15,7 @@
 The core interface that all exchange WebSocket clients implement.
 
 ```csharp
-namespace CCXT.Collector.Library
+namespace CCXT.Collector.Core.Abstractions
 {
     public interface IWebSocketClient
     {
@@ -76,6 +76,10 @@ Task<bool> ConnectAsync(string apiKey = null, string secretKey = null)
 
 **Example:**
 ```csharp
+using CCXT.Collector.Binance;
+using CCXT.Collector.Core.Abstractions;
+using CCXT.Collector.Service;
+
 var client = new BinanceWebSocketClient();
 await client.ConnectAsync(); // Public connection
 // or

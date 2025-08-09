@@ -27,31 +27,65 @@ CCXT.Collector is a comprehensive .NET library designed for real-time cryptocurr
 
 ```
 src/
-├── library/                  # Core library components (CCXT.Collector.Library)
-│   ├── IWebSocketClient.cs  # WebSocket interface definition
-│   ├── WebSocketClientBase.cs # Base WebSocket implementation
-│   ├── config.cs            # Configuration management
-│   ├── restclient.cs        # REST API client fallback
-│   ├── factory.cs           # Factory pattern implementations
-│   ├── settings.cs          # Application settings
-│   └── ...                  # Message models, extensions, utilities
+├── Core/                     # Core framework components
+│   ├── Abstractions/        # Interfaces and base classes
+│   │   ├── IWebSocketClient.cs  # WebSocket interface definition
+│   │   └── WebSocketClientBase.cs # Base WebSocket implementation
+│   ├── Configuration/       # Configuration management
+│   │   ├── config.cs       # Configuration classes
+│   │   └── settings.cs     # Application settings
+│   └── Infrastructure/      # Infrastructure components
+│       ├── factory.cs      # Factory pattern implementations
+│       ├── logger.cs       # Logging infrastructure
+│       └── selector.cs     # Selector utilities
 │
-├── service/                 # Service layer (CCXT.Collector.Service)
-│   ├── orderbook.cs        # Order book data structures
-│   ├── ticker.cs           # Ticker data structures
-│   ├── trading.cs          # Trading data structures
-│   ├── complete.cs         # Complete order structures
-│   ├── ohlcv.cs           # OHLCV candle data
-│   ├── account.cs         # Account/balance structures
-│   └── logger.cs          # Logging service
+├── Models/                  # Data models and structures
+│   ├── Market/             # Market data models
+│   │   ├── orderbook.cs   # Order book data structures
+│   │   ├── ticker.cs      # Ticker data structures
+│   │   ├── ohlcv.cs       # OHLCV candle data
+│   │   └── candle.cs      # Candlestick data
+│   ├── Trading/            # Trading related models
+│   │   ├── account.cs     # Account/balance structures
+│   │   ├── trading.cs     # Trading data structures
+│   │   └── complete.cs    # Complete order structures
+│   └── WebSocket/          # WebSocket specific models
+│       ├── apiResult.cs   # API result models
+│       ├── wsResult.cs    # WebSocket result models
+│       └── message.cs     # Message structures
 │
-├── indicator/              # Technical indicators (CCXT.Collector.Indicator)
-│   ├── IndicatorCalculatorBase.cs # Base indicator class
-│   ├── Trend/             # Trend indicators (SMA, EMA, MACD, etc.)
-│   ├── Momentum/          # Momentum indicators (RSI, ROC, etc.)
-│   ├── Volatility/        # Volatility indicators (BB, ATR, etc.)
-│   ├── Volume/            # Volume indicators (OBV, ADL, etc.)
-│   └── Advanced/          # Advanced indicators (Ichimoku, etc.)
+├── Indicators/             # Technical indicators
+│   ├── Base/              # Base indicator classes
+│   │   └── IndicatorCalculatorBase.cs
+│   ├── Trend/             # Trend indicators
+│   │   ├── SMA.cs, EMA.cs, WMA.cs
+│   │   ├── MACD.cs, SAR.cs
+│   │   └── DEMA.cs, ZLEMA.cs
+│   ├── Momentum/          # Momentum indicators
+│   │   ├── RSI.cs, ROC.cs
+│   │   ├── CMO.cs, Momentum.cs
+│   │   └── TRIX.cs
+│   ├── Volatility/        # Volatility indicators
+│   │   ├── BollingerBand.cs
+│   │   ├── ATR.cs, Envelope.cs
+│   │   └── DPO.cs
+│   ├── Volume/            # Volume indicators
+│   │   ├── OBV.cs, ADL.cs
+│   │   ├── CMF.cs, PVT.cs
+│   │   └── VROC.cs, Volume.cs
+│   ├── MarketStrength/    # Market strength indicators
+│   │   ├── ADX.cs, Aroon.cs
+│   │   └── CCI.cs, WPR.cs
+│   ├── Advanced/          # Advanced indicators
+│   │   └── Ichimoku.cs
+│   └── Series/            # Indicator series data
+│       └── Various serie classes
+│
+├── Utilities/              # Utility classes
+│   ├── extension.cs       # Extension methods
+│   ├── Statistics.cs      # Statistical calculations
+│   ├── Ohlc.cs           # OHLC utilities
+│   └── logger.cs         # Logging utilities
 │
 └── exchanges/             # Exchange implementations (by country code)
     ├── kr/               # South Korea (7 exchanges)
