@@ -519,7 +519,7 @@ namespace CCXT.Collector.Samples
             };
 
             await client.ConnectAsync();
-            await client.SubscribeOhlcv("BTC/USDT", "5m");
+            await client.SubscribeCandlesAsync("BTC/USDT", "5m");
 
             Console.WriteLine("Running advanced indicator analysis. Press 'Q' to quit.\n");
 
@@ -636,9 +636,9 @@ namespace CCXT.Collector.Samples
         public double ADX { get; private set; }
         public double ATR { get; private set; }
         public double VolumeRatio { get; private set; }
-        public string Trend { get; private set; }
-        public string Volatility { get; private set; }
-        public string Momentum { get; private set; }
+        public string Trend { get; private set; } = string.Empty;
+        public string Volatility { get; private set; } = string.Empty;
+        public string Momentum { get; private set; } = string.Empty;
         public bool IsReady => buffer.Count >= 50;
 
         public void Update(SCandlestick candle)
@@ -788,7 +788,7 @@ namespace CCXT.Collector.Samples
     {
         public SignalType Type { get; set; }
         public int Strength { get; set; }
-        public string Reason { get; set; }
+        public string Reason { get; set; } = string.Empty;
     }
 
     enum SignalType

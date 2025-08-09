@@ -14,7 +14,7 @@ namespace CCXT.Collector.Samples
     /// </summary>
     public class WebSocketExample
     {
-        public static async Task Main(string[] args)
+        public static async Task RunAsync()
         {
             Console.WriteLine("CCXT.Collector WebSocket Example");
             Console.WriteLine("=================================\n");
@@ -79,8 +79,12 @@ namespace CCXT.Collector.Samples
             // Trade callback
             client.OnTradeReceived += (trade) =>
             {
-                var side = trade.result.sideType == SideType.Bid ? "BUY" : "SELL";
-                Console.WriteLine($"💰 Trade {trade.symbol}: {side} {trade.result.quantity:F8} @ {trade.result.price:F2}");
+                if (trade.result != null && trade.result.Count > 0)
+                {
+                    var tradeItem = trade.result[0];
+                    var side = tradeItem.sideType == SideType.Bid ? "BUY" : "SELL";
+                    Console.WriteLine($"💰 Trade {trade.symbol}: {side} {tradeItem.quantity:F8} @ {tradeItem.price:F2}");
+                }
             };
 
             // Ticker callback
@@ -136,10 +140,14 @@ namespace CCXT.Collector.Samples
             // Trade callback
             client.OnTradeReceived += (trade) =>
             {
-                var side = trade.result.sideType == SideType.Bid ? "매수" : "매도";
-                if (trade.symbol.EndsWith("/KRW"))
+                if (trade.result != null && trade.result.Count > 0)
                 {
-                    Console.WriteLine($"💰 체결 {trade.symbol}: {side} {trade.result.quantity:F8} @ ₩{trade.result.price:N0}");
+                    var tradeItem = trade.result[0];
+                    var side = tradeItem.sideType == SideType.Bid ? "매수" : "매도";
+                    if (trade.symbol.EndsWith("/KRW"))
+                    {
+                        Console.WriteLine($"💰 체결 {trade.symbol}: {side} {tradeItem.quantity:F8} @ ₩{tradeItem.price:N0}");
+                    }
                 }
             };
 
@@ -202,16 +210,20 @@ namespace CCXT.Collector.Samples
             var sellVolume = 0m;
             client.OnTradeReceived += (trade) =>
             {
-                if (trade.result.sideType == SideType.Bid)
-                    buyVolume += trade.result.amount;
-                else
-                    sellVolume += trade.result.amount;
+                if (trade.result != null && trade.result.Count > 0)
+                {
+                    var tradeItem = trade.result[0];
+                    if (tradeItem.sideType == SideType.Bid)
+                        buyVolume += tradeItem.amount;
+                    else
+                        sellVolume += tradeItem.amount;
 
-                var netFlow = buyVolume - sellVolume;
-                var flowDirection = netFlow > 0 ? "🟢 Bullish" : "🔴 Bearish";
-                
-                Console.WriteLine($"💰 Trade {trade.symbol}: {trade.result.quantity:F8} @ ₩{trade.result.price:N0}");
-                Console.WriteLine($"   Net Flow: ₩{netFlow:N0} {flowDirection}");
+                    var netFlow = buyVolume - sellVolume;
+                    var flowDirection = netFlow > 0 ? "🟢 Bullish" : "🔴 Bearish";
+                    
+                    Console.WriteLine($"💰 Trade {trade.symbol}: {tradeItem.quantity:F8} @ ₩{tradeItem.price:N0}");
+                    Console.WriteLine($"   Net Flow: ₩{netFlow:N0} {flowDirection}");
+                }
             };
 
             // Connect and subscribe to payment coins
