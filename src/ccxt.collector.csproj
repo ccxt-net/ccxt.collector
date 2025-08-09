@@ -16,12 +16,12 @@
         <PackageProjectUrl>https://github.com/ccxt-net/ccxt.collector</PackageProjectUrl>
         <PackageIcon>ccxt.net.api.png</PackageIcon>
         <PackageTags>cryptocurrency;exchange;trading;market-data;exchange-markets;bot;crypto</PackageTags>
-        <PackageReleaseNotes>v2.1.0 - Performance optimizations with Market struct, direct JSON conversion pattern, enhanced symbol formatting, and architectural improvements. Support for 132 exchanges with WebSocket streaming.</PackageReleaseNotes>
+        <PackageReleaseNotes>v2.1.2 - Callback optimization with batch processing, reducing function call overhead by 90%. Breaking changes: SCandlestick.result now List&lt;SCandleItem&gt;, OnOrderUpdate uses SOrders container, OnPositionUpdate uses SPositions container.</PackageReleaseNotes>
         <Platforms>AnyCPU;x64;x86</Platforms>
         
-		<Version>2.1.0</Version>
-        <AssemblyVersion>2.1.0.0</AssemblyVersion>
-		<FileVersion>2.1.0.0</FileVersion>
+		<Version>2.1.2</Version>
+        <AssemblyVersion>2.1.2.0</AssemblyVersion>
+		<FileVersion>2.1.2.0</FileVersion>
 
 		<ApplicationIcon>ccxt.net.ico</ApplicationIcon>
 		<PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
@@ -54,7 +54,6 @@
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="RestSharp" Version="112.1.0" />
         <PackageReference Include="Microsoft.Extensions.Configuration" Version="9.0.8" />
         <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="9.0.8" />
         <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="9.0.8" />

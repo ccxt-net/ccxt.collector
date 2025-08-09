@@ -39,7 +39,7 @@ namespace CCXT.Collector.Korbit
     /// </summary>
     public class KorbitWebSocketClient : WebSocketClientBase
     {
-        private readonly Dictionary<string, SOrderBooks> _orderbookCache;
+        private readonly Dictionary<string, SOrderBook> _orderbookCache;
         private readonly object _lockObject = new object();
 
         public override string ExchangeName => "Korbit";
@@ -48,7 +48,7 @@ namespace CCXT.Collector.Korbit
 
         public KorbitWebSocketClient()
         {
-            _orderbookCache = new Dictionary<string, SOrderBooks>();
+            _orderbookCache = new Dictionary<string, SOrderBook>();
         }
 
         private string ConvertSymbol(string symbol)
@@ -179,12 +179,12 @@ namespace CCXT.Collector.Korbit
                 var symbol = ConvertSymbolBack(korbitSymbol);
                 var timestamp = data["timestamp"]?.Value<long>() ?? DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
 
-                var orderbook = new SOrderBooks
+                var orderbook = new SOrderBook
                 {
                     exchange = ExchangeName,
                     symbol = symbol,
                     timestamp = timestamp,
-                    result = new SOrderBook
+                    result = new SOrderBookData
                     {
                         timestamp = timestamp,
                         bids = new List<SOrderBookItem>(),
@@ -271,12 +271,12 @@ namespace CCXT.Collector.Korbit
                 var symbol = ConvertSymbolBack(korbitSymbol);
                 var timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
 
-                var completeOrders = new SCompleteOrders
+                var completeOrders = new STrade
                 {
                     exchange = ExchangeName,
                     symbol = symbol,
                     timestamp = timestamp,
-                    result = new List<SCompleteOrderItem>()
+                    result = new List<STradeItem>()
                 };
 
                 // Process transaction list
@@ -289,7 +289,7 @@ namespace CCXT.Collector.Korbit
                         var txTimestamp = tx["timestamp"]?.Value<long>() ?? timestamp;
                         var side = tx["type"]?.ToString() ?? "buy";
 
-                        completeOrders.result.Add(new SCompleteOrderItem
+                        completeOrders.result.Add(new STradeItem
                         {
                             orderId = tx["tid"]?.ToString() ?? Guid.NewGuid().ToString(),
                             sideType = side.ToLower() == "buy" ? SideType.Bid : SideType.Ask,
@@ -307,7 +307,7 @@ namespace CCXT.Collector.Korbit
                     var txTimestamp = data["timestamp"]?.Value<long>() ?? timestamp;
                     var side = data["type"]?.ToString() ?? "buy";
 
-                    completeOrders.result.Add(new SCompleteOrderItem
+                    completeOrders.result.Add(new STradeItem
                     {
                         orderId = data["tid"]?.ToString() ?? Guid.NewGuid().ToString(),
                         sideType = side.ToLower() == "buy" ? SideType.Bid : SideType.Ask,

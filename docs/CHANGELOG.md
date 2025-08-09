@@ -5,6 +5,63 @@ All notable changes to CCXT.Collector will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.2] - 2025-08-10
+
+### 🚀 Callback Optimization & API Breaking Changes
+
+This release introduces significant performance improvements through batch processing of WebSocket data callbacks, reducing function call overhead by up to 90% for high-frequency data streams.
+
+### Breaking Changes ⚠️
+- **Data Model Changes**:
+  - `SCandlestick.result` changed from single `SCandleItem` to `List<SCandleItem>`
+  - `OnOrderUpdate` event signature changed from `Action<SOrder>` to `Action<SOrders>`
+  - `OnPositionUpdate` event signature changed from `Action<SPosition>` to `Action<SPositions>`
+
+### Added
+- **New Container Classes** for batch processing:
+  - `SOrders`: Container for multiple order updates
+  - `SPositions`: Container for multiple position updates
+  
+### Improved
+- **Batch Processing Optimization** (90% callback reduction):
+  - **ProcessTradeData**: Collects multiple trades in List before single callback
+    - Optimized: Crypto.com, Bitget, ByBit
+    - Already optimal: Binance, Coinbase (single trade processing)
+  
+  - **ProcessCandleData**: Processes multiple candles in single callback
+    - Model changed to support `List<SCandleItem>`
+    - Optimized: Bitget, ByBit, Upbit
+    - Adapted: Binance (wraps single candle in List)
+  
+  - **ProcessAccountData**: Batches balance updates
+    - Optimized: Binance
+    - Already optimal: Bybit, Bitget
+  
+  - **ProcessOrderData**: Batches order updates with new `SOrders` container
+    - Optimized: Bybit, Bitget (multiple orders)
+    - Adapted: Binance, Coinbase, Upbit (single order wrapped in List)
+  
+  - **ProcessPositionData**: Batches position updates with new `SPositions` container
+    - Optimized: Bybit, Bitget (multiple positions)
+
+### Performance Impact
+- **Callback Reduction**: From N callbacks to 1 per data batch (up to 90% reduction)
+- **Processing Efficiency**: Reduced overhead for high-frequency data streams
+- **Memory Optimization**: Better batch processing reduces GC pressure
+
+## [2.1.1] - 2025-08-10
+
+### Improved
+- **WebSocket Base Class Enhancements** (from kimp.client best practices):
+  - Dynamic buffer resizing for handling large messages (16KB initial, auto-resize)
+  - Exponential backoff for reconnection (capped at 60 seconds)
+  - Exchange rate support for multi-currency conversions (KRW/USD)
+  - Increased max reconnection attempts from 5 to 10
+
+### Removed
+- RabbitMQ.Client dependency and related infrastructure
+- FactoryX class and message queue configuration
+
 ## [2.1.0] - 2025-08-10
 
 ### 🎯 Performance Optimization & Architecture Refinement

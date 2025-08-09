@@ -149,7 +149,7 @@ namespace CCXT.Collector.Tests.Exchanges
             Console.WriteLine("\n[TEST] SOrderBooks Data Stream");
             Console.WriteLine("----------------------------------------");
             
-            var orderbookData = new Dictionary<string, SOrderBooks>();
+            var orderbookData = new Dictionary<string, SOrderBook>();
             var updateCount = 0;
             
             _client.OnOrderbookReceived += (orderbook) =>
@@ -191,7 +191,7 @@ namespace CCXT.Collector.Tests.Exchanges
             Console.WriteLine("\n[TEST] SCompleteOrders Data Stream");
             Console.WriteLine("----------------------------------------");
             
-            var trades = new List<SCompleteOrders>();
+            var trades = new List<STrade>();
             var symbolsWithSCompleteOrderss = new HashSet<string>();
             
             _client.OnTradeReceived += (trade) =>
@@ -366,7 +366,9 @@ namespace CCXT.Collector.Tests.Exchanges
                 if (bbResults.Count % 10 == 0)
                 {
                     var bandwidth = bb.Upper - bb.Lower;
-                    var percentB = ((double)ohlcv.result.close - bb.Lower) / bandwidth;
+                    var percentB = ohlcv.result != null && ohlcv.result.Count > 0 
+                        ? ((double)ohlcv.result[0].close - bb.Lower) / bandwidth
+                        : 0;
                     
                     Console.WriteLine($"📊 BB - Upper: {bb.Upper:F2}, " +
                         $"Middle: {bb.Middle:F2}, Lower: {bb.Lower:F2}, " +
@@ -475,7 +477,7 @@ namespace CCXT.Collector.Tests.Exchanges
 
         #region Helper Methods
 
-        private void ValidateOrderbook(SOrderBooks orderbook)
+        private void ValidateOrderbook(SOrderBook orderbook)
         {
             Assert.NotNull(orderbook);
             Assert.True(orderbook.result.bids.Count > 0, "No bid levels in orderbook");
@@ -500,7 +502,7 @@ namespace CCXT.Collector.Tests.Exchanges
             Assert.True(spread > 0, "Invalid spread (ask <= bid)");
         }
 
-        private void DisplayTradeStats(List<SCompleteOrders> trades)
+        private void DisplayTradeStats(List<STrade> trades)
         {
             if (trades.Count == 0) return;
             
@@ -546,7 +548,7 @@ namespace CCXT.Collector.Tests.Exchanges
     {
         private readonly int _period;
         public RSICalculator(int period) => _period = period;
-        public double Calculate(SCandlestick ohlcv) => 50 + new Random().NextDouble() * 50; // Simplified for testing
+        public double Calculate(SCandle ohlcv) => 50 + new Random().NextDouble() * 50; // Simplified for testing
     }
 
     public class MACDCalculator
@@ -556,7 +558,7 @@ namespace CCXT.Collector.Tests.Exchanges
         {
             _fast = fast; _slow = slow; _signal = signal;
         }
-        public MACDResult Calculate(SCandlestick ohlcv) => new MACDResult 
+        public MACDResult Calculate(SCandle ohlcv) => new MACDResult 
         { 
             MACD = new Random().NextDouble() * 10 - 5,
             Signal = new Random().NextDouble() * 10 - 5,
@@ -572,11 +574,11 @@ namespace CCXT.Collector.Tests.Exchanges
         {
             _period = period; _stdDev = stdDev;
         }
-        public BollingerBandsResult Calculate(SCandlestick ohlcv) => new BollingerBandsResult
+        public BollingerBandsResult Calculate(SCandle ohlcv) => new BollingerBandsResult
         {
-            Middle = (double)ohlcv.result.close,
-            Upper = (double)ohlcv.result.close * 1.02,
-            Lower = (double)ohlcv.result.close * 0.98
+            Middle = ohlcv.result != null && ohlcv.result.Count > 0 ? (double)ohlcv.result[0].close : 0,
+            Upper = ohlcv.result != null && ohlcv.result.Count > 0 ? (double)ohlcv.result[0].close * 1.02 : 0,
+            Lower = ohlcv.result != null && ohlcv.result.Count > 0 ? (double)ohlcv.result[0].close * 0.98 : 0
         };
     }
 

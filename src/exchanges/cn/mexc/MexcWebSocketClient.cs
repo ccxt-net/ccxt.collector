@@ -27,7 +27,7 @@ namespace CCXT.Collector.Mexc
     /// </summary>
     public class MexcWebSocketClient : WebSocketClientBase
     {
-        private readonly Dictionary<string, SOrderBooks> _orderbookCache;
+        private readonly Dictionary<string, SOrderBook> _orderbookCache;
 
         public override string ExchangeName => "Mexc";
         protected override string WebSocketUrl => "wss://wbs.mexc.com/ws"; // TODO: Update with actual WebSocket URL
@@ -35,7 +35,7 @@ namespace CCXT.Collector.Mexc
 
         public MexcWebSocketClient()
         {
-            _orderbookCache = new Dictionary<string, SOrderBooks>();
+            _orderbookCache = new Dictionary<string, SOrderBook>();
         }
 
         protected override async Task ProcessMessageAsync(string message, bool isPrivate = false)

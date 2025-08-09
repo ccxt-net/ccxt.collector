@@ -50,18 +50,24 @@ CCXT.Collector is a comprehensive library that connects to cryptocurrency exchan
 
 ### NuGet Package Manager
 ```bash
-Install-Package CCXT.Collector -Version 2.1.0
+Install-Package CCXT.Collector -Version 2.1.2
 ```
 
 ### .NET CLI
 ```bash
-dotnet add package CCXT.Collector --version 2.1.0
+dotnet add package CCXT.Collector --version 2.1.2
 ```
 
 ### Package Reference
 ```xml
-<PackageReference Include="CCXT.Collector" Version="2.1.0" />
+<PackageReference Include="CCXT.Collector" Version="2.1.2" />
 ```
+
+### ⚠️ Breaking Changes in v2.1.2
+- `SCandlestick.result` changed from single item to `List<SCandleItem>`
+- `OnOrderUpdate` event now uses `SOrders` container instead of single `SOrder`
+- `OnPositionUpdate` event now uses `SPositions` container instead of single `SPosition`
+- See [Migration Guide](docs/GUIDE.md#breaking-changes-v212) for details
 
 ## 🚀 Quick Start
 
@@ -233,23 +239,6 @@ This project is licensed under the MIT License - see the [LICENSE.txt](LICENSE.t
 - **SEONGAHN** - Lead Developer & Project Architect ([lisa@odinsoft.co.kr](mailto:lisa@odinsoft.co.kr))
 - **YUJIN** - Senior Developer & Exchange Integration Specialist ([yoojin@odinsoft.co.kr](mailto:yoojin@odinsoft.co.kr))
 - **SEJIN** - Software Developer & API Implementation ([saejin@odinsoft.co.kr](mailto:saejin@odinsoft.co.kr))
-
----
-
-<a name="korean"></a>
-## 📊 한국어 개요
-
-CCXT.Collector는 전 세계 암호화폐 거래소의 WebSocket을 통해 실시간 시장 데이터를 수신하고 기술적 지표를 계산하는 종합적인 라이브러리입니다. 
-
-### ✨ 주요 기능
-
-- 🚀 **실시간 WebSocket 스트리밍** - 저지연 시장 데이터 스트리밍
-- 🔄 **통합 데이터 클래스** - 모든 거래소에서 일관된 데이터 형식
-- 📈 **25개 이상의 기술 지표** - 거래소/마켓별 실시간 계산
-- 🔌 **콜백 아키텍처** - 비동기 이벤트 기반 데이터 처리
-- 🔐 **자동 재연결** - 탄력적인 WebSocket 연결 관리
-
-자세한 내용은 [Developer Guide](docs/GUIDE.md)를 참조하세요.
 
 ---
 

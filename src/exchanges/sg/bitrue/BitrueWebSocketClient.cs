@@ -27,7 +27,7 @@ namespace CCXT.Collector.Bitrue
     /// </summary>
     public class BitrueWebSocketClient : WebSocketClientBase
     {
-        private readonly Dictionary<string, SOrderBooks> _orderbookCache;
+        private readonly Dictionary<string, SOrderBook> _orderbookCache;
 
         public override string ExchangeName => "Bitrue";
         protected override string WebSocketUrl => "wss://ws.bitrue.com/kline-api/ws"; // TODO: Update with actual WebSocket URL
@@ -35,7 +35,7 @@ namespace CCXT.Collector.Bitrue
 
         public BitrueWebSocketClient()
         {
-            _orderbookCache = new Dictionary<string, SOrderBooks>();
+            _orderbookCache = new Dictionary<string, SOrderBook>();
         }
 
         protected override async Task ProcessMessageAsync(string message, bool isPrivate = false)

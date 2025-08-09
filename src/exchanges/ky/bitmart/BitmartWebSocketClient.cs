@@ -15,7 +15,7 @@ namespace CCXT.Collector.Bitmart
     /// </summary>
     public class BitmartWebSocketClient : WebSocketClientBase
     {
-        private readonly Dictionary<string, SOrderBooks> _orderbookCache;
+        private readonly Dictionary<string, SOrderBook> _orderbookCache;
 
         public override string ExchangeName => "Bitmart";
         protected override string WebSocketUrl => "wss://ws.bitmart.com"; // TODO: Update with actual WebSocket URL
@@ -23,7 +23,7 @@ namespace CCXT.Collector.Bitmart
 
         public BitmartWebSocketClient()
         {
-            _orderbookCache = new Dictionary<string, SOrderBooks>();
+            _orderbookCache = new Dictionary<string, SOrderBook>();
         }
 
         protected override async Task ProcessMessageAsync(string message, bool isPrivate = false)

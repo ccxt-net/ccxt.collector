@@ -27,7 +27,7 @@ namespace CCXT.Collector.Cryptocom
     /// </summary>
     public class CryptocomWebSocketClient : WebSocketClientBase
     {
-        private readonly Dictionary<string, SOrderBooks> _orderbookCache;
+        private readonly Dictionary<string, SOrderBook> _orderbookCache;
 
         public override string ExchangeName => "Cryptocom";
         protected override string WebSocketUrl => "wss://stream.crypto.com/exchange/v1/market"; // TODO: Update with actual WebSocket URL
@@ -35,7 +35,7 @@ namespace CCXT.Collector.Cryptocom
 
         public CryptocomWebSocketClient()
         {
-            _orderbookCache = new Dictionary<string, SOrderBooks>();
+            _orderbookCache = new Dictionary<string, SOrderBook>();
         }
 
         protected override async Task ProcessMessageAsync(string message, bool isPrivate = false)

@@ -21,8 +21,11 @@ namespace CCXT.Collector.Core.Abstractions
         protected readonly SemaphoreSlim _sendSemaphore;
         protected Timer _pingTimer;
         protected int _reconnectAttempts = 0;
-        protected readonly int _maxReconnectAttempts = 5;
+        protected readonly int _maxReconnectAttempts = 10;  // Increased from 5
         protected readonly int _reconnectDelayMs = 5000;
+        
+        // Exchange rate support for multi-currency (from kimp.client)
+        protected decimal _exchangeRate = 1.0m;
         
         // Authentication
         protected string _apiKey;
@@ -40,9 +43,9 @@ namespace CCXT.Collector.Core.Abstractions
         #region Events - Public Data
 
         public event Action<STicker> OnTickerReceived;
-        public event Action<SCompleteOrders> OnTradeReceived;
-        public event Action<SOrderBooks> OnOrderbookReceived;
-        public event Action<SCandlestick> OnCandleReceived;
+        public event Action<STrade> OnTradeReceived;
+        public event Action<SOrderBook> OnOrderbookReceived;
+        public event Action<SCandle> OnCandleReceived;
 
         #endregion
 
@@ -200,7 +203,9 @@ namespace CCXT.Collector.Core.Abstractions
 
         protected async Task ReceiveLoop(ClientWebSocket socket, bool isPrivate)
         {
-            var buffer = new ArraySegment<byte>(new byte[4096]);
+            // Dynamic buffer sizing for large messages (from kimp.client)
+            var bufferSize = 1024 * 16;  // 16KB initial buffer
+            var buffer = new ArraySegment<byte>(new byte[bufferSize]);
             var messageBuilder = new StringBuilder();
 
             try
@@ -217,6 +222,13 @@ namespace CCXT.Collector.Core.Abstractions
                         if (result.MessageType == System.Net.WebSockets.WebSocketMessageType.Text)
                         {
                             messageBuilder.Append(Encoding.UTF8.GetString(buffer.Array, 0, result.Count));
+                            
+                            // Resize buffer if nearly full (from kimp.client)
+                            if (result.Count == buffer.Count && !result.EndOfMessage)
+                            {
+                                bufferSize *= 2;
+                                buffer = new ArraySegment<byte>(new byte[bufferSize]);
+                            }
                         }
                         else if (result.MessageType == System.Net.WebSockets.WebSocketMessageType.Close)
                         {
@@ -310,9 +322,12 @@ namespace CCXT.Collector.Core.Abstractions
             }
 
             _reconnectAttempts++;
-            RaiseError($"Reconnecting... Attempt {_reconnectAttempts}/{_maxReconnectAttempts}");
             
-            await Task.Delay(_reconnectDelayMs * _reconnectAttempts);
+            // Exponential backoff with cap (from kimp.client pattern)
+            var delay = Math.Min(_reconnectDelayMs * _reconnectAttempts, 60000);  // Cap at 60 seconds
+            RaiseError($"Reconnecting in {delay}ms (attempt {_reconnectAttempts}/{_maxReconnectAttempts})...");
+            
+            await Task.Delay(delay);
             
             if (await ConnectAsync())
             {
@@ -369,6 +384,12 @@ namespace CCXT.Collector.Core.Abstractions
         {
             return market.ToString();
         }
+        
+        // Set exchange rate for currency conversion (useful for KRW/USD conversions)
+        public virtual void SetExchangeRate(decimal rate)
+        {
+            _exchangeRate = rate;
+        }
 
         #endregion
 
@@ -420,12 +441,12 @@ namespace CCXT.Collector.Core.Abstractions
             OnTickerReceived?.Invoke(ticker);
         }
 
-        protected void InvokeTradeCallback(SCompleteOrders trade)
+        protected void InvokeTradeCallback(STrade trade)
         {
             OnTradeReceived?.Invoke(trade);
         }
 
-        protected void InvokeOrderbookCallback(SOrderBooks orderbook)
+        protected void InvokeOrderbookCallback(SOrderBook orderbook)
         {
             OnOrderbookReceived?.Invoke(orderbook);
         }
@@ -451,7 +472,7 @@ namespace CCXT.Collector.Core.Abstractions
             OnDisconnected?.Invoke();
         }
 
-        protected void InvokeCandleCallback(SCandlestick candle)
+        protected void InvokeCandleCallback(SCandle candle)
         {
             OnCandleReceived?.Invoke(candle);
         }
@@ -462,14 +483,14 @@ namespace CCXT.Collector.Core.Abstractions
             OnBalanceUpdate?.Invoke(balance);
         }
 
-        protected void InvokeOrderCallback(SOrder order)
+        protected void InvokeOrderCallback(SOrder orders)
         {
-            OnOrderUpdate?.Invoke(order);
+            OnOrderUpdate?.Invoke(orders);
         }
 
-        protected void InvokePositionCallback(SPosition position)
+        protected void InvokePositionCallback(SPosition positions)
         {
-            OnPositionUpdate?.Invoke(position);
+            OnPositionUpdate?.Invoke(positions);
         }
 
         protected string CreateSubscriptionKey(string channel, string symbol)

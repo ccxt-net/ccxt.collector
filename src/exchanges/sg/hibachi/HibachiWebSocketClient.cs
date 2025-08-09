@@ -15,7 +15,7 @@ namespace CCXT.Collector.Hibachi
     /// </summary>
     public class HibachiWebSocketClient : WebSocketClientBase
     {
-        private readonly Dictionary<string, SOrderBooks> _orderbookCache;
+        private readonly Dictionary<string, SOrderBook> _orderbookCache;
 
         public override string ExchangeName => "Hibachi";
         protected override string WebSocketUrl => "wss://ws.hibachi.com"; // TODO: Update with actual WebSocket URL
@@ -23,7 +23,7 @@ namespace CCXT.Collector.Hibachi
 
         public HibachiWebSocketClient()
         {
-            _orderbookCache = new Dictionary<string, SOrderBooks>();
+            _orderbookCache = new Dictionary<string, SOrderBook>();
         }
 
         protected override async Task ProcessMessageAsync(string message, bool isPrivate = false)

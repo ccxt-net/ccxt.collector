@@ -30,7 +30,7 @@ namespace CCXT.Collector.Upbit
     /// </summary>
     public class UpbitWebSocketClient : WebSocketClientBase
     {
-        private readonly Dictionary<string, SOrderBooks> _orderbookCache;
+        private readonly Dictionary<string, SOrderBook> _orderbookCache;
 
         public override string ExchangeName => "Upbit";
         protected override string WebSocketUrl => "wss://api.upbit.com/websocket/v1";
@@ -38,7 +38,7 @@ namespace CCXT.Collector.Upbit
 
         public UpbitWebSocketClient()
         {
-            _orderbookCache = new Dictionary<string, SOrderBooks>();
+            _orderbookCache = new Dictionary<string, SOrderBook>();
         }
 
         protected override async Task ProcessMessageAsync(string message, bool isPrivate = false)
@@ -108,13 +108,13 @@ namespace CCXT.Collector.Upbit
                 var code = json["code"].ToString();
                 var symbol = ConvertFromUpbitCode(code);
                 
-                var orderbook = new SOrderBooks
+                var orderbook = new SOrderBook
                 {
                     exchange = ExchangeName,
                     symbol = symbol,
                     timestamp = json["timestamp"].Value<long>(),
                     sequentialId = json["total_ask_size"]?.Value<long>() ?? 0,
-                    result = new SOrderBook
+                    result = new SOrderBookData
                     {
                         timestamp = json["timestamp"].Value<long>(),
                         asks = new List<SOrderBookItem>(),
@@ -177,14 +177,14 @@ namespace CCXT.Collector.Upbit
                 var code = json["code"].ToString();
                 var symbol = ConvertFromUpbitCode(code);
                 
-                var trade = new SCompleteOrders
+                var trade = new STrade
                 {
                     exchange = ExchangeName,
                     symbol = symbol,
                     timestamp = json["timestamp"].Value<long>(),
-                    result = new List<SCompleteOrderItem>
+                    result = new List<STradeItem>
                     {
-                        new SCompleteOrderItem
+                        new STradeItem
                         {
                             orderId = json["sequential_id"]?.ToString() ?? Guid.NewGuid().ToString(),
                             timestamp = json["timestamp"].Value<long>(),
@@ -564,26 +564,29 @@ namespace CCXT.Collector.Upbit
                 var code = json["code"].ToString();
                 var symbol = ConvertFromUpbitCode(code);
                 
-                var candle = new SCandlestick
+                var candle = new SCandle
                 {
                     exchange = ExchangeName,
                     symbol = symbol,
                     interval = ConvertUpbitInterval(json["unit"]?.ToString()),
                     timestamp = json["timestamp"].Value<long>(),
-                    result = new SCandleItem
+                    result = new List<SCandleItem>
                     {
-                        openTime = json["candle_date_time_kst"] != null ? 
-                            DateTimeOffset.Parse(json["candle_date_time_kst"].ToString()).ToUnixTimeMilliseconds() : 
-                            json["timestamp"].Value<long>(),
-                        closeTime = json["timestamp"].Value<long>(),
-                        open = json["opening_price"].Value<decimal>(),
-                        high = json["high_price"].Value<decimal>(),
-                        low = json["low_price"].Value<decimal>(),
-                        close = json["trade_price"].Value<decimal>(),
-                        volume = json["candle_acc_trade_volume"].Value<decimal>(),
-                        quoteVolume = json["candle_acc_trade_price"].Value<decimal>(),
-                        tradeCount = json["trade_count"]?.Value<long>() ?? 0,
-                        isClosed = true // Upbit sends completed candles
+                        new SCandleItem
+                        {
+                            openTime = json["candle_date_time_kst"] != null ? 
+                                DateTimeOffset.Parse(json["candle_date_time_kst"].ToString()).ToUnixTimeMilliseconds() : 
+                                json["timestamp"].Value<long>(),
+                            closeTime = json["timestamp"].Value<long>(),
+                            open = json["opening_price"].Value<decimal>(),
+                            high = json["high_price"].Value<decimal>(),
+                            low = json["low_price"].Value<decimal>(),
+                            close = json["trade_price"].Value<decimal>(),
+                            volume = json["candle_acc_trade_volume"].Value<decimal>(),
+                            quoteVolume = json["candle_acc_trade_price"].Value<decimal>(),
+                            tradeCount = json["trade_count"]?.Value<long>() ?? 0,
+                            isClosed = true // Upbit sends completed candles
+                        }
                     }
                 };
 
@@ -749,9 +752,8 @@ namespace CCXT.Collector.Upbit
         {
             try
             {
-                var order = new SOrder
+                var order = new SOrderItem
                 {
-                    exchange = ExchangeName,
                     orderId = json["uuid"].ToString(),
                     symbol = ConvertFromUpbitCode(json["market"].ToString()),
                     type = ParseOrderType(json["ord_type"]?.ToString()),
@@ -772,7 +774,14 @@ namespace CCXT.Collector.Upbit
 
                 order.cost = order.filledQuantity * order.avgFillPrice;
 
-                InvokeOrderCallback(order);
+                var orders = new SOrder
+                {
+                    exchange = ExchangeName,
+                    timestamp = order.updateTime,
+                    orders = new List<SOrderItem> { order }
+                };
+
+                InvokeOrderCallback(orders);
             }
             catch (Exception ex)
             {

@@ -27,7 +27,7 @@ namespace CCXT.Collector.Tokocrypto
     /// </summary>
     public class TokocryptoWebSocketClient : WebSocketClientBase
     {
-        private readonly Dictionary<string, SOrderBooks> _orderbookCache;
+        private readonly Dictionary<string, SOrderBook> _orderbookCache;
 
         public override string ExchangeName => "Tokocrypto";
         protected override string WebSocketUrl => "wss://stream.tokocrypto.com:9443/ws"; // TODO: Update with actual WebSocket URL
@@ -35,7 +35,7 @@ namespace CCXT.Collector.Tokocrypto
 
         public TokocryptoWebSocketClient()
         {
-            _orderbookCache = new Dictionary<string, SOrderBooks>();
+            _orderbookCache = new Dictionary<string, SOrderBook>();
         }
 
         protected override async Task ProcessMessageAsync(string message, bool isPrivate = false)

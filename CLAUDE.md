@@ -65,7 +65,11 @@ dotnet publish -c Release -r ubuntu.18.04-x64 -f net8.0
 1. **Core Framework** (`src/Core/`):
    - **Abstractions** (`Core/Abstractions/`):
      - `IWebSocketClient.cs` - WebSocket client interface defining callback events
-     - `WebSocketClientBase.cs` - Base implementation with reconnection, ping/pong, subscription management
+     - `WebSocketClientBase.cs` - Enhanced base implementation with:
+       - Dynamic buffer resizing for large messages
+       - Exponential backoff reconnection (max 60s)
+       - Exchange rate support for multi-currency
+       - Improved error recovery (10 retry attempts)
    - **Configuration** (`Core/Configuration/`):
      - `config.cs` - Configuration classes
      - `settings.cs` - Application settings
@@ -155,7 +159,6 @@ dotnet publish -c Release -r ubuntu.18.04-x64 -f net8.0
 - **Newtonsoft.Json**: JSON serialization
 - **Microsoft.Extensions.Configuration**: Configuration management
 - **System.Text.Json**: Additional JSON support
-- **RestSharp**: REST API communication
 
 ### Configuration
 

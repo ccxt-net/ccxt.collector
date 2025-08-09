@@ -30,7 +30,7 @@ namespace CCXT.Collector.Binance
     public class BinanceWebSocketClient : WebSocketClientBase
     {
         private readonly Dictionary<string, long> _lastUpdateIds;
-        private readonly Dictionary<string, SOrderBooks> _orderbookCache;
+        private readonly Dictionary<string, SOrderBook> _orderbookCache;
         //private string _listenKey; // For user data stream
 
         public override string ExchangeName => "Binance";
@@ -41,7 +41,7 @@ namespace CCXT.Collector.Binance
         public BinanceWebSocketClient()
         {
             _lastUpdateIds = new Dictionary<string, long>();
-            _orderbookCache = new Dictionary<string, SOrderBooks>();
+            _orderbookCache = new Dictionary<string, SOrderBook>();
         }
 
         protected override async Task ProcessMessageAsync(string message, bool isPrivate = false)
@@ -125,13 +125,13 @@ namespace CCXT.Collector.Binance
                 
                 _lastUpdateIds[symbol] = updateId;
 
-                var orderbook = new SOrderBooks
+                var orderbook = new SOrderBook
                 {
                     exchange = ExchangeName,
                     symbol = symbol,
                     timestamp = json["E"].Value<long>(),
                     sequentialId = updateId,
-                    result = new SOrderBook
+                    result = new SOrderBookData
                     {
                         timestamp = json["E"].Value<long>(),
                         asks = new List<SOrderBookItem>(),
@@ -199,14 +199,14 @@ namespace CCXT.Collector.Binance
         {
             try
             {
-                var trade = new SCompleteOrders
+                var trade = new STrade
                 {
                     exchange = ExchangeName,
                     symbol = ConvertSymbol(json["s"].ToString()),
                     timestamp = json["E"].Value<long>(),
-                    result = new List<SCompleteOrderItem>
+                    result = new List<STradeItem>
                     {
-                        new SCompleteOrderItem
+                        new STradeItem
                         {
                             orderId = json["t"].ToString(),
                             timestamp = json["T"].Value<long>(),
@@ -250,15 +250,13 @@ namespace CCXT.Collector.Binance
                         askPrice = json["a"].Value<decimal>(),
                         askQuantity = json["A"].Value<decimal>(),
                         vwap = json["w"].Value<decimal>(),
-                        count = json["C"].Value<long>()
+                        count = json["C"].Value<long>(),
+                        change = json["c"].Value<decimal>() - json["o"].Value<decimal>(),
+                        percentage = json["o"].Value<decimal>() > 0 
+                            ? ((json["c"].Value<decimal>() - json["o"].Value<decimal>()) / json["o"].Value<decimal>()) * 100 
+                            : 0
                     }
                 };
-
-                // Calculate additional fields
-                ticker.result.change = ticker.result.closePrice - ticker.result.openPrice;
-                ticker.result.percentage = ticker.result.openPrice > 0 
-                    ? (ticker.result.change / ticker.result.openPrice) * 100 
-                    : 0;
 
                 InvokeTickerCallback(ticker);
             }
@@ -499,27 +497,31 @@ namespace CCXT.Collector.Binance
             {
                 var klineData = json["k"];
                 var symbol = ConvertSymbol(json["s"].ToString());
+                var timestamp = json["E"].Value<long>();
                 
-                var candle = new SCandlestick
+                var candle = new SCandle
                 {
                     exchange = ExchangeName,
                     symbol = symbol,
                     interval = ConvertFromBinanceInterval(klineData["i"].ToString()),
-                    timestamp = json["E"].Value<long>(),
-                    result = new SCandleItem
+                    timestamp = timestamp,
+                    result = new List<SCandleItem>
                     {
-                        openTime = klineData["t"].Value<long>(),
-                        closeTime = klineData["T"].Value<long>(),
-                        open = decimal.Parse(klineData["o"].ToString()),
-                        high = decimal.Parse(klineData["h"].ToString()),
-                        low = decimal.Parse(klineData["l"].ToString()),
-                        close = decimal.Parse(klineData["c"].ToString()),
-                        volume = decimal.Parse(klineData["v"].ToString()),
-                        quoteVolume = decimal.Parse(klineData["q"].ToString()),
-                        tradeCount = klineData["n"].Value<long>(),
-                        isClosed = klineData["x"].Value<bool>(),
-                        buyVolume = decimal.Parse(klineData["V"].ToString()),
-                        buyQuoteVolume = decimal.Parse(klineData["Q"].ToString())
+                        new SCandleItem
+                        {
+                            openTime = klineData["t"].Value<long>(),
+                            closeTime = klineData["T"].Value<long>(),
+                            open = decimal.Parse(klineData["o"].ToString()),
+                            high = decimal.Parse(klineData["h"].ToString()),
+                            low = decimal.Parse(klineData["l"].ToString()),
+                            close = decimal.Parse(klineData["c"].ToString()),
+                            volume = decimal.Parse(klineData["v"].ToString()),
+                            quoteVolume = decimal.Parse(klineData["q"].ToString()),
+                            tradeCount = klineData["n"].Value<long>(),
+                            isClosed = klineData["x"].Value<bool>(),
+                            buyVolume = decimal.Parse(klineData["V"].ToString()),
+                            buyQuoteVolume = decimal.Parse(klineData["Q"].ToString())
+                        }
                     }
                 };
 
@@ -622,17 +624,12 @@ namespace CCXT.Collector.Binance
         {
             try
             {
-                var balance = new SBalance
-                {
-                    exchange = ExchangeName,
-                    accountId = "spot",
-                    timestamp = json["E"].Value<long>(),
-                    balances = new List<SBalanceItem>()
-                };
-
                 var balances = json["B"] as JArray;
                 if (balances != null)
                 {
+                    var balanceItems = new List<SBalanceItem>();
+                    var timestamp = json["E"].Value<long>();
+                    
                     foreach (var item in balances)
                     {
                         var free = decimal.Parse(item["f"].ToString());
@@ -640,19 +637,30 @@ namespace CCXT.Collector.Binance
                         
                         if (free > 0 || locked > 0)
                         {
-                            balance.balances.Add(new SBalanceItem
+                            balanceItems.Add(new SBalanceItem
                             {
                                 currency = item["a"].ToString(),
                                 free = free,
                                 used = locked,
                                 total = free + locked,
-                                updateTime = json["E"].Value<long>()
+                                updateTime = timestamp
                             });
                         }
                     }
+                    
+                    if (balanceItems.Count > 0)
+                    {
+                        var balance = new SBalance
+                        {
+                            exchange = ExchangeName,
+                            accountId = "spot",
+                            timestamp = timestamp,
+                            balances = balanceItems
+                        };
+                        
+                        InvokeBalanceCallback(balance);
+                    }
                 }
-
-                InvokeBalanceCallback(balance);
             }
             catch (Exception ex)
             {
@@ -695,9 +703,8 @@ namespace CCXT.Collector.Binance
         {
             try
             {
-                var order = new SOrder
+                var order = new SOrderItem
                 {
-                    exchange = ExchangeName,
                     orderId = json["i"].ToString(),
                     clientOrderId = json["c"].ToString(),
                     symbol = ConvertSymbol(json["s"].ToString()),
@@ -705,20 +712,20 @@ namespace CCXT.Collector.Binance
                     side = json["S"].ToString() == "BUY" ? OrderSide.Buy : OrderSide.Sell,
                     status = ParseOrderStatus(json["X"].ToString()),
                     price = decimal.Parse(json["p"].ToString()),
-                    stopPrice = json["P"] != null ? decimal.Parse(json["P"].ToString()) : null,
                     quantity = decimal.Parse(json["q"].ToString()),
                     filledQuantity = decimal.Parse(json["z"].ToString()),
-                    remainingQuantity = decimal.Parse(json["q"].ToString()) - decimal.Parse(json["z"].ToString()),
-                    avgFillPrice = decimal.Parse(json["Z"].ToString()) / (decimal.Parse(json["z"].ToString()) > 0 ? decimal.Parse(json["z"].ToString()) : 1),
-                    cost = decimal.Parse(json["Z"].ToString()),
-                    fee = decimal.Parse(json["n"]?.ToString() ?? "0"),
-                    feeCurrency = json["N"]?.ToString(),
                     createTime = json["O"].Value<long>(),
-                    updateTime = json["E"].Value<long>(),
-                    timeInForce = json["f"].ToString()
+                    updateTime = json["E"].Value<long>()
                 };
 
-                InvokeOrderCallback(order);
+                var orders = new SOrder
+                {
+                    exchange = ExchangeName,
+                    timestamp = json["E"].Value<long>(),
+                    orders = new List<SOrderItem> { order }
+                };
+
+                InvokeOrderCallback(orders);
             }
             catch (Exception ex)
             {

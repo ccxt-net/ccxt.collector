@@ -27,7 +27,7 @@ namespace CCXT.Collector.Bitbank
     /// </summary>
     public class BitbankWebSocketClient : WebSocketClientBase
     {
-        private readonly Dictionary<string, SOrderBooks> _orderbookCache;
+        private readonly Dictionary<string, SOrderBook> _orderbookCache;
 
         public override string ExchangeName => "Bitbank";
         protected override string WebSocketUrl => "wss://stream.bitbank.cc"; // TODO: Update with actual WebSocket URL
@@ -35,7 +35,7 @@ namespace CCXT.Collector.Bitbank
 
         public BitbankWebSocketClient()
         {
-            _orderbookCache = new Dictionary<string, SOrderBooks>();
+            _orderbookCache = new Dictionary<string, SOrderBook>();
         }
 
         protected override async Task ProcessMessageAsync(string message, bool isPrivate = false)

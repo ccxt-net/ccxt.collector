@@ -26,7 +26,7 @@ namespace CCXT.Collector.Phemex
     /// </summary>
     public class PhemexWebSocketClient : WebSocketClientBase
     {
-        private readonly Dictionary<string, SOrderBooks> _orderbookCache;
+        private readonly Dictionary<string, SOrderBook> _orderbookCache;
 
         public override string ExchangeName => "Phemex";
         protected override string WebSocketUrl => "wss://phemex.com/ws"; // TODO: Update with actual WebSocket URL
@@ -34,7 +34,7 @@ namespace CCXT.Collector.Phemex
 
         public PhemexWebSocketClient()
         {
-            _orderbookCache = new Dictionary<string, SOrderBooks>();
+            _orderbookCache = new Dictionary<string, SOrderBook>();
         }
 
         protected override async Task ProcessMessageAsync(string message, bool isPrivate = false)

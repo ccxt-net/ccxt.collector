@@ -37,7 +37,7 @@ namespace CCXT.Collector.Gopax
     /// </summary>
     public class GopaxWebSocketClient : WebSocketClientBase
     {
-        private readonly Dictionary<string, SOrderBooks> _orderbookCache;
+        private readonly Dictionary<string, SOrderBook> _orderbookCache;
         private readonly object _lockObject = new object();
 
         public override string ExchangeName => "Gopax";
@@ -46,7 +46,7 @@ namespace CCXT.Collector.Gopax
 
         public GopaxWebSocketClient()
         {
-            _orderbookCache = new Dictionary<string, SOrderBooks>();
+            _orderbookCache = new Dictionary<string, SOrderBook>();
         }
 
         private string ConvertSymbol(string symbol)
@@ -151,12 +151,12 @@ namespace CCXT.Collector.Gopax
                 var symbol = ConvertSymbolBack(gopaxSymbol);
                 var timestamp = json["t"]?.Value<long>() ?? DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
 
-                var orderbook = new SOrderBooks
+                var orderbook = new SOrderBook
                 {
                     exchange = ExchangeName,
                     symbol = symbol,
                     timestamp = timestamp,
-                    result = new SOrderBook
+                    result = new SOrderBookData
                     {
                         timestamp = timestamp,
                         bids = new List<SOrderBookItem>(),
@@ -231,12 +231,12 @@ namespace CCXT.Collector.Gopax
                 var symbol = ConvertSymbolBack(gopaxSymbol);
                 var timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
 
-                var completeOrders = new SCompleteOrders
+                var completeOrders = new STrade
                 {
                     exchange = ExchangeName,
                     symbol = symbol,
                     timestamp = timestamp,
-                    result = new List<SCompleteOrderItem>()
+                    result = new List<STradeItem>()
                 };
 
                 // Process trades array
@@ -248,7 +248,7 @@ namespace CCXT.Collector.Gopax
                         var tradeTimestamp = trade["t"]?.Value<long>() ?? timestamp;
                         var side = trade["s"]?.ToString(); // side
 
-                        completeOrders.result.Add(new SCompleteOrderItem
+                        completeOrders.result.Add(new STradeItem
                         {
                             orderId = trade["id"]?.ToString() ?? Guid.NewGuid().ToString(),
                             sideType = side == "buy" ? SideType.Bid : SideType.Ask,
@@ -281,16 +281,16 @@ namespace CCXT.Collector.Gopax
                 var symbol = ConvertSymbolBack(gopaxSymbol);
                 var timestamp = json["t"]?.Value<long>() ?? DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
 
-                var completeOrders = new SCompleteOrders
+                var completeOrders = new STrade
                 {
                     exchange = ExchangeName,
                     symbol = symbol,
                     timestamp = timestamp,
-                    result = new List<SCompleteOrderItem>()
+                    result = new List<STradeItem>()
                 };
 
                 var side = json["s"]?.ToString(); // side
-                completeOrders.result.Add(new SCompleteOrderItem
+                completeOrders.result.Add(new STradeItem
                 {
                     orderId = json["id"]?.ToString() ?? Guid.NewGuid().ToString(),
                     sideType = side == "buy" ? SideType.Bid : SideType.Ask,

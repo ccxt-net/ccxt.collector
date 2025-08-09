@@ -723,7 +723,7 @@ namespace CCXT.Collector.Tests.Exchanges
             return (double)sameDirection / minCount;
         }
 
-        private decimal EstimateSlippage(SOrderBooks orderbook, decimal orderSize)
+        private decimal EstimateSlippage(SOrderBook orderbook, decimal orderSize)
         {
             var totalCost = 0m;
             var remaining = orderSize;

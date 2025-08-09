@@ -97,17 +97,17 @@ namespace CCXT.Collector.Core.Abstractions
         /// <summary>
         /// Trade execution data received callback (개별 체결)
         /// </summary>
-        event Action<SCompleteOrders> OnTradeReceived;
+        event Action<STrade> OnTradeReceived;
 
         /// <summary>
         /// 2. Orderbook/Depth data received callback (호가창)
         /// </summary>
-        event Action<SOrderBooks> OnOrderbookReceived;
+        event Action<SOrderBook> OnOrderbookReceived;
 
         /// <summary>
         /// 3. Candlestick/K-Line data received callback (캔들)
         /// </summary>
-        event Action<SCandlestick> OnCandleReceived;
+        event Action<SCandle> OnCandleReceived;
 
         #endregion
 

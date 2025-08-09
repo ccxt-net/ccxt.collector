@@ -40,7 +40,7 @@ namespace CCXT.Collector.Bithumb
     /// </summary>
     public class BithumbWebSocketClient : WebSocketClientBase
     {
-        private readonly Dictionary<string, SOrderBooks> _orderbookCache;
+        private readonly Dictionary<string, SOrderBook> _orderbookCache;
         private readonly Dictionary<string, List<SOrderBookItem>> _localOrderbook;
         private readonly object _lockObject = new object();
 
@@ -50,7 +50,7 @@ namespace CCXT.Collector.Bithumb
 
         public BithumbWebSocketClient()
         {
-            _orderbookCache = new Dictionary<string, SOrderBooks>();
+            _orderbookCache = new Dictionary<string, SOrderBook>();
             _localOrderbook = new Dictionary<string, List<SOrderBookItem>>();
         }
 
@@ -296,12 +296,12 @@ namespace CCXT.Collector.Bithumb
                         localBids.RemoveRange(30, localBids.Count - 30);
 
                     // Create orderbook snapshot
-                    var orderbook = new SOrderBooks
+                    var orderbook = new SOrderBook
                     {
                         exchange = ExchangeName,
                         symbol = symbol,
                         timestamp = timestamp,
-                        result = new SOrderBook
+                        result = new SOrderBookData
                         {
                             timestamp = timestamp,
                             bids = new List<SOrderBookItem>(localBids),
@@ -341,12 +341,12 @@ namespace CCXT.Collector.Bithumb
                     var symbol = ConvertSymbolBack(bithumbSymbol);
                     var timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
 
-                    var completeOrders = new SCompleteOrders
+                    var completeOrders = new STrade
                     {
                         exchange = ExchangeName,
                         symbol = symbol,
                         timestamp = timestamp,
-                        result = new List<SCompleteOrderItem>()
+                        result = new List<STradeItem>()
                     };
 
                     foreach (var item in group)
@@ -373,7 +373,7 @@ namespace CCXT.Collector.Bithumb
                         var buySellGb = item["buySellGb"]?.ToString();
                         var sideType = (buySellGb == "1") ? SideType.Bid : SideType.Ask;
 
-                        completeOrders.result.Add(new SCompleteOrderItem
+                        completeOrders.result.Add(new STradeItem
                         {
                             orderId = item["contNo"]?.ToString() ?? Guid.NewGuid().ToString(),
                             sideType = sideType,

@@ -188,12 +188,12 @@ All exchanges return data in these standardized formats:
 
 ```csharp
 // Order Book
-public class SOrderBooks
+public class SOrderBook
 {
     public string exchange { get; set; }
     public string symbol { get; set; }
     public long timestamp { get; set; }
-    public SOrderBook result { get; set; }
+    public SOrderBookData result { get; set; }
 }
 
 // Ticker
@@ -635,17 +635,17 @@ namespace CCXT.Collector.Bithumb
 Order book data structure:
 
 ```csharp
-public class SOrderBooks
+public class SOrderBook
 {
     public string exchange { get; set; }    // Exchange name
     public string symbol { get; set; }      // Trading symbol
     public long timestamp { get; set; }     // Unix timestamp
     public string datetime { get; set; }    // ISO 8601 datetime
     public long nonce { get; set; }         // Message sequence number
-    public SOrderBook result { get; set; }  // Order book data
+    public SOrderBookData result { get; set; }  // Order book data
 }
 
-public class SOrderBook
+public class SOrderBookData
 {
     public string symbol { get; set; }
     public List<SOrderBookItem> bids { get; set; }  // Buy orders
@@ -759,7 +759,7 @@ public class SBalanceItem
 Order structure:
 
 ```csharp
-public class SOrder
+public class SOrderItem
 {
     public string id { get; set; }
     public string clientOrderId { get; set; }
@@ -810,14 +810,18 @@ var rsi = new RSI(14);
 // Feed OHLCV data
 client.OnCandleReceived += (candle) =>
 {
-    var rsiValue = rsi.Calculate(candle.result);
-    Console.WriteLine($"RSI: {rsiValue}");
+    // Note: candle.result is now List<SCandleItem>
+    foreach (var item in candle.result)
+    {
+        var rsiValue = rsi.Calculate(item);
+        Console.WriteLine($"RSI: {rsiValue}");
     
-    // Trading signal
-    if (rsiValue < 30)
-        Console.WriteLine("Oversold - potential buy signal");
-    else if (rsiValue > 70)
-        Console.WriteLine("Overbought - potential sell signal");
+        // Trading signal
+        if (rsiValue < 30)
+            Console.WriteLine("Oversold - potential buy signal");
+        else if (rsiValue > 70)
+            Console.WriteLine("Overbought - potential sell signal");
+    }
 };
 ```
 
@@ -830,10 +834,14 @@ var macd = new MACD(12, 26, 9);
 
 client.OnCandleReceived += (candle) =>
 {
-    var macdResult = macd.Calculate(candle.result);
-    Console.WriteLine($"MACD: {macdResult.MACD}");
-    Console.WriteLine($"Signal: {macdResult.Signal}");
-    Console.WriteLine($"Histogram: {macdResult.Histogram}");
+    // Note: candle.result is now List<SCandleItem>
+    foreach (var item in candle.result)
+    {
+        var macdResult = macd.Calculate(item);
+        Console.WriteLine($"MACD: {macdResult.MACD}");
+        Console.WriteLine($"Signal: {macdResult.Signal}");
+        Console.WriteLine($"Histogram: {macdResult.Histogram}");
+    }
 };
 ```
 
@@ -846,10 +854,14 @@ var bb = new BollingerBand(20, 2);
 
 client.OnCandleReceived += (candle) =>
 {
-    var bands = bb.Calculate(candle.result);
-    Console.WriteLine($"Upper: {bands.Upper}");
-    Console.WriteLine($"Middle: {bands.Middle}");
-    Console.WriteLine($"Lower: {bands.Lower}");
+    // Note: candle.result is now List<SCandleItem>
+    foreach (var item in candle.result)
+    {
+        var bands = bb.Calculate(item);
+        Console.WriteLine($"Upper: {bands.Upper}");
+        Console.WriteLine($"Middle: {bands.Middle}");
+        Console.WriteLine($"Lower: {bands.Lower}");
+    }
 };
 ```
 
@@ -890,6 +902,84 @@ export CCXT_EXCHANGE=binance
 export CCXT_SYMBOLS=BTC/USDT,ETH/USDT
 export CCXT_API_KEY=your_api_key
 export CCXT_SECRET_KEY=your_secret_key
+```
+
+## Breaking Changes (v2.1.2)
+
+### Data Model Changes
+The following breaking changes were introduced in v2.1.2 for performance optimization:
+
+#### 1. Candlestick Data Structure
+```csharp
+// Old (v2.1.1 and earlier)
+public class SCandle
+{
+    public SCandleItem result { get; set; }  // Single item
+}
+
+// New (v2.1.2+)
+public class SCandle
+{
+    public List<SCandleItem> result { get; set; }  // List of items
+}
+```
+
+#### 2. Order Update Event Signature
+```csharp
+// Old (v2.1.1 and earlier)
+public event Action<SOrder> OnOrderUpdate;
+
+// New (v2.1.2+)
+public event Action<SOrders> OnOrderUpdate;  // Container with List<SOrder>
+```
+
+#### 3. Position Update Event Signature
+```csharp
+// Old (v2.1.1 and earlier)
+public event Action<SPosition> OnPositionUpdate;
+
+// New (v2.1.2+)
+public event Action<SPositions> OnPositionUpdate;  // Container with List<SPosition>
+```
+
+### Migration Guide
+
+#### Updating Candle Processing Code
+```csharp
+// Old code
+client.OnCandleReceived += (candle) =>
+{
+    var close = candle.result.close;  // Direct access to single item
+    ProcessCandle(candle.result);
+};
+
+// New code
+client.OnCandleReceived += (candle) =>
+{
+    foreach (var item in candle.result)  // Iterate through list
+    {
+        var close = item.close;
+        ProcessCandle(item);
+    }
+};
+```
+
+#### Updating Order Processing Code
+```csharp
+// Old code
+client.OnOrderUpdate += (order) =>
+{
+    Console.WriteLine($"Order {order.orderId} status: {order.status}");
+};
+
+// New code
+client.OnOrderUpdate += (orders) =>
+{
+    foreach (var order in orders.orders)
+    {
+        Console.WriteLine($"Order {order.orderId} status: {order.status}");
+    }
+};
 ```
 
 ## Error Handling

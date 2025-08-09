@@ -28,7 +28,7 @@ namespace CCXT.Collector.Kucoin
     /// </summary>
     public class KucoinWebSocketClient : WebSocketClientBase
     {
-        private readonly Dictionary<string, SOrderBooks> _orderbookCache;
+        private readonly Dictionary<string, SOrderBook> _orderbookCache;
 
         public override string ExchangeName => "Kucoin";
         protected override string WebSocketUrl => "wss://ws-api-spot.kucoin.com"; // TODO: Update with actual WebSocket URL
@@ -36,7 +36,7 @@ namespace CCXT.Collector.Kucoin
 
         public KucoinWebSocketClient()
         {
-            _orderbookCache = new Dictionary<string, SOrderBooks>();
+            _orderbookCache = new Dictionary<string, SOrderBook>();
         }
 
         protected override async Task ProcessMessageAsync(string message, bool isPrivate = false)

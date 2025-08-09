@@ -37,7 +37,7 @@ namespace CCXT.Collector.Coinone
     /// </summary>
     public class CoinoneWebSocketClient : WebSocketClientBase
     {
-        private readonly Dictionary<string, SOrderBooks> _orderbookCache;
+        private readonly Dictionary<string, SOrderBook> _orderbookCache;
 
         public override string ExchangeName => "Coinone";
         protected override string WebSocketUrl => "wss://stream.coinone.co.kr";
@@ -45,7 +45,7 @@ namespace CCXT.Collector.Coinone
 
         public CoinoneWebSocketClient()
         {
-            _orderbookCache = new Dictionary<string, SOrderBooks>();
+            _orderbookCache = new Dictionary<string, SOrderBook>();
         }
 
         private string ConvertSymbol(string symbol)
@@ -147,12 +147,12 @@ namespace CCXT.Collector.Coinone
                 var symbol = ConvertSymbolBack(coinoneSymbol);
                 var timestamp = data["timestamp"]?.Value<long>() ?? DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
 
-                var orderbook = new SOrderBooks
+                var orderbook = new SOrderBook
                 {
                     exchange = ExchangeName,
                     symbol = symbol,
                     timestamp = timestamp,
-                    result = new SOrderBook
+                    result = new SOrderBookData
                     {
                         timestamp = timestamp,
                         bids = new List<SOrderBookItem>(),
@@ -214,12 +214,12 @@ namespace CCXT.Collector.Coinone
                 var symbol = ConvertSymbolBack(coinoneSymbol);
                 var timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
 
-                var completeOrders = new SCompleteOrders
+                var completeOrders = new STrade
                 {
                     exchange = ExchangeName,
                     symbol = symbol,
                     timestamp = timestamp,
-                    result = new List<SCompleteOrderItem>()
+                    result = new List<STradeItem>()
                 };
 
                 foreach (var trade in trades)
@@ -227,7 +227,7 @@ namespace CCXT.Collector.Coinone
                     var tradeTimestamp = trade["timestamp"]?.Value<long>() ?? timestamp;
                     var isBuy = trade["is_buyer_maker"]?.Value<bool>() ?? false;
 
-                    completeOrders.result.Add(new SCompleteOrderItem
+                    completeOrders.result.Add(new STradeItem
                     {
                         orderId = trade["id"]?.ToString() ?? Guid.NewGuid().ToString(),
                         sideType = isBuy ? SideType.Bid : SideType.Ask,

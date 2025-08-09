@@ -272,17 +272,23 @@ namespace CCXT.Collector.Samples
 
             client.OnCandleReceived += (candle) =>
             {
-                var ohlcv = new Ohlc
+                if (candle.result == null || candle.result.Count == 0) return;
+                
+                // Process each candle in the batch
+                foreach (var candleItem in candle.result)
                 {
-                    openTime = candle.result.openTime,
-                    closeTime = candle.result.closeTime,
-                    Open = candle.result.open,
-                    High = candle.result.high,
-                    Low = candle.result.low,
-                    Close = candle.result.close,
-                    Volume = candle.result.volume
-                };
-                ohlcvBuffer.Add(ohlcv);
+                    var ohlcv = new Ohlc
+                    {
+                        openTime = candleItem.openTime,
+                        closeTime = candleItem.closeTime,
+                        Open = candleItem.open,
+                        High = candleItem.high,
+                        Low = candleItem.low,
+                        Close = candleItem.close,
+                        Volume = candleItem.volume
+                    };
+                    ohlcvBuffer.Add(ohlcv);
+                }
 
                 if (ohlcvBuffer.Count < 50) return; // Wait for enough data
 
@@ -294,13 +300,19 @@ namespace CCXT.Collector.Samples
                 var emaValue = ema.Calculate(ohlcvBuffer);
 
                 Console.WriteLine($"\n[{DateTime.Now:HH:mm:ss}] Technical Analysis for {candle.symbol}");
-                Console.WriteLine($"  Price: {candle.result.close:F2}");
+                if (candle.result != null && candle.result.Count > 0)
+                {
+                    Console.WriteLine($"  Price: {candle.result[0].close:F2}");
+                }
                 Console.WriteLine($"  RSI(14): {rsiValue:F2} {GetRSISignal(rsiValue)}");
                 Console.WriteLine($"  MACD: {macdResult.MACD:F2}, Signal: {macdResult.Signal:F2}");
                 Console.WriteLine($"  Bollinger Bands: Upper={bbResult.Upper:F2}, Middle={bbResult.Middle:F2}, Lower={bbResult.Lower:F2}");
                 Console.WriteLine($"  SMA(50): {smaValue:F2}");
                 Console.WriteLine($"  EMA(20): {emaValue:F2}");
-                Console.WriteLine($"  Trend: {GetTrendSignal(candle.result.close, smaValue, emaValue)}");
+                if (candle.result != null && candle.result.Count > 0)
+                {
+                    Console.WriteLine($"  Trend: {GetTrendSignal(candle.result[0].close, smaValue, emaValue)}");
+                }
             };
 
             await client.ConnectAsync();
@@ -374,7 +386,7 @@ namespace CCXT.Collector.Samples
 
             var client = new BinanceWebSocketClient();
             var cts = new CancellationTokenSource();
-            var trades = new List<SCompleteOrderItem>();
+            var trades = new List<STradeItem>();
             var volumeStats = new VolumeStatistics();
 
             client.OnTradeReceived += (tradeData) =>
@@ -495,7 +507,10 @@ namespace CCXT.Collector.Samples
                 var signal = signalGenerator.GenerateSignal(indicators);
 
                 Console.WriteLine($"\n[{DateTime.Now:HH:mm:ss}] Market Analysis for {candle.symbol}");
-                Console.WriteLine($"  Current Price: {candle.result.close:F2}");
+                if (candle.result != null && candle.result.Count > 0)
+                {
+                    Console.WriteLine($"  Current Price: {candle.result[0].close:F2}");
+                }
                 Console.WriteLine("\nIndicator Values:");
                 Console.WriteLine($"  RSI(14): {indicators.RSI:F2}");
                 Console.WriteLine($"  MACD: {indicators.MACD:F2}");
@@ -593,7 +608,7 @@ namespace CCXT.Collector.Samples
         public decimal TotalValue { get; private set; }
         public decimal VWAP => TotalVolume > 0 ? TotalValue / TotalVolume : 0;
 
-        public void Update(SCompleteOrderItem trade)
+        public void Update(STradeItem trade)
         {
             if (trade.sideType == SideType.Bid)
                 BuyVolume += trade.quantity;
@@ -641,17 +656,20 @@ namespace CCXT.Collector.Samples
         public string Momentum { get; private set; } = string.Empty;
         public bool IsReady => buffer.Count >= 50;
 
-        public void Update(SCandlestick candle)
+        public void Update(SCandle candle)
         {
+            if (candle.result == null || candle.result.Count == 0) return;
+            
+            var candleItem = candle.result[0]; // Get first candle item
             var ohlc = new Ohlc
             {
-                openTime = candle.result.openTime,
-                closeTime = candle.result.closeTime,
-                Open = candle.result.open,
-                High = candle.result.high,
-                Low = candle.result.low,
-                Close = candle.result.close,
-                Volume = candle.result.volume
+                openTime = candleItem.openTime,
+                closeTime = candleItem.closeTime,
+                Open = candleItem.open,
+                High = candleItem.high,
+                Low = candleItem.low,
+                Close = candleItem.close,
+                Volume = candleItem.volume
             };
             buffer.Add(ohlc);
             if (buffer.Count > 100) buffer.RemoveAt(0);

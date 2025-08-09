@@ -73,13 +73,8 @@ namespace CCXT.Collector.Service
     /// <summary>
     /// Order data structure (주문 정보)
     /// </summary>
-    public class SOrder
+    public class SOrderItem
     {
-        /// <summary>
-        /// Exchange name
-        /// </summary>
-        public string exchange { get; set; }
-
         /// <summary>
         /// Order ID
         /// </summary>
@@ -230,13 +225,8 @@ namespace CCXT.Collector.Service
     /// <summary>
     /// Position data structure (포지션 - for futures/derivatives)
     /// </summary>
-    public class SPosition
+    public class SPositionItem
     {
-        /// <summary>
-        /// Exchange name
-        /// </summary>
-        public string exchange { get; set; }
-
         /// <summary>
         /// Position ID
         /// </summary>

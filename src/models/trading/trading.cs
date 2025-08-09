@@ -29,7 +29,7 @@ namespace CCXT.Collector.Service
     /// <summary>
     /// Trade/Complete order item
     /// </summary>
-    public class SCompleteOrderItem
+    public class STradeItem
     {
         /// <summary>
         /// Order/Trade ID
@@ -111,7 +111,7 @@ namespace CCXT.Collector.Service
     /// <summary>
     /// Complete orders/trades data structure
     /// </summary>
-    public class SCompleteOrders : SApiResult<List<SCompleteOrderItem>>
+    public class STrade : SApiResult<List<STradeItem>>
     {
         /// <summary>
         /// Exchange name

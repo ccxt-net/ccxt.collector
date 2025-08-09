@@ -1,5 +1,4 @@
-﻿using CCXT.Collector.Core.Abstractions;
-using CCXT.Collector.Library;
+﻿using CCXT.Collector.Library;
 using Newtonsoft.Json;
 using System.Collections.Generic;
 
@@ -68,9 +67,9 @@ namespace CCXT.Collector.Service
     /// <summary>
     ///
     /// </summary>
-    public class SOrderBook
+    public class SOrderBookData
     {
-        public SOrderBook()
+        public SOrderBookData()
         {
             this.asks = new List<SOrderBookItem>();
             this.bids = new List<SOrderBookItem>();
@@ -125,7 +124,7 @@ namespace CCXT.Collector.Service
     /// <summary>
     ///
     /// </summary>
-    public class SOrderBooks : SApiResult<SOrderBook>
+    public class SOrderBook : SApiResult<SOrderBookData>
     {
 #if DEBUG
         /// <summary>

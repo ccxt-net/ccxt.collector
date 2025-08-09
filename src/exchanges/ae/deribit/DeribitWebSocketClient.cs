@@ -28,7 +28,7 @@ namespace CCXT.Collector.Deribit
     /// </summary>
     public class DeribitWebSocketClient : WebSocketClientBase
     {
-        private readonly Dictionary<string, SOrderBooks> _orderbookCache;
+        private readonly Dictionary<string, SOrderBook> _orderbookCache;
 
         public override string ExchangeName => "Deribit";
         protected override string WebSocketUrl => "wss://www.deribit.com/ws/api/v2"; // TODO: Update with actual WebSocket URL
@@ -36,7 +36,7 @@ namespace CCXT.Collector.Deribit
 
         public DeribitWebSocketClient()
         {
-            _orderbookCache = new Dictionary<string, SOrderBooks>();
+            _orderbookCache = new Dictionary<string, SOrderBook>();
         }
 
         protected override async Task ProcessMessageAsync(string message, bool isPrivate = false)

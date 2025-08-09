@@ -6,7 +6,7 @@ namespace CCXT.Collector.Service
     /// <summary>
     /// Candlestick/K-Line data structure (캔들 데이터)
     /// </summary>
-    public class SCandlestick
+    public class SCandle
     {
         /// <summary>
         /// Exchange name
@@ -29,9 +29,9 @@ namespace CCXT.Collector.Service
         public long timestamp { get; set; }
 
         /// <summary>
-        /// Candle data
+        /// Candle data list
         /// </summary>
-        public SCandleItem result { get; set; }
+        public List<SCandleItem> result { get; set; }
     }
 
     /// <summary>

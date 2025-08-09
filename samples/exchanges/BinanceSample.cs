@@ -273,17 +273,21 @@ namespace CCXT.Collector.Samples.Exchanges
 
             _client.OnCandleReceived += (candle) =>
             {
-                if (candle.result != null)
+                if (candle.result != null && candle.result.Count > 0)
                 {
-                    _ohlcBuffer.Add(candle.result);
-                    if (_ohlcBuffer.Count > 50) _ohlcBuffer.RemoveAt(0);
+                    // Process each candle in the batch
+                    foreach (var candleItem in candle.result)
+                    {
+                        _ohlcBuffer.Add(candleItem);
+                        if (_ohlcBuffer.Count > 50) _ohlcBuffer.RemoveAt(0);
+                    }
 
                     Console.Clear();
                     Console.WriteLine($"BINANCE CANDLESTICK DATA - {candle.symbol}");
                     Console.WriteLine($"Interval: {candle.interval} | Time: {DateTime.Now:HH:mm:ss}");
                     Console.WriteLine(new string('=', 70));
 
-                    var c = candle.result;
+                    var c = candle.result[0]; // Display first candle
                     Console.WriteLine($"\nCurrent Candle:");
                     Console.WriteLine($"  Open:  ${c.open:F2}");
                     Console.WriteLine($"  High:  ${c.high:F2}");

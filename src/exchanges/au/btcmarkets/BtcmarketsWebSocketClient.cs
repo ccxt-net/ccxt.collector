@@ -27,7 +27,7 @@ namespace CCXT.Collector.Btcmarkets
     /// </summary>
     public class BtcmarketsWebSocketClient : WebSocketClientBase
     {
-        private readonly Dictionary<string, SOrderBooks> _orderbookCache;
+        private readonly Dictionary<string, SOrderBook> _orderbookCache;
 
         public override string ExchangeName => "Btcmarkets";
         protected override string WebSocketUrl => "wss://socket.btcmarkets.net/v2"; // TODO: Update with actual WebSocket URL
@@ -35,7 +35,7 @@ namespace CCXT.Collector.Btcmarkets
 
         public BtcmarketsWebSocketClient()
         {
-            _orderbookCache = new Dictionary<string, SOrderBooks>();
+            _orderbookCache = new Dictionary<string, SOrderBook>();
         }
 
         protected override async Task ProcessMessageAsync(string message, bool isPrivate = false)

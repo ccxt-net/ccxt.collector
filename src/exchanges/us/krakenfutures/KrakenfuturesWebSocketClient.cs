@@ -15,7 +15,7 @@ namespace CCXT.Collector.Krakenfutures
     /// </summary>
     public class KrakenfuturesWebSocketClient : WebSocketClientBase
     {
-        private readonly Dictionary<string, SOrderBooks> _orderbookCache;
+        private readonly Dictionary<string, SOrderBook> _orderbookCache;
 
         public override string ExchangeName => "Krakenfutures";
         protected override string WebSocketUrl => "wss://ws.krakenfutures.com"; // TODO: Update with actual WebSocket URL
@@ -23,7 +23,7 @@ namespace CCXT.Collector.Krakenfutures
 
         public KrakenfuturesWebSocketClient()
         {
-            _orderbookCache = new Dictionary<string, SOrderBooks>();
+            _orderbookCache = new Dictionary<string, SOrderBook>();
         }
 
         protected override async Task ProcessMessageAsync(string message, bool isPrivate = false)
