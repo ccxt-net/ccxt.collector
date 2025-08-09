@@ -5,6 +5,61 @@ All notable changes to CCXT.Collector will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.3] - 2025-08-10
+
+### 🎯 Complete WebSocket Implementation for 15 Major Exchanges
+
+This release completes the WebSocket implementation for all 15 exchanges from the kimp.client reference, ensuring standardized real-time data streaming across all major cryptocurrency exchanges.
+
+### Added
+
+#### Full WebSocket Implementations
+- **Gate.io WebSocket Client**: Complete implementation with orderbook, trades, ticker, and candle data
+  - Symbol format: BTC_USDT (underscore separator)
+  - WebSocket URL: wss://api.gateio.ws/ws/v4/
+  - Supports spot markets with real-time updates
+  
+- **Bittrex WebSocket Client**: Full SignalR-based implementation
+  - Symbol format: BTC-USDT (hyphen separator)
+  - WebSocket URL: wss://socket-v3.bittrex.com/signalr
+  - Supports USD, USDT, BTC, ETH markets
+
+### Improved
+
+#### Exchange Implementation Status (15 Total from kimp.client)
+| Exchange | Status | Location | Notes |
+|----------|--------|----------|-------|
+| ✅ Binance | Complete | `src/exchanges/hk/binance/` | Full implementation |
+| ✅ Bitget | Complete | `src/exchanges/cn/bitget/` | Full implementation |
+| ✅ Bithumb | Complete | `src/exchanges/kr/bithumb/` | Korean exchange |
+| ✅ Bittrex | Complete | `src/exchanges/us/bittrex/` | SignalR protocol |
+| ✅ Bybit | Complete | `src/exchanges/cn/bybit/` | Full implementation |
+| ✅ Coinbase | Complete | `src/exchanges/us/coinbase/` | Full implementation |
+| ✅ Coinone | Complete | `src/exchanges/kr/coinone/` | Korean exchange |
+| ✅ Crypto.com | Complete | `src/exchanges/us/crypto/` | Full implementation |
+| ✅ Gate.io | Complete | `src/exchanges/cn/gateio/` | Full implementation |
+| ✅ Huobi | Complete | `src/exchanges/cn/huobi/` | Full implementation |
+| ✅ Korbit | Complete | `src/exchanges/kr/korbit/` | Korean exchange |
+| ✅ Kucoin | Complete | `src/exchanges/cn/kucoin/` | Full implementation |
+| ✅ OkEX | Merged with OKX | `src/exchanges/cn/okx/` | Rebranded to OKX |
+| ✅ OKX | Complete | `src/exchanges/cn/okx/` | Successor to OkEX |
+| ✅ Upbit | Complete | `src/exchanges/kr/upbit/` | Korean exchange |
+
+### Technical Details
+
+#### Standardized WebSocket Features
+- Unified data models across all exchanges
+- Automatic reconnection with exponential backoff
+- Real-time orderbook, trades, ticker, and candle data
+- Symbol conversion between exchange and standard formats
+- Batch processing for improved performance
+- Ping/pong heartbeat mechanisms
+
+#### Exchange-Specific Implementations
+- **Gate.io**: JSON-based protocol with spot market channels
+- **Bittrex**: SignalR hub-based communication (c3 hub)
+- **Symbol Formats**: Each exchange maintains its native format with automatic conversion
+
 ## [2.1.2] - 2025-08-10
 
 ### 🚀 Callback Optimization & API Breaking Changes

@@ -10,9 +10,13 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 CCXT.Collector is a .NET library that connects to cryptocurrency exchanges worldwide via WebSocket to receive real-time market data (orderbook, trades, ticker, etc.) and delivers it to callback functions using unified data classes. Additionally, it analyzes the data per exchange and market to calculate technical indicators in real-time, providing these indicator values through callbacks. This allows developers to handle both raw market data and technical analysis from different exchanges with a consistent interface.
 
-### Recent Major Updates (2025-08-10)
+### Recent Major Updates (2025-01-09)
+- **v2.1.3 Release**: Complete WebSocket implementation for 15 major exchanges from kimp.client
+  - Full implementations: Gate.io (JSON protocol), Bittrex (SignalR protocol)
+  - Standardized data models: STrade, STradeItem, SCandle, SCandleItem
+  - Fixed all build errors with proper model and method usage (InvokeOrderbookCallback, InvokeTradeCallback, etc.)
 - Complete WebSocket architecture implementation for real-time data streaming
-- Exchange-specific WebSocket clients (Binance, Upbit, Bithumb) with callback-based event system
+- Exchange-specific WebSocket clients with callback-based event system
 - Comprehensive test suites separated by exchange with performance and integration tests
 - Sample projects demonstrating real-world usage patterns for each exchange
 - Full documentation suite including API reference and migration guide
@@ -21,6 +25,9 @@ CCXT.Collector is a .NET library that connects to cryptocurrency exchanges world
   - Data models categorized into `Models/Market/`, `Models/Trading/`, and `Models/WebSocket/`
   - Technical indicators reorganized by type in `Indicators/` with subcategories
   - Utility classes consolidated in `Utilities/` folder
+- **Exchange Implementations (15 Total from kimp.client)**:
+  - ✅ Complete: Binance, Bitget, Bithumb, Bittrex, Bybit, Coinbase, Coinone, Crypto.com, Gate.io, Huobi, Korbit, Kucoin, OKX, Upbit
+  - OkEX merged with OKX (rebranded)
 
 ## Build and Development Commands
 

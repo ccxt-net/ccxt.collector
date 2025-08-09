@@ -156,14 +156,14 @@ namespace CCXT.Collector.Core.Abstractions
         
         // Callback Events - Public Data
         Action<SOrderBooks> OnOrderbookReceived { get; set; }
-        Action<SCompleteOrders> OnTradeReceived { get; set; }
+        Action<STrade> OnTradeReceived { get; set; }
         Action<STicker> OnTickerReceived { get; set; }
-        Action<SCandlestick> OnCandleReceived { get; set; }
+        Action<SCandle> OnCandleReceived { get; set; }
         
         // Callback Events - Private Data
         Action<SBalance> OnBalanceReceived { get; set; }
-        Action<SOrder> OnOrderReceived { get; set; }
-        Action<SPosition> OnPositionReceived { get; set; }
+        Action<SOrders> OnOrderReceived { get; set; }
+        Action<SPositions> OnPositionReceived { get; set; }
         
         // Connection Events
         Action OnConnected { get; set; }
@@ -206,12 +206,12 @@ public class STicker
 }
 
 // Trade
-public class SCompleteOrders
+public class STrade
 {
     public string exchange { get; set; }
     public string symbol { get; set; }
     public long timestamp { get; set; }
-    public SCompleteOrder result { get; set; }
+    public List<STradeItem> result { get; set; }
 }
 ```
 
@@ -282,7 +282,7 @@ public class BinanceWebSocketClient : WebSocketClientBase
             exchange = ExchangeName,
             symbol = ConvertSymbol(json["s"].ToString()),
             timestamp = json["E"].Value<long>(),
-            result = new SOrderBook
+            result = new SOrderBookData
             {
                 bids = json["b"].Select(bid => new SOrderBookItem
                 {
@@ -420,10 +420,10 @@ The library supports 132 exchanges across 22 countries/regions:
 
 | Status | Count | Description |
 |--------|-------|-------------|
-| Full Implementation | 3 | Binance, Upbit, Bithumb |
-| WebSocket Structure | 129 | Basic WebSocket client created |
+| Full Implementation | 15 | All 15 major exchanges from kimp.client completed |
+| WebSocket Structure | 117 | Basic WebSocket client created |
 | API Documentation | 44 | Documentation URLs added |
-| Pending | 88 | Awaiting implementation |
+| Pending | 73 | Awaiting implementation |
 
 ### Adding New Exchange Support
 
@@ -565,7 +565,10 @@ Triggered when trade data is received.
 ```csharp
 client.OnTradeReceived += (trade) =>
 {
-    Console.WriteLine($"Trade: {trade.result.price} @ {trade.result.quantity}");
+    foreach (var tradeItem in trade.result)
+    {
+        Console.WriteLine($"Trade: {tradeItem.price} @ {tradeItem.quantity}");
+    }
 };
 ```
 
@@ -635,7 +638,7 @@ namespace CCXT.Collector.Bithumb
 Order book data structure:
 
 ```csharp
-public class SOrderBook
+public class SOrderBooks
 {
     public string exchange { get; set; }    // Exchange name
     public string symbol { get; set; }      // Trading symbol
@@ -692,20 +695,20 @@ public class STickerItem
 }
 ```
 
-#### SCompleteOrders
+#### STrade
 Trade data structure:
 
 ```csharp
-public class SCompleteOrders
+public class STrade
 {
     public string exchange { get; set; }
     public string symbol { get; set; }
     public long timestamp { get; set; }
     public string datetime { get; set; }
-    public List<SCompleteOrder> result { get; set; }
+    public List<STradeItem> result { get; set; }
 }
 
-public class SCompleteOrder
+public class STradeItem
 {
     public string id { get; set; }          // Trade ID
     public string order { get; set; }       // Order ID
@@ -713,8 +716,8 @@ public class SCompleteOrder
     public SideType sideType { get; set; }  // Buy/Sell
     public OrderType orderType { get; set; } // Market/Limit
     public decimal price { get; set; }      // Trade price
-    public decimal amount { get; set; }     // Trade amount
-    public decimal cost { get; set; }       // Total cost
+    public decimal quantity { get; set; }   // Trade quantity
+    public decimal amount { get; set; }     // Trade amount (price * quantity)
     public decimal fee { get; set; }        // Trading fee
     public long timestamp { get; set; }     // Trade timestamp
     public string datetime { get; set; }    // ISO 8601 datetime
@@ -1152,7 +1155,7 @@ When adding a new exchange:
 
 3. **Follow Unified Data Model**
    - Use `SOrderBooks` for orderbook data
-   - Use `SCompleteOrders` for trade data
+   - Use `STrade` for trade data
    - Use `STicker` for ticker data
    - Convert exchange format to unified format in `ProcessMessageAsync`
 

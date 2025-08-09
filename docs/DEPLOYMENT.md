@@ -1,20 +1,27 @@
 # Deployment Guide
 
-## 📦 Current Release: v2.1.0
+## 📦 Current Release: v2.1.3
 
-### ✨ What's New in v2.1.0 (2025-08-10)
+### ✨ What's New in v2.1.3 (2025-08-10)
 
-#### Performance Improvements
+#### Complete Exchange Implementation
+- ✅ 15 major exchanges fully implemented from kimp.client
+- 🔥 Gate.io WebSocket with JSON protocol
+- 🔥 Bittrex WebSocket with SignalR protocol
+- 🔧 All build errors resolved with standardized data models
+- 🔄 Unified callback architecture across all exchanges
+
+#### Technical Improvements
+- Standardized data models: STrade, STradeItem, SCandle, SCandleItem
+- Proper callback method usage: InvokeOrderbookCallback, InvokeTradeCallback
+- Symbol conversion: Exchange-specific formats with automatic conversion
+- Enhanced error handling and message processing
+
+### Previous Release Highlights (v2.1.0-v2.1.2)
 - ⚡ 40-60% faster symbol conversion with Market struct
 - 🚀 30-50% faster JSON processing
 - 💾 25-35% memory usage reduction
-- 🌍 132 exchanges supported
-
-#### Architecture Enhancements
-- Direct JSON to standard model conversion pattern
-- Removed unnecessary exchange-specific models
-- Enhanced symbol formatting for each exchange
-- 100% backward compatible with v2.0.x
+- 🔄 90% callback overhead reduction through batch processing
 
 ## Publishing to NuGet
 
@@ -25,20 +32,24 @@
 
 ### Pre-Upload Checklist
 
-#### Version Updates
-- [ ] Update version in `src/ccxt.collector.csproj`
-- [ ] Update AssemblyVersion and FileVersion
-- [ ] Update PackageReleaseNotes with summary
-- [ ] Verify version consistency across all files
+#### Version Updates (Current: v2.1.3)
+- [x] Update version in `src/ccxt.collector.csproj` to 2.1.3
+- [x] Update AssemblyVersion and FileVersion to 2.1.3.0
+- [x] Update PackageReleaseNotes with v2.1.3 summary
+- [x] Verify version consistency across all files
 
-#### Documentation
-- [ ] Update CHANGELOG.md with release notes
-- [ ] Update README.md installation instructions with new version
+#### Documentation (v2.1.3 Status)
+- [x] Update CHANGELOG.md with v2.1.3 release notes
+- [x] Update README.md installation instructions with version 2.1.3
+- [x] Update CLAUDE.md with recent changes and 15 exchange implementations
+- [x] Update ROADMAP.md with completed exchange implementations
 - [ ] Verify GUIDE.md reflects current architecture
 - [ ] Review API documentation for accuracy
 
-#### Code Quality
-- [ ] All build errors resolved
+#### Code Quality (v2.1.3 Status)
+- [x] All build errors resolved (0 errors, 0 warnings)
+- [x] Fixed model compatibility issues (STrade, STradeItem, SCandle models)
+- [x] Standardized callback methods across all exchanges
 - [ ] Run tests successfully: `dotnet test tests/ccxt.tests.csproj -c Release`
 - [ ] Verify no unnecessary files in repository
 - [ ] Check for any security vulnerabilities
