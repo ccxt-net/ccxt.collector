@@ -7,6 +7,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 	ProjectSection(SolutionItems) = preProject
 		.gitattributes = .gitattributes
 		.gitignore = .gitignore
+		.mcp.json = .mcp.json
+		CLAUDE.local.md = CLAUDE.local.md
+		CLAUDE.md = CLAUDE.md
 		LICENSE.txt = LICENSE.txt
 		README.md = README.md
 	EndProjectSection
@@ -25,12 +28,23 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ccxt.collector", "src\ccxt.
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "scripts", "scripts", "{BDE3F436-CA04-4841-8238-A62C56F39AEB}"
 	ProjectSection(SolutionItems) = preProject
-		scripts\build.ccxt.collector.sh = scripts\build.ccxt.collector.sh
-		scripts\publish.ccxt.collector.sh = scripts\publish.ccxt.collector.sh
-		scripts\restart-ccxt-collector.sh = scripts\restart-ccxt-collector.sh
+		scripts\nuget-config.ps1.example = scripts\nuget-config.ps1.example
+		scripts\publish-nuget.bat = scripts\publish-nuget.bat
+		scripts\publish-nuget.ps1 = scripts\publish-nuget.ps1
+		scripts\unlist-nuget.bat = scripts\unlist-nuget.bat
+		scripts\unlist-nuget.ps1 = scripts\unlist-nuget.ps1
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{C8D5274F-AC00-46C7-1F8D-E88E81087A52}"
+	ProjectSection(SolutionItems) = preProject
+		docs\API_REFERENCE.md = docs\API_REFERENCE.md
+		docs\ARCHITECTURE.md = docs\ARCHITECTURE.md
+		docs\CHANGELOG.md = docs\CHANGELOG.md
+		docs\CONTRIBUTING.md = docs\CONTRIBUTING.md
+		docs\DEPLOYMENT.md = docs\DEPLOYMENT.md
+		docs\MIGRATION_GUIDE.md = docs\MIGRATION_GUIDE.md
+		docs\ROADMAP.md = docs\ROADMAP.md
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ccxt.tests", "tests\ccxt.tests.csproj", "{C1A7AF2A-AFCE-7EF1-E7AD-D7CAAC3E437B}"
 EndProject

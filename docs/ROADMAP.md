@@ -154,7 +154,7 @@ To become the most comprehensive and reliable real-time cryptocurrency data aggr
 ## Technology Stack Evolution
 
 ### Current Stack
-- **Language**: C# (.NET 8.0)
+- **Language**: C# (.NET 8.0 / .NET 9.0)
 - **WebSocket**: Native ClientWebSocket
 - **Serialization**: Newtonsoft.Json
 - **Testing**: xUnit

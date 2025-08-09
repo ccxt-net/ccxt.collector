@@ -1,13 +1,10 @@
 # CCXT.Collector
 
 [![NuGet](https://img.shields.io/nuget/v/CCXT.Collector.svg)](https://www.nuget.org/packages/CCXT.Collector)
+[![.NET](https://img.shields.io/badge/.NET-8.0%20%7C%209.0-blue.svg)](https://dotnet.microsoft.com/)
 [![License](https://img.shields.io/github/license/ccxt-net/ccxt.collector)](https://github.com/ccxt-net/ccxt.collector/blob/master/LICENSE.txt)
-[![Build Status](https://img.shields.io/github/actions/workflow/status/ccxt-net/ccxt.collector/build.yml)](https://github.com/ccxt-net/ccxt.collector/actions)
-[![.NET](https://img.shields.io/badge/.NET-8.0%20|%209.0-512BD4)](https://dotnet.microsoft.com)
 
 A powerful .NET library for real-time cryptocurrency exchange data collection with unified WebSocket streaming and technical indicator analysis.
-
-[English](#english) | [한국어](#korean)
 
 ---
 
@@ -148,7 +145,9 @@ dotnet run
 ### Technical Indicator Analysis
 
 ```csharp
-using CCXT.Collector.Indicator;
+using CCXT.Collector.Indicators.Momentum;
+using CCXT.Collector.Indicators.Trend;
+using CCXT.Collector.Indicators.Volatility;
 using System;
 
 class TechnicalAnalysis
@@ -301,23 +300,45 @@ class MultiExchangeCollector
 ```
 CCXT.Collector/
 ├── src/
-│   ├── library/          # Core library components (CCXT.Collector.Library)
-│   │   ├── IWebSocketClient.cs      # WebSocket interface with callbacks
-│   │   ├── WebSocketClientBase.cs   # Base WebSocket implementation
-│   │   ├── config.cs                # Configuration management
-│   │   ├── restclient.cs            # REST API client
-│   │   └── ...                      # Factory, settings, extensions
-│   ├── service/          # Service layer (CCXT.Collector.Service)
-│   │   ├── orderbook.cs             # Order book data models
-│   │   ├── ticker.cs                # Ticker data models
-│   │   ├── trading.cs               # Trading data models
-│   │   ├── complete.cs              # Complete order models
-│   │   └── ...                      # OHLCV, account, candle models
-│   ├── indicator/        # Technical indicators (CCXT.Collector.Indicator)
-│   │   ├── IndicatorCalculatorBase.cs # Base indicator class
-│   │   ├── RSI.cs, MACD.cs, SMA.cs   # Momentum indicators
-│   │   ├── BollingerBand.cs, ATR.cs  # Volatility indicators
-│   │   └── ...                       # 25+ indicators total
+│   ├── Core/             # Core framework components
+│   │   ├── Abstractions/           # Interfaces and base classes
+│   │   │   ├── IWebSocketClient.cs # WebSocket interface
+│   │   │   └── WebSocketClientBase.cs # Base implementation
+│   │   ├── Configuration/          # Configuration management
+│   │   │   ├── config.cs           # Configuration classes
+│   │   │   └── settings.cs         # Application settings
+│   │   └── Infrastructure/         # Infrastructure components
+│   │       ├── factory.cs          # Factory patterns
+│   │       ├── logger.cs           # Logging infrastructure
+│   │       └── selector.cs         # Selector utilities
+│   ├── Models/           # Data models and structures
+│   │   ├── Market/                 # Market data models
+│   │   │   ├── orderbook.cs        # Order book structures
+│   │   │   ├── ticker.cs           # Ticker structures
+│   │   │   ├── ohlcv.cs            # OHLCV candle data
+│   │   │   └── candle.cs           # Candlestick data
+│   │   ├── Trading/                # Trading models
+│   │   │   ├── account.cs          # Account/balance
+│   │   │   ├── trading.cs          # Trading structures
+│   │   │   └── complete.cs         # Complete orders
+│   │   └── WebSocket/              # WebSocket models
+│   │       ├── apiResult.cs        # API results
+│   │       ├── wsResult.cs         # WebSocket results
+│   │       └── message.cs          # Message structures
+│   ├── Indicators/       # Technical indicators (organized by category)
+│   │   ├── Base/                   # Base indicator classes
+│   │   ├── Trend/                  # SMA, EMA, WMA, MACD, SAR
+│   │   ├── Momentum/               # RSI, CMO, ROC, TRIX
+│   │   ├── Volatility/             # BollingerBand, ATR, Envelope
+│   │   ├── Volume/                 # OBV, ADL, CMF, PVT, VROC
+│   │   ├── MarketStrength/         # ADX, Aroon, CCI, WPR
+│   │   ├── Advanced/               # Ichimoku
+│   │   └── Series/                 # Indicator series data
+│   ├── Utilities/        # Utility classes
+│   │   ├── extension.cs            # Extension methods
+│   │   ├── Statistics.cs           # Statistical calculations
+│   │   ├── Ohlc.cs                 # OHLC utilities
+│   │   └── logger.cs               # Logging utilities
 │   └── exchanges/        # Exchange implementations (by country code)
 │       ├── kr/           # South Korea (7 exchanges)
 │       │   ├── upbit/UpbitWebSocketClient.cs
@@ -363,7 +384,7 @@ CCXT.Collector/
 
 ## 🤝 Contributing
 
-We welcome contributions! Please see our [Contributing Guide](docs/CONTRIBUTING.md) for details.
+We welcome contributions! Please see our [Developer Guide](docs/GUIDE.md#contributing) for details.
 
 1. Fork the repository
 2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
@@ -377,12 +398,11 @@ This project is licensed under the MIT License - see the [LICENSE.txt](LICENSE.t
 
 ## 📚 Documentation
 
-- [API Reference](docs/API_REFERENCE.md) - Complete API documentation and examples
-- [Architecture](docs/ARCHITECTURE.md) - System design and technical details
+- [Developer Guide](docs/GUIDE.md) - Complete architecture, API reference, and contributing guide
 - [Deployment Guide](docs/DEPLOYMENT.md) - Production deployment instructions
 - [Roadmap & Tasks](docs/ROADMAP.md) - Development roadmap and current tasks
-- [Contributing](docs/CONTRIBUTING.md) - How to contribute to the project
 - [Changelog](docs/CHANGELOG.md) - Version history and migration guide
+- [Migration Guide](docs/MIGRATION_GUIDE.md) - Guide for migrating from v1.x to v2.0
 
 ## 🔗 Links
 

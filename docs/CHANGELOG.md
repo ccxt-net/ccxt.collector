@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Changed - Code Reorganization (2025-08-09)
+### Changed - Code Reorganization (2025-08-10)
 
 #### 📁 Complete Source Code Restructuring
 - **Core Framework** (`src/Core/`): Reorganized core components
@@ -55,7 +55,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Test projects and samples updated to use new namespaces
 - Complete.cs and other service models retained in CCXT.Collector.Service namespace for compatibility
 
-## [2.0.0] - 2025-08-09
+## [2.0.0] - 2025-08-10
 
 ### 🚀 Complete WebSocket Architecture Overhaul - 132 Exchange Support
 
