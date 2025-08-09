@@ -1,12 +1,35 @@
-﻿using CCXT.NET.Shared.Coin;
-using CCXT.NET.Shared.Coin.Types;
-using CCXT.NET.Shared.Configuration;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using System.Collections.Generic;
+using CCXT.Collector.Library;
 
 namespace CCXT.Collector.Service
 {
+    /// <summary>
+    /// Maker type enum
+    /// </summary>
+    public enum MakerType
+    {
+        Maker,
+        Taker,
+        Unknown
+    }
+
+
+    /// <summary>
+    /// Error code enum
+    /// </summary>
+    public enum ErrorCode
+    {
+        Success = 0,
+        InvalidRequest = 400,
+        Unauthorized = 401,
+        Forbidden = 403,
+        NotFound = 404,
+        ServerError = 500,
+        Unknown = -1
+    }
+
     /// <summary>
     ///
     /// </summary>
@@ -262,7 +285,8 @@ namespace CCXT.Collector.Service
         {
             get
             {
-                return CUnixTime.ConvertToUtcTimeMilli(timestamp).ToString("o");
+                var epoch = new System.DateTime(1970, 1, 1, 0, 0, 0, System.DateTimeKind.Utc);
+                return epoch.AddMilliseconds(timestamp).ToString("o");
             }
         }
 
@@ -349,9 +373,22 @@ namespace CCXT.Collector.Service
     }
 
     /// <summary>
+    /// Interface for API result
+    /// </summary>
+    public interface ISApiResult<T>
+    {
+        bool success { get; set; }
+        string message { get; set; }
+        int statusCode { get; set; }
+        ErrorCode errorCode { get; set; }
+        bool supported { get; set; }
+        T result { get; set; }
+    }
+
+    /// <summary>
     /// a market order list
     /// </summary>
-    public interface ISMyOrders : IApiResult<List<ISMyOrderItem>>
+    public interface ISMyOrders : ISApiResult<List<ISMyOrderItem>>
     {
         /// <summary>
         ///
@@ -412,33 +449,13 @@ namespace CCXT.Collector.Service
     /// <summary>
     /// a market order list
     /// </summary>
-    public class SMyOrders : ApiResult<List<ISMyOrderItem>>, ISMyOrders
+    public class SMyOrders : SApiResult<List<ISMyOrderItem>>, ISMyOrders
     {
-        /// <summary>
-        /// is success calling
-        /// </summary>
-        [JsonIgnore]
-        public override bool success
-        {
-            get;
-            set;
-        }
-
-        /// <summary>
-        /// error or success message
-        /// </summary>
-        [JsonIgnore]
-        public override string message
-        {
-            get;
-            set;
-        }
-
         /// <summary>
         /// status, error code
         /// </summary>
         [JsonIgnore]
-        public override int statusCode
+        public int statusCode
         {
             get;
             set;
@@ -448,7 +465,7 @@ namespace CCXT.Collector.Service
         ///
         /// </summary>
         [JsonIgnore]
-        public override ErrorCode errorCode
+        public ErrorCode errorCode
         {
             get;
             set;
@@ -458,7 +475,7 @@ namespace CCXT.Collector.Service
         /// check implemented
         /// </summary>
         [JsonIgnore]
-        public override bool supported
+        public bool supported
         {
             get;
             set;
@@ -467,7 +484,7 @@ namespace CCXT.Collector.Service
         /// <summary>
         ///
         /// </summary>
-        public string exchange
+        public new string exchange
         {
             get;
             set;
@@ -476,7 +493,7 @@ namespace CCXT.Collector.Service
         /// <summary>
         /// S, R
         /// </summary>
-        public string stream
+        public new string stream
         {
             get;
             set;
@@ -485,7 +502,7 @@ namespace CCXT.Collector.Service
         /// <summary>
         ///
         /// </summary>
-        public string symbol
+        public new string symbol
         {
             get;
             set;
@@ -494,7 +511,7 @@ namespace CCXT.Collector.Service
         /// <summary>
         ///
         /// </summary>
-        public string action
+        public new string action
         {
             get;
             set;
@@ -503,7 +520,7 @@ namespace CCXT.Collector.Service
         /// <summary>
         ///
         /// </summary>
-        public long sequentialId
+        public new long sequentialId
         {
             get;
             set;

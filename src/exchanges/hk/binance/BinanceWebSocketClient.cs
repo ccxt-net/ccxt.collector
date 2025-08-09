@@ -30,7 +30,7 @@ namespace CCXT.Collector.Binance
     {
         private readonly Dictionary<string, long> _lastUpdateIds;
         private readonly Dictionary<string, SOrderBooks> _orderbookCache;
-        private string _listenKey; // For user data stream
+        //private string _listenKey; // For user data stream
 
         public override string ExchangeName => "Binance";
         protected override string WebSocketUrl => "wss://stream.binance.com:9443/ws";
@@ -91,7 +91,7 @@ namespace CCXT.Collector.Binance
                                 await ProcessKline(json);
                                 break;
                             case "error":
-                                OnError?.Invoke($"Binance error: {json["m"]}");
+                                RaiseError($"Binance error: {json["m"]}");
                                 break;
                         }
                     }
@@ -104,7 +104,7 @@ namespace CCXT.Collector.Binance
             }
             catch (Exception ex)
             {
-                OnError?.Invoke($"Message processing error: {ex.Message}");
+                RaiseError($"Message processing error: {ex.Message}");
             }
         }
 
@@ -129,7 +129,7 @@ namespace CCXT.Collector.Binance
                     exchange = ExchangeName,
                     symbol = symbol,
                     timestamp = json["E"].Value<long>(),
-                    sequentialId = updateId.ToString(),
+                    sequentialId = updateId,
                     result = new SOrderBook
                     {
                         timestamp = json["E"].Value<long>(),
@@ -190,7 +190,7 @@ namespace CCXT.Collector.Binance
             }
             catch (Exception ex)
             {
-                OnError?.Invoke($"Orderbook processing error: {ex.Message}");
+                RaiseError($"Orderbook processing error: {ex.Message}");
             }
         }
 
@@ -203,15 +203,18 @@ namespace CCXT.Collector.Binance
                     exchange = ExchangeName,
                     symbol = ConvertSymbol(json["s"].ToString()),
                     timestamp = json["E"].Value<long>(),
-                    result = new SCompleteOrder
+                    result = new List<SCompleteOrderItem>
                     {
-                        orderId = json["t"].ToString(),
-                        timestamp = json["T"].Value<long>(),
-                        sideType = json["m"].Value<bool>() ? SideType.Ask : SideType.Bid,
-                        orderType = OrderType.Limit,
-                        price = json["p"].Value<decimal>(),
-                        quantity = json["q"].Value<decimal>(),
-                        amount = json["p"].Value<decimal>() * json["q"].Value<decimal>()
+                        new SCompleteOrderItem
+                        {
+                            orderId = json["t"].ToString(),
+                            timestamp = json["T"].Value<long>(),
+                            sideType = json["m"].Value<bool>() ? SideType.Ask : SideType.Bid,
+                            orderType = OrderType.Limit,
+                            price = json["p"].Value<decimal>(),
+                            quantity = json["q"].Value<decimal>(),
+                            amount = json["p"].Value<decimal>() * json["q"].Value<decimal>()
+                        }
                     }
                 };
 
@@ -219,7 +222,7 @@ namespace CCXT.Collector.Binance
             }
             catch (Exception ex)
             {
-                OnError?.Invoke($"Trade processing error: {ex.Message}");
+                RaiseError($"Trade processing error: {ex.Message}");
             }
         }
 
@@ -260,7 +263,7 @@ namespace CCXT.Collector.Binance
             }
             catch (Exception ex)
             {
-                OnError?.Invoke($"Ticker processing error: {ex.Message}");
+                RaiseError($"Ticker processing error: {ex.Message}");
             }
         }
 
@@ -293,7 +296,7 @@ namespace CCXT.Collector.Binance
             }
             catch (Exception ex)
             {
-                OnError?.Invoke($"Subscribe orderbook error: {ex.Message}");
+                RaiseError($"Subscribe orderbook error: {ex.Message}");
                 return false;
             }
         }
@@ -327,7 +330,7 @@ namespace CCXT.Collector.Binance
             }
             catch (Exception ex)
             {
-                OnError?.Invoke($"Subscribe trades error: {ex.Message}");
+                RaiseError($"Subscribe trades error: {ex.Message}");
                 return false;
             }
         }
@@ -361,7 +364,7 @@ namespace CCXT.Collector.Binance
             }
             catch (Exception ex)
             {
-                OnError?.Invoke($"Subscribe ticker error: {ex.Message}");
+                RaiseError($"Subscribe ticker error: {ex.Message}");
                 return false;
             }
         }
@@ -398,7 +401,7 @@ namespace CCXT.Collector.Binance
             }
             catch (Exception ex)
             {
-                OnError?.Invoke($"Unsubscribe error: {ex.Message}");
+                RaiseError($"Unsubscribe error: {ex.Message}");
                 return false;
             }
         }
@@ -484,7 +487,7 @@ namespace CCXT.Collector.Binance
             }
             catch (Exception ex)
             {
-                OnError?.Invoke($"Subscribe klines error: {ex.Message}");
+                RaiseError($"Subscribe klines error: {ex.Message}");
                 return false;
             }
         }
@@ -523,7 +526,7 @@ namespace CCXT.Collector.Binance
             }
             catch (Exception ex)
             {
-                OnError?.Invoke($"Kline processing error: {ex.Message}");
+                RaiseError($"Kline processing error: {ex.Message}");
             }
         }
 
@@ -584,7 +587,7 @@ namespace CCXT.Collector.Binance
             // Binance uses a REST API call to get a listenKey for user data stream
             // This is a placeholder - real implementation would call REST API
             // POST /api/v3/userDataStream to get listenKey
-            _listenKey = "placeholder_listen_key";
+            //_listenKey = "placeholder_listen_key";
             return null; // Binance doesn't send auth message, uses listenKey in URL
         }
 
@@ -592,7 +595,7 @@ namespace CCXT.Collector.Binance
         {
             if (!IsAuthenticated)
             {
-                OnError?.Invoke("Not authenticated. Please connect with API credentials.");
+                RaiseError("Not authenticated. Please connect with API credentials.");
                 return false;
             }
 
@@ -605,7 +608,7 @@ namespace CCXT.Collector.Binance
         {
             if (!IsAuthenticated)
             {
-                OnError?.Invoke("Not authenticated. Please connect with API credentials.");
+                RaiseError("Not authenticated. Please connect with API credentials.");
                 return false;
             }
 
@@ -652,7 +655,7 @@ namespace CCXT.Collector.Binance
             }
             catch (Exception ex)
             {
-                OnError?.Invoke($"Account update processing error: {ex.Message}");
+                RaiseError($"Account update processing error: {ex.Message}");
             }
         }
 
@@ -683,7 +686,7 @@ namespace CCXT.Collector.Binance
             }
             catch (Exception ex)
             {
-                OnError?.Invoke($"Balance update processing error: {ex.Message}");
+                RaiseError($"Balance update processing error: {ex.Message}");
             }
         }
 
@@ -718,7 +721,7 @@ namespace CCXT.Collector.Binance
             }
             catch (Exception ex)
             {
-                OnError?.Invoke($"Order update processing error: {ex.Message}");
+                RaiseError($"Order update processing error: {ex.Message}");
             }
         }
 

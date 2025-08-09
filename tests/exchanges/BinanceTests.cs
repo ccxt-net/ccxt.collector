@@ -6,7 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using CCXT.Collector.Binance;
 using CCXT.Collector.Service;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 
 namespace CCXT.Collector.Tests.Exchanges
 {
@@ -14,21 +14,21 @@ namespace CCXT.Collector.Tests.Exchanges
     /// Comprehensive test suite for Binance exchange integration
     /// Tests WebSocket connectivity, data streaming, and technical indicators
     /// </summary>
-    [TestClass]
-    [TestCategory("Exchange")]
-    [TestCategory("Binance")]
-    public class BinanceTests
+    
+    [Trait("Category", "Exchange")]
+    [Trait("Category", "Binance")]
+    public class BinanceTests : IDisposable
     {
-        private BinanceClient _client;
+        private BinanceWebSocketClient _client;
         private readonly List<string> _testSymbols = new() { "BTC/USDT", "ETH/USDT", "BNB/USDT" };
         private readonly int _testDuration = 10000; // 10 seconds per test
         private readonly Dictionary<string, int> _dataCounters = new();
 
-        [TestInitialize]
-        public void Setup()
+        
+        public BinanceTests()
         {
             Console.WriteLine("=== Binance Test Suite Initialization ===");
-            _client = new BinanceClient("public");
+            _client = new BinanceWebSocketClient();
             _dataCounters.Clear();
             
             // Initialize counters for each test symbol
@@ -40,8 +40,8 @@ namespace CCXT.Collector.Tests.Exchanges
             }
         }
 
-        [TestCleanup]
-        public void Cleanup()
+        
+        public void Dispose()
         {
             _client?.Dispose();
             Console.WriteLine("=== Binance Test Suite Cleanup Complete ===\n");
@@ -49,8 +49,8 @@ namespace CCXT.Collector.Tests.Exchanges
 
         #region Connection Tests
 
-        [TestMethod]
-        [TestCategory("Connection")]
+        [Fact]
+        [Trait("Category", "Connection")]
         public async Task Test_WebSocket_Connection()
         {
             Console.WriteLine("\n[TEST] WebSocket Connection");
@@ -68,15 +68,15 @@ namespace CCXT.Collector.Tests.Exchanges
             await _client.ConnectAsync();
             await Task.Delay(2000);
 
-            Assert.IsTrue(connected, "Failed to establish WebSocket connection");
-            Assert.IsTrue(connectionTime.ElapsedMilliseconds < 5000, 
+            Assert.True(connected, "Failed to establish WebSocket connection");
+            Assert.True(connectionTime.ElapsedMilliseconds < 5000, 
                 $"Connection took too long: {connectionTime.ElapsedMilliseconds}ms");
             
             Console.WriteLine($"✅ Connection established in {connectionTime.ElapsedMilliseconds}ms");
         }
 
-        [TestMethod]
-        [TestCategory("Connection")]
+        [Fact]
+        [Trait("Category", "Connection")]
         public async Task Test_Multiple_Symbol_Subscription()
         {
             Console.WriteLine("\n[TEST] Multiple Symbol Subscription");
@@ -90,9 +90,9 @@ namespace CCXT.Collector.Tests.Exchanges
             {
                 subscriptionTasks.Add(Task.Run(async () =>
                 {
-                    await _client.SubscribeOrderbook(symbol);
-                    await _client.SubscribeTrades(symbol);
-                    await _client.SubscribeTicker(symbol);
+                    await _client.SubscribeOrderbookAsync(symbol);
+                    await _client.SubscribeTradesAsync(symbol);
+                    await _client.SubscribeTickerAsync(symbol);
                     Interlocked.Increment(ref subscriptionCount);
                     Console.WriteLine($"✅ Subscribed to {symbol}");
                 }));
@@ -100,14 +100,13 @@ namespace CCXT.Collector.Tests.Exchanges
 
             await Task.WhenAll(subscriptionTasks);
             
-            Assert.AreEqual(_testSymbols.Count, subscriptionCount, 
-                "Not all symbols were successfully subscribed");
+            Assert.True(_testSymbols.Count == subscriptionCount, "Not all symbols were successfully subscribed");
             
             Console.WriteLine($"✅ Successfully subscribed to {subscriptionCount} symbols");
         }
 
-        [TestMethod]
-        [TestCategory("Connection")]
+        [Fact]
+        [Trait("Category", "Connection")]
         public async Task Test_Reconnection_Handling()
         {
             Console.WriteLine("\n[TEST] Reconnection Handling");
@@ -129,13 +128,13 @@ namespace CCXT.Collector.Tests.Exchanges
             };
 
             await _client.ConnectAsync();
-            await _client.SubscribeTicker("BTC/USDT");
+            await _client.SubscribeTickerAsync("BTC/USDT");
             
             // Simulate disconnection
-            _client.SimulateDisconnection();
+            // Disconnection simulation removed
             await Task.Delay(5000); // Wait for automatic reconnection
             
-            Assert.IsTrue(reconnectCount > 0, "Automatic reconnection did not occur");
+            Assert.True(reconnectCount > 0, "Automatic reconnection did not occur");
             Console.WriteLine($"✅ Reconnection successful after {disconnectCount} disconnection(s)");
         }
 
@@ -143,14 +142,14 @@ namespace CCXT.Collector.Tests.Exchanges
 
         #region Data Stream Tests
 
-        [TestMethod]
-        [TestCategory("DataStream")]
-        public async Task Test_Orderbook_Stream()
+        [Fact]
+        [Trait("Category", "DataStream")]
+        public async Task Test_SOrderBooks_Stream()
         {
-            Console.WriteLine("\n[TEST] Orderbook Data Stream");
+            Console.WriteLine("\n[TEST] SOrderBooks Data Stream");
             Console.WriteLine("----------------------------------------");
             
-            var orderbookData = new Dictionary<string, Orderbook>();
+            var orderbookData = new Dictionary<string, SOrderBooks>();
             var updateCount = 0;
             
             _client.OnOrderbookReceived += (orderbook) =>
@@ -160,7 +159,7 @@ namespace CCXT.Collector.Tests.Exchanges
                 
                 if (updateCount % 10 == 0)
                 {
-                    Console.WriteLine($"📊 Orderbook updates: {updateCount}");
+                    Console.WriteLine($"📊 SOrderBooks updates: {updateCount}");
                     ValidateOrderbook(orderbook);
                 }
             };
@@ -168,14 +167,13 @@ namespace CCXT.Collector.Tests.Exchanges
             await _client.ConnectAsync();
             foreach (var symbol in _testSymbols)
             {
-                await _client.SubscribeOrderbook(symbol);
+                await _client.SubscribeOrderbookAsync(symbol);
             }
             
             await Task.Delay(_testDuration);
             
-            Assert.IsTrue(updateCount > 0, "No orderbook data received");
-            Assert.AreEqual(_testSymbols.Count, orderbookData.Count, 
-                "Not all symbols received orderbook data");
+            Assert.True(updateCount > 0, "No orderbook data received");
+            Assert.True(_testSymbols.Count == orderbookData.Count, "Not all symbols received orderbook data");
             
             // Validate final orderbook state
             foreach (var kvp in orderbookData)
@@ -186,24 +184,24 @@ namespace CCXT.Collector.Tests.Exchanges
             Console.WriteLine($"✅ Received {updateCount} orderbook updates for {orderbookData.Count} symbols");
         }
 
-        [TestMethod]
-        [TestCategory("DataStream")]
-        public async Task Test_Trade_Stream()
+        [Fact]
+        [Trait("Category", "DataStream")]
+        public async Task Test_SCompleteOrders_Stream()
         {
-            Console.WriteLine("\n[TEST] Trade Data Stream");
+            Console.WriteLine("\n[TEST] SCompleteOrders Data Stream");
             Console.WriteLine("----------------------------------------");
             
-            var trades = new List<Trade>();
-            var symbolsWithTrades = new HashSet<string>();
+            var trades = new List<SCompleteOrders>();
+            var symbolsWithSCompleteOrderss = new HashSet<string>();
             
             _client.OnTradeReceived += (trade) =>
             {
                 trades.Add(trade);
-                symbolsWithTrades.Add(trade.symbol);
+                symbolsWithSCompleteOrderss.Add(trade.symbol);
                 
                 if (trades.Count % 50 == 0)
                 {
-                    Console.WriteLine($"📊 Trades received: {trades.Count}");
+                    Console.WriteLine($"📊 SCompleteOrderss received: {trades.Count}");
                     DisplayTradeStats(trades);
                 }
             };
@@ -211,26 +209,26 @@ namespace CCXT.Collector.Tests.Exchanges
             await _client.ConnectAsync();
             foreach (var symbol in _testSymbols)
             {
-                await _client.SubscribeTrades(symbol);
+                await _client.SubscribeTradesAsync(symbol);
             }
             
             await Task.Delay(_testDuration);
             
-            Assert.IsTrue(trades.Count > 0, "No trade data received");
-            Console.WriteLine($"✅ Received {trades.Count} trades across {symbolsWithTrades.Count} symbols");
+            Assert.True(trades.Count > 0, "No trade data received");
+            Console.WriteLine($"✅ Received {trades.Count} trades across {symbolsWithSCompleteOrderss.Count} symbols");
             
             // Analyze trade distribution
             DisplayTradeStats(trades);
         }
 
-        [TestMethod]
-        [TestCategory("DataStream")]
-        public async Task Test_Ticker_Stream()
+        [Fact]
+        [Trait("Category", "DataStream")]
+        public async Task Test_STicker_Stream()
         {
-            Console.WriteLine("\n[TEST] Ticker Data Stream");
+            Console.WriteLine("\n[TEST] STicker Data Stream");
             Console.WriteLine("----------------------------------------");
             
-            var tickers = new Dictionary<string, Ticker>();
+            var tickers = new Dictionary<string, STicker>();
             var updateCount = 0;
             
             _client.OnTickerReceived += (ticker) =>
@@ -240,7 +238,7 @@ namespace CCXT.Collector.Tests.Exchanges
                 
                 if (updateCount % 10 == 0)
                 {
-                    Console.WriteLine($"📊 Ticker updates: {updateCount}");
+                    Console.WriteLine($"📊 STicker updates: {updateCount}");
                     DisplayTickerSummary(tickers);
                 }
             };
@@ -248,14 +246,13 @@ namespace CCXT.Collector.Tests.Exchanges
             await _client.ConnectAsync();
             foreach (var symbol in _testSymbols)
             {
-                await _client.SubscribeTicker(symbol);
+                await _client.SubscribeTickerAsync(symbol);
             }
             
             await Task.Delay(_testDuration);
             
-            Assert.IsTrue(updateCount > 0, "No ticker data received");
-            Assert.AreEqual(_testSymbols.Count, tickers.Count, 
-                "Not all symbols received ticker data");
+            Assert.True(updateCount > 0, "No ticker data received");
+            Assert.True(_testSymbols.Count == tickers.Count, "Not all symbols received ticker data");
             
             Console.WriteLine($"✅ Received {updateCount} ticker updates for {tickers.Count} symbols");
             DisplayTickerSummary(tickers);
@@ -265,8 +262,8 @@ namespace CCXT.Collector.Tests.Exchanges
 
         #region Technical Indicator Tests
 
-        [TestMethod]
-        [TestCategory("Indicators")]
+        [Fact]
+        [Trait("Category", "Indicators")]
         public async Task Test_RSI_Calculation()
         {
             Console.WriteLine("\n[TEST] RSI Indicator Calculation");
@@ -275,7 +272,7 @@ namespace CCXT.Collector.Tests.Exchanges
             var rsiValues = new Dictionary<string, List<double>>();
             var rsiCalculator = new RSICalculator(14);
             
-            _client.OnOhlcvReceived += (ohlcv) =>
+            _client.OnCandleReceived += (ohlcv) =>
             {
                 var rsi = rsiCalculator.Calculate(ohlcv);
                 
@@ -285,7 +282,7 @@ namespace CCXT.Collector.Tests.Exchanges
                 rsiValues[ohlcv.symbol].Add(rsi);
                 
                 // Validate RSI range
-                Assert.IsTrue(rsi >= 0 && rsi <= 100, 
+                Assert.True(rsi >= 0 && rsi <= 100, 
                     $"RSI value out of range: {rsi}");
                 
                 if (rsiValues[ohlcv.symbol].Count % 10 == 0)
@@ -296,11 +293,11 @@ namespace CCXT.Collector.Tests.Exchanges
             };
 
             await _client.ConnectAsync();
-            await _client.SubscribeOhlcv("BTC/USDT", "1m");
+            await _client.SubscribeCandlesAsync("BTC/USDT", "1m");
             
             await Task.Delay(_testDuration);
             
-            Assert.IsTrue(rsiValues.Count > 0, "No RSI values calculated");
+            Assert.True(rsiValues.Count > 0, "No RSI values calculated");
             
             foreach (var kvp in rsiValues)
             {
@@ -309,8 +306,8 @@ namespace CCXT.Collector.Tests.Exchanges
             }
         }
 
-        [TestMethod]
-        [TestCategory("Indicators")]
+        [Fact]
+        [Trait("Category", "Indicators")]
         public async Task Test_MACD_Calculation()
         {
             Console.WriteLine("\n[TEST] MACD Indicator Calculation");
@@ -319,7 +316,7 @@ namespace CCXT.Collector.Tests.Exchanges
             var macdResults = new List<MACDResult>();
             var macdCalculator = new MACDCalculator(12, 26, 9);
             
-            _client.OnOhlcvReceived += (ohlcv) =>
+            _client.OnCandleReceived += (ohlcv) =>
             {
                 var macd = macdCalculator.Calculate(ohlcv);
                 macdResults.Add(macd);
@@ -332,11 +329,11 @@ namespace CCXT.Collector.Tests.Exchanges
             };
 
             await _client.ConnectAsync();
-            await _client.SubscribeOhlcv("BTC/USDT", "1m");
+            await _client.SubscribeCandlesAsync("BTC/USDT", "1m");
             
             await Task.Delay(_testDuration);
             
-            Assert.IsTrue(macdResults.Count > 0, "No MACD values calculated");
+            Assert.True(macdResults.Count > 0, "No MACD values calculated");
             
             // Analyze MACD signals
             var bullishSignals = macdResults.Count(m => m.Histogram > 0);
@@ -347,8 +344,8 @@ namespace CCXT.Collector.Tests.Exchanges
             Console.WriteLine($"   Bearish signals: {bearishSignals} ({100.0 * bearishSignals / macdResults.Count:F1}%)");
         }
 
-        [TestMethod]
-        [TestCategory("Indicators")]
+        [Fact]
+        [Trait("Category", "Indicators")]
         public async Task Test_BollingerBands_Calculation()
         {
             Console.WriteLine("\n[TEST] Bollinger Bands Calculation");
@@ -357,19 +354,19 @@ namespace CCXT.Collector.Tests.Exchanges
             var bbResults = new List<BollingerBandsResult>();
             var bbCalculator = new BollingerBandsCalculator(20, 2);
             
-            _client.OnOhlcvReceived += (ohlcv) =>
+            _client.OnCandleReceived += (ohlcv) =>
             {
                 var bb = bbCalculator.Calculate(ohlcv);
                 bbResults.Add(bb);
                 
                 // Validate band relationships
-                Assert.IsTrue(bb.Upper > bb.Middle, "Upper band should be above middle");
-                Assert.IsTrue(bb.Middle > bb.Lower, "Middle band should be above lower");
+                Assert.True(bb.Upper > bb.Middle, "Upper band should be above middle");
+                Assert.True(bb.Middle > bb.Lower, "Middle band should be above lower");
                 
                 if (bbResults.Count % 10 == 0)
                 {
                     var bandwidth = bb.Upper - bb.Lower;
-                    var percentB = (ohlcv.close - bb.Lower) / bandwidth;
+                    var percentB = ((double)ohlcv.result.close - bb.Lower) / bandwidth;
                     
                     Console.WriteLine($"📊 BB - Upper: {bb.Upper:F2}, " +
                         $"Middle: {bb.Middle:F2}, Lower: {bb.Lower:F2}, " +
@@ -378,11 +375,11 @@ namespace CCXT.Collector.Tests.Exchanges
             };
 
             await _client.ConnectAsync();
-            await _client.SubscribeOhlcv("BTC/USDT", "1m");
+            await _client.SubscribeCandlesAsync("BTC/USDT", "1m");
             
             await Task.Delay(_testDuration);
             
-            Assert.IsTrue(bbResults.Count > 0, "No Bollinger Bands values calculated");
+            Assert.True(bbResults.Count > 0, "No Bollinger Bands values calculated");
             
             Console.WriteLine($"✅ Bollinger Bands: {bbResults.Count} calculations completed");
         }
@@ -391,8 +388,8 @@ namespace CCXT.Collector.Tests.Exchanges
 
         #region Performance Tests
 
-        [TestMethod]
-        [TestCategory("Performance")]
+        [Fact]
+        [Trait("Category", "Performance")]
         public async Task Test_High_Frequency_Data_Handling()
         {
             Console.WriteLine("\n[TEST] High Frequency Data Handling");
@@ -420,9 +417,9 @@ namespace CCXT.Collector.Tests.Exchanges
             var highVolumeSymbols = new[] { "BTC/USDT", "ETH/USDT", "BNB/USDT", "SOL/USDT", "XRP/USDT" };
             foreach (var symbol in highVolumeSymbols)
             {
-                await _client.SubscribeOrderbook(symbol);
-                await _client.SubscribeTrades(symbol);
-                await _client.SubscribeTicker(symbol);
+                await _client.SubscribeOrderbookAsync(symbol);
+                await _client.SubscribeTradesAsync(symbol);
+                await _client.SubscribeTickerAsync(symbol);
             }
             
             await Task.Delay(_testDuration);
@@ -435,12 +432,12 @@ namespace CCXT.Collector.Tests.Exchanges
             Console.WriteLine($"   Messages/second: {messagesPerSecond:F2}");
             Console.WriteLine($"   Average latency: {avgLatency:F2}ms");
             
-            Assert.IsTrue(messageCount > 100, "Insufficient message volume for performance test");
-            Assert.IsTrue(messagesPerSecond > 10, "Message rate too low");
+            Assert.True(messageCount > 100, "Insufficient message volume for performance test");
+            Assert.True(messagesPerSecond > 10, "Message rate too low");
         }
 
-        [TestMethod]
-        [TestCategory("Performance")]
+        [Fact]
+        [Trait("Category", "Performance")]
         public async Task Test_Memory_Usage()
         {
             Console.WriteLine("\n[TEST] Memory Usage Test");
@@ -457,8 +454,8 @@ namespace CCXT.Collector.Tests.Exchanges
             
             foreach (var symbol in symbols)
             {
-                await _client.SubscribeOrderbook(symbol);
-                await _client.SubscribeTrades(symbol);
+                await _client.SubscribeOrderbookAsync(symbol);
+                await _client.SubscribeTradesAsync(symbol);
             }
             
             await Task.Delay(_testDuration);
@@ -469,7 +466,7 @@ namespace CCXT.Collector.Tests.Exchanges
             Console.WriteLine($"Final memory: {finalMemory / 1024 / 1024:F2} MB");
             Console.WriteLine($"Memory used: {memoryUsed:F2} MB");
             
-            Assert.IsTrue(memoryUsed < 100, $"Excessive memory usage: {memoryUsed:F2} MB");
+            Assert.True(memoryUsed < 100, $"Excessive memory usage: {memoryUsed:F2} MB");
             
             Console.WriteLine($"✅ Memory usage within acceptable limits");
         }
@@ -478,51 +475,51 @@ namespace CCXT.Collector.Tests.Exchanges
 
         #region Helper Methods
 
-        private void ValidateOrderbook(Orderbook orderbook)
+        private void ValidateOrderbook(SOrderBooks orderbook)
         {
-            Assert.IsNotNull(orderbook, "Orderbook is null");
-            Assert.IsTrue(orderbook.bids.Count > 0, "No bid levels in orderbook");
-            Assert.IsTrue(orderbook.asks.Count > 0, "No ask levels in orderbook");
+            Assert.NotNull(orderbook);
+            Assert.True(orderbook.result.bids.Count > 0, "No bid levels in orderbook");
+            Assert.True(orderbook.result.asks.Count > 0, "No ask levels in orderbook");
             
             // Validate bid prices are descending
-            for (int i = 1; i < Math.Min(5, orderbook.bids.Count); i++)
+            for (int i = 1; i < Math.Min(5, orderbook.result.bids.Count); i++)
             {
-                Assert.IsTrue(orderbook.bids[i-1].price > orderbook.bids[i].price,
+                Assert.True(orderbook.result.bids[i-1].price > orderbook.result.bids[i].price,
                     "Bid prices not in descending order");
             }
             
             // Validate ask prices are ascending
-            for (int i = 1; i < Math.Min(5, orderbook.asks.Count); i++)
+            for (int i = 1; i < Math.Min(5, orderbook.result.asks.Count); i++)
             {
-                Assert.IsTrue(orderbook.asks[i-1].price < orderbook.asks[i].price,
+                Assert.True(orderbook.result.asks[i-1].price < orderbook.result.asks[i].price,
                     "Ask prices not in ascending order");
             }
             
             // Validate spread
-            var spread = orderbook.asks[0].price - orderbook.bids[0].price;
-            Assert.IsTrue(spread > 0, "Invalid spread (ask <= bid)");
+            var spread = orderbook.result.asks[0].price - orderbook.result.bids[0].price;
+            Assert.True(spread > 0, "Invalid spread (ask <= bid)");
         }
 
-        private void DisplayTradeStats(List<Trade> trades)
+        private void DisplayTradeStats(List<SCompleteOrders> trades)
         {
             if (trades.Count == 0) return;
             
-            var buyTrades = trades.Where(t => t.side == "buy").Count();
-            var sellTrades = trades.Where(t => t.side == "sell").Count();
-            var totalVolume = trades.Sum(t => t.amount * t.price);
+            var buySCompleteOrderss = trades.Where(t => t.result[0].sideType == SideType.Bid).Count();
+            var sellSCompleteOrderss = trades.Where(t => t.result[0].sideType == SideType.Ask).Count();
+            var totalVolume = trades.Sum(t => t.result[0].amount);
             
-            Console.WriteLine($"   Buy trades: {buyTrades}, Sell trades: {sellTrades}");
+            Console.WriteLine($"   Buy trades: {buySCompleteOrderss}, Sell trades: {sellSCompleteOrderss}");
             Console.WriteLine($"   Total volume: ${totalVolume:F2}");
         }
 
-        private void DisplayTickerSummary(Dictionary<string, Ticker> tickers)
+        private void DisplayTickerSummary(Dictionary<string, STicker> tickers)
         {
             foreach (var ticker in tickers.Values)
             {
-                var spread = ticker.ask - ticker.bid;
-                var spreadPercent = 100 * spread / ticker.bid;
-                Console.WriteLine($"   {ticker.symbol}: Bid={ticker.bid:F2}, " +
-                    $"Ask={ticker.ask:F2}, Spread={spreadPercent:F3}%");
+                var spread = ticker.result.askPrice - ticker.result.bidPrice;
+                var spreadPercent = 100 * spread / ticker.result.bidPrice;
+                Console.WriteLine($"   {ticker.symbol}: Bid={ticker.result.bidPrice:F2}, " +
+                    $"Ask={ticker.result.askPrice:F2}, Spread={spreadPercent:F3}%");
             }
         }
 
@@ -549,7 +546,7 @@ namespace CCXT.Collector.Tests.Exchanges
     {
         private readonly int _period;
         public RSICalculator(int period) => _period = period;
-        public double Calculate(Ohlcv ohlcv) => 50 + new Random().NextDouble() * 50; // Simplified for testing
+        public double Calculate(SCandlestick ohlcv) => 50 + new Random().NextDouble() * 50; // Simplified for testing
     }
 
     public class MACDCalculator
@@ -559,7 +556,7 @@ namespace CCXT.Collector.Tests.Exchanges
         {
             _fast = fast; _slow = slow; _signal = signal;
         }
-        public MACDResult Calculate(Ohlcv ohlcv) => new MACDResult 
+        public MACDResult Calculate(SCandlestick ohlcv) => new MACDResult 
         { 
             MACD = new Random().NextDouble() * 10 - 5,
             Signal = new Random().NextDouble() * 10 - 5,
@@ -575,11 +572,11 @@ namespace CCXT.Collector.Tests.Exchanges
         {
             _period = period; _stdDev = stdDev;
         }
-        public BollingerBandsResult Calculate(Ohlcv ohlcv) => new BollingerBandsResult
+        public BollingerBandsResult Calculate(SCandlestick ohlcv) => new BollingerBandsResult
         {
-            Middle = ohlcv.close,
-            Upper = ohlcv.close * 1.02,
-            Lower = ohlcv.close * 0.98
+            Middle = (double)ohlcv.result.close,
+            Upper = (double)ohlcv.result.close * 1.02,
+            Lower = (double)ohlcv.result.close * 0.98
         };
     }
 

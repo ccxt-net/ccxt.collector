@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using CCXT.Collector.Library;
 using CCXT.Collector.Service;
@@ -83,7 +82,7 @@ namespace CCXT.Collector.Upbit
                                 await ProcessPosition(json);
                                 break;
                             case "error":
-                                OnError?.Invoke($"Upbit private error: {json["message"]}");
+                                RaiseError($"Upbit private error: {json["message"]}");
                                 break;
                         }
                     }
@@ -105,7 +104,7 @@ namespace CCXT.Collector.Upbit
                                 await ProcessCandle(json);
                                 break;
                             case "error":
-                                OnError?.Invoke($"Upbit error: {json["message"]}");
+                                RaiseError($"Upbit error: {json["message"]}");
                                 break;
                         }
                     }
@@ -113,7 +112,7 @@ namespace CCXT.Collector.Upbit
             }
             catch (Exception ex)
             {
-                OnError?.Invoke($"Message processing error: {ex.Message}");
+                RaiseError($"Message processing error: {ex.Message}");
             }
         }
 
@@ -129,7 +128,7 @@ namespace CCXT.Collector.Upbit
                     exchange = ExchangeName,
                     symbol = symbol,
                     timestamp = json["timestamp"].Value<long>(),
-                    sequentialId = json["total_ask_size"]?.ToString() ?? "0",
+                    sequentialId = json["total_ask_size"]?.Value<long>() ?? 0,
                     result = new SOrderBook
                     {
                         timestamp = json["timestamp"].Value<long>(),
@@ -182,7 +181,7 @@ namespace CCXT.Collector.Upbit
             }
             catch (Exception ex)
             {
-                OnError?.Invoke($"Orderbook processing error: {ex.Message}");
+                RaiseError($"Orderbook processing error: {ex.Message}");
             }
         }
 
@@ -198,15 +197,18 @@ namespace CCXT.Collector.Upbit
                     exchange = ExchangeName,
                     symbol = symbol,
                     timestamp = json["timestamp"].Value<long>(),
-                    result = new SCompleteOrder
+                    result = new List<SCompleteOrderItem>
                     {
-                        orderId = json["sequential_id"]?.ToString() ?? Guid.NewGuid().ToString(),
-                        timestamp = json["timestamp"].Value<long>(),
-                        sideType = json["ask_bid"].ToString() == "ASK" ? SideType.Ask : SideType.Bid,
-                        orderType = OrderType.Limit,
-                        price = json["trade_price"].Value<decimal>(),
-                        quantity = json["trade_volume"].Value<decimal>(),
-                        amount = json["trade_price"].Value<decimal>() * json["trade_volume"].Value<decimal>()
+                        new SCompleteOrderItem
+                        {
+                            orderId = json["sequential_id"]?.ToString() ?? Guid.NewGuid().ToString(),
+                            timestamp = json["timestamp"].Value<long>(),
+                            sideType = json["ask_bid"].ToString() == "ASK" ? SideType.Ask : SideType.Bid,
+                            orderType = OrderType.Limit,
+                            price = json["trade_price"].Value<decimal>(),
+                            quantity = json["trade_volume"].Value<decimal>(),
+                            amount = json["trade_price"].Value<decimal>() * json["trade_volume"].Value<decimal>()
+                        }
                     }
                 };
 
@@ -214,7 +216,7 @@ namespace CCXT.Collector.Upbit
             }
             catch (Exception ex)
             {
-                OnError?.Invoke($"Trade processing error: {ex.Message}");
+                RaiseError($"Trade processing error: {ex.Message}");
             }
         }
 
@@ -265,7 +267,7 @@ namespace CCXT.Collector.Upbit
             }
             catch (Exception ex)
             {
-                OnError?.Invoke($"Ticker processing error: {ex.Message}");
+                RaiseError($"Ticker processing error: {ex.Message}");
             }
         }
 
@@ -296,7 +298,7 @@ namespace CCXT.Collector.Upbit
             }
             catch (Exception ex)
             {
-                OnError?.Invoke($"Subscribe orderbook error: {ex.Message}");
+                RaiseError($"Subscribe orderbook error: {ex.Message}");
                 return false;
             }
         }
@@ -328,7 +330,7 @@ namespace CCXT.Collector.Upbit
             }
             catch (Exception ex)
             {
-                OnError?.Invoke($"Subscribe trades error: {ex.Message}");
+                RaiseError($"Subscribe trades error: {ex.Message}");
                 return false;
             }
         }
@@ -360,7 +362,7 @@ namespace CCXT.Collector.Upbit
             }
             catch (Exception ex)
             {
-                OnError?.Invoke($"Subscribe ticker error: {ex.Message}");
+                RaiseError($"Subscribe ticker error: {ex.Message}");
                 return false;
             }
         }
@@ -381,7 +383,7 @@ namespace CCXT.Collector.Upbit
             }
             catch (Exception ex)
             {
-                OnError?.Invoke($"Unsubscribe error: {ex.Message}");
+                RaiseError($"Unsubscribe error: {ex.Message}");
                 return false;
             }
         }
@@ -484,7 +486,7 @@ namespace CCXT.Collector.Upbit
             }
             catch (Exception ex)
             {
-                OnError?.Invoke($"Candle processing error: {ex.Message}");
+                RaiseError($"Candle processing error: {ex.Message}");
             }
         }
 
@@ -516,7 +518,7 @@ namespace CCXT.Collector.Upbit
             }
             catch (Exception ex)
             {
-                OnError?.Invoke($"Subscribe candles error: {ex.Message}");
+                RaiseError($"Subscribe candles error: {ex.Message}");
                 return false;
             }
         }
@@ -601,7 +603,7 @@ namespace CCXT.Collector.Upbit
             }
             catch (Exception ex)
             {
-                OnError?.Invoke($"Balance processing error: {ex.Message}");
+                RaiseError($"Balance processing error: {ex.Message}");
             }
         }
 
@@ -636,7 +638,7 @@ namespace CCXT.Collector.Upbit
             }
             catch (Exception ex)
             {
-                OnError?.Invoke($"Order processing error: {ex.Message}");
+                RaiseError($"Order processing error: {ex.Message}");
             }
         }
 
@@ -694,7 +696,7 @@ namespace CCXT.Collector.Upbit
         {
             if (!IsAuthenticated)
             {
-                OnError?.Invoke("Not authenticated. Please connect with API credentials.");
+                RaiseError("Not authenticated. Please connect with API credentials.");
                 return false;
             }
 
@@ -721,7 +723,7 @@ namespace CCXT.Collector.Upbit
             }
             catch (Exception ex)
             {
-                OnError?.Invoke($"Subscribe balance error: {ex.Message}");
+                RaiseError($"Subscribe balance error: {ex.Message}");
                 return false;
             }
         }
@@ -730,7 +732,7 @@ namespace CCXT.Collector.Upbit
         {
             if (!IsAuthenticated)
             {
-                OnError?.Invoke("Not authenticated. Please connect with API credentials.");
+                RaiseError("Not authenticated. Please connect with API credentials.");
                 return false;
             }
 
@@ -757,7 +759,7 @@ namespace CCXT.Collector.Upbit
             }
             catch (Exception ex)
             {
-                OnError?.Invoke($"Subscribe orders error: {ex.Message}");
+                RaiseError($"Subscribe orders error: {ex.Message}");
                 return false;
             }
         }

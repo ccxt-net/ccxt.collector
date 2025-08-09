@@ -6,7 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using CCXT.Collector.Bithumb;
 using CCXT.Collector.Service;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 
 namespace CCXT.Collector.Tests.Exchanges
 {
@@ -14,25 +14,25 @@ namespace CCXT.Collector.Tests.Exchanges
     /// Comprehensive test suite for Bithumb exchange integration
     /// Tests payment coins, market depth, arbitrage opportunities, and Korean market features
     /// </summary>
-    [TestClass]
-    [TestCategory("Exchange")]
-    [TestCategory("Bithumb")]
-    public class BithumbTests
+    
+    [Trait("Category", "Exchange")]
+    [Trait("Category", "Bithumb")]
+    public class BithumbTests : IDisposable
     {
-        private BithumbClient _client;
+        private BithumbWebSocketClient _client;
         private readonly List<string> _majorPairs = new() { "BTC/KRW", "ETH/KRW", "XRP/KRW" };
         private readonly List<string> _paymentCoins = new() { "XRP/KRW", "TRX/KRW", "ADA/KRW", "DOGE/KRW" };
         private readonly int _testDuration = 10000; // 10 seconds per test
 
-        [TestInitialize]
-        public void Setup()
+        
+        public BithumbTests()
         {
             Console.WriteLine("=== Bithumb Test Suite Initialization ===");
-            _client = new BithumbClient("public");
+            _client = new BithumbWebSocketClient();
         }
 
-        [TestCleanup]
-        public void Cleanup()
+        
+        public void Dispose()
         {
             _client?.Dispose();
             Console.WriteLine("=== Bithumb Test Suite Cleanup Complete ===\n");
@@ -40,8 +40,8 @@ namespace CCXT.Collector.Tests.Exchanges
 
         #region Connection Tests
 
-        [TestMethod]
-        [TestCategory("Connection")]
+        [Fact]
+        [Trait("Category", "Connection")]
         public async Task Test_Basic_Connection()
         {
             Console.WriteLine("\n[TEST] Basic WebSocket Connection");
@@ -51,25 +51,19 @@ namespace CCXT.Collector.Tests.Exchanges
             var connectionAttempts = 0;
             var connectionTime = Stopwatch.StartNew();
             
-            _client.OnConnectionAttempt += () => connectionAttempts++;
-            _client.OnConnected += () =>
-            {
-                connected = true;
-                connectionTime.Stop();
-            };
-
+            
             await _client.ConnectAsync();
             await Task.Delay(3000);
 
-            Assert.IsTrue(connected, "Failed to establish connection to Bithumb");
-            Assert.AreEqual(1, connectionAttempts, "Multiple connection attempts detected");
+            Assert.True(connected, "Failed to establish connection to Bithumb");
+            Assert.True(1 == connectionAttempts, "Multiple connection attempts detected");
             
             Console.WriteLine($"✅ Connected successfully in {connectionTime.ElapsedMilliseconds}ms");
             Console.WriteLine($"   Connection attempts: {connectionAttempts}");
         }
 
-        [TestMethod]
-        [TestCategory("Connection")]
+        [Fact]
+        [Trait("Category", "Connection")]
         public async Task Test_Payment_Coin_Subscription()
         {
             Console.WriteLine("\n[TEST] Payment Coin Channel Subscription");
@@ -78,11 +72,7 @@ namespace CCXT.Collector.Tests.Exchanges
             var subscribedChannels = new HashSet<string>();
             var dataReceived = new Dictionary<string, int>();
             
-            _client.OnChannelSubscribed += (channel) =>
-            {
-                subscribedChannels.Add(channel);
-                Console.WriteLine($"✅ Subscribed to channel: {channel}");
-            };
+            
             
             _client.OnTickerReceived += (ticker) =>
             {
@@ -96,13 +86,13 @@ namespace CCXT.Collector.Tests.Exchanges
             
             foreach (var coin in _paymentCoins)
             {
-                await _client.SubscribeTicker(coin);
+                await _client.SubscribeTickerAsync(coin);
             }
             
             await Task.Delay(_testDuration);
             
-            Assert.IsTrue(subscribedChannels.Count > 0, "No channels subscribed");
-            Assert.IsTrue(dataReceived.Count > 0, "No payment coin data received");
+            Assert.True(subscribedChannels.Count > 0, "No channels subscribed");
+            Assert.True(dataReceived.Count > 0, "No payment coin data received");
             
             Console.WriteLine($"\n📊 Payment Coin Data Summary:");
             foreach (var kvp in dataReceived)
@@ -111,8 +101,8 @@ namespace CCXT.Collector.Tests.Exchanges
             }
         }
 
-        [TestMethod]
-        [TestCategory("Connection")]
+        [Fact]
+        [Trait("Category", "Connection")]
         public async Task Test_Error_Recovery()
         {
             Console.WriteLine("\n[TEST] Error Recovery Mechanism");
@@ -129,30 +119,25 @@ namespace CCXT.Collector.Tests.Exchanges
                 Console.WriteLine($"❌ Error #{errorCount}: {error}");
             };
             
-            _client.OnRecovery += () =>
-            {
-                recoveryCount++;
-                Console.WriteLine($"✅ Recovery #{recoveryCount} successful");
-            };
+            
 
             await _client.ConnectAsync();
             
             // Subscribe to invalid symbol to trigger error
             try
             {
-                await _client.SubscribeTicker("INVALID/KRW");
+                await _client.SubscribeTickerAsync("INVALID/KRW");
             }
             catch { }
             
             // Subscribe to valid symbol to test recovery
-            await _client.SubscribeTicker("BTC/KRW");
+            await _client.SubscribeTickerAsync("BTC/KRW");
             
             await Task.Delay(5000);
             
             if (errorCount > 0)
             {
-                Assert.AreEqual(errorCount, recoveryCount, 
-                    "Not all errors were recovered");
+                Assert.True(errorCount == recoveryCount, "Not all errors were recovered");
                 Console.WriteLine($"✅ All {errorCount} errors recovered successfully");
             }
             else
@@ -165,8 +150,8 @@ namespace CCXT.Collector.Tests.Exchanges
 
         #region Payment Coin Tests
 
-        [TestMethod]
-        [TestCategory("PaymentCoins")]
+        [Fact]
+        [Trait("Category", "PaymentCoins")]
         public async Task Test_Payment_Coin_Analysis()
         {
             Console.WriteLine("\n[TEST] Payment Coin Comprehensive Analysis");
@@ -190,9 +175,9 @@ namespace CCXT.Collector.Tests.Exchanges
                     }
                     
                     var analysis = paymentCoinData[ticker.symbol];
-                    analysis.Prices.Add(ticker.last);
-                    analysis.Volumes.Add(ticker.baseVolume);
-                    analysis.Spreads.Add(ticker.ask - ticker.bid);
+                    analysis.Prices.Add(ticker.result.closePrice);
+                    analysis.Volumes.Add(ticker.result.volume);
+                    analysis.Spreads.Add(ticker.result.askPrice - ticker.result.bidPrice);
                     analysis.UpdateCount++;
                 }
             };
@@ -201,7 +186,7 @@ namespace CCXT.Collector.Tests.Exchanges
             
             foreach (var coin in _paymentCoins)
             {
-                await _client.SubscribeTicker(coin);
+                await _client.SubscribeTickerAsync(coin);
             }
             
             await Task.Delay(_testDuration);
@@ -229,11 +214,11 @@ namespace CCXT.Collector.Tests.Exchanges
                 Console.WriteLine($"      Classification: {classification}");
             }
             
-            Assert.IsTrue(paymentCoinData.Count > 0, "No payment coin data collected");
+            Assert.True(paymentCoinData.Count > 0, "No payment coin data collected");
         }
 
-        [TestMethod]
-        [TestCategory("PaymentCoins")]
+        [Fact]
+        [Trait("Category", "PaymentCoins")]
         public async Task Test_Payment_Coin_Correlation()
         {
             Console.WriteLine("\n[TEST] Payment Coin Correlation Analysis");
@@ -248,7 +233,7 @@ namespace CCXT.Collector.Tests.Exchanges
                 {
                     if (previousPrices.ContainsKey(ticker.symbol))
                     {
-                        var movement = (double)((ticker.last - previousPrices[ticker.symbol]) 
+                        var movement = (double)((ticker.result.closePrice - previousPrices[ticker.symbol]) 
                             / previousPrices[ticker.symbol] * 100);
                         
                         if (!priceMovements.ContainsKey(ticker.symbol))
@@ -257,7 +242,7 @@ namespace CCXT.Collector.Tests.Exchanges
                         priceMovements[ticker.symbol].Add(movement);
                     }
                     
-                    previousPrices[ticker.symbol] = ticker.last;
+                    previousPrices[ticker.symbol] = ticker.result.closePrice;
                 }
             };
 
@@ -265,7 +250,7 @@ namespace CCXT.Collector.Tests.Exchanges
             
             foreach (var coin in _paymentCoins)
             {
-                await _client.SubscribeTicker(coin);
+                await _client.SubscribeTickerAsync(coin);
             }
             
             await Task.Delay(_testDuration);
@@ -285,7 +270,7 @@ namespace CCXT.Collector.Tests.Exchanges
                     Console.WriteLine($"      → Strong negative correlation");
             }
             
-            Assert.IsTrue(priceMovements.Count >= 2, 
+            Assert.True(priceMovements.Count >= 2, 
                 "Insufficient data for correlation analysis");
         }
 
@@ -293,9 +278,9 @@ namespace CCXT.Collector.Tests.Exchanges
 
         #region Market Depth Tests
 
-        [TestMethod]
-        [TestCategory("MarketDepth")]
-        public async Task Test_Orderbook_Depth_Analysis()
+        [Fact]
+        [Trait("Category", "MarketDepth")]
+        public async Task Test_SOrderBooks_Depth_Analysis()
         {
             Console.WriteLine("\n[TEST] Market Depth Analysis");
             Console.WriteLine("----------------------------------------");
@@ -318,8 +303,8 @@ namespace CCXT.Collector.Tests.Exchanges
                 var analysis = depthAnalysis[orderbook.symbol];
                 
                 // Calculate total bid/ask depth (top 10 levels)
-                var bidDepth = orderbook.bids.Take(10).Sum(b => b.quantity * b.price);
-                var askDepth = orderbook.asks.Take(10).Sum(a => a.quantity * a.price);
+                var bidDepth = orderbook.result.bids.Take(10).Sum(b => b.quantity * b.price);
+                var askDepth = orderbook.result.asks.Take(10).Sum(a => a.quantity * a.price);
                 var imbalance = (double)((bidDepth - askDepth) / (bidDepth + askDepth));
                 
                 analysis.BidDepths.Add(bidDepth);
@@ -339,7 +324,7 @@ namespace CCXT.Collector.Tests.Exchanges
             
             foreach (var pair in _majorPairs)
             {
-                await _client.SubscribeOrderbook(pair);
+                await _client.SubscribeOrderbookAsync(pair);
             }
             
             await Task.Delay(_testDuration);
@@ -364,11 +349,11 @@ namespace CCXT.Collector.Tests.Exchanges
                 Console.WriteLine($"      Market Condition: {marketCondition}");
             }
             
-            Assert.IsTrue(depthAnalysis.Count > 0, "No market depth data collected");
+            Assert.True(depthAnalysis.Count > 0, "No market depth data collected");
         }
 
-        [TestMethod]
-        [TestCategory("MarketDepth")]
+        [Fact]
+        [Trait("Category", "MarketDepth")]
         public async Task Test_Liquidity_Analysis()
         {
             Console.WriteLine("\n[TEST] Liquidity Analysis");
@@ -392,11 +377,11 @@ namespace CCXT.Collector.Tests.Exchanges
                 var metrics = liquidityData[orderbook.symbol];
                 
                 // Calculate spread
-                var spread = orderbook.asks[0].price - orderbook.bids[0].price;
+                var spread = orderbook.result.asks[0].price - orderbook.result.bids[0].price;
                 metrics.SpreadHistory.Add(spread);
                 
                 // Calculate depth
-                var totalLevels = orderbook.bids.Count + orderbook.asks.Count;
+                var totalLevels = orderbook.result.bids.Count + orderbook.result.asks.Count;
                 metrics.DepthHistory.Add(totalLevels);
                 
                 // Estimate slippage for a standard order size
@@ -411,7 +396,7 @@ namespace CCXT.Collector.Tests.Exchanges
             
             foreach (var pair in _majorPairs)
             {
-                await _client.SubscribeOrderbook(pair);
+                await _client.SubscribeOrderbookAsync(pair);
             }
             
             await Task.Delay(_testDuration);
@@ -434,15 +419,15 @@ namespace CCXT.Collector.Tests.Exchanges
                 Console.WriteLine($"      Liquidity Score: {liquidityScore}/10");
             }
             
-            Assert.IsTrue(liquidityData.Count > 0, "No liquidity data collected");
+            Assert.True(liquidityData.Count > 0, "No liquidity data collected");
         }
 
         #endregion
 
         #region Arbitrage Tests
 
-        [TestMethod]
-        [TestCategory("Arbitrage")]
+        [Fact]
+        [Trait("Category", "Arbitrage")]
         public async Task Test_Cross_Exchange_Arbitrage()
         {
             Console.WriteLine("\n[TEST] Cross-Exchange Arbitrage Detection");
@@ -461,11 +446,11 @@ namespace CCXT.Collector.Tests.Exchanges
             
             _client.OnTickerReceived += (ticker) =>
             {
-                bithumbPrices[ticker.symbol] = ticker.last;
+                bithumbPrices[ticker.symbol] = ticker.result.closePrice;
                 
                 if (externalPrices.ContainsKey(ticker.symbol))
                 {
-                    var priceDiff = ticker.last - externalPrices[ticker.symbol];
+                    var priceDiff = ticker.result.closePrice - externalPrices[ticker.symbol];
                     var percentDiff = (priceDiff / externalPrices[ticker.symbol]) * 100;
                     
                     if (Math.Abs(percentDiff) > 0.5m) // 0.5% threshold
@@ -473,7 +458,7 @@ namespace CCXT.Collector.Tests.Exchanges
                         var opportunity = new ArbitrageOpportunity
                         {
                             Symbol = ticker.symbol,
-                            BithumbPrice = ticker.last,
+                            BithumbPrice = ticker.result.closePrice,
                             ExternalPrice = externalPrices[ticker.symbol],
                             PriceDifference = priceDiff,
                             PercentDifference = percentDiff,
@@ -484,7 +469,7 @@ namespace CCXT.Collector.Tests.Exchanges
                         
                         Console.WriteLine($"🎯 Arbitrage Opportunity Detected!");
                         Console.WriteLine($"   Symbol: {ticker.symbol}");
-                        Console.WriteLine($"   Bithumb: ₩{ticker.last:N0}");
+                        Console.WriteLine($"   Bithumb: ₩{ticker.result.closePrice:N0}");
                         Console.WriteLine($"   External: ₩{externalPrices[ticker.symbol]:N0}");
                         Console.WriteLine($"   Difference: {percentDiff:F2}%");
                     }
@@ -495,7 +480,7 @@ namespace CCXT.Collector.Tests.Exchanges
             
             foreach (var pair in _majorPairs)
             {
-                await _client.SubscribeTicker(pair);
+                await _client.SubscribeTickerAsync(pair);
             }
             
             await Task.Delay(_testDuration);
@@ -509,11 +494,11 @@ namespace CCXT.Collector.Tests.Exchanges
                 Console.WriteLine($"   Average profit potential: {avgProfit:F2}%");
             }
             
-            Assert.IsTrue(bithumbPrices.Count > 0, "No price data collected");
+            Assert.True(bithumbPrices.Count > 0, "No price data collected");
         }
 
-        [TestMethod]
-        [TestCategory("Arbitrage")]
+        [Fact]
+        [Trait("Category", "Arbitrage")]
         public async Task Test_Triangular_Arbitrage()
         {
             Console.WriteLine("\n[TEST] Triangular Arbitrage Detection");
@@ -524,7 +509,7 @@ namespace CCXT.Collector.Tests.Exchanges
             
             _client.OnTickerReceived += (ticker) =>
             {
-                prices[ticker.symbol] = ticker.last;
+                prices[ticker.symbol] = ticker.result.closePrice;
                 
                 // Check for triangular arbitrage opportunity
                 // Example: KRW -> BTC -> ETH -> KRW
@@ -571,7 +556,7 @@ namespace CCXT.Collector.Tests.Exchanges
             var triangularPairs = new[] { "BTC/KRW", "ETH/KRW", "XRP/KRW" };
             foreach (var pair in triangularPairs)
             {
-                await _client.SubscribeTicker(pair);
+                await _client.SubscribeTickerAsync(pair);
             }
             
             await Task.Delay(_testDuration);
@@ -585,15 +570,15 @@ namespace CCXT.Collector.Tests.Exchanges
                 Console.WriteLine($"   Max profit potential: {maxProfit:F3}%");
             }
             
-            Assert.IsTrue(prices.Count > 0, "No price data collected");
+            Assert.True(prices.Count > 0, "No price data collected");
         }
 
         #endregion
 
         #region Performance Tests
 
-        [TestMethod]
-        [TestCategory("Performance")]
+        [Fact]
+        [Trait("Category", "Performance")]
         public async Task Test_Data_Throughput()
         {
             Console.WriteLine("\n[TEST] Data Throughput Test");
@@ -603,11 +588,7 @@ namespace CCXT.Collector.Tests.Exchanges
             var byteCount = 0L;
             var startTime = DateTime.UtcNow;
             
-            _client.OnRawMessage += (message) =>
-            {
-                Interlocked.Increment(ref messageCount);
-                Interlocked.Add(ref byteCount, message.Length);
-            };
+            
 
             await _client.ConnectAsync();
             
@@ -615,9 +596,9 @@ namespace CCXT.Collector.Tests.Exchanges
             var allPairs = _majorPairs.Concat(_paymentCoins).Distinct();
             foreach (var pair in allPairs)
             {
-                await _client.SubscribeOrderbook(pair);
-                await _client.SubscribeTicker(pair);
-                await _client.SubscribeTrades(pair);
+                await _client.SubscribeOrderbookAsync(pair);
+                await _client.SubscribeTickerAsync(pair);
+                await _client.SubscribeTradesAsync(pair);
             }
             
             await Task.Delay(_testDuration);
@@ -632,12 +613,12 @@ namespace CCXT.Collector.Tests.Exchanges
             Console.WriteLine($"   Data rate: {mbPerSecond:F3} MB/s");
             Console.WriteLine($"   Avg message size: {byteCount / Math.Max(1, messageCount)} bytes");
             
-            Assert.IsTrue(messageCount > 0, "No messages received");
-            Assert.IsTrue(messagesPerSecond > 5, "Throughput too low");
+            Assert.True(messageCount > 0, "No messages received");
+            Assert.True(messagesPerSecond > 5, "Throughput too low");
         }
 
-        [TestMethod]
-        [TestCategory("Performance")]
+        [Fact]
+        [Trait("Category", "Performance")]
         public async Task Test_CPU_Usage()
         {
             Console.WriteLine("\n[TEST] CPU Usage Test");
@@ -652,9 +633,9 @@ namespace CCXT.Collector.Tests.Exchanges
             // Heavy subscription load
             foreach (var pair in _majorPairs.Concat(_paymentCoins))
             {
-                await _client.SubscribeOrderbook(pair);
-                await _client.SubscribeTicker(pair);
-                await _client.SubscribeTrades(pair);
+                await _client.SubscribeOrderbookAsync(pair);
+                await _client.SubscribeTickerAsync(pair);
+                await _client.SubscribeTradesAsync(pair);
             }
             
             await Task.Delay(_testDuration);
@@ -671,7 +652,7 @@ namespace CCXT.Collector.Tests.Exchanges
             Console.WriteLine($"   Wall time: {totalMs:F2}ms");
             Console.WriteLine($"   CPU usage: {cpuUsagePercent:F2}%");
             
-            Assert.IsTrue(cpuUsagePercent < 50, 
+            Assert.True(cpuUsagePercent < 50, 
                 $"Excessive CPU usage: {cpuUsagePercent:F2}%");
         }
 
@@ -742,12 +723,12 @@ namespace CCXT.Collector.Tests.Exchanges
             return (double)sameDirection / minCount;
         }
 
-        private decimal EstimateSlippage(Orderbook orderbook, decimal orderSize)
+        private decimal EstimateSlippage(SOrderBooks orderbook, decimal orderSize)
         {
             var totalCost = 0m;
             var remaining = orderSize;
             
-            foreach (var ask in orderbook.asks)
+            foreach (var ask in orderbook.result.asks)
             {
                 if (remaining <= 0) break;
                 
@@ -757,7 +738,7 @@ namespace CCXT.Collector.Tests.Exchanges
             }
             
             var avgPrice = totalCost / orderSize;
-            var bestPrice = orderbook.asks[0].price;
+            var bestPrice = orderbook.result.asks[0].price;
             return ((avgPrice - bestPrice) / bestPrice) * 100;
         }
 

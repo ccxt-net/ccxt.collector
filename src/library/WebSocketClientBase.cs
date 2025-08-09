@@ -39,7 +39,7 @@ namespace CCXT.Collector.Library
 
         #region Events - Public Data
 
-        public event Action<STickers> OnTickerReceived;
+        public event Action<STicker> OnTickerReceived;
         public event Action<SCompleteOrders> OnTradeReceived;
         public event Action<SOrderBooks> OnOrderbookReceived;
         public event Action<SCandlestick> OnCandleReceived;
@@ -107,7 +107,7 @@ namespace CCXT.Collector.Library
             }
             catch (Exception ex)
             {
-                OnError?.Invoke($"Connection failed: {ex.Message}");
+                RaiseError($"Connection failed: {ex.Message}");
                 await HandleReconnectAsync();
                 return false;
             }
@@ -161,7 +161,7 @@ namespace CCXT.Collector.Library
             }
             catch (Exception ex)
             {
-                OnError?.Invoke($"Authentication failed: {ex.Message}");
+                RaiseError($"Authentication failed: {ex.Message}");
                 return false;
             }
         }
@@ -189,7 +189,7 @@ namespace CCXT.Collector.Library
             }
             catch (Exception ex)
             {
-                OnError?.Invoke($"Disconnect error: {ex.Message}");
+                RaiseError($"Disconnect error: {ex.Message}");
             }
         }
 
@@ -214,11 +214,11 @@ namespace CCXT.Collector.Library
                     {
                         result = await socket.ReceiveAsync(buffer, _cancellationTokenSource.Token);
                         
-                        if (result.MessageType == WebSocketMessageType.Data)
+                        if (result.MessageType == System.Net.WebSockets.WebSocketMessageType.Text)
                         {
                             messageBuilder.Append(Encoding.UTF8.GetString(buffer.Array, 0, result.Count));
                         }
-                        else if (result.MessageType == WebSocketMessageType.Error)
+                        else if (result.MessageType == System.Net.WebSockets.WebSocketMessageType.Close)
                         {
                             await HandleDisconnectAsync();
                             return;
@@ -235,7 +235,7 @@ namespace CCXT.Collector.Library
             }
             catch (Exception ex)
             {
-                OnError?.Invoke($"Receive error: {ex.Message}");
+                RaiseError($"Receive error: {ex.Message}");
                 await HandleReconnectAsync();
             }
         }
@@ -248,7 +248,7 @@ namespace CCXT.Collector.Library
             
             if (socket?.State != WebSocketState.Open)
             {
-                OnError?.Invoke("Cannot send message: Not connected");
+                RaiseError("Cannot send message: Not connected");
                 return;
             }
 
@@ -257,11 +257,11 @@ namespace CCXT.Collector.Library
             {
                 var bytes = Encoding.UTF8.GetBytes(message);
                 await socket.SendAsync(new ArraySegment<byte>(bytes), 
-                    WebSocketMessageType.Text, true, _cancellationTokenSource.Token);
+                    System.Net.WebSockets.WebSocketMessageType.Text, true, _cancellationTokenSource.Token);
             }
             catch (Exception ex)
             {
-                OnError?.Invoke($"Send error: {ex.Message}");
+                RaiseError($"Send error: {ex.Message}");
                 await HandleReconnectAsync();
             }
             finally
@@ -285,7 +285,7 @@ namespace CCXT.Collector.Library
             }
             catch (Exception ex)
             {
-                OnError?.Invoke($"Ping error: {ex.Message}");
+                RaiseError($"Ping error: {ex.Message}");
             }
         }
 
@@ -305,12 +305,12 @@ namespace CCXT.Collector.Library
         {
             if (_reconnectAttempts >= _maxReconnectAttempts)
             {
-                OnError?.Invoke($"Max reconnection attempts ({_maxReconnectAttempts}) reached");
+                RaiseError($"Max reconnection attempts ({_maxReconnectAttempts}) reached");
                 return;
             }
 
             _reconnectAttempts++;
-            OnError?.Invoke($"Reconnecting... Attempt {_reconnectAttempts}/{_maxReconnectAttempts}");
+            RaiseError($"Reconnecting... Attempt {_reconnectAttempts}/{_maxReconnectAttempts}");
             
             await Task.Delay(_reconnectDelayMs * _reconnectAttempts);
             
@@ -346,7 +346,7 @@ namespace CCXT.Collector.Library
         {
             if (!IsAuthenticated)
             {
-                OnError?.Invoke("Not authenticated. Please connect with API credentials.");
+                RaiseError("Not authenticated. Please connect with API credentials.");
                 return false;
             }
             
@@ -358,7 +358,7 @@ namespace CCXT.Collector.Library
         {
             if (!IsAuthenticated)
             {
-                OnError?.Invoke("Not authenticated. Please connect with API credentials.");
+                RaiseError("Not authenticated. Please connect with API credentials.");
                 return false;
             }
             
@@ -370,7 +370,7 @@ namespace CCXT.Collector.Library
         {
             if (!IsAuthenticated)
             {
-                OnError?.Invoke("Not authenticated. Please connect with API credentials.");
+                RaiseError("Not authenticated. Please connect with API credentials.");
                 return false;
             }
             
@@ -383,7 +383,7 @@ namespace CCXT.Collector.Library
         #region Protected Helper Methods
 
         // Public data callbacks
-        protected void InvokeTickerCallback(STickers ticker)
+        protected void InvokeTickerCallback(STicker ticker)
         {
             OnTickerReceived?.Invoke(ticker);
         }
@@ -396,6 +396,27 @@ namespace CCXT.Collector.Library
         protected void InvokeOrderbookCallback(SOrderBooks orderbook)
         {
             OnOrderbookReceived?.Invoke(orderbook);
+        }
+
+        // Event raising helper methods for derived classes
+        protected virtual void RaiseError(string message)
+        {
+            OnError?.Invoke(message);
+        }
+
+        protected virtual void RaiseConnected()
+        {
+            OnConnected?.Invoke();
+        }
+
+        protected virtual void RaiseAuthenticated()
+        {
+            OnAuthenticated?.Invoke();
+        }
+
+        protected virtual void RaiseDisconnected()
+        {
+            OnDisconnected?.Invoke();
         }
 
         protected void InvokeCandleCallback(SCandlestick candle)

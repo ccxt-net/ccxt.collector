@@ -154,7 +154,6 @@ The system uses RabbitMQ for message queue communication with predefined exchang
 
 ### Key Dependencies
 
-- **CCXT.NET**: The base CCXT library for .NET
 - **RabbitMQ.Client**: For message queue communication
 - **Newtonsoft.Json**: JSON serialization
 - **Microsoft.Extensions.Configuration**: Configuration management

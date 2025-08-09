@@ -6,7 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using CCXT.Collector.Upbit;
 using CCXT.Collector.Service;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 
 namespace CCXT.Collector.Tests.Exchanges
 {
@@ -14,25 +14,25 @@ namespace CCXT.Collector.Tests.Exchanges
     /// Comprehensive test suite for Upbit exchange integration
     /// Tests Korean market specific features, KRW pairs, and market analysis
     /// </summary>
-    [TestClass]
-    [TestCategory("Exchange")]
-    [TestCategory("Upbit")]
-    public class UpbitTests
+    
+    [Trait("Category", "Exchange")]
+    [Trait("Category", "Upbit")]
+    public class UpbitTests : IDisposable
     {
-        private UpbitClient _client;
+        private UpbitWebSocketClient _client;
         private readonly List<string> _krwPairs = new() { "BTC/KRW", "ETH/KRW", "XRP/KRW" };
         private readonly List<string> _usdtPairs = new() { "BTC/USDT", "ETH/USDT" };
         private readonly int _testDuration = 10000; // 10 seconds per test
 
-        [TestInitialize]
-        public void Setup()
+        
+        public UpbitTests()
         {
             Console.WriteLine("=== Upbit Test Suite Initialization ===");
-            _client = new UpbitClient("public");
+            _client = new UpbitWebSocketClient();
         }
 
-        [TestCleanup]
-        public void Cleanup()
+        
+        public void Dispose()
         {
             _client?.Dispose();
             Console.WriteLine("=== Upbit Test Suite Cleanup Complete ===\n");
@@ -40,8 +40,8 @@ namespace CCXT.Collector.Tests.Exchanges
 
         #region Connection Tests
 
-        [TestMethod]
-        [TestCategory("Connection")]
+        [Fact]
+        [Trait("Category", "Connection")]
         public async Task Test_KRW_Market_Connection()
         {
             Console.WriteLine("\n[TEST] KRW Market Connection");
@@ -51,23 +51,18 @@ namespace CCXT.Collector.Tests.Exchanges
             var krwMarketsConnected = new HashSet<string>();
             
             _client.OnConnected += () => connected = true;
-            _client.OnMarketConnected += (market) =>
-            {
-                if (market.EndsWith("/KRW"))
-                    krwMarketsConnected.Add(market);
-            };
-
+            
             await _client.ConnectAsync();
             
             foreach (var pair in _krwPairs)
             {
-                await _client.SubscribeTicker(pair);
+                await _client.SubscribeTickerAsync(pair);
             }
             
             await Task.Delay(3000);
 
-            Assert.IsTrue(connected, "Failed to connect to Upbit");
-            Assert.IsTrue(krwMarketsConnected.Count > 0, "No KRW markets connected");
+            Assert.True(connected, "Failed to connect to Upbit");
+            Assert.True(krwMarketsConnected.Count > 0, "No KRW markets connected");
             
             Console.WriteLine($"✅ Connected to {krwMarketsConnected.Count} KRW markets");
             foreach (var market in krwMarketsConnected)
@@ -76,8 +71,8 @@ namespace CCXT.Collector.Tests.Exchanges
             }
         }
 
-        [TestMethod]
-        [TestCategory("Connection")]
+        [Fact]
+        [Trait("Category", "Connection")]
         public async Task Test_Mixed_Market_Subscription()
         {
             Console.WriteLine("\n[TEST] Mixed Market Subscription (KRW + USDT)");
@@ -103,13 +98,13 @@ namespace CCXT.Collector.Tests.Exchanges
             // Subscribe to both KRW and USDT pairs
             foreach (var pair in _krwPairs.Concat(_usdtPairs))
             {
-                await _client.SubscribeTicker(pair);
+                await _client.SubscribeTickerAsync(pair);
             }
             
             await Task.Delay(_testDuration);
             
-            Assert.IsTrue(krwData.Count > 0, "No KRW market data received");
-            Assert.IsTrue(usdtData.Count > 0, "No USDT market data received");
+            Assert.True(krwData.Count > 0, "No KRW market data received");
+            Assert.True(usdtData.Count > 0, "No USDT market data received");
             
             Console.WriteLine($"✅ KRW Markets: {krwData.Count} symbols, " +
                 $"{krwData.Values.Sum()} updates");
@@ -121,8 +116,8 @@ namespace CCXT.Collector.Tests.Exchanges
 
         #region Korean Market Specific Tests
 
-        [TestMethod]
-        [TestCategory("KoreanMarket")]
+        [Fact]
+        [Trait("Category", "KoreanMarket")]
         public async Task Test_KRW_Premium_Calculation()
         {
             Console.WriteLine("\n[TEST] KRW Premium Calculation");
@@ -138,21 +133,21 @@ namespace CCXT.Collector.Tests.Exchanges
                 
                 if (ticker.symbol.EndsWith("/KRW"))
                 {
-                    krwPrices[baseSymbol] = ticker.last;
+                    krwPrices[baseSymbol] = ticker.result.closePrice;
                 }
                 else if (ticker.symbol.EndsWith("/USDT"))
                 {
-                    usdtPrices[baseSymbol] = ticker.last;
+                    usdtPrices[baseSymbol] = ticker.result.closePrice;
                 }
             };
 
             await _client.ConnectAsync();
             
             // Subscribe to both BTC pairs for premium calculation
-            await _client.SubscribeTicker("BTC/KRW");
-            await _client.SubscribeTicker("BTC/USDT");
-            await _client.SubscribeTicker("ETH/KRW");
-            await _client.SubscribeTicker("ETH/USDT");
+            await _client.SubscribeTickerAsync("BTC/KRW");
+            await _client.SubscribeTickerAsync("BTC/USDT");
+            await _client.SubscribeTickerAsync("ETH/KRW");
+            await _client.SubscribeTickerAsync("ETH/USDT");
             
             await Task.Delay(_testDuration);
             
@@ -170,16 +165,16 @@ namespace CCXT.Collector.Tests.Exchanges
                 Console.WriteLine($"      USDT Price: ${usdtPrice:F2}");
                 Console.WriteLine($"      Premium: {premium:F2}%");
                 
-                Assert.IsTrue(Math.Abs(premium) < 20, 
+                Assert.True(Math.Abs(premium) < 20, 
                     $"Unusual premium detected for {symbol}: {premium:F2}%");
             }
             
-            Assert.IsTrue(krwPrices.Count > 0 && usdtPrices.Count > 0, 
+            Assert.True(krwPrices.Count > 0 && usdtPrices.Count > 0, 
                 "Insufficient data for premium calculation");
         }
 
-        [TestMethod]
-        [TestCategory("KoreanMarket")]
+        [Fact]
+        [Trait("Category", "KoreanMarket")]
         public async Task Test_KRW_Volume_Analysis()
         {
             Console.WriteLine("\n[TEST] KRW Market Volume Analysis");
@@ -194,7 +189,7 @@ namespace CCXT.Collector.Tests.Exchanges
                     if (!volumeData.ContainsKey(ticker.symbol))
                         volumeData[ticker.symbol] = new List<decimal>();
                     
-                    volumeData[ticker.symbol].Add(ticker.baseVolume);
+                    volumeData[ticker.symbol].Add(ticker.result.volume);
                 }
             };
 
@@ -202,7 +197,7 @@ namespace CCXT.Collector.Tests.Exchanges
             
             foreach (var pair in _krwPairs)
             {
-                await _client.SubscribeTicker(pair);
+                await _client.SubscribeTickerAsync(pair);
             }
             
             await Task.Delay(_testDuration);
@@ -225,12 +220,12 @@ namespace CCXT.Collector.Tests.Exchanges
             
             Console.WriteLine($"\n   Total Market Volume: {totalVolume:F2}");
             
-            Assert.IsTrue(volumeData.Count > 0, "No volume data collected");
-            Assert.IsTrue(totalVolume > 0, "Zero total volume detected");
+            Assert.True(volumeData.Count > 0, "No volume data collected");
+            Assert.True(totalVolume > 0, "Zero total volume detected");
         }
 
-        [TestMethod]
-        [TestCategory("KoreanMarket")]
+        [Fact]
+        [Trait("Category", "KoreanMarket")]
         public async Task Test_Payment_Coin_Monitoring()
         {
             Console.WriteLine("\n[TEST] Payment Coin Monitoring");
@@ -255,8 +250,8 @@ namespace CCXT.Collector.Tests.Exchanges
                     }
                     
                     var metrics = paymentCoinData[ticker.symbol];
-                    metrics.PriceHistory.Add(ticker.last);
-                    metrics.VolumeHistory.Add(ticker.baseVolume);
+                    metrics.PriceHistory.Add(ticker.result.closePrice);
+                    metrics.VolumeHistory.Add(ticker.result.volume);
                     metrics.UpdateCount++;
                 }
             };
@@ -265,7 +260,7 @@ namespace CCXT.Collector.Tests.Exchanges
             
             foreach (var coin in paymentCoins)
             {
-                await _client.SubscribeTicker(coin);
+                await _client.SubscribeTickerAsync(coin);
             }
             
             await Task.Delay(_testDuration);
@@ -285,18 +280,18 @@ namespace CCXT.Collector.Tests.Exchanges
                 Console.WriteLine($"      Avg Volume: {avgVolume:F2}");
             }
             
-            Assert.IsTrue(paymentCoinData.Count > 0, "No payment coin data collected");
+            Assert.True(paymentCoinData.Count > 0, "No payment coin data collected");
         }
 
         #endregion
 
         #region Data Stream Tests
 
-        [TestMethod]
-        [TestCategory("DataStream")]
-        public async Task Test_Orderbook_Depth()
+        [Fact]
+        [Trait("Category", "DataStream")]
+        public async Task Test_SOrderBooks_Depth()
         {
-            Console.WriteLine("\n[TEST] Orderbook Depth Analysis");
+            Console.WriteLine("\n[TEST] SOrderBooks Depth Analysis");
             Console.WriteLine("----------------------------------------");
             
             var orderbookDepths = new Dictionary<string, List<int>>();
@@ -306,16 +301,16 @@ namespace CCXT.Collector.Tests.Exchanges
                 if (!orderbookDepths.ContainsKey(orderbook.symbol))
                     orderbookDepths[orderbook.symbol] = new List<int>();
                 
-                orderbookDepths[orderbook.symbol].Add(orderbook.bids.Count);
+                orderbookDepths[orderbook.symbol].Add(orderbook.result.bids.Count);
                 
                 // Analyze orderbook imbalance
-                var bidVolume = orderbook.bids.Take(10).Sum(b => b.quantity);
-                var askVolume = orderbook.asks.Take(10).Sum(a => a.quantity);
+                var bidVolume = orderbook.result.bids.Take(10).Sum(b => b.quantity);
+                var askVolume = orderbook.result.asks.Take(10).Sum(a => a.quantity);
                 var imbalance = (bidVolume - askVolume) / (bidVolume + askVolume) * 100;
                 
                 if (orderbookDepths[orderbook.symbol].Count % 10 == 0)
                 {
-                    Console.WriteLine($"📊 {orderbook.symbol} - Depth: {orderbook.bids.Count}, " +
+                    Console.WriteLine($"📊 {orderbook.symbol} - Depth: {orderbook.result.bids.Count}, " +
                         $"Imbalance: {imbalance:F2}%");
                 }
             };
@@ -324,52 +319,52 @@ namespace CCXT.Collector.Tests.Exchanges
             
             foreach (var pair in _krwPairs)
             {
-                await _client.SubscribeOrderbook(pair);
+                await _client.SubscribeOrderbookAsync(pair);
             }
             
             await Task.Delay(_testDuration);
             
-            Console.WriteLine("\n📊 Orderbook Depth Summary:");
+            Console.WriteLine("\n📊 SOrderBooks Depth Summary:");
             foreach (var kvp in orderbookDepths)
             {
                 var avgDepth = kvp.Value.Average();
                 Console.WriteLine($"   {kvp.Key}: Avg Depth = {avgDepth:F1} levels");
             }
             
-            Assert.IsTrue(orderbookDepths.Count > 0, "No orderbook data received");
+            Assert.True(orderbookDepths.Count > 0, "No orderbook data received");
         }
 
-        [TestMethod]
-        [TestCategory("DataStream")]
-        public async Task Test_Trade_Flow_Analysis()
+        [Fact]
+        [Trait("Category", "DataStream")]
+        public async Task Test_SCompleteOrders_Flow_Analysis()
         {
-            Console.WriteLine("\n[TEST] Trade Flow Analysis");
+            Console.WriteLine("\n[TEST] SCompleteOrders Flow Analysis");
             Console.WriteLine("----------------------------------------");
             
-            var tradeFlows = new Dictionary<string, TradeFlow>();
+            var tradeFlows = new Dictionary<string, SCompleteOrdersFlow>();
             
             _client.OnTradeReceived += (trade) =>
             {
                 if (!tradeFlows.ContainsKey(trade.symbol))
                 {
-                    tradeFlows[trade.symbol] = new TradeFlow { Symbol = trade.symbol };
+                    tradeFlows[trade.symbol] = new SCompleteOrdersFlow { Symbol = trade.symbol };
                 }
                 
                 var flow = tradeFlows[trade.symbol];
-                flow.TotalTrades++;
+                flow.TotalSCompleteOrderss++;
                 
-                if (trade.side == "buy")
+                if (trade.result[0].sideType == SideType.Bid)
                 {
-                    flow.BuyVolume += trade.amount * trade.price;
+                    flow.BuyVolume += trade.result[0].amount * trade.result[0].price;
                     flow.BuyCount++;
                 }
                 else
                 {
-                    flow.SellVolume += trade.amount * trade.price;
+                    flow.SellVolume += trade.result[0].amount * trade.result[0].price;
                     flow.SellCount++;
                 }
                 
-                if (flow.TotalTrades % 50 == 0)
+                if (flow.TotalSCompleteOrderss % 50 == 0)
                 {
                     var netFlow = flow.BuyVolume - flow.SellVolume;
                     Console.WriteLine($"📊 {trade.symbol} - Net Flow: ₩{netFlow:N0}, " +
@@ -381,33 +376,33 @@ namespace CCXT.Collector.Tests.Exchanges
             
             foreach (var pair in _krwPairs)
             {
-                await _client.SubscribeTrades(pair);
+                await _client.SubscribeTradesAsync(pair);
             }
             
             await Task.Delay(_testDuration);
             
-            Console.WriteLine("\n📊 Trade Flow Summary:");
+            Console.WriteLine("\n📊 SCompleteOrders Flow Summary:");
             foreach (var flow in tradeFlows.Values)
             {
                 var netFlow = flow.BuyVolume - flow.SellVolume;
                 var flowDirection = netFlow > 0 ? "Bullish" : "Bearish";
                 
                 Console.WriteLine($"   {flow.Symbol}:");
-                Console.WriteLine($"      Total Trades: {flow.TotalTrades}");
+                Console.WriteLine($"      Total SCompleteOrderss: {flow.TotalSCompleteOrderss}");
                 Console.WriteLine($"      Buy Volume: ₩{flow.BuyVolume:N0}");
                 Console.WriteLine($"      Sell Volume: ₩{flow.SellVolume:N0}");
                 Console.WriteLine($"      Net Flow: ₩{netFlow:N0} ({flowDirection})");
             }
             
-            Assert.IsTrue(tradeFlows.Count > 0, "No trade flow data collected");
+            Assert.True(tradeFlows.Count > 0, "No trade flow data collected");
         }
 
         #endregion
 
         #region Market Analysis Tests
 
-        [TestMethod]
-        [TestCategory("MarketAnalysis")]
+        [Fact]
+        [Trait("Category", "MarketAnalysis")]
         public async Task Test_Top_Movers_Detection()
         {
             Console.WriteLine("\n[TEST] Top Movers Detection");
@@ -422,12 +417,12 @@ namespace CCXT.Collector.Tests.Exchanges
                     priceChanges[ticker.symbol] = new PriceChangeTracker
                     {
                         Symbol = ticker.symbol,
-                        InitialPrice = ticker.last,
-                        CurrentPrice = ticker.last
+                        InitialPrice = ticker.result.closePrice,
+                        CurrentPrice = ticker.result.closePrice
                     };
                 }
                 
-                priceChanges[ticker.symbol].CurrentPrice = ticker.last;
+                priceChanges[ticker.symbol].CurrentPrice = ticker.result.closePrice;
                 priceChanges[ticker.symbol].UpdateCount++;
             };
 
@@ -439,7 +434,7 @@ namespace CCXT.Collector.Tests.Exchanges
             
             foreach (var pair in extendedPairs)
             {
-                await _client.SubscribeTicker(pair);
+                await _client.SubscribeTickerAsync(pair);
             }
             
             await Task.Delay(_testDuration);
@@ -468,11 +463,11 @@ namespace CCXT.Collector.Tests.Exchanges
                 Console.WriteLine($"      {loser.Symbol}: {loser.ChangePercent:F3}%");
             }
             
-            Assert.IsTrue(movers.Count > 0, "No price movement data collected");
+            Assert.True(movers.Count > 0, "No price movement data collected");
         }
 
-        [TestMethod]
-        [TestCategory("MarketAnalysis")]
+        [Fact]
+        [Trait("Category", "MarketAnalysis")]
         public async Task Test_Market_Correlation()
         {
             Console.WriteLine("\n[TEST] Market Correlation Analysis");
@@ -487,7 +482,7 @@ namespace CCXT.Collector.Tests.Exchanges
                     if (!priceData.ContainsKey(ticker.symbol))
                         priceData[ticker.symbol] = new List<decimal>();
                     
-                    priceData[ticker.symbol].Add(ticker.last);
+                    priceData[ticker.symbol].Add(ticker.result.closePrice);
                 }
             };
 
@@ -497,7 +492,7 @@ namespace CCXT.Collector.Tests.Exchanges
             var correlationPairs = new[] { "BTC/KRW", "ETH/KRW", "XRP/KRW" };
             foreach (var pair in correlationPairs)
             {
-                await _client.SubscribeTicker(pair);
+                await _client.SubscribeTickerAsync(pair);
             }
             
             await Task.Delay(_testDuration);
@@ -519,15 +514,15 @@ namespace CCXT.Collector.Tests.Exchanges
                 }
             }
             
-            Assert.IsTrue(priceData.Count >= 2, "Insufficient data for correlation analysis");
+            Assert.True(priceData.Count >= 2, "Insufficient data for correlation analysis");
         }
 
         #endregion
 
         #region Performance Tests
 
-        [TestMethod]
-        [TestCategory("Performance")]
+        [Fact]
+        [Trait("Category", "Performance")]
         public async Task Test_Message_Latency()
         {
             Console.WriteLine("\n[TEST] Message Latency Test");
@@ -536,33 +531,14 @@ namespace CCXT.Collector.Tests.Exchanges
             var latencies = new List<double>();
             var timestamps = new Dictionary<string, DateTime>();
             
-            _client.OnMessageSent += (message) =>
-            {
-                timestamps[message] = DateTime.UtcNow;
-            };
+                        
             
-            _client.OnMessageReceived += (message) =>
-            {
-                if (timestamps.ContainsKey(message))
-                {
-                    var latency = (DateTime.UtcNow - timestamps[message]).TotalMilliseconds;
-                    latencies.Add(latency);
-                    
-                    if (latencies.Count % 100 == 0)
-                    {
-                        var avgLatency = latencies.Average();
-                        Console.WriteLine($"📊 Messages: {latencies.Count}, " +
-                            $"Avg Latency: {avgLatency:F2}ms");
-                    }
-                }
-            };
-
             await _client.ConnectAsync();
             
             foreach (var pair in _krwPairs)
             {
-                await _client.SubscribeTicker(pair);
-                await _client.SubscribeTrades(pair);
+                await _client.SubscribeTickerAsync(pair);
+                await _client.SubscribeTradesAsync(pair);
             }
             
             await Task.Delay(_testDuration);
@@ -581,12 +557,12 @@ namespace CCXT.Collector.Tests.Exchanges
                 Console.WriteLine($"   Maximum: {maxLatency:F2}ms");
                 Console.WriteLine($"   P95: {p95Latency:F2}ms");
                 
-                Assert.IsTrue(avgLatency < 1000, $"High average latency: {avgLatency:F2}ms");
+                Assert.True(avgLatency < 1000, $"High average latency: {avgLatency:F2}ms");
             }
         }
 
-        [TestMethod]
-        [TestCategory("Performance")]
+        [Fact]
+        [Trait("Category", "Performance")]
         public async Task Test_Concurrent_Subscriptions()
         {
             Console.WriteLine("\n[TEST] Concurrent Subscription Test");
@@ -595,12 +571,7 @@ namespace CCXT.Collector.Tests.Exchanges
             var subscriptionCount = 0;
             var messageCount = 0;
             
-            _client.OnSubscriptionSuccess += (symbol) =>
-            {
-                Interlocked.Increment(ref subscriptionCount);
-                Console.WriteLine($"✅ Subscribed to {symbol} ({subscriptionCount})");
-            };
-            
+                        
             _client.OnTickerReceived += (_) => Interlocked.Increment(ref messageCount);
             _client.OnTradeReceived += (_) => Interlocked.Increment(ref messageCount);
 
@@ -614,8 +585,8 @@ namespace CCXT.Collector.Tests.Exchanges
             
             var tasks = allPairs.SelectMany(pair => new[]
             {
-                _client.SubscribeTicker(pair),
-                _client.SubscribeTrades(pair)
+                _client.SubscribeTickerAsync(pair),
+                _client.SubscribeTradesAsync(pair)
             }).ToArray();
             
             await Task.WhenAll(tasks);
@@ -629,9 +600,8 @@ namespace CCXT.Collector.Tests.Exchanges
             Console.WriteLine($"   Messages received: {messageCount}");
             Console.WriteLine($"   Messages/second: {messagesPerSecond:F2}");
             
-            Assert.AreEqual(expectedSubscriptions, subscriptionCount, 
-                "Not all subscriptions successful");
-            Assert.IsTrue(messageCount > 0, "No messages received");
+            Assert.True(subscriptionCount == expectedSubscriptions, "Not all subscriptions successful");
+            Assert.True(messageCount > 0, "No messages received");
         }
 
         #endregion
@@ -691,10 +661,10 @@ namespace CCXT.Collector.Tests.Exchanges
             public int UpdateCount { get; set; }
         }
 
-        private class TradeFlow
+        private class SCompleteOrdersFlow
         {
             public string Symbol { get; set; }
-            public int TotalTrades { get; set; }
+            public int TotalSCompleteOrderss { get; set; }
             public int BuyCount { get; set; }
             public int SellCount { get; set; }
             public decimal BuyVolume { get; set; }

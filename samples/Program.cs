@@ -12,6 +12,78 @@ using System.Threading.Tasks;
 
 namespace CCXT.Collector.Samples
 {
+    // Define temporary classes for the sample (these should be moved to proper locations)
+    
+    public class Ohlc
+    {
+        public long openTime { get; set; }
+        public long closeTime { get; set; }
+        public decimal Open { get; set; }
+        public decimal High { get; set; }
+        public decimal Low { get; set; }
+        public decimal Close { get; set; }
+        public decimal Volume { get; set; }
+    }
+    
+    class RSI
+    {
+        private int _period;
+        public RSI(int period) { _period = period; }
+        public double Calculate(List<Ohlc> data) => 50.0; // Placeholder
+    }
+    
+    class MACD
+    {
+        private int _fast, _slow, _signal;
+        public MACD(int fast, int slow, int signal) 
+        { 
+            _fast = fast; 
+            _slow = slow; 
+            _signal = signal; 
+        }
+        public (double MACD, double Signal) Calculate(List<Ohlc> data) => (0, 0); // Placeholder
+    }
+    
+    class BollingerBand
+    {
+        private int _period;
+        private double _stdDev;
+        public BollingerBand(int period, double stdDev) 
+        { 
+            _period = period; 
+            _stdDev = stdDev; 
+        }
+        public (double Upper, double Middle, double Lower) Calculate(List<Ohlc> data) => (0, 0, 0); // Placeholder
+    }
+    
+    class SMA
+    {
+        private int _period;
+        public SMA(int period) { _period = period; }
+        public decimal Calculate(List<Ohlc> data) => 0; // Placeholder
+    }
+    
+    class EMA
+    {
+        private int _period;
+        public EMA(int period) { _period = period; }
+        public decimal Calculate(List<Ohlc> data) => 0; // Placeholder
+    }
+    
+    class ADX
+    {
+        private int _period;
+        public ADX(int period) { _period = period; }
+        public (double ADX, double PlusDI, double MinusDI) Calculate(List<Ohlc> data) => (25, 0, 0); // Placeholder
+    }
+    
+    class ATR
+    {
+        private int _period;
+        public ATR(int period) { _period = period; }
+        public (double ATR, double TrueRange) Calculate(List<Ohlc> data) => (0, 0); // Placeholder
+    }
+    
     class Program
     {
         static async Task Main(string[] args)
@@ -80,7 +152,7 @@ namespace CCXT.Collector.Samples
         {
             Console.WriteLine("\n=== Basic WebSocket Connection Sample ===\n");
 
-            var client = new BinanceClient("public");
+            var client = new BinanceWebSocketClient();
             var cts = new CancellationTokenSource();
 
             // Register callbacks
@@ -88,19 +160,32 @@ namespace CCXT.Collector.Samples
             {
                 Console.WriteLine($"[{DateTime.Now:HH:mm:ss.fff}] Orderbook Update");
                 Console.WriteLine($"  Symbol: {orderbook.symbol}");
-                Console.WriteLine($"  Best Bid: {orderbook.bids[0].price:F2} @ {orderbook.bids[0].quantity:F8}");
-                Console.WriteLine($"  Best Ask: {orderbook.asks[0].price:F2} @ {orderbook.asks[0].quantity:F8}");
-                Console.WriteLine($"  Spread: {(orderbook.asks[0].price - orderbook.bids[0].price):F2}\n");
+                if (orderbook.result.bids.Count > 0 && orderbook.result.asks.Count > 0)
+                {
+                    Console.WriteLine($"  Best Bid: {orderbook.result.bids[0].price:F2} @ {orderbook.result.bids[0].quantity:F8}");
+                    Console.WriteLine($"  Best Ask: {orderbook.result.asks[0].price:F2} @ {orderbook.result.asks[0].quantity:F8}");
+                    Console.WriteLine($"  Spread: {(orderbook.result.asks[0].price - orderbook.result.bids[0].price):F2}\n");
+                }
             };
 
-            client.OnConnectionStateChanged += (state) =>
+            client.OnConnected += () =>
             {
-                Console.WriteLine($"Connection State: {state}");
+                Console.WriteLine($"Connection State: Connected");
+            };
+            
+            client.OnDisconnected += () =>
+            {
+                Console.WriteLine($"Connection State: Disconnected");
+            };
+            
+            client.OnError += (error) =>
+            {
+                Console.WriteLine($"Error: {error}");
             };
 
             // Connect and subscribe
             await client.ConnectAsync();
-            await client.SubscribeOrderbook("BTC/USDT");
+            await client.SubscribeOrderbookAsync("BTC/USDT");
 
             Console.WriteLine("Connected to Binance WebSocket. Press 'Q' to quit.\n");
 
@@ -117,8 +202,8 @@ namespace CCXT.Collector.Samples
         {
             Console.WriteLine("\n=== Multi-Exchange Data Collection Sample ===\n");
 
-            var binanceClient = new BinanceClient("public");
-            var upbitClient = new UpbitClient("public");
+            var binanceClient = new BinanceWebSocketClient();
+            var upbitClient = new UpbitWebSocketClient();
             var cts = new CancellationTokenSource();
 
             var priceComparison = new Dictionary<string, Dictionary<string, decimal>>();
@@ -129,7 +214,7 @@ namespace CCXT.Collector.Samples
                 if (!priceComparison.ContainsKey(ticker.symbol))
                     priceComparison[ticker.symbol] = new Dictionary<string, decimal>();
                 
-                priceComparison[ticker.symbol]["Binance"] = ticker.last;
+                priceComparison[ticker.symbol]["Binance"] = ticker.result.closePrice;
                 DisplayPriceComparison(priceComparison);
             };
 
@@ -139,7 +224,7 @@ namespace CCXT.Collector.Samples
                 if (!priceComparison.ContainsKey(ticker.symbol))
                     priceComparison[ticker.symbol] = new Dictionary<string, decimal>();
                 
-                priceComparison[ticker.symbol]["Upbit"] = ticker.last;
+                priceComparison[ticker.symbol]["Upbit"] = ticker.result.closePrice;
                 DisplayPriceComparison(priceComparison);
             };
 
@@ -151,8 +236,8 @@ namespace CCXT.Collector.Samples
 
             // Subscribe to same markets
             await Task.WhenAll(
-                binanceClient.SubscribeTicker("BTC/USDT"),
-                upbitClient.SubscribeTicker("BTC/USDT")
+                binanceClient.SubscribeTickerAsync("BTC/USDT"),
+                upbitClient.SubscribeTickerAsync("BTC/USDT")
             );
 
             Console.WriteLine("Connected to multiple exchanges. Press 'Q' to quit.\n");
@@ -172,7 +257,7 @@ namespace CCXT.Collector.Samples
         {
             Console.WriteLine("\n=== Technical Indicator Analysis Sample ===\n");
 
-            var client = new BinanceClient("public");
+            var client = new BinanceWebSocketClient();
             var cts = new CancellationTokenSource();
 
             // Initialize indicators
@@ -184,8 +269,18 @@ namespace CCXT.Collector.Samples
 
             var ohlcvBuffer = new List<Ohlc>();
 
-            client.OnOhlcvReceived += (ohlcv) =>
+            client.OnCandleReceived += (candle) =>
             {
+                var ohlcv = new Ohlc
+                {
+                    openTime = candle.result.openTime,
+                    closeTime = candle.result.closeTime,
+                    Open = candle.result.open,
+                    High = candle.result.high,
+                    Low = candle.result.low,
+                    Close = candle.result.close,
+                    Volume = candle.result.volume
+                };
                 ohlcvBuffer.Add(ohlcv);
 
                 if (ohlcvBuffer.Count < 50) return; // Wait for enough data
@@ -197,18 +292,18 @@ namespace CCXT.Collector.Samples
                 var smaValue = sma.Calculate(ohlcvBuffer);
                 var emaValue = ema.Calculate(ohlcvBuffer);
 
-                Console.WriteLine($"\n[{DateTime.Now:HH:mm:ss}] Technical Analysis for {ohlcv.symbol}");
-                Console.WriteLine($"  Price: {ohlcv.closePrice:F2}");
+                Console.WriteLine($"\n[{DateTime.Now:HH:mm:ss}] Technical Analysis for {candle.symbol}");
+                Console.WriteLine($"  Price: {candle.result.close:F2}");
                 Console.WriteLine($"  RSI(14): {rsiValue:F2} {GetRSISignal(rsiValue)}");
                 Console.WriteLine($"  MACD: {macdResult.MACD:F2}, Signal: {macdResult.Signal:F2}");
                 Console.WriteLine($"  Bollinger Bands: Upper={bbResult.Upper:F2}, Middle={bbResult.Middle:F2}, Lower={bbResult.Lower:F2}");
                 Console.WriteLine($"  SMA(50): {smaValue:F2}");
                 Console.WriteLine($"  EMA(20): {emaValue:F2}");
-                Console.WriteLine($"  Trend: {GetTrendSignal(ohlcv.closePrice, smaValue, emaValue)}");
+                Console.WriteLine($"  Trend: {GetTrendSignal(candle.result.close, smaValue, emaValue)}");
             };
 
             await client.ConnectAsync();
-            await client.SubscribeOhlcv("BTC/USDT", "1m");
+            await client.SubscribeCandlesAsync("BTC/USDT", "1m");
 
             Console.WriteLine("Calculating technical indicators. Press 'Q' to quit.\n");
 
@@ -224,7 +319,7 @@ namespace CCXT.Collector.Samples
         {
             Console.WriteLine("\n=== Orderbook Depth Monitoring Sample ===\n");
 
-            var client = new BinanceClient("public");
+            var client = new BinanceWebSocketClient();
             var cts = new CancellationTokenSource();
 
             client.OnOrderbookReceived += (orderbook) =>
@@ -236,22 +331,22 @@ namespace CCXT.Collector.Samples
 
                 // Display asks (reversed for visual representation)
                 Console.WriteLine("\nASKS (Sell Orders):");
-                for (int i = Math.Min(9, orderbook.asks.Count - 1); i >= 0; i--)
+                for (int i = Math.Min(9, orderbook.result.asks.Count - 1); i >= 0; i--)
                 {
-                    var ask = orderbook.asks[i];
+                    var ask = orderbook.result.asks[i];
                     var barLength = (int)(ask.quantity * 10);
                     Console.ForegroundColor = ConsoleColor.Red;
                     Console.WriteLine($"  {ask.price,10:F2} | {ask.quantity,12:F8} | {new string('█', Math.Min(barLength, 40))}");
                 }
 
                 Console.ResetColor();
-                Console.WriteLine($"\n  SPREAD: {(orderbook.asks[0].price - orderbook.bids[0].price):F2}");
+                Console.WriteLine($"\n  SPREAD: {(orderbook.result.asks[0].price - orderbook.result.bids[0].price):F2}");
 
                 // Display bids
                 Console.WriteLine("\nBIDS (Buy Orders):");
-                for (int i = 0; i < Math.Min(10, orderbook.bids.Count); i++)
+                for (int i = 0; i < Math.Min(10, orderbook.result.bids.Count); i++)
                 {
-                    var bid = orderbook.bids[i];
+                    var bid = orderbook.result.bids[i];
                     var barLength = (int)(bid.quantity * 10);
                     Console.ForegroundColor = ConsoleColor.Green;
                     Console.WriteLine($"  {bid.price,10:F2} | {bid.quantity,12:F8} | {new string('█', Math.Min(barLength, 40))}");
@@ -262,7 +357,7 @@ namespace CCXT.Collector.Samples
             };
 
             await client.ConnectAsync();
-            await client.SubscribeOrderbook("BTC/USDT");
+            await client.SubscribeOrderbookAsync("BTC/USDT");
 
             await WaitForExit(cts);
 
@@ -276,30 +371,34 @@ namespace CCXT.Collector.Samples
         {
             Console.WriteLine("\n=== Trade History Collection Sample ===\n");
 
-            var client = new BinanceClient("public");
+            var client = new BinanceWebSocketClient();
             var cts = new CancellationTokenSource();
-            var trades = new List<SCompleteItem>();
+            var trades = new List<SCompleteOrderItem>();
             var volumeStats = new VolumeStatistics();
 
-            client.OnTradeReceived += (trade) =>
+            client.OnTradeReceived += (tradeData) =>
             {
-                trades.Add(trade);
-                volumeStats.Update(trade);
+                if (tradeData.result.Count > 0)
+                {
+                    var trade = tradeData.result[0];
+                    trades.Add(trade);
+                    volumeStats.Update(trade);
 
-                Console.WriteLine($"[{DateTime.Now:HH:mm:ss.fff}] Trade Executed");
-                Console.WriteLine($"  Symbol: {trade.symbol}");
-                Console.WriteLine($"  Price: {trade.price:F2}");
-                Console.WriteLine($"  Amount: {trade.quantity:F8}");
-                Console.WriteLine($"  Side: {(trade.sideType == "B" ? "BUY ↑" : "SELL ↓")}");
+                    Console.WriteLine($"[{DateTime.Now:HH:mm:ss.fff}] Trade Executed");
+                    Console.WriteLine($"  Symbol: {tradeData.symbol}");
+                    Console.WriteLine($"  Price: {trade.price:F2}");
+                    Console.WriteLine($"  Amount: {trade.quantity:F8}");
+                    Console.WriteLine($"  Side: {(trade.sideType == SideType.Bid ? "BUY ↑" : "SELL ↓")}");
                 Console.WriteLine($"  Total Trades: {trades.Count}");
                 Console.WriteLine($"  Buy Volume: {volumeStats.BuyVolume:F8}");
                 Console.WriteLine($"  Sell Volume: {volumeStats.SellVolume:F8}");
                 Console.WriteLine($"  Net Volume: {volumeStats.NetVolume:F8}");
-                Console.WriteLine($"  VWAP: {volumeStats.VWAP:F2}\n");
+                    Console.WriteLine($"  VWAP: {volumeStats.VWAP:F2}\n");
+                }
             };
 
             await client.ConnectAsync();
-            await client.SubscribeTrades("BTC/USDT");
+            await client.SubscribeTradesAsync("BTC/USDT");
 
             Console.WriteLine("Collecting trade history. Press 'Q' to quit.\n");
 
@@ -308,7 +407,7 @@ namespace CCXT.Collector.Samples
             // Display summary
             Console.WriteLine("\n=== Trade Summary ===");
             Console.WriteLine($"Total Trades Collected: {trades.Count}");
-            Console.WriteLine($"Time Period: {(trades.Count > 0 ? $"{trades[0].timestamp:HH:mm:ss} - {trades[^1].timestamp:HH:mm:ss}" : "N/A")}");
+            Console.WriteLine($"Time Period: {(trades.Count > 0 ? $"{DateTimeOffset.FromUnixTimeMilliseconds(trades[0].timestamp).ToString("HH:mm:ss")} - {DateTimeOffset.FromUnixTimeMilliseconds(trades[^1].timestamp).ToString("HH:mm:ss")}" : "N/A")}");
             Console.WriteLine($"Final Buy Volume: {volumeStats.BuyVolume:F8}");
             Console.WriteLine($"Final Sell Volume: {volumeStats.SellVolume:F8}");
             Console.WriteLine($"Final VWAP: {volumeStats.VWAP:F2}");
@@ -323,7 +422,7 @@ namespace CCXT.Collector.Samples
         {
             Console.WriteLine("\n=== Real-time Ticker Updates Sample ===\n");
 
-            var client = new BinanceClient("public");
+            var client = new BinanceWebSocketClient();
             var cts = new CancellationTokenSource();
             var symbols = new[] { "BTC/USDT", "ETH/USDT", "BNB/USDT", "ADA/USDT", "SOL/USDT" };
             var tickers = new Dictionary<string, TickerInfo>();
@@ -364,7 +463,7 @@ namespace CCXT.Collector.Samples
             await client.ConnectAsync();
             foreach (var symbol in symbols)
             {
-                await client.SubscribeTicker(symbol);
+                await client.SubscribeTickerAsync(symbol);
             }
 
             await WaitForExit(cts);
@@ -379,23 +478,23 @@ namespace CCXT.Collector.Samples
         {
             Console.WriteLine("\n=== Advanced Indicator Combination Sample ===\n");
 
-            var client = new BinanceClient("public");
+            var client = new BinanceWebSocketClient();
             var cts = new CancellationTokenSource();
 
             // Initialize multiple indicators
             var indicators = new IndicatorSet();
             var signalGenerator = new SignalGenerator();
 
-            client.OnOhlcvReceived += (ohlcv) =>
+            client.OnCandleReceived += (candle) =>
             {
-                indicators.Update(ohlcv);
+                indicators.Update(candle);
 
                 if (!indicators.IsReady) return;
 
                 var signal = signalGenerator.GenerateSignal(indicators);
 
-                Console.WriteLine($"\n[{DateTime.Now:HH:mm:ss}] Market Analysis for {ohlcv.symbol}");
-                Console.WriteLine($"  Current Price: {ohlcv.closePrice:F2}");
+                Console.WriteLine($"\n[{DateTime.Now:HH:mm:ss}] Market Analysis for {candle.symbol}");
+                Console.WriteLine($"  Current Price: {candle.result.close:F2}");
                 Console.WriteLine("\nIndicator Values:");
                 Console.WriteLine($"  RSI(14): {indicators.RSI:F2}");
                 Console.WriteLine($"  MACD: {indicators.MACD:F2}");
@@ -493,9 +592,9 @@ namespace CCXT.Collector.Samples
         public decimal TotalValue { get; private set; }
         public decimal VWAP => TotalVolume > 0 ? TotalValue / TotalVolume : 0;
 
-        public void Update(SCompleteItem trade)
+        public void Update(SCompleteOrderItem trade)
         {
-            if (trade.sideType == "B")
+            if (trade.sideType == SideType.Bid)
                 BuyVolume += trade.quantity;
             else
                 SellVolume += trade.quantity;
@@ -512,13 +611,13 @@ namespace CCXT.Collector.Samples
         public decimal Volume24h { get; private set; }
         public decimal Change24h { get; private set; }
 
-        public void Update(STickerItem ticker)
+        public void Update(STicker ticker)
         {
-            LastPrice = ticker.lastPrice;
-            Bid = ticker.bidPrice;
-            Ask = ticker.askPrice;
-            Volume24h = ticker.volume;
-            Change24h = ticker.changePercent;
+            LastPrice = ticker.result.closePrice;
+            Bid = ticker.result.bidPrice;
+            Ask = ticker.result.askPrice;
+            Volume24h = ticker.result.volume;
+            Change24h = ticker.result.percentage;
         }
     }
 
@@ -541,8 +640,18 @@ namespace CCXT.Collector.Samples
         public string Momentum { get; private set; }
         public bool IsReady => buffer.Count >= 50;
 
-        public void Update(Ohlc ohlc)
+        public void Update(SCandlestick candle)
         {
+            var ohlc = new Ohlc
+            {
+                openTime = candle.result.openTime,
+                closeTime = candle.result.closeTime,
+                Open = candle.result.open,
+                High = candle.result.high,
+                Low = candle.result.low,
+                Close = candle.result.close,
+                Volume = candle.result.volume
+            };
             buffer.Add(ohlc);
             if (buffer.Count > 100) buffer.RemoveAt(0);
 

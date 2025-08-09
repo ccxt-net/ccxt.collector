@@ -16,14 +16,14 @@ namespace CCXT.Collector.Samples.Exchanges
     /// </summary>
     public class BithumbSample
     {
-        private readonly BithumbClient _client;
+        private readonly BithumbWebSocketClient _client;
         private readonly Dictionary<string, BithumbMarketData> _marketData;
         private readonly PaymentCoinAnalyzer _paymentAnalyzer;
         private CancellationTokenSource _cancellationTokenSource;
 
         public BithumbSample()
         {
-            _client = new BithumbClient("public");
+            _client = new BithumbWebSocketClient();
             _marketData = new Dictionary<string, BithumbMarketData>();
             _paymentAnalyzer = new PaymentCoinAnalyzer();
             _cancellationTokenSource = new CancellationTokenSource();
@@ -594,7 +594,7 @@ namespace CCXT.Collector.Samples.Exchanges
             Console.WriteLine("\nPress 'Q' to quit...");
         }
 
-        private void DrawDepthChart(SOrderbookItem orderbook)
+        private void DrawDepthChart(SOrderBook orderbook)
         {
             var maxQuantity = Math.Max(
                 orderbook.bids.Take(10).Max(b => b.quantity),
@@ -853,9 +853,9 @@ namespace CCXT.Collector.Samples.Exchanges
 
     public class MarketDepthAnalyzer
     {
-        private SOrderbookItem _lastOrderbook;
+        private SOrderBookItem _lastOrderbook;
 
-        public void UpdateOrderbook(SOrderbookItem orderbook)
+        public void UpdateOrderbook(SOrderBookItem orderbook)
         {
             _lastOrderbook = orderbook;
         }
@@ -1052,7 +1052,7 @@ namespace CCXT.Collector.Samples.Exchanges
         public string LiquidityRisk { get; set; } = "Low";
         public string PositionRisk { get; set; } = "Medium";
 
-        public MarketMakingStrategy UpdateAndCalculate(SOrderbookItem orderbook)
+        public MarketMakingStrategy UpdateAndCalculate(SOrderBookItem orderbook)
         {
             // Simplified market making strategy
             return new MarketMakingStrategy
@@ -1089,7 +1089,7 @@ namespace CCXT.Collector.Samples.Exchanges
     public class RiskManager
     {
         public void UpdateMarketData(STickerItem ticker) { }
-        public void UpdateOrderbook(SOrderbookItem orderbook) { }
+        public void UpdateOrderbook(SOrderBookItem orderbook) { }
 
         public RiskMetrics CalculateRiskMetrics()
         {
@@ -1181,8 +1181,8 @@ namespace CCXT.Collector.Samples.Exchanges
         public List<SystemTrade> RecentTrades { get; set; } = new List<SystemTrade>();
 
         public void ProcessTicker(STickerItem ticker) { }
-        public void ProcessOrderbook(SOrderbookItem orderbook) { }
-        public void ProcessTrade(SCompleteItem trade)
+        public void ProcessOrderbook(SOrderBookItem orderbook) { }
+        public void ProcessTrade(SCompleteOrderItem trade)
         {
             ProcessedEvents++;
             RecentTrades.Add(new SystemTrade

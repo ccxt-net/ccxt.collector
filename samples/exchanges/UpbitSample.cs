@@ -16,14 +16,14 @@ namespace CCXT.Collector.Samples.Exchanges
     /// </summary>
     public class UpbitSample
     {
-        private readonly UpbitClient _client;
+        private readonly UpbitWebSocketClient _client;
         private readonly Dictionary<string, MarketData> _marketData;
         private readonly List<Ohlc> _ohlcBuffer;
         private CancellationTokenSource _cancellationTokenSource;
 
         public UpbitSample()
         {
-            _client = new UpbitClient("public");
+            _client = new UpbitWebSocketClient();
             _marketData = new Dictionary<string, MarketData>();
             _ohlcBuffer = new List<Ohlc>();
             _cancellationTokenSource = new CancellationTokenSource();
@@ -303,13 +303,13 @@ namespace CCXT.Collector.Samples.Exchanges
                     Console.WriteLine($"{"시간",10} {"종목",12} {"방향",6} {"수량",15} {"가격",15} {"거래대금",20}");
                     Console.WriteLine(new string('-', 100));
 
-                    foreach (var trade in largeTrades)
+                    foreach (var lt in largeTrades)
                     {
-                        var color = trade.sideType == "B" ? ConsoleColor.Green : ConsoleColor.Red;
+                        var color = lt.sideType ==  SideType.Bid  ? ConsoleColor.Green : ConsoleColor.Red;
                         Console.ForegroundColor = color;
-                        var value = trade.price * trade.quantity;
-                        Console.WriteLine($"{trade.timestamp:HH:mm:ss} {trade.symbol,12} {(trade.sideType == "B" ? "매수" : "매도"),6} " +
-                                        $"{trade.quantity,15:F4} ₩{trade.price,14:N0} ₩{value,19:N0}");
+                        var value = lt.price * lt.quantity;
+                        Console.WriteLine($"{lt.timestamp:HH:mm:ss} {trade.symbol, 12} {(lt.sideType ==  SideType.Bid ? "매수" : "매도"),6} " +
+                                        $"{lt.quantity,15:F4} ₩{lt.price,14:N0} ₩{value,19:N0}");
                         Console.ResetColor();
                     }
                 }
@@ -747,7 +747,7 @@ namespace CCXT.Collector.Samples.Exchanges
         public List<decimal> BidWalls { get; private set; } = new List<decimal>();
         public List<decimal> AskWalls { get; private set; } = new List<decimal>();
 
-        public void Analyze(SOrderbookItem orderbook)
+        public void Analyze(SOrderBookItem orderbook)
         {
             TotalBidVolume = orderbook.bids.Sum(b => b.quantity);
             TotalAskVolume = orderbook.asks.Sum(a => a.quantity);
@@ -793,18 +793,20 @@ namespace CCXT.Collector.Samples.Exchanges
 
     public class VolumeTracker
     {
-        private List<SCompleteItem> _trades = new List<SCompleteItem>();
-        private Dictionary<string, List<SCompleteItem>> _tradesBySymbol = new Dictionary<string, List<SCompleteItem>>();
+        private List<SCompleteOrderItem> _trades = new List<SCompleteOrderItem>();
+        private Dictionary<string, List<SCompleteOrderItem>> _tradesBySymbol = new Dictionary<string, List<SCompleteOrderItem>>();
 
-        public void AddTrade(SCompleteItem trade)
+        public void AddTrade(SCompleteOrders trade)
         {
-            _trades.Add(trade);
+            _trades.AddRange(trade.result);
+
             if (_trades.Count > 10000) _trades.RemoveAt(0);
 
             if (!_tradesBySymbol.ContainsKey(trade.symbol))
-                _tradesBySymbol[trade.symbol] = new List<SCompleteItem>();
+                _tradesBySymbol[trade.symbol] = new List<SCompleteOrderItem>();
 
-            _tradesBySymbol[trade.symbol].Add(trade);
+            _tradesBySymbol[trade.symbol].AddRange(trade.result);
+
             if (_tradesBySymbol[trade.symbol].Count > 1000)
                 _tradesBySymbol[trade.symbol].RemoveAt(0);
         }
@@ -833,7 +835,7 @@ namespace CCXT.Collector.Samples.Exchanges
             return periods;
         }
 
-        private PeriodVolumeData CreatePeriodData(string period, List<SCompleteItem> trades)
+        private PeriodVolumeData CreatePeriodData(string period, List<SCompleteOrderItem> trades)
         {
             return new PeriodVolumeData
             {
@@ -856,7 +858,7 @@ namespace CCXT.Collector.Samples.Exchanges
             return total > 0 ? (double)(buyVolume / total * 100) : 50;
         }
 
-        public List<SCompleteItem> GetLargeTrades(int count)
+        public List<SCompleteOrderItem> GetLargeTrades(int count)
         {
             var threshold = _trades.Any() ? _trades.Average(t => t.quantity) * 10 : 0;
             return _trades.Where(t => t.quantity > threshold)
@@ -981,8 +983,8 @@ namespace CCXT.Collector.Samples.Exchanges
     public class DashboardData
     {
         private Dictionary<string, MarketData> _marketData = new Dictionary<string, MarketData>();
-        private List<SCompleteItem> _recentTrades = new List<SCompleteItem>();
-        private SOrderbookItem _lastOrderbook;
+        private List<SCompleteOrderItem> _recentTrades = new List<SCompleteOrderItem>();
+        private SOrderBookItem _lastOrderbook;
 
         public decimal TotalVolume => _marketData.Values.Sum(m => m.Volume24hKRW);
         public int ActiveSymbols => _marketData.Count;
@@ -999,12 +1001,12 @@ namespace CCXT.Collector.Samples.Exchanges
             _marketData[ticker.symbol].UpdateFromTicker(ticker);
         }
 
-        public void UpdateOrderbook(SOrderbookItem orderbook)
+        public void UpdateOrderbook(SOrderBookItem orderbook)
         {
             _lastOrderbook = orderbook;
         }
 
-        public void UpdateTrade(SCompleteItem trade)
+        public void UpdateTrade(SCompleteOrderItem trade)
         {
             _recentTrades.Add(trade);
             if (_recentTrades.Count > 1000) _recentTrades.RemoveAt(0);

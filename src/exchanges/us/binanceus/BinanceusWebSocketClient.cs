@@ -34,11 +34,11 @@ namespace CCXT.Collector.Binanceus
                 // TODO: Implement message processing based on Binanceus WebSocket protocol
                 // Handle different message types (orderbook, trades, ticker, etc.)
                 
-                OnError?.Invoke("Binanceus WebSocket implementation not yet completed");
+                RaiseError("Binanceus WebSocket implementation not yet completed");
             }
             catch (Exception ex)
             {
-                OnError?.Invoke($"Message processing error: {ex.Message}");
+                RaiseError($"Message processing error: {ex.Message}");
             }
         }
 
@@ -69,7 +69,7 @@ namespace CCXT.Collector.Binanceus
             }
             catch (Exception ex)
             {
-                OnError?.Invoke($"Subscribe orderbook error: {ex.Message}");
+                RaiseError($"Subscribe orderbook error: {ex.Message}");
                 return false;
             }
         }
@@ -101,7 +101,7 @@ namespace CCXT.Collector.Binanceus
             }
             catch (Exception ex)
             {
-                OnError?.Invoke($"Subscribe trades error: {ex.Message}");
+                RaiseError($"Subscribe trades error: {ex.Message}");
                 return false;
             }
         }
@@ -133,7 +133,7 @@ namespace CCXT.Collector.Binanceus
             }
             catch (Exception ex)
             {
-                OnError?.Invoke($"Subscribe ticker error: {ex.Message}");
+                RaiseError($"Subscribe ticker error: {ex.Message}");
                 return false;
             }
         }
@@ -162,7 +162,7 @@ namespace CCXT.Collector.Binanceus
             }
             catch (Exception ex)
             {
-                OnError?.Invoke($"Unsubscribe error: {ex.Message}");
+                RaiseError($"Unsubscribe error: {ex.Message}");
                 return false;
             }
         }
@@ -196,6 +196,45 @@ namespace CCXT.Collector.Binanceus
             // TODO: Implement symbol conversion if needed for Binanceus
             // Convert from "BTC/USDT" to exchange-specific format
             return symbol;
+        }
+
+        #endregion
+
+        #region Candlestick/K-Line Implementation
+
+        public override async Task<bool> SubscribeCandlesAsync(string symbol, string interval)
+        {
+            try
+            {
+                // TODO: Implement Binanceus-specific candles subscription
+                // This is a placeholder implementation - needs exchange-specific protocol
+                var subscription = new
+                {
+                    type = "subscribe",
+                    channel = "candles",
+                    symbol = symbol,
+                    interval = interval
+                };
+
+                await SendMessageAsync(JsonConvert.SerializeObject(subscription));
+                
+                var key = CreateSubscriptionKey($"candles:{interval}", symbol);
+                _subscriptions[key] = new SubscriptionInfo
+                {
+                    Channel = "candles",
+                    Symbol = symbol,
+                    SubscribedAt = DateTime.UtcNow,
+                    IsActive = true,
+                    Extra = interval // Store interval for resubscription
+                };
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                RaiseError($"Subscribe candles error: {ex.Message}");
+                return false;
+            }
         }
 
         #endregion

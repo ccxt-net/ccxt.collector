@@ -116,6 +116,15 @@ namespace CCXT.Collector.Library
         }
 
         /// <summary>
+        /// 64-bit Unix Timestamp in milliseconds since Epoch 1 Jan 1970
+        /// </summary>
+        public long timestamp
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
         ///
         /// </summary>
         public virtual T result

@@ -16,7 +16,7 @@
         <PackageProjectUrl>https://github.com/ccxt-net/ccxt.collector</PackageProjectUrl>
         <PackageIcon>ccxt.net.api.png</PackageIcon>
         <PackageTags>cryptocurrency;exchange;trading;market-data;exchange-markets;bot;crypto</PackageTags>
-        <PackageReleaseNotes>upgrade net8.0</PackageReleaseNotes>
+        <PackageReleaseNotes>upgrade net9.0</PackageReleaseNotes>
         <Platforms>AnyCPU;x64;x86</Platforms>
         
 		<Version>2.0.0</Version>
@@ -30,6 +30,10 @@
 		<RepositoryUrl>https://github.com/ccxt-net/ccxt.collector</RepositoryUrl>
 		<PackageReadmeFile>README.md</PackageReadmeFile>
 		<RepositoryType>git</RepositoryType>
+	</PropertyGroup>
+
+    <PropertyGroup>
+		<NoWarn>CS1998</NoWarn>
 	</PropertyGroup>
 
     <ItemGroup>
@@ -50,7 +54,6 @@
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="CCXT.NET" Version="1.5.2" />
         <PackageReference Include="RestSharp" Version="112.1.0" />
         <PackageReference Include="Microsoft.Extensions.Configuration" Version="9.0.0" />
         <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="9.0.0" />

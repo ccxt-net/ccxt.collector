@@ -158,18 +158,39 @@ When adding a new exchange:
    - Convert exchange format to unified format in `ProcessMessageAsync`
 
 4. **Add Tests**
-   Create test file in `tests/exchanges/[ExchangeName]Tests.cs`:
+   Create test file in `tests/exchanges/[ExchangeName]Tests.cs` using XUnit:
    ```csharp
-   [TestClass]
-   public class NewExchangeTests
+   using Xunit;
+   using System;
+   using System.Threading.Tasks;
+   
+   public class NewExchangeTests : IDisposable
    {
-       [TestMethod]
-       public async Task Test_WebSocket_Connection() { }
+       private NewExchangeWebSocketClient _client;
        
-       [TestMethod]
-       public async Task Test_Orderbook_Stream() { }
+       public NewExchangeTests()
+       {
+           _client = new NewExchangeWebSocketClient();
+       }
        
-       // Add more tests...
+       [Fact]
+       [Trait("Category", "Connection")]
+       public async Task Test_WebSocket_Connection() 
+       {
+           // Test implementation
+       }
+       
+       [Fact]
+       [Trait("Category", "DataStream")]
+       public async Task Test_Orderbook_Stream() 
+       {
+           // Test implementation
+       }
+       
+       public void Dispose()
+       {
+           _client?.Dispose();
+       }
    }
    ```
 
@@ -278,11 +299,14 @@ public class ExchangeWebSocket
 
 ### Writing Tests
 
+We use XUnit for testing. Here's an example:
+
 ```csharp
-[TestClass]
+using Xunit;
+
 public class IndicatorTests
 {
-    [TestMethod]
+    [Fact]
     public void RSI_Calculate_ReturnsValidValue()
     {
         // Arrange
@@ -293,7 +317,19 @@ public class IndicatorTests
         var result = rsi.Calculate(data);
         
         // Assert
-        Assert.IsTrue(result >= 0 && result <= 100);
+        Assert.True(result >= 0 && result <= 100);
+    }
+    
+    [Theory]
+    [InlineData(14)]
+    [InlineData(21)]
+    [InlineData(28)]
+    public void RSI_WithDifferentPeriods_CalculatesCorrectly(int period)
+    {
+        // Test with multiple inputs
+        var rsi = new RSI(period);
+        var result = rsi.Calculate(GenerateTestData());
+        Assert.InRange(result, 0, 100);
     }
 }
 ```

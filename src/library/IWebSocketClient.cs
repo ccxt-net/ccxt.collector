@@ -92,7 +92,7 @@ namespace CCXT.Collector.Library
         /// <summary>
         /// 1. Ticker/Trade data received callback (시세/체결)
         /// </summary>
-        event Action<STickers> OnTickerReceived;
+        event Action<STicker> OnTickerReceived;
 
         /// <summary>
         /// Trade execution data received callback (개별 체결)
@@ -164,12 +164,13 @@ namespace CCXT.Collector.Library
         public string Symbol { get; set; }
         public DateTime SubscribedAt { get; set; }
         public bool IsActive { get; set; }
+        public string Extra { get; set; } // For storing additional data like interval for candles
     }
 
     /// <summary>
     /// WebSocket message types
     /// </summary>
-    public enum WebSocketMessageType
+    public enum CustomWebSocketMessageType
     {
         Subscribe,
         Unsubscribe,

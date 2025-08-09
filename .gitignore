@@ -264,3 +264,4 @@ __pycache__/
 # Project-specific
 scripts/nuget-config.ps1
 .claude/
+nul

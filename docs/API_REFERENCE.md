@@ -40,11 +40,13 @@ namespace CCXT.Collector.Library
         Task<bool> SubscribeOrdersAsync();
         Task<bool> SubscribePositionsAsync();
         
-        // Callback Events
+        // Callback Events - Public Data
         Action<SOrderBooks> OnOrderbookReceived { get; set; }
         Action<SCompleteOrders> OnTradeReceived { get; set; }
         Action<STicker> OnTickerReceived { get; set; }
         Action<SCandlestick> OnCandleReceived { get; set; }
+        
+        // Callback Events - Private Data (Future)
         Action<SBalance> OnBalanceReceived { get; set; }
         Action<SOrder> OnOrderReceived { get; set; }
         Action<SPosition> OnPositionReceived { get; set; }

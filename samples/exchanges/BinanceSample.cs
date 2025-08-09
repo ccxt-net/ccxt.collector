@@ -16,14 +16,14 @@ namespace CCXT.Collector.Samples.Exchanges
     /// </summary>
     public class BinanceSample
     {
-        private readonly BinanceClient _client;
+        private readonly BinanceWebSocketClient _client;
         private readonly List<Ohlc> _ohlcBuffer;
         private readonly Dictionary<string, IIndicatorCalculator> _indicators;
         private CancellationTokenSource _cancellationTokenSource;
 
         public BinanceSample()
         {
-            _client = new BinanceClient("public");
+            _client = new BinanceWebSocketClient();
             _ohlcBuffer = new List<Ohlc>();
             _indicators = new Dictionary<string, IIndicatorCalculator>();
             _cancellationTokenSource = new CancellationTokenSource();
@@ -184,7 +184,7 @@ namespace CCXT.Collector.Samples.Exchanges
             Console.WriteLine("\n💹 Starting Binance Trade Analysis...\n");
 
             var tradeStats = new TradeStatistics();
-            var recentTrades = new Queue<SCompleteItem>(100);
+            var recentTrades = new Queue<SCompleteOrderItem>(100);
 
             _client.OnTradeReceived += (trade) =>
             {
@@ -638,7 +638,7 @@ namespace CCXT.Collector.Samples.Exchanges
         public decimal AverageSpread { get; private set; }
         private List<decimal> _spreads = new List<decimal>();
 
-        public void Update(SOrderbookItem orderbook)
+        public void Update(SOrderBookItem orderbook)
         {
             UpdateCount++;
             
@@ -671,7 +671,7 @@ namespace CCXT.Collector.Samples.Exchanges
 
         private decimal _totalValue;
 
-        public void AddTrade(SCompleteItem trade)
+        public void AddTrade(SCompleteOrderItem trade)
         {
             TradeCount++;
             TotalVolume += trade.quantity;

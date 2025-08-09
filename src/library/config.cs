@@ -1,5 +1,4 @@
-﻿using CCXT.NET.Shared.Configuration;
-using Microsoft.Extensions.Configuration;
+﻿using Microsoft.Extensions.Configuration;
 using System;
 using System.IO;
 using System.Runtime.InteropServices;
@@ -242,7 +241,7 @@ namespace CCXT.Collector.Library
         public virtual DateTime GetAppDateTime(string appSection, string appkey)
         {
             var _value = GetAppSection(appSection, appkey);
-            return String.IsNullOrEmpty(_value) ? CUnixTime.UtcNow : Convert.ToDateTime(_value);
+            return String.IsNullOrEmpty(_value) ? DateTime.UtcNow : Convert.ToDateTime(_value);
         }
 
         /// <summary>
