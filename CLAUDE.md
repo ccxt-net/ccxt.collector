@@ -11,7 +11,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 CCXT.Collector is a .NET library that connects to cryptocurrency exchanges worldwide via WebSocket to receive real-time market data (orderbook, trades, ticker, etc.) and delivers it to callback functions using unified data classes. Additionally, it analyzes the data per exchange and market to calculate technical indicators in real-time, providing these indicator values through callbacks. This allows developers to handle both raw market data and technical analysis from different exchanges with a consistent interface.
 
 ### Recent Major Updates (2025-01-09)
-- **v2.1.3 Release**: Complete WebSocket implementation for 15 major exchanges from kimp.client
+- **v2.1.3 Release**: Complete WebSocket implementation for 15 major exchanges
   - Full implementations: Gate.io (JSON protocol), Bittrex (SignalR protocol)
   - Standardized data models: STrade, STradeItem, SCandle, SCandleItem
   - Fixed all build errors with proper model and method usage (InvokeOrderbookCallback, InvokeTradeCallback, etc.)
@@ -25,7 +25,7 @@ CCXT.Collector is a .NET library that connects to cryptocurrency exchanges world
   - Data models categorized into `Models/Market/`, `Models/Trading/`, and `Models/WebSocket/`
   - Technical indicators reorganized by type in `Indicators/` with subcategories
   - Utility classes consolidated in `Utilities/` folder
-- **Exchange Implementations (15 Total from kimp.client)**:
+- **Exchange Implementations (15 Total)**:
   - ✅ Complete: Binance, Bitget, Bithumb, Bittrex, Bybit, Coinbase, Coinone, Crypto.com, Gate.io, Huobi, Korbit, Kucoin, OKX, Upbit
   - OkEX merged with OKX (rebranded)
 

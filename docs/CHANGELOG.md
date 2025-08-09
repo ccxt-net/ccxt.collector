@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### 🎯 Complete WebSocket Implementation for 15 Major Exchanges
 
-This release completes the WebSocket implementation for all 15 exchanges from the kimp.client reference, ensuring standardized real-time data streaming across all major cryptocurrency exchanges.
+This release completes the WebSocket implementation for all 15 exchanges, ensuring standardized real-time data streaming across all major cryptocurrency exchanges.
 
 ### Added
 
@@ -26,7 +26,7 @@ This release completes the WebSocket implementation for all 15 exchanges from th
 
 ### Improved
 
-#### Exchange Implementation Status (15 Total from kimp.client)
+#### Exchange Implementation Status (15 Total)
 | Exchange | Status | Location | Notes |
 |----------|--------|----------|-------|
 | ✅ Binance | Complete | `src/exchanges/hk/binance/` | Full implementation |
@@ -107,7 +107,7 @@ This release introduces significant performance improvements through batch proce
 ## [2.1.1] - 2025-08-10
 
 ### Improved
-- **WebSocket Base Class Enhancements** (from kimp.client best practices):
+- **WebSocket Base Class Enhancements** (best practices):
   - Dynamic buffer resizing for handling large messages (16KB initial, auto-resize)
   - Exponential backoff for reconnection (capped at 60 seconds)
   - Exchange rate support for multi-currency conversions (KRW/USD)

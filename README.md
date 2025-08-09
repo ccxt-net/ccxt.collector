@@ -44,9 +44,9 @@ CCXT.Collector is a comprehensive library that connects to cryptocurrency exchan
 | WebSocket Clients | 132 | - | - |
 | Korean Exchange WebSockets | 5 (Upbit, Bithumb, Coinone, Korbit, Gopax) | 2 (OKCoinKR, Probit) | - |
 | Major Exchange Implementations | **15 (100% Complete)** | - | - |
-| Full WebSocket Implementation | **15** (All kimp.client exchanges) | - | 117 |
+| Full WebSocket Implementation | **15** | - | 117 |
 
-#### ✅ All 15 Major Exchanges from kimp.client (100% Complete)
+#### ✅ All 15 Major Exchanges (100% Complete)
 Binance, Bitget, Bithumb, Bittrex, Bybit, Coinbase, Coinone, Crypto.com, Gate.io, Huobi, Korbit, Kucoin, OKX, Upbit - **All functional with standardized WebSocket streaming**
 
 ## 📦 Installation

@@ -24,7 +24,7 @@ namespace CCXT.Collector.Core.Abstractions
         protected readonly int _maxReconnectAttempts = 10;  // Increased from 5
         protected readonly int _reconnectDelayMs = 5000;
         
-        // Exchange rate support for multi-currency (from kimp.client)
+        // Exchange rate support for multi-currency 
         protected decimal _exchangeRate = 1.0m;
         
         // Authentication
@@ -203,7 +203,7 @@ namespace CCXT.Collector.Core.Abstractions
 
         protected async Task ReceiveLoop(ClientWebSocket socket, bool isPrivate)
         {
-            // Dynamic buffer sizing for large messages (from kimp.client)
+            // Dynamic buffer sizing for large messages 
             var bufferSize = 1024 * 16;  // 16KB initial buffer
             var buffer = new ArraySegment<byte>(new byte[bufferSize]);
             var messageBuilder = new StringBuilder();
@@ -223,7 +223,7 @@ namespace CCXT.Collector.Core.Abstractions
                         {
                             messageBuilder.Append(Encoding.UTF8.GetString(buffer.Array, 0, result.Count));
                             
-                            // Resize buffer if nearly full (from kimp.client)
+                            // Resize buffer if nearly full 
                             if (result.Count == buffer.Count && !result.EndOfMessage)
                             {
                                 bufferSize *= 2;
@@ -323,7 +323,7 @@ namespace CCXT.Collector.Core.Abstractions
 
             _reconnectAttempts++;
             
-            // Exponential backoff with cap (from kimp.client pattern)
+            // Exponential backoff with cap 
             var delay = Math.Min(_reconnectDelayMs * _reconnectAttempts, 60000);  // Cap at 60 seconds
             RaiseError($"Reconnecting in {delay}ms (attempt {_reconnectAttempts}/{_maxReconnectAttempts})...");
             

@@ -420,7 +420,7 @@ The library supports 132 exchanges across 22 countries/regions:
 
 | Status | Count | Description |
 |--------|-------|-------------|
-| Full Implementation | 15 | All 15 major exchanges from kimp.client completed |
+| Full Implementation | 15 | All 15 major exchanges completed |
 | WebSocket Structure | 117 | Basic WebSocket client created |
 | API Documentation | 44 | Documentation URLs added |
 | Pending | 73 | Awaiting implementation |

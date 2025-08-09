@@ -16,7 +16,7 @@
         <PackageProjectUrl>https://github.com/ccxt-net/ccxt.collector</PackageProjectUrl>
         <PackageIcon>ccxt.net.api.png</PackageIcon>
         <PackageTags>cryptocurrency;exchange;trading;market-data;exchange-markets;bot;crypto</PackageTags>
-        <PackageReleaseNotes>v2.1.3 (2025-08-10) - Complete WebSocket implementation for all 15 major exchanges from kimp.client. NEW: Gate.io (JSON protocol), Bittrex (SignalR protocol). FIXED: Standardized data models (STrade, STradeItem, SCandle), resolved all build errors. All 15 exchanges now fully operational with unified callback architecture and production-ready stability.</PackageReleaseNotes>
+        <PackageReleaseNotes>v2.1.3 (2025-08-10) - Complete WebSocket implementation for all 15 major exchanges. NEW: Gate.io (JSON protocol), Bittrex (SignalR protocol). FIXED: Standardized data models (STrade, STradeItem, SCandle), resolved all build errors. All 15 exchanges now fully operational with unified callback architecture and production-ready stability.</PackageReleaseNotes>
         <Platforms>AnyCPU;x64;x86</Platforms>
         
 		<Version>2.1.3</Version>

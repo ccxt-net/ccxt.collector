@@ -5,7 +5,7 @@
 ### ✨ What's New in v2.1.3 (2025-08-10)
 
 #### Complete Exchange Implementation
-- ✅ 15 major exchanges fully implemented from kimp.client
+- ✅ 15 major exchanges fully implemented 
 - 🔥 Gate.io WebSocket with JSON protocol
 - 🔥 Bittrex WebSocket with SignalR protocol
 - 🔧 All build errors resolved with standardized data models
