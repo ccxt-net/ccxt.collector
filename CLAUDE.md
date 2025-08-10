@@ -163,9 +163,8 @@ dotnet publish -c Release -r ubuntu.18.04-x64 -f net8.0
 
 ### Key Dependencies
 
-- **Newtonsoft.Json**: JSON serialization
 - **Microsoft.Extensions.Configuration**: Configuration management
-- **System.Text.Json**: Additional JSON support
+- **System.Text.Json**: JSON support
 
 ### Configuration
 

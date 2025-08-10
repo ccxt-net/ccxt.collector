@@ -37,7 +37,7 @@ CCXT.Collector is a comprehensive library that connects to cryptocurrency exchan
 
 *Note: Exchange locations indicate registration/headquarters, not service availability
 
-#### Implementation Status (v2.1.4)
+#### Implementation Status (v2.1.5)
 
 | Feature | Implemented | In Progress | Planned |
 |---------|------------|-------------|----------|
@@ -53,23 +53,24 @@ Binance, Bitget, Bithumb, Bittrex, Bybit, Coinbase, Coinone, Crypto.com, Gate.io
 
 ### NuGet Package Manager
 ```bash
-Install-Package CCXT.Collector -Version 2.1.4
+Install-Package CCXT.Collector -Version 2.1.5
 ```
 
 ### .NET CLI
 ```bash
-dotnet add package CCXT.Collector --version 2.1.4
+dotnet add package CCXT.Collector --version 2.1.5
 ```
 
 ### Package Reference
 ```xml
-<PackageReference Include="CCXT.Collector" Version="2.1.4" />
+<PackageReference Include="CCXT.Collector" Version="2.1.5" />
 ```
 
-### ⚠️ Breaking Changes in v2.1.4
-- No breaking changes in this release
-- Enhanced sample applications with improved stability
-- See [CHANGELOG](docs/CHANGELOG.md#214---2025-08-10) for complete details
+### ⚠️ Breaking Changes in v2.1.5
+- **IMPORTANT**: Complete migration from Newtonsoft.Json to System.Text.Json
+- All JSON processing now uses System.Text.Json for better performance and reduced dependencies
+- Added JsonExtensions utility class with safe property access methods
+- See [CHANGELOG](docs/CHANGELOG.md#215---2025-08-11) for migration details
 
 ### ⚠️ Breaking Changes in v2.1.2
 - `SCandlestick.result` changed from single item to `List<SCandleItem>`

@@ -6,7 +6,7 @@ namespace CCXT.Collector.Library
     /// <summary>
     ///
     /// </summary>
-    public static partial class CExtension
+    public static partial class LinqExtension
     {
         /// <summary>
         ///

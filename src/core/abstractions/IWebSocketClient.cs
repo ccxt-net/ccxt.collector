@@ -42,22 +42,22 @@ namespace CCXT.Collector.Core.Abstractions
         #region Public Channel Subscriptions
 
         /// <summary>
-        /// Subscribe to ticker channel (시세/체결)
+        /// Subscribe to ticker channel
         /// </summary>
         Task<bool> SubscribeTickerAsync(string symbol);
 
         /// <summary>
-        /// Subscribe to orderbook/depth channel (호가창)
+        /// Subscribe to orderbook/depth channel 
         /// </summary>
         Task<bool> SubscribeOrderbookAsync(string symbol);
 
         /// <summary>
-        /// Subscribe to trades channel (체결 내역)
+        /// Subscribe to trades channel 
         /// </summary>
         Task<bool> SubscribeTradesAsync(string symbol);
 
         /// <summary>
-        /// Subscribe to candlestick/kline channel (캔들)
+        /// Subscribe to candlestick/kline channel 
         /// </summary>
         Task<bool> SubscribeCandlesAsync(string symbol, string interval);
 
@@ -66,17 +66,17 @@ namespace CCXT.Collector.Core.Abstractions
         #region Private Channel Subscriptions
 
         /// <summary>
-        /// Subscribe to account balance updates (잔고)
+        /// Subscribe to account balance updates 
         /// </summary>
         Task<bool> SubscribeBalanceAsync();
 
         /// <summary>
-        /// Subscribe to order updates (주문)
+        /// Subscribe to order updates 
         /// </summary>
         Task<bool> SubscribeOrdersAsync();
 
         /// <summary>
-        /// Subscribe to position updates (포지션 - for futures)
+        /// Subscribe to position updates (for futures)
         /// </summary>
         Task<bool> SubscribePositionsAsync();
 
@@ -90,22 +90,22 @@ namespace CCXT.Collector.Core.Abstractions
         #region Callback Events - Public Data
 
         /// <summary>
-        /// 1. Ticker/Trade data received callback (시세/체결)
+        /// 1. Ticker/Trade data received callback 
         /// </summary>
         event Action<STicker> OnTickerReceived;
 
         /// <summary>
-        /// Trade execution data received callback (개별 체결)
+        /// Trade execution data received callback 
         /// </summary>
         event Action<STrade> OnTradeReceived;
 
         /// <summary>
-        /// 2. Orderbook/Depth data received callback (호가창)
+        /// 2. Orderbook/Depth data received callback 
         /// </summary>
         event Action<SOrderBook> OnOrderbookReceived;
 
         /// <summary>
-        /// 3. Candlestick/K-Line data received callback (캔들)
+        /// 3. Candlestick/K-Line data received callback 
         /// </summary>
         event Action<SCandle> OnCandleReceived;
 
@@ -114,17 +114,17 @@ namespace CCXT.Collector.Core.Abstractions
         #region Callback Events - Private Data
 
         /// <summary>
-        /// 4. Account balance update callback (계정 잔고)
+        /// 4. Account balance update callback 
         /// </summary>
         event Action<SBalance> OnBalanceUpdate;
 
         /// <summary>
-        /// 4. Order update callback (주문 상태)
+        /// 4. Order update callback 
         /// </summary>
         event Action<SOrder> OnOrderUpdate;
 
         /// <summary>
-        /// 4. Position update callback (포지션 - futures)
+        /// 4. Position update callback (futures)
         /// </summary>
         event Action<SPosition> OnPositionUpdate;
 

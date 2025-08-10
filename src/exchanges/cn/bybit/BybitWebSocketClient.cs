@@ -6,8 +6,7 @@ using System.Threading.Tasks;
 using CCXT.Collector.Core.Abstractions;
 using CCXT.Collector.Library;
 using CCXT.Collector.Service;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
+using System.Text.Json;
 
 namespace CCXT.Collector.Bybit
 {
@@ -47,33 +46,34 @@ namespace CCXT.Collector.Bybit
         {
             try
             {
-                var json = JObject.Parse(message);
+                using var doc = JsonDocument.Parse(message); 
+                var json = doc.RootElement;
 
                 // Handle ping/pong
-                if (json["op"]?.ToString() == "ping")
+                if (json.GetStringOrDefault("op") == "ping")
                 {
                     await HandlePingMessage();
                     return;
                 }
 
                 // Handle subscription response
-                if (json["op"]?.ToString() == "subscribe")
+                if (json.GetStringOrDefault("op") == "subscribe")
                 {
-                    if (!json["success"]?.Value<bool>() ?? false)
+                    if (!json.GetBooleanOrFalse("success"))
                     {
-                        RaiseError($"Subscription failed: {json["ret_msg"]}");
+                        RaiseError($"Subscription failed: {json.GetProperty("ret_msg")}");
                     }
+
                     return;
                 }
 
                 // Handle data messages
-                if (json["topic"] != null)
+                if (json.TryGetProperty("topic", out var topicProp))
                 {
-                    var topic = json["topic"].ToString();
-                    var data = json["data"];
-                    
-                    if (data == null)
+                    if (!json.TryGetProperty("data", out var data))
                         return;
+
+                    var topic = json.GetStringOrDefault("topic");
 
                     if (isPrivate)
                     {
@@ -125,18 +125,20 @@ namespace CCXT.Collector.Bybit
             {
                 op = "pong"
             };
-            await SendMessageAsync(JsonConvert.SerializeObject(pong));
+            await SendMessageAsync(JsonSerializer.Serialize(pong));
         }
 
-        private async Task ProcessOrderbookData(JObject json)
+        private async Task ProcessOrderbookData(JsonElement json)
         {
             try
             {
-                var topic = json["topic"].ToString();
+                if (!json.TryGetProperty("data", out var data))
+                    return;
+
+                var topic = json.GetStringOrDefault("topic");
                 var symbol = ExtractSymbolFromTopic(topic);
-                var data = json["data"];
-                var type = json["type"]?.ToString(); // snapshot or delta
-                var timestamp = json["ts"]?.Value<long>() ?? DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+                var type = json.GetStringOrDefault("type"); // snapshot or delta
+                var timestamp = json.GetInt64OrDefault("ts", TimeExtension.UnixTime);
 
                 var orderbook = new SOrderBook
                 {
@@ -152,13 +154,12 @@ namespace CCXT.Collector.Bybit
                 };
 
                 // Process asks
-                var asks = data["a"] as JArray;
-                if (asks != null)
+                if (data.TryGetArray("a", out var asks))
                 {
-                    foreach (var ask in asks)
+                    foreach (var ask in asks.EnumerateArray())
                     {
-                        var price = ask[0].Value<decimal>();
-                        var quantity = ask[1].Value<decimal>();
+                        var price = ask[0].GetDecimalValue();
+                        var quantity = ask[1].GetDecimalValue();
                         
                         orderbook.result.asks.Add(new SOrderBookItem
                         {
@@ -170,13 +171,12 @@ namespace CCXT.Collector.Bybit
                 }
 
                 // Process bids
-                var bids = data["b"] as JArray;
-                if (bids != null)
+                if (data.TryGetArray("b", out var bids))
                 {
-                    foreach (var bid in bids)
+                    foreach (var bid in bids.EnumerateArray())
                     {
-                        var price = bid[0].Value<decimal>();
-                        var quantity = bid[1].Value<decimal>();
+                        var price = bid[0].GetDecimalValue();
+                        var quantity = bid[1].GetDecimalValue();
                         
                         orderbook.result.bids.Add(new SOrderBookItem
                         {
@@ -251,35 +251,34 @@ namespace CCXT.Collector.Bybit
             cached.timestamp = update.timestamp;
         }
 
-        private async Task ProcessTradeData(JObject json)
+        private async Task ProcessTradeData(JsonElement json)
         {
             try
             {
-                var topic = json["topic"].ToString();
+                var topic = json.GetStringOrDefault("topic");
                 var symbol = ExtractSymbolFromTopic(topic);
-                var data = json["data"] as JArray;
-                
-                if (data == null)
+
+                if (!(json.TryGetArray("data", out var data)))
                     return;
 
                 var symbolConverted = ConvertToStandardSymbol(symbol);
                 var trades = new List<STradeItem>();
                 long latestTimestamp = 0;
 
-                foreach (var trade in data)
+                foreach (var trade in data.EnumerateArray())
                 {
-                    var timestamp = trade["T"]?.Value<long>() ?? DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+                    var timestamp = trade.GetInt64OrDefault("T", TimeExtension.UnixTime);
                     if (timestamp > latestTimestamp)
                         latestTimestamp = timestamp;
 
                     trades.Add(new STradeItem
                     {
-                        orderId = trade["i"]?.ToString(),
+                        tradeId = trade.GetStringOrDefault("i"),
                         timestamp = timestamp,
-                        price = trade["p"]?.Value<decimal>() ?? 0,
-                        quantity = trade["v"]?.Value<decimal>() ?? 0,
-                        amount = (trade["p"]?.Value<decimal>() ?? 0) * (trade["v"]?.Value<decimal>() ?? 0),
-                        sideType = trade["S"]?.ToString() == "Buy" ? SideType.Bid : SideType.Ask,
+                        price = trade.GetDecimalOrDefault("p"),
+                        quantity = trade.GetDecimalOrDefault("v"),
+                        amount = (trade.GetDecimalOrDefault("p")) * (trade.GetDecimalOrDefault("v")),
+                        sideType = trade.GetStringOrDefault("S") == "Buy" ? SideType.Bid : SideType.Ask,
                         orderType = OrderType.Limit
                     });
                 }
@@ -303,37 +302,37 @@ namespace CCXT.Collector.Bybit
             }
         }
 
-        private async Task ProcessTickerData(JObject json)
+        private async Task ProcessTickerData(JsonElement json)
         {
             try
             {
-                var topic = json["topic"].ToString();
-                var symbol = ExtractSymbolFromTopic(topic);
-                var data = json["data"];
-                
-                if (data == null)
+                if (!json.TryGetProperty("data", out var data))
                     return;
+
+                var topic = json.GetStringOrDefault("topic");
+                var symbol = ExtractSymbolFromTopic(topic);
+                var timestamp = json.GetInt64OrDefault("ts", TimeExtension.UnixTime);
 
                 var ticker = new STicker
                 {
                     exchange = ExchangeName,
                     symbol = ConvertToStandardSymbol(symbol),
-                    timestamp = json["ts"]?.Value<long>() ?? DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
+                    timestamp = timestamp,
                     result = new STickerItem
                     {
-                        timestamp = json["ts"]?.Value<long>() ?? DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
-                        closePrice = data["lastPrice"]?.Value<decimal>() ?? 0,
-                        askPrice = data["ask1Price"]?.Value<decimal>() ?? 0,
-                        bidPrice = data["bid1Price"]?.Value<decimal>() ?? 0,
-                        askQuantity = data["ask1Size"]?.Value<decimal>() ?? 0,
-                        bidQuantity = data["bid1Size"]?.Value<decimal>() ?? 0,
-                        openPrice = data["prevPrice24h"]?.Value<decimal>() ?? 0,
-                        highPrice = data["highPrice24h"]?.Value<decimal>() ?? 0,
-                        lowPrice = data["lowPrice24h"]?.Value<decimal>() ?? 0,
-                        volume = data["volume24h"]?.Value<decimal>() ?? 0,
-                        quoteVolume = data["turnover24h"]?.Value<decimal>() ?? 0,
-                        change = data["price24hPcnt"]?.Value<decimal>() ?? 0,
-                        percentage = (data["price24hPcnt"]?.Value<decimal>() ?? 0) * 100
+                        timestamp = timestamp,
+                        closePrice = data.GetDecimalOrDefault("lastPrice"),
+                        askPrice = data.GetDecimalOrDefault("ask1Price"),
+                        bidPrice = data.GetDecimalOrDefault("bid1Price"),
+                        askQuantity = data.GetDecimalOrDefault("ask1Size"),
+                        bidQuantity = data.GetDecimalOrDefault("bid1Size"),
+                        openPrice = data.GetDecimalOrDefault("prevPrice24h"),
+                        highPrice = data.GetDecimalOrDefault("highPrice24h"),
+                        lowPrice = data.GetDecimalOrDefault("lowPrice24h"),
+                        volume = data.GetDecimalOrDefault("volume24h"),
+                        quoteVolume = data.GetDecimalOrDefault("turnover24h"),
+                        change = data.GetDecimalOrDefault("price24hPcnt"),
+                        percentage = (data.GetDecimalOrDefault("price24hPcnt")) * 100
                     }
                 };
 
@@ -345,39 +344,38 @@ namespace CCXT.Collector.Bybit
             }
         }
 
-        private async Task ProcessKlineData(JObject json)
+        private async Task ProcessKlineData(JsonElement json)
         {
             try
             {
-                var topic = json["topic"].ToString();
+                var topic = json.GetStringOrDefault("topic");
                 var parts = topic.Split('.');
                 var interval = parts[1]; // Extract interval
                 var symbol = parts[2]; // Extract symbol
-                var data = json["data"] as JArray;
-                
-                if (data == null)
+
+                if (!(json.TryGetArray("data", out var data)))
                     return;
 
                 var candleItems = new List<SCandleItem>();
                 long latestTimestamp = 0;
                 var convertedInterval = ConvertInterval(interval);
 
-                foreach (var kline in data)
+                foreach (var kline in data.EnumerateArray())
                 {
-                    var timestamp = kline["start"]?.Value<long>() ?? 0;
+                    var timestamp = kline.GetInt64OrDefault("start");
                     if (timestamp > latestTimestamp)
                         latestTimestamp = timestamp;
 
                     candleItems.Add(new SCandleItem
                     {
                         openTime = timestamp,
-                        closeTime = kline["end"]?.Value<long>() ?? 0,
-                        open = decimal.Parse(kline["open"]?.ToString() ?? "0"),
-                        high = decimal.Parse(kline["high"]?.ToString() ?? "0"),
-                        low = decimal.Parse(kline["low"]?.ToString() ?? "0"),
-                        close = decimal.Parse(kline["close"]?.ToString() ?? "0"),
-                        volume = decimal.Parse(kline["volume"]?.ToString() ?? "0"),
-                        quoteVolume = decimal.Parse(kline["turnover"]?.ToString() ?? "0")
+                        closeTime = kline.GetInt64OrDefault("end"),
+                        open = kline.GetDecimalOrDefault("open"),
+                        high = kline.GetDecimalOrDefault("high"),
+                        low = kline.GetDecimalOrDefault("low"),
+                        close = kline.GetDecimalOrDefault("close"),
+                        volume = kline.GetDecimalOrDefault("volume"),
+                        quoteVolume = kline.GetDecimalOrDefault("turnover")
                     });
                 }
 
@@ -401,27 +399,27 @@ namespace CCXT.Collector.Bybit
             }
         }
 
-        private async Task ProcessWalletData(JObject json)
+        private async Task ProcessWalletData(JsonElement json)
         {
             try
             {
-                var data = json["data"] as JArray;
-                if (data == null) return;
+                if (!(json.TryGetArray("data", out var data)))
+                    return;
 
-                foreach (var wallet in data)
+                foreach (var wallet in data.EnumerateArray())
                 {
-                    var coins = wallet["coin"] as JArray;
-                    if (coins == null) continue;
+                    if (!(wallet.TryGetArray("coin", out var coins)))
+                        continue;
 
                     var balanceItems = new List<SBalanceItem>();
-                    var timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
-                    var accountType = wallet["accountType"]?.ToString() ?? "spot";
+                    var timestamp = TimeExtension.UnixTime;
+                    var accountType = wallet.GetStringOrDefault("accountType", "spot");
 
-                    foreach (var coin in coins)
+                    foreach (var coin in coins.EnumerateArray())
                     {
-                        var currency = coin["coin"]?.ToString();
-                        var free = coin["free"]?.Value<decimal>() ?? 0;
-                        var locked = coin["locked"]?.Value<decimal>() ?? 0;
+                        var currency = coin.GetStringOrDefault("coin");
+                        var free = coin.GetDecimalOrDefault("free");
+                        var locked = coin.GetDecimalOrDefault("locked");
                         
                         if (free > 0 || locked > 0)
                         {
@@ -456,31 +454,31 @@ namespace CCXT.Collector.Bybit
             }
         }
 
-        private async Task ProcessOrderData(JObject json)
+        private async Task ProcessOrderData(JsonElement json)
         {
             try
             {
-                var data = json["data"] as JArray;
-                if (data == null) return;
+                if (!(json.TryGetArray("data", out var data)))
+                    return;
 
                 var orderList = new List<SOrderItem>();
-                var timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+                var timestamp = TimeExtension.UnixTime;
 
-                foreach (var order in data)
+                foreach (var order in data.EnumerateArray())
                 {
                     orderList.Add(new SOrderItem
                     {
-                        orderId = order["orderId"]?.ToString(),
-                        clientOrderId = order["orderLinkId"]?.ToString(),
-                        symbol = ConvertToStandardSymbol(order["symbol"]?.ToString()),
-                        side = order["side"]?.ToString() == "Buy" ? OrderSide.Buy : OrderSide.Sell,
-                        type = ConvertOrderType(order["orderType"]?.ToString()),
-                        status = ConvertOrderStatus(order["orderStatus"]?.ToString()),
-                        price = order["price"]?.Value<decimal>() ?? 0,
-                        quantity = order["qty"]?.Value<decimal>() ?? 0,
-                        filledQuantity = order["cumExecQty"]?.Value<decimal>() ?? 0,
-                        createTime = order["createdTime"]?.Value<long>() ?? timestamp,
-                        updateTime = order["updatedTime"]?.Value<long>() ?? timestamp
+                        orderId = order.GetStringOrDefault("orderId"),
+                        clientOrderId = order.GetStringOrDefault("orderLinkId"),
+                        symbol = ConvertToStandardSymbol(order.GetStringOrDefault("symbol")),
+                        side = order.GetStringOrDefault("side") == "Buy" ? OrderSide.Buy : OrderSide.Sell,
+                        type = ConvertOrderType(order.GetStringOrDefault("orderType")),
+                        status = ConvertOrderStatus(order.GetStringOrDefault("orderStatus")),
+                        price = order.GetDecimalOrDefault("price"),
+                        quantity = order.GetDecimalOrDefault("qty"),
+                        filledQuantity = order.GetDecimalOrDefault("cumExecQty"),
+                        createTime = order.GetInt64OrDefault("createdTime", timestamp),
+                        updateTime = order.GetInt64OrDefault("updatedTime", timestamp)
                     });
                 }
 
@@ -502,27 +500,27 @@ namespace CCXT.Collector.Bybit
             }
         }
 
-        private async Task ProcessPositionData(JObject json)
+        private async Task ProcessPositionData(JsonElement json)
         {
             try
             {
-                var data = json["data"] as JArray;
-                if (data == null) return;
+                if (!(json.TryGetArray("data", out var data)))
+                    return;
 
                 var positionList = new List<SPositionItem>();
-                var timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+                var timestamp = TimeExtension.UnixTime;
 
-                foreach (var pos in data)
+                foreach (var pos in data.EnumerateArray())
                 {
                     positionList.Add(new SPositionItem
                     {
-                        symbol = ConvertToStandardSymbol(pos["symbol"]?.ToString()),
-                        side = pos["side"]?.ToString() == "Buy" ? PositionSide.Long : PositionSide.Short,
-                        size = pos["size"]?.Value<decimal>() ?? 0,
-                        entryPrice = pos["avgPrice"]?.Value<decimal>() ?? 0,
-                        markPrice = pos["markPrice"]?.Value<decimal>() ?? 0,
-                        unrealizedPnl = pos["unrealisedPnl"]?.Value<decimal>() ?? 0,
-                        realizedPnl = pos["realisedPnl"]?.Value<decimal>() ?? 0
+                        symbol = ConvertToStandardSymbol(pos.GetStringOrDefault("symbol")),
+                        side = pos.GetStringOrDefault("side") == "Buy" ? PositionSide.Long : PositionSide.Short,
+                        size = pos.GetDecimalOrDefault("size"),
+                        entryPrice = pos.GetDecimalOrDefault("avgPrice"),
+                        markPrice = pos.GetDecimalOrDefault("markPrice"),
+                        unrealizedPnl = pos.GetDecimalOrDefault("unrealisedPnl"),
+                        realizedPnl = pos.GetDecimalOrDefault("realisedPnl")
                     });
                 }
 
@@ -558,7 +556,7 @@ namespace CCXT.Collector.Bybit
                     }
                 };
 
-                await SendMessageAsync(JsonConvert.SerializeObject(subscription));
+                await SendMessageAsync(JsonSerializer.Serialize(subscription));
 
                 var key = CreateSubscriptionKey("orderbook", symbol);
                 _subscriptions[key] = new SubscriptionInfo
@@ -592,7 +590,7 @@ namespace CCXT.Collector.Bybit
                     }
                 };
 
-                await SendMessageAsync(JsonConvert.SerializeObject(subscription));
+                await SendMessageAsync(JsonSerializer.Serialize(subscription));
 
                 var key = CreateSubscriptionKey("trades", symbol);
                 _subscriptions[key] = new SubscriptionInfo
@@ -626,7 +624,7 @@ namespace CCXT.Collector.Bybit
                     }
                 };
 
-                await SendMessageAsync(JsonConvert.SerializeObject(subscription));
+                await SendMessageAsync(JsonSerializer.Serialize(subscription));
 
                 var key = CreateSubscriptionKey("ticker", symbol);
                 _subscriptions[key] = new SubscriptionInfo
@@ -662,7 +660,7 @@ namespace CCXT.Collector.Bybit
                     }
                 };
 
-                await SendMessageAsync(JsonConvert.SerializeObject(subscription));
+                await SendMessageAsync(JsonSerializer.Serialize(subscription));
 
                 var key = CreateSubscriptionKey($"kline.{bybitInterval}", symbol);
                 _subscriptions[key] = new SubscriptionInfo
@@ -701,7 +699,7 @@ namespace CCXT.Collector.Bybit
                     args = new[] { topic }
                 };
 
-                await SendMessageAsync(JsonConvert.SerializeObject(unsubscription));
+                await SendMessageAsync(JsonSerializer.Serialize(unsubscription));
 
                 var key = CreateSubscriptionKey(channel, symbol);
                 if (_subscriptions.TryRemove(key, out var sub))
@@ -720,15 +718,15 @@ namespace CCXT.Collector.Bybit
 
         protected override string CreatePingMessage()
         {
-            return JsonConvert.SerializeObject(new { op = "ping" });
+            return JsonSerializer.Serialize(new { op = "ping" });
         }
 
         protected override string CreateAuthenticationMessage(string apiKey, string secretKey)
         {
-            var expires = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() + 10000;
+            var expires = TimeExtension.UnixTime + 10000;
             var signature = GenerateSignature(secretKey, $"GET/realtime{expires}");
             
-            return JsonConvert.SerializeObject(new
+            return JsonSerializer.Serialize(new
             {
                 op = "auth",
                 args = new[]

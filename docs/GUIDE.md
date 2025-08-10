@@ -257,7 +257,8 @@ public class BinanceWebSocketClient : WebSocketClientBase
     protected override async Task ProcessMessageAsync(string message, bool isPrivate)
     {
         // 1. Parse to JObject for efficient access
-        var json = JObject.Parse(message);
+        using var doc = JsonDocument.Parse(message); 
+        var json = doc.RootElement;
         
         // 2. Identify message type
         var messageType = json["e"]?.ToString();
@@ -274,7 +275,7 @@ public class BinanceWebSocketClient : WebSocketClientBase
         }
     }
     
-    private async Task ProcessOrderbook(JObject json)
+    private async Task ProcessOrderbook(JsonElement json)
     {
         // Direct conversion from JObject to standard model
         var orderbook = new SOrderBooks

@@ -5,8 +5,7 @@ using System.Threading.Tasks;
 using CCXT.Collector.Core.Abstractions;
 using CCXT.Collector.Library;
 using CCXT.Collector.Service;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
+using System.Text.Json;
 
 namespace CCXT.Collector.Upbit
 {
@@ -46,11 +45,12 @@ namespace CCXT.Collector.Upbit
             try
             {
                 // Upbit sends data in binary format first, then JSON
-                var json = JObject.Parse(message);
+                using var doc = JsonDocument.Parse(message); 
+                var json = doc.RootElement;
                 
-                if (json["type"] != null)
+                if (json.TryGetProperty("type", out var typeProp))
                 {
-                    var messageType = json["type"].ToString();
+                    var messageType = json.GetStringOrDefault("type");
                     
                     if (isPrivate)
                     {
@@ -67,7 +67,7 @@ namespace CCXT.Collector.Upbit
                                 await ProcessPosition(json);
                                 break;
                             case "error":
-                                RaiseError($"Upbit private error: {json["message"]}");
+                                RaiseError($"Upbit private error: {json.GetProperty("message")}");
                                 break;
                         }
                     }
@@ -89,7 +89,7 @@ namespace CCXT.Collector.Upbit
                                 await ProcessCandle(json);
                                 break;
                             case "error":
-                                RaiseError($"Upbit error: {json["message"]}");
+                                RaiseError($"Upbit error: {json.GetProperty("message")}");
                                 break;
                         }
                     }
@@ -101,36 +101,35 @@ namespace CCXT.Collector.Upbit
             }
         }
 
-        private async Task ProcessOrderbook(JObject json)
+        private async Task ProcessOrderbook(JsonElement json)
         {
             try
             {
-                var code = json["code"].ToString();
+                var code = json.GetStringOrDefault("code");
                 var symbol = ConvertFromUpbitCode(code);
                 
                 var orderbook = new SOrderBook
                 {
                     exchange = ExchangeName,
                     symbol = symbol,
-                    timestamp = json["timestamp"].Value<long>(),
-                    sequentialId = json["total_ask_size"]?.Value<long>() ?? 0,
+                    timestamp = json.GetInt64OrDefault("timestamp"),
+                    sequentialId = json.GetInt64OrDefault("total_ask_size"),
                     result = new SOrderBookData
                     {
-                        timestamp = json["timestamp"].Value<long>(),
+                        timestamp = json.GetInt64OrDefault("timestamp"),
                         asks = new List<SOrderBookItem>(),
                         bids = new List<SOrderBookItem>()
                     }
                 };
 
                 // Process orderbook units
-                var units = json["orderbook_units"] as JArray;
-                if (units != null)
+                if (json.TryGetArray("orderbook_units", out var units))
                 {
-                    foreach (var unit in units)
+                    foreach (var unit in units.EnumerateArray())
                     {
                         // Add ask
-                        var askPrice = unit["ask_price"].Value<decimal>();
-                        var askSize = unit["ask_size"].Value<decimal>();
+                        var askPrice = unit.GetDecimalOrDefault("ask_price");
+                        var askSize = unit.GetDecimalOrDefault("ask_size");
                         if (askSize > 0)
                         {
                             orderbook.result.asks.Add(new SOrderBookItem
@@ -143,8 +142,8 @@ namespace CCXT.Collector.Upbit
                         }
 
                         // Add bid
-                        var bidPrice = unit["bid_price"].Value<decimal>();
-                        var bidSize = unit["bid_size"].Value<decimal>();
+                        var bidPrice = unit.GetDecimalOrDefault("bid_price");
+                        var bidSize = unit.GetDecimalOrDefault("bid_size");
                         if (bidSize > 0)
                         {
                             orderbook.result.bids.Add(new SOrderBookItem
@@ -170,29 +169,29 @@ namespace CCXT.Collector.Upbit
             }
         }
 
-        private async Task ProcessTrade(JObject json)
+        private async Task ProcessTrade(JsonElement json)
         {
             try
             {
-                var code = json["code"].ToString();
+                var code = json.GetStringOrDefault("code");
                 var symbol = ConvertFromUpbitCode(code);
                 
                 var trade = new STrade
                 {
                     exchange = ExchangeName,
                     symbol = symbol,
-                    timestamp = json["timestamp"].Value<long>(),
+                    timestamp = json.GetInt64OrDefault("timestamp"),
                     result = new List<STradeItem>
                     {
                         new STradeItem
                         {
-                            orderId = json["sequential_id"]?.ToString() ?? Guid.NewGuid().ToString(),
-                            timestamp = json["timestamp"].Value<long>(),
-                            sideType = json["ask_bid"].ToString() == "ASK" ? SideType.Ask : SideType.Bid,
+                            tradeId = json.GetStringOrDefault("sequential_id", Guid.NewGuid().ToString()),
+                            timestamp = json.GetInt64OrDefault("timestamp"),
+                            sideType = json.GetStringOrDefault("ask_bid") == "ASK" ? SideType.Ask : SideType.Bid,
                             orderType = OrderType.Limit,
-                            price = json["trade_price"].Value<decimal>(),
-                            quantity = json["trade_volume"].Value<decimal>(),
-                            amount = json["trade_price"].Value<decimal>() * json["trade_volume"].Value<decimal>()
+                            price = json.GetDecimalOrDefault("trade_price"),
+                            quantity = json.GetDecimalOrDefault("trade_volume"),
+                            amount = json.GetDecimalOrDefault("trade_price") * json.GetDecimalOrDefault("trade_volume")
                         }
                     }
                 };
@@ -205,30 +204,30 @@ namespace CCXT.Collector.Upbit
             }
         }
 
-        private async Task ProcessTickerData(JObject json)
+        private async Task ProcessTickerData(JsonElement json)
         {
             try
             {
-                var code = json["code"].ToString();
+                var code = json.GetStringOrDefault("code");
                 var symbol = ConvertFromUpbitCode(code);
                 
                 var ticker = new STicker
                 {
                     exchange = ExchangeName,
                     symbol = symbol,
-                    timestamp = json["timestamp"].Value<long>(),
+                    timestamp = json.GetInt64OrDefault("timestamp"),
                     result = new STickerItem
                     {
-                        timestamp = json["timestamp"].Value<long>(),
-                        openPrice = json["opening_price"].Value<decimal>(),
-                        highPrice = json["high_price"].Value<decimal>(),
-                        lowPrice = json["low_price"].Value<decimal>(),
-                        closePrice = json["trade_price"].Value<decimal>(),
-                        volume = json["acc_trade_volume_24h"].Value<decimal>(),
-                        quoteVolume = json["acc_trade_price_24h"].Value<decimal>(),
-                        prevClosePrice = json["prev_closing_price"].Value<decimal>(),
-                        change = json["signed_change_price"].Value<decimal>(),
-                        percentage = json["signed_change_rate"].Value<decimal>() * 100
+                        timestamp = json.GetInt64OrDefault("timestamp"),
+                        openPrice = json.GetDecimalOrDefault("opening_price"),
+                        highPrice = json.GetDecimalOrDefault("high_price"),
+                        lowPrice = json.GetDecimalOrDefault("low_price"),
+                        closePrice = json.GetDecimalOrDefault("trade_price"),
+                        volume = json.GetDecimalOrDefault("acc_trade_volume_24h"),
+                        quoteVolume = json.GetDecimalOrDefault("acc_trade_price_24h"),
+                        prevClosePrice = json.GetDecimalOrDefault("prev_closing_price"),
+                        change = json.GetDecimalOrDefault("signed_change_price"),
+                        percentage = json.GetDecimalOrDefault("signed_change_rate") * 100
                     }
                 };
 
@@ -268,7 +267,7 @@ namespace CCXT.Collector.Upbit
                     new { type = "orderbook", codes = new[] { upbitCode } }
                 };
 
-                await SendMessageAsync(JsonConvert.SerializeObject(subscription));
+                await SendMessageAsync(JsonSerializer.Serialize(subscription));
                 
                 var key = CreateSubscriptionKey("orderbook", market.ToString());
                 _subscriptions[key] = new SubscriptionInfo
@@ -300,7 +299,7 @@ namespace CCXT.Collector.Upbit
                     new { type = "orderbook", codes = new[] { upbitCode } }
                 };
 
-                await SendMessageAsync(JsonConvert.SerializeObject(subscription));
+                await SendMessageAsync(JsonSerializer.Serialize(subscription));
                 
                 var key = CreateSubscriptionKey("orderbook", symbol);
                 _subscriptions[key] = new SubscriptionInfo
@@ -332,7 +331,7 @@ namespace CCXT.Collector.Upbit
                     new { type = "trade", codes = new[] { upbitCode } }
                 };
 
-                await SendMessageAsync(JsonConvert.SerializeObject(subscription));
+                await SendMessageAsync(JsonSerializer.Serialize(subscription));
                 
                 var key = CreateSubscriptionKey("trade", market.ToString());
                 _subscriptions[key] = new SubscriptionInfo
@@ -364,7 +363,7 @@ namespace CCXT.Collector.Upbit
                     new { type = "trade", codes = new[] { upbitCode } }
                 };
 
-                await SendMessageAsync(JsonConvert.SerializeObject(subscription));
+                await SendMessageAsync(JsonSerializer.Serialize(subscription));
                 
                 var key = CreateSubscriptionKey("trade", symbol);
                 _subscriptions[key] = new SubscriptionInfo
@@ -396,7 +395,7 @@ namespace CCXT.Collector.Upbit
                     new { type = "ticker", codes = new[] { upbitCode } }
                 };
 
-                await SendMessageAsync(JsonConvert.SerializeObject(subscription));
+                await SendMessageAsync(JsonSerializer.Serialize(subscription));
                 
                 var key = CreateSubscriptionKey("ticker", market.ToString());
                 _subscriptions[key] = new SubscriptionInfo
@@ -428,7 +427,7 @@ namespace CCXT.Collector.Upbit
                     new { type = "ticker", codes = new[] { upbitCode } }
                 };
 
-                await SendMessageAsync(JsonConvert.SerializeObject(subscription));
+                await SendMessageAsync(JsonSerializer.Serialize(subscription));
                 
                 var key = CreateSubscriptionKey("ticker", symbol);
                 _subscriptions[key] = new SubscriptionInfo
@@ -557,34 +556,32 @@ namespace CCXT.Collector.Upbit
 
         #region Candle Processing
 
-        private async Task ProcessCandle(JObject json)
+        private async Task ProcessCandle(JsonElement json)
         {
             try
             {
-                var code = json["code"].ToString();
+                var code = json.GetStringOrDefault("code");
                 var symbol = ConvertFromUpbitCode(code);
                 
                 var candle = new SCandle
                 {
                     exchange = ExchangeName,
                     symbol = symbol,
-                    interval = ConvertUpbitInterval(json["unit"]?.ToString()),
-                    timestamp = json["timestamp"].Value<long>(),
+                    interval = ConvertUpbitInterval(json.GetStringOrDefault("unit")),
+                    timestamp = json.GetInt64OrDefault("timestamp"),
                     result = new List<SCandleItem>
                     {
                         new SCandleItem
                         {
-                            openTime = json["candle_date_time_kst"] != null ? 
-                                DateTimeOffset.Parse(json["candle_date_time_kst"].ToString()).ToUnixTimeMilliseconds() : 
-                                json["timestamp"].Value<long>(),
-                            closeTime = json["timestamp"].Value<long>(),
-                            open = json["opening_price"].Value<decimal>(),
-                            high = json["high_price"].Value<decimal>(),
-                            low = json["low_price"].Value<decimal>(),
-                            close = json["trade_price"].Value<decimal>(),
-                            volume = json["candle_acc_trade_volume"].Value<decimal>(),
-                            quoteVolume = json["candle_acc_trade_price"].Value<decimal>(),
-                            tradeCount = json["trade_count"]?.Value<long>() ?? 0,
+                            openTime = json.GetUnixTimeOrDefault("candle_date_time_kst", json.GetInt64OrDefault("timestamp")),
+                            closeTime = json.GetInt64OrDefault("timestamp"),
+                            open = json.GetDecimalOrDefault("opening_price"),
+                            high = json.GetDecimalOrDefault("high_price"),
+                            low = json.GetDecimalOrDefault("low_price"),
+                            close = json.GetDecimalOrDefault("trade_price"),
+                            volume = json.GetDecimalOrDefault("candle_acc_trade_volume"),
+                            quoteVolume = json.GetDecimalOrDefault("candle_acc_trade_price"),
+                            tradeCount = json.GetInt64OrDefault("trade_count"),
                             isClosed = true // Upbit sends completed candles
                         }
                     }
@@ -611,7 +608,7 @@ namespace CCXT.Collector.Upbit
                     new { type = "candle", codes = new[] { upbitCode }, unit = upbitInterval }
                 };
 
-                await SendMessageAsync(JsonConvert.SerializeObject(subscription));
+                await SendMessageAsync(JsonSerializer.Serialize(subscription));
                 
                 var key = CreateSubscriptionKey($"candle:{interval}", market.ToString());
                 _subscriptions[key] = new SubscriptionInfo
@@ -644,7 +641,7 @@ namespace CCXT.Collector.Upbit
                     new { type = "candle", codes = new[] { upbitCode }, unit = upbitInterval }
                 };
 
-                await SendMessageAsync(JsonConvert.SerializeObject(subscription));
+                await SendMessageAsync(JsonSerializer.Serialize(subscription));
                 
                 var key = CreateSubscriptionKey($"candle:{interval}", symbol);
                 _subscriptions[key] = new SubscriptionInfo
@@ -708,26 +705,26 @@ namespace CCXT.Collector.Upbit
 
         #region Private Channel Processing
 
-        private async Task ProcessBalance(JObject json)
+        private async Task ProcessBalance(JsonElement json)
         {
             try
             {
                 var balance = new SBalance
                 {
                     exchange = ExchangeName,
-                    accountId = json["account_id"]?.ToString() ?? "main",
-                    timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
+                    accountId = json.GetStringOrDefault("account_id", "main"),
+                    timestamp = TimeExtension.UnixTime,
                     balances = new List<SBalanceItem>()
                 };
 
                 // Parse balance data from Upbit format
-                if (json["balances"] is JArray balances)
+                if (json.TryGetArray("balances", out var balances))
                 {
-                    foreach (var item in balances)
+                    foreach (var item in balances.EnumerateArray())
                     {
-                        var currency = item["currency"].ToString();
-                        var free = item["balance"].Value<decimal>();
-                        var locked = item["locked"].Value<decimal>();
+                        var currency = item.GetStringOrDefault("currency");
+                        var free = item.GetDecimalOrDefault("balance");
+                        var locked = item.GetDecimalOrDefault("locked");
                         
                         balance.balances.Add(new SBalanceItem
                         {
@@ -735,7 +732,7 @@ namespace CCXT.Collector.Upbit
                             free = free,
                             used = locked,
                             total = free + locked,
-                            updateTime = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()
+                            updateTime = TimeExtension.UnixTime
                         });
                     }
                 }
@@ -748,28 +745,26 @@ namespace CCXT.Collector.Upbit
             }
         }
 
-        private async Task ProcessOrder(JObject json)
+        private async Task ProcessOrder(JsonElement json)
         {
             try
             {
                 var order = new SOrderItem
                 {
-                    orderId = json["uuid"].ToString(),
-                    symbol = ConvertFromUpbitCode(json["market"].ToString()),
-                    type = ParseOrderType(json["ord_type"]?.ToString()),
-                    side = json["side"].ToString() == "bid" ? OrderSide.Buy : OrderSide.Sell,
-                    status = ParseOrderStatus(json["state"]?.ToString()),
-                    price = json["price"]?.Value<decimal>() ?? 0,
-                    quantity = json["volume"]?.Value<decimal>() ?? 0,
-                    filledQuantity = json["executed_volume"]?.Value<decimal>() ?? 0,
-                    remainingQuantity = json["remaining_volume"]?.Value<decimal>() ?? 0,
-                    avgFillPrice = json["avg_price"]?.Value<decimal>() ?? 0,
-                    fee = json["paid_fee"]?.Value<decimal>() ?? 0,
-                    feeCurrency = json["fee_currency"]?.ToString(),
-                    createTime = json["created_at"] != null ? 
-                        DateTimeOffset.Parse(json["created_at"].ToString()).ToUnixTimeMilliseconds() : 0,
-                    updateTime = json["updated_at"] != null ? 
-                        DateTimeOffset.Parse(json["updated_at"].ToString()).ToUnixTimeMilliseconds() : 0
+                    orderId = json.GetStringOrDefault("uuid"),
+                    symbol = ConvertFromUpbitCode(json.GetStringOrDefault("market")),
+                    type = ParseOrderType(json.GetStringOrDefault("ord_type")),
+                    side = json.GetStringOrDefault("side") == "bid" ? OrderSide.Buy : OrderSide.Sell,
+                    status = ParseOrderStatus(json.GetStringOrDefault("state")),
+                    price = json.GetDecimalOrDefault("price"),
+                    quantity = json.GetDecimalOrDefault("volume"),
+                    filledQuantity = json.GetDecimalOrDefault("executed_volume"),
+                    remainingQuantity = json.GetDecimalOrDefault("remaining_volume"),
+                    avgFillPrice = json.GetDecimalOrDefault("avg_price"),
+                    fee = json.GetDecimalOrDefault("paid_fee"),
+                    feeCurrency = json.GetStringOrDefault("fee_currency"),
+                    createTime = json.GetUnixTimeOrDefault("created_at"),
+                    updateTime = json.GetUnixTimeOrDefault("updated_at")
                 };
 
                 order.cost = order.filledQuantity * order.avgFillPrice;
@@ -789,7 +784,7 @@ namespace CCXT.Collector.Upbit
             }
         }
 
-        private async Task ProcessPosition(JObject json)
+        private async Task ProcessPosition(JsonElement json)
         {
             // Upbit doesn't support futures/margin trading, so no positions
             // This method is here for interface compatibility
@@ -832,11 +827,11 @@ namespace CCXT.Collector.Upbit
             {
                 type = "authentication",
                 api_key = apiKey,
-                timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
+                timestamp = TimeExtension.UnixTime,
                 // In production, add proper signature generation here
             };
 
-            return JsonConvert.SerializeObject(authData);
+            return JsonSerializer.Serialize(authData);
         }
 
         public override async Task<bool> SubscribeBalanceAsync()
@@ -856,7 +851,7 @@ namespace CCXT.Collector.Upbit
                 };
 
                 var socket = _privateWebSocket ?? _webSocket;
-                await SendMessageAsync(JsonConvert.SerializeObject(subscription), socket);
+                await SendMessageAsync(JsonSerializer.Serialize(subscription), socket);
                 
                 _subscriptions["private:balance"] = new SubscriptionInfo
                 {
@@ -892,7 +887,7 @@ namespace CCXT.Collector.Upbit
                 };
 
                 var socket = _privateWebSocket ?? _webSocket;
-                await SendMessageAsync(JsonConvert.SerializeObject(subscription), socket);
+                await SendMessageAsync(JsonSerializer.Serialize(subscription), socket);
                 
                 _subscriptions["private:orders"] = new SubscriptionInfo
                 {

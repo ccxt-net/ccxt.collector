@@ -6,8 +6,7 @@ using System.Threading.Tasks;
 using CCXT.Collector.Core.Abstractions;
 using CCXT.Collector.Library;
 using CCXT.Collector.Service;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
+using System.Text.Json;
 
 namespace CCXT.Collector.Bitget
 {
@@ -33,8 +32,8 @@ namespace CCXT.Collector.Bitget
         private readonly Dictionary<string, long> _lastUpdateIds;
 
         public override string ExchangeName => "Bitget";
-        protected override string WebSocketUrl => "wss://ws.bitget.com/v2/ws/public";
-        protected override string PrivateWebSocketUrl => "wss://ws.bitget.com/v2/ws/private";
+        protected override string WebSocketUrl => "wss://ws.bitget.com/spot/v1/stream";
+        protected override string PrivateWebSocketUrl => "wss://ws.bitget.com/spot/v1/stream";
         protected override int PingIntervalMs => 30000; // 30 seconds
 
         public BitgetWebSocketClient()
@@ -47,34 +46,34 @@ namespace CCXT.Collector.Bitget
         {
             try
             {
-                var json = JObject.Parse(message);
+                using var doc = JsonDocument.Parse(message); 
+                var json = doc.RootElement;
 
                 // Handle ping/pong
-                if (json["action"]?.ToString() == "ping")
+                if (json.GetStringOrDefault("action") == "ping")
                 {
                     await HandlePingMessage(json);
                     return;
                 }
 
                 // Handle subscription responses
-                if (json["event"]?.ToString() == "subscribe")
+                if (json.GetStringOrDefault("event") == "subscribe")
                 {
-                    var code = json["code"]?.ToString();
+                    var code = json.GetStringOrDefault("code");
                     if (code != "0")
                     {
-                        RaiseError($"Subscription failed: {json["msg"]}");
+                        RaiseError($"Subscription failed: {json.GetProperty("msg")}");
                     }
                     return;
                 }
 
                 // Handle data messages
-                if (json["action"]?.ToString() == "update" || json["action"]?.ToString() == "snapshot")
+                if (json.GetStringOrDefault("action") == "update" || json.GetStringOrDefault("action") == "snapshot")
                 {
-                    var arg = json["arg"];
-                    if (arg != null)
+                    if (json.TryGetProperty("arg", out var arg))
                     {
-                        var channel = arg["channel"]?.ToString();
-                        var instId = arg["instId"]?.ToString();
+                        var channel = arg.GetStringOrDefault("channel");
+                        var instId = arg.GetStringOrDefault("instId");
                         
                         if (isPrivate)
                         {
@@ -128,30 +127,37 @@ namespace CCXT.Collector.Bitget
             }
         }
 
-        private async Task HandlePingMessage(JObject json)
+        private async Task HandlePingMessage(JsonElement json)
         {
             var pong = new
             {
                 action = "pong",
-                ts = json["ts"]?.ToString()
+                ts = json.GetStringOrDefault("ts")
             };
-            await SendMessageAsync(JsonConvert.SerializeObject(pong));
+            await SendMessageAsync(JsonSerializer.Serialize(pong));
         }
 
-        private async Task ProcessOrderbookData(JObject json)
+        private async Task ProcessOrderbookData(JsonElement json)
         {
             try
             {
-                var arg = json["arg"];
-                var instId = arg["instId"]?.ToString();
-                var data = json["data"]?.FirstOrDefault();
-                
-                if (data == null || string.IsNullOrEmpty(instId))
+                if (!json.TryGetProperty("arg", out var arg))
+                    return;
+
+                var instId = arg.GetStringOrDefault("instId");
+                if (String.IsNullOrEmpty(instId))
+                    return;
+
+                if (!(json.TryGetArray("data", out var dataProp)))
+                    return;
+
+                var data = dataProp.EnumerateArray().FirstOrDefault();                
+                if (data.ValueKind == JsonValueKind.Undefined)
                     return;
 
                 var symbol = ConvertToStandardSymbol(instId);
-                var timestamp = data["ts"]?.Value<long>() ?? DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
-                var action = json["action"]?.ToString();
+                var timestamp = data.GetInt64OrDefault("ts", TimeExtension.UnixTime);
+                var action = json.GetStringOrDefault("action");
 
                 var orderbook = new SOrderBook
                 {
@@ -167,13 +173,13 @@ namespace CCXT.Collector.Bitget
                 };
 
                 // Process asks
-                var asks = data["asks"] as JArray;
-                if (asks != null)
+                if (data.TryGetArray("asks", out var asks))
                 {
-                    foreach (var ask in asks)
+                    foreach (var ask in asks.EnumerateArray())
                     {
-                        var price = ask[0].Value<decimal>();
-                        var amount = ask[1].Value<decimal>();
+                        var price = ask[0].GetDecimalValue();
+                        var amount = ask[1].GetDecimalValue();
+
                         orderbook.result.asks.Add(new SOrderBookItem
                         {
                             price = price,
@@ -184,13 +190,13 @@ namespace CCXT.Collector.Bitget
                 }
 
                 // Process bids
-                var bids = data["bids"] as JArray;
-                if (bids != null)
+                if (data.TryGetArray("bids", out var bids))
                 {
-                    foreach (var bid in bids)
+                    foreach (var bid in bids.EnumerateArray())
                     {
-                        var price = bid[0].Value<decimal>();
-                        var amount = bid[1].Value<decimal>();
+                        var price = bid[0].GetDecimalValue();
+                        var amount = bid[1].GetDecimalValue();
+                        
                         orderbook.result.bids.Add(new SOrderBookItem
                         {
                             price = price,
@@ -264,35 +270,42 @@ namespace CCXT.Collector.Bitget
             cached.timestamp = update.timestamp;
         }
 
-        private async Task ProcessTradeData(JObject json)
+        private async Task ProcessTradeData(JsonElement json)
         {
             try
             {
-                var arg = json["arg"];
-                var instId = arg["instId"]?.ToString();
-                var data = json["data"] as JArray;
-                
-                if (data == null || string.IsNullOrEmpty(instId))
+                if (!json.TryGetProperty("arg", out var arg))
+                    return;
+
+                var instId = arg.GetStringOrDefault("instId");
+                if (String.IsNullOrEmpty(instId))
+                    return;
+
+                if (!(json.TryGetArray("data", out var dataProp)))
+                    return;
+
+                var data = dataProp.EnumerateArray().FirstOrDefault();                
+                if (data.ValueKind == JsonValueKind.Undefined)
                     return;
 
                 var symbol = ConvertToStandardSymbol(instId);
                 var trades = new List<STradeItem>();
                 long latestTimestamp = 0;
                 
-                foreach (var trade in data)
+                foreach (var trade in data.EnumerateArray())
                 {
-                    var timestamp = trade["ts"]?.Value<long>() ?? DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+                    var timestamp = trade.GetInt64OrDefault("ts", TimeExtension.UnixTime);
                     if (timestamp > latestTimestamp)
                         latestTimestamp = timestamp;
 
                     trades.Add(new STradeItem
                     {
-                        orderId = trade["tradeId"]?.ToString(),
+                        tradeId = trade.GetStringOrDefault("tradeId"),
                         timestamp = timestamp,
-                        price = trade["price"]?.Value<decimal>() ?? 0,
-                        quantity = trade["size"]?.Value<decimal>() ?? 0,
-                        amount = (trade["price"]?.Value<decimal>() ?? 0) * (trade["size"]?.Value<decimal>() ?? 0),
-                        sideType = trade["side"]?.ToString() == "buy" ? SideType.Bid : SideType.Ask,
+                        price = trade.GetDecimalOrDefault("price"),
+                        quantity = trade.GetDecimalOrDefault("size"),
+                        amount = (trade.GetDecimalOrDefault("price")) * (trade.GetDecimalOrDefault("size")),
+                        sideType = trade.GetStringOrDefault("side") == "buy" ? SideType.Bid : SideType.Ask,
                         orderType = OrderType.Limit
                     });
                 }
@@ -316,37 +329,45 @@ namespace CCXT.Collector.Bitget
             }
         }
 
-        private async Task ProcessTickerData(JObject json)
+        private async Task ProcessTickerData(JsonElement json)
         {
             try
             {
-                var arg = json["arg"];
-                var instId = arg["instId"]?.ToString();
-                var data = json["data"]?.FirstOrDefault();
-                
-                if (data == null || string.IsNullOrEmpty(instId))
+                if (!json.TryGetProperty("arg", out var arg))
+                    return;
+
+                var instId = arg.GetStringOrDefault("instId");
+                if (String.IsNullOrEmpty(instId))
+                    return;
+
+                if (!(json.TryGetArray("data", out var dataProp)))
+                    return;
+
+                var data = dataProp.EnumerateArray().FirstOrDefault();                
+                if (data.ValueKind == JsonValueKind.Undefined)
                     return;
 
                 var symbol = ConvertToStandardSymbol(instId);
+                var timestamp = data.GetInt64OrDefault("ts", TimeExtension.UnixTime);
                 
                 var ticker = new STicker
                 {
                     exchange = ExchangeName,
                     symbol = symbol,
-                    timestamp = data["ts"]?.Value<long>() ?? DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
+                    timestamp = timestamp,
                     result = new STickerItem
                     {
-                        timestamp = data["ts"]?.Value<long>() ?? DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
-                        closePrice = data["lastPr"]?.Value<decimal>() ?? 0,
-                        askPrice = data["askPr"]?.Value<decimal>() ?? 0,
-                        bidPrice = data["bidPr"]?.Value<decimal>() ?? 0,
-                        openPrice = data["open24h"]?.Value<decimal>() ?? 0,
-                        highPrice = data["high24h"]?.Value<decimal>() ?? 0,
-                        lowPrice = data["low24h"]?.Value<decimal>() ?? 0,
-                        volume = data["baseVolume"]?.Value<decimal>() ?? 0,
-                        quoteVolume = data["quoteVolume"]?.Value<decimal>() ?? 0,
-                        change = data["change24h"]?.Value<decimal>() ?? 0,
-                        percentage = data["changeUtc24h"]?.Value<decimal>() ?? 0
+                        timestamp = timestamp,
+                        closePrice = data.GetDecimalOrDefault("lastPr"),
+                        askPrice = data.GetDecimalOrDefault("askPr"),
+                        bidPrice = data.GetDecimalOrDefault("bidPr"),
+                        openPrice = data.GetDecimalOrDefault("open24h"),
+                        highPrice = data.GetDecimalOrDefault("high24h"),
+                        lowPrice = data.GetDecimalOrDefault("low24h"),
+                        volume = data.GetDecimalOrDefault("baseVolume"),
+                        quoteVolume = data.GetDecimalOrDefault("quoteVolume"),
+                        change = data.GetDecimalOrDefault("change24h"),
+                        percentage = data.GetDecimalOrDefault("changeUtc24h")
                     }
                 };
 
@@ -358,16 +379,20 @@ namespace CCXT.Collector.Bitget
             }
         }
 
-        private async Task ProcessCandleData(JObject json)
+        private async Task ProcessCandleData(JsonElement json)
         {
             try
             {
-                var arg = json["arg"];
-                var instId = arg["instId"]?.ToString();
-                var channel = arg["channel"]?.ToString();
-                var data = json["data"] as JArray;
-                
-                if (data == null || string.IsNullOrEmpty(instId))
+                if (!json.TryGetProperty("arg", out var arg))
+                    return;
+
+                var channel = arg.GetStringOrDefault("channel");
+
+                var instId = arg.GetStringOrDefault("instId");
+                if (String.IsNullOrEmpty(instId))
+                    return;
+
+                if (!(json.TryGetArray("data", out var data)))
                     return;
 
                 var symbol = ConvertToStandardSymbol(instId);
@@ -377,9 +402,9 @@ namespace CCXT.Collector.Bitget
                 var candleItems = new List<SCandleItem>();
                 long latestTimestamp = 0;
 
-                foreach (var candle in data)
+                foreach (var candle in data.EnumerateArray())
                 {
-                    var timestamp = candle["ts"]?.Value<long>() ?? 0;
+                    var timestamp = candle.GetInt64OrDefault("ts");
                     if (timestamp > latestTimestamp)
                         latestTimestamp = timestamp;
 
@@ -387,11 +412,11 @@ namespace CCXT.Collector.Bitget
                     {
                         openTime = timestamp,
                         closeTime = timestamp + intervalMs,
-                        open = candle["o"]?.Value<decimal>() ?? 0,
-                        high = candle["h"]?.Value<decimal>() ?? 0,
-                        low = candle["l"]?.Value<decimal>() ?? 0,
-                        close = candle["c"]?.Value<decimal>() ?? 0,
-                        volume = candle["v"]?.Value<decimal>() ?? 0
+                        open = candle.GetDecimalOrDefault("o"),
+                        high = candle.GetDecimalOrDefault("h"),
+                        low = candle.GetDecimalOrDefault("l"),
+                        close = candle.GetDecimalOrDefault("c"),
+                        volume = candle.GetDecimalOrDefault("v")
                     });
                 }
 
@@ -415,22 +440,22 @@ namespace CCXT.Collector.Bitget
             }
         }
 
-        private async Task ProcessAccountData(JObject json)
+        private async Task ProcessAccountData(JsonElement json)
         {
             try
             {
-                var data = json["data"] as JArray;
-                if (data == null) return;
+                if (!(json.TryGetArray("data", out var data)))
+                    return;
 
                 var balanceItems = new List<SBalanceItem>();
-                var timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+                var timestamp = TimeExtension.UnixTime;
 
-                foreach (var account in data)
+                foreach (var account in data.EnumerateArray())
                 {
-                    var currency = account["ccy"]?.ToString();
-                    var free = account["availBal"]?.Value<decimal>() ?? 0;
-                    var used = account["frozenBal"]?.Value<decimal>() ?? 0;
-                    var total = account["bal"]?.Value<decimal>() ?? 0;
+                    var currency = account.GetStringOrDefault("ccy");
+                    var free = account.GetDecimalOrDefault("availBal");
+                    var used = account.GetDecimalOrDefault("frozenBal");
+                    var total = account.GetDecimalOrDefault("bal");
                     
                     if (total > 0 || free > 0 || used > 0)
                     {
@@ -464,31 +489,31 @@ namespace CCXT.Collector.Bitget
             }
         }
 
-        private async Task ProcessOrderData(JObject json)
+        private async Task ProcessOrderData(JsonElement json)
         {
             try
             {
-                var data = json["data"] as JArray;
-                if (data == null) return;
+                if (!(json.TryGetArray("data", out var data)))
+                    return;
 
                 var orderList = new List<SOrderItem>();
-                var timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+                var timestamp = TimeExtension.UnixTime;
 
-                foreach (var order in data)
+                foreach (var order in data.EnumerateArray())
                 {
                     orderList.Add(new SOrderItem
                     {
-                        orderId = order["orderId"]?.ToString(),
-                        clientOrderId = order["clientOid"]?.ToString(),
-                        symbol = ConvertToStandardSymbol(order["instId"]?.ToString()),
-                        side = order["side"]?.ToString() == "buy" ? OrderSide.Buy : OrderSide.Sell,
-                        type = ConvertOrderType(order["orderType"]?.ToString()),
-                        status = ConvertOrderStatus(order["status"]?.ToString()),
-                        price = order["price"]?.Value<decimal>() ?? 0,
-                        quantity = order["size"]?.Value<decimal>() ?? 0,
-                        filledQuantity = order["fillSize"]?.Value<decimal>() ?? 0,
-                        createTime = order["cTime"]?.Value<long>() ?? timestamp,
-                        updateTime = order["uTime"]?.Value<long>() ?? timestamp
+                        orderId = order.GetStringOrDefault("orderId"),
+                        clientOrderId = order.GetStringOrDefault("clientOid"),
+                        symbol = ConvertToStandardSymbol(order.GetStringOrDefault("instId")),
+                        side = order.GetStringOrDefault("side") == "buy" ? OrderSide.Buy : OrderSide.Sell,
+                        type = ConvertOrderType(order.GetStringOrDefault("orderType")),
+                        status = ConvertOrderStatus(order.GetStringOrDefault("status")),
+                        price = order.GetDecimalOrDefault("price"),
+                        quantity = order.GetDecimalOrDefault("size"),
+                        filledQuantity = order.GetDecimalOrDefault("fillSize"),
+                        createTime = order.GetInt64OrDefault("cTime", timestamp),
+                        updateTime = order.GetInt64OrDefault("uTime", timestamp)
                     });
                 }
 
@@ -510,27 +535,27 @@ namespace CCXT.Collector.Bitget
             }
         }
 
-        private async Task ProcessPositionData(JObject json)
+        private async Task ProcessPositionData(JsonElement json)
         {
             try
             {
-                var data = json["data"] as JArray;
-                if (data == null) return;
+                if (!(json.TryGetArray("data", out var data)))
+                    return;
 
                 var positionList = new List<SPositionItem>();
-                var timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+                var timestamp = TimeExtension.UnixTime;
 
-                foreach (var pos in data)
+                foreach (var pos in data.EnumerateArray())
                 {
                     positionList.Add(new SPositionItem
                     {
-                        symbol = ConvertToStandardSymbol(pos["instId"]?.ToString()),
-                        side = pos["holdSide"]?.ToString() == "long" ? PositionSide.Long : PositionSide.Short,
-                        size = pos["total"]?.Value<decimal>() ?? 0,
-                        entryPrice = pos["averageOpenPrice"]?.Value<decimal>() ?? 0,
-                        markPrice = pos["markPrice"]?.Value<decimal>() ?? 0,
-                        unrealizedPnl = pos["unrealizedPL"]?.Value<decimal>() ?? 0,
-                        realizedPnl = pos["achievedProfits"]?.Value<decimal>() ?? 0
+                        symbol = ConvertToStandardSymbol(pos.GetStringOrDefault("instId")),
+                        side = pos.GetStringOrDefault("holdSide") == "long" ? PositionSide.Long : PositionSide.Short,
+                        size = pos.GetDecimalOrDefault("total"),
+                        entryPrice = pos.GetDecimalOrDefault("averageOpenPrice"),
+                        markPrice = pos.GetDecimalOrDefault("markPrice"),
+                        unrealizedPnl = pos.GetDecimalOrDefault("unrealizedPL"),
+                        realizedPnl = pos.GetDecimalOrDefault("achievedProfits")
                     });
                 }
 
@@ -571,7 +596,7 @@ namespace CCXT.Collector.Bitget
                     }
                 };
 
-                await SendMessageAsync(JsonConvert.SerializeObject(subscription));
+                await SendMessageAsync(JsonSerializer.Serialize(subscription));
 
                 var key = CreateSubscriptionKey("orderbook", symbol);
                 _subscriptions[key] = new SubscriptionInfo
@@ -610,7 +635,7 @@ namespace CCXT.Collector.Bitget
                     }
                 };
 
-                await SendMessageAsync(JsonConvert.SerializeObject(subscription));
+                await SendMessageAsync(JsonSerializer.Serialize(subscription));
 
                 var key = CreateSubscriptionKey("trades", symbol);
                 _subscriptions[key] = new SubscriptionInfo
@@ -649,7 +674,7 @@ namespace CCXT.Collector.Bitget
                     }
                 };
 
-                await SendMessageAsync(JsonConvert.SerializeObject(subscription));
+                await SendMessageAsync(JsonSerializer.Serialize(subscription));
 
                 var key = CreateSubscriptionKey("ticker", symbol);
                 _subscriptions[key] = new SubscriptionInfo
@@ -690,7 +715,7 @@ namespace CCXT.Collector.Bitget
                     }
                 };
 
-                await SendMessageAsync(JsonConvert.SerializeObject(subscription));
+                await SendMessageAsync(JsonSerializer.Serialize(subscription));
 
                 var key = CreateSubscriptionKey($"candle{channelInterval}", symbol);
                 _subscriptions[key] = new SubscriptionInfo
@@ -729,7 +754,7 @@ namespace CCXT.Collector.Bitget
                     }
                 };
 
-                await SendMessageAsync(JsonConvert.SerializeObject(unsubscription));
+                await SendMessageAsync(JsonSerializer.Serialize(unsubscription));
 
                 var key = CreateSubscriptionKey(channel, symbol);
                 if (_subscriptions.TryRemove(key, out var sub))
@@ -748,7 +773,7 @@ namespace CCXT.Collector.Bitget
 
         protected override string CreatePingMessage()
         {
-            return JsonConvert.SerializeObject(new { action = "ping" });
+            return JsonSerializer.Serialize(new { action = "ping" });
         }
 
         protected override string CreateAuthenticationMessage(string apiKey, string secretKey)
@@ -759,7 +784,7 @@ namespace CCXT.Collector.Bitget
             
             var sign = GenerateSignature(secretKey, timestamp, method, requestPath);
             
-            return JsonConvert.SerializeObject(new
+            return JsonSerializer.Serialize(new
             {
                 op = "login",
                 args = new[]

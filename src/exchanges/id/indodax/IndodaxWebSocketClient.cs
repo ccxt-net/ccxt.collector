@@ -5,8 +5,8 @@ using System.Threading.Tasks;
 using CCXT.Collector.Core.Abstractions;
 using CCXT.Collector.Library;
 using CCXT.Collector.Service;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
+using System.Text.Json;
+
 
 namespace CCXT.Collector.Indodax
 {
@@ -42,7 +42,8 @@ namespace CCXT.Collector.Indodax
         {
             try
             {
-                var json = JObject.Parse(message);
+                using var doc = JsonDocument.Parse(message); 
+                var json = doc.RootElement;
                 
                 // TODO: Implement message processing based on Indodax WebSocket protocol
                 // Handle different message types (orderbook, trades, ticker, etc.)
@@ -67,7 +68,7 @@ namespace CCXT.Collector.Indodax
                     symbol = symbol
                 };
 
-                await SendMessageAsync(JsonConvert.SerializeObject(subscription));
+                await SendMessageAsync(JsonSerializer.Serialize(subscription));
                 
                 var key = CreateSubscriptionKey("orderbook", symbol);
                 _subscriptions[key] = new SubscriptionInfo
@@ -99,7 +100,7 @@ namespace CCXT.Collector.Indodax
                     symbol = symbol
                 };
 
-                await SendMessageAsync(JsonConvert.SerializeObject(subscription));
+                await SendMessageAsync(JsonSerializer.Serialize(subscription));
                 
                 var key = CreateSubscriptionKey("trades", symbol);
                 _subscriptions[key] = new SubscriptionInfo
@@ -131,7 +132,7 @@ namespace CCXT.Collector.Indodax
                     symbol = symbol
                 };
 
-                await SendMessageAsync(JsonConvert.SerializeObject(subscription));
+                await SendMessageAsync(JsonSerializer.Serialize(subscription));
                 
                 var key = CreateSubscriptionKey("ticker", symbol);
                 _subscriptions[key] = new SubscriptionInfo
@@ -163,7 +164,7 @@ namespace CCXT.Collector.Indodax
                     symbol = symbol
                 };
 
-                await SendMessageAsync(JsonConvert.SerializeObject(unsubscription));
+                await SendMessageAsync(JsonSerializer.Serialize(unsubscription));
                 
                 var key = CreateSubscriptionKey(channel, symbol);
                 if (_subscriptions.TryRemove(key, out var sub))
@@ -183,7 +184,7 @@ namespace CCXT.Collector.Indodax
         protected override string CreatePingMessage()
         {
             // TODO: Implement Indodax-specific ping message
-            return JsonConvert.SerializeObject(new { type = "ping" });
+            return JsonSerializer.Serialize(new { type = "ping" });
         }
 
         protected override async Task ResubscribeAsync(SubscriptionInfo subscription)
@@ -218,7 +219,7 @@ namespace CCXT.Collector.Indodax
                     interval = interval
                 };
 
-                await SendMessageAsync(JsonConvert.SerializeObject(subscription));
+                await SendMessageAsync(JsonSerializer.Serialize(subscription));
                 
                 var key = CreateSubscriptionKey($"candles:{interval}", symbol);
                 _subscriptions[key] = new SubscriptionInfo

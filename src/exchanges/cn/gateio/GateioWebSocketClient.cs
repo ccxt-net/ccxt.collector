@@ -5,8 +5,7 @@ using System.Threading.Tasks;
 using CCXT.Collector.Core.Abstractions;
 using CCXT.Collector.Library;
 using CCXT.Collector.Service;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
+using System.Text.Json;
 
 namespace CCXT.Collector.Gateio
 {
@@ -44,49 +43,50 @@ namespace CCXT.Collector.Gateio
         {
             try
             {
-                var json = JObject.Parse(message);
+                using var doc = JsonDocument.Parse(message); 
+                var json = doc.RootElement;
                 
                 // Handle ping/pong
-                if (json["channel"]?.ToString() == "spot.ping")
+                if (json.GetStringOrDefault("channel") == "spot.ping")
                 {
                     await HandlePingMessage();
                     return;
                 }
 
                 // Handle subscription response
-                if (json["event"]?.ToString() == "subscribe")
+                if (json.GetStringOrDefault("event") == "subscribe")
                 {
-                    var result = json["result"]?["status"]?.ToString();
-                    if (result != "success")
+                    var status = json.GetNestedString("result", "status");
+                    if (!string.Equals(status, "success", StringComparison.OrdinalIgnoreCase))
                     {
-                        RaiseError($"Subscription failed: {json["error"]?["message"]}");
+                        var errMsg = json.GetNestedString("error", "message");
+                        RaiseError($"Subscription failed: {errMsg}");
                     }
                     return;
                 }
 
                 // Handle data messages
-                var channel = json["channel"]?.ToString();
-                if (channel != null && json["event"]?.ToString() == "update")
+                var channel = json.GetStringOrNull("channel");
+                if (channel != null && json.GetStringOrDefault("event") == "update")
                 {
-                    var result = json["result"];
-                    if (result == null)
-                        return;
-
-                    if (channel.StartsWith("spot.order_book"))
+                    if (json.TryGetProperty("result", out var result))
                     {
-                        await ProcessOrderbookData(json);
-                    }
-                    else if (channel.StartsWith("spot.trades"))
-                    {
-                        await ProcessTradeData(json);
-                    }
-                    else if (channel.StartsWith("spot.tickers"))
-                    {
-                        await ProcessTickerData(json);
-                    }
-                    else if (channel.StartsWith("spot.candlesticks"))
-                    {
-                        await ProcessCandleData(json);
+                        if (channel.StartsWith("spot.order_book"))
+                        {
+                            await ProcessOrderbookData(json);
+                        }
+                        else if (channel.StartsWith("spot.trades"))
+                        {
+                            await ProcessTradeData(json);
+                        }
+                        else if (channel.StartsWith("spot.tickers"))
+                        {
+                            await ProcessTickerData(json);
+                        }
+                        else if (channel.StartsWith("spot.candlesticks"))
+                        {
+                            await ProcessCandleData(json);
+                        }
                     }
                 }
             }
@@ -103,18 +103,21 @@ namespace CCXT.Collector.Gateio
                 time = DateTimeOffset.UtcNow.ToUnixTimeSeconds(),
                 channel = "spot.pong"
             };
-            await SendMessageAsync(JsonConvert.SerializeObject(pong));
+            await SendMessageAsync(JsonSerializer.Serialize(pong));
         }
 
-        private async Task ProcessOrderbookData(JObject json)
+        private async Task ProcessOrderbookData(JsonElement root)
         {
             try
             {
-                var result = json["result"];
-                var symbol = result["s"]?.ToString(); // Currency pair like "BTC_USDT"
-                var timestamp = result["t"]?.Value<long>() ?? DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
-                var updateId = result["u"]?.Value<long>() ?? 0;
-                var isSnapshot = result["U"]?.Value<long>() == updateId; // First update ID equals current for snapshot
+                if (!root.TryGetProperty("result", out var result))
+                    return;
+                    
+                var symbol = result.GetStringOrDefault("s"); // Currency pair like "BTC_USDT)"
+                var timestamp = result.GetInt64OrDefault("t", TimeExtension.UnixTime);
+                var updateId = result.GetInt64OrDefault("u", 0L);
+                var firstUpdateId = result.GetInt64OrDefault("U", 0L);
+                var isSnapshot = firstUpdateId == updateId; // First update ID equals current for snapshot
 
                 var orderbook = new SOrderBook
                 {
@@ -130,37 +133,45 @@ namespace CCXT.Collector.Gateio
                 };
 
                 // Process asks
-                var asks = result["asks"] as JArray;
-                if (asks != null)
+                if (result.TryGetArray("asks", out var asks))
                 {
-                    foreach (var ask in asks)
+                    foreach (var ask in asks.EnumerateArray())
                     {
-                        var askArray = ask as JArray;
-                        if (askArray != null && askArray.Count >= 2)
+                        if (ask.ValueKind == JsonValueKind.Array && ask.GetArrayLength() >= 2)
                         {
-                            orderbook.result.asks.Add(new SOrderBookItem
+                            var price = ask[0].GetDecimalValue();
+                            var quantity = ask[1].GetDecimalValue();
+                            
+                            if (quantity > 0)
                             {
-                                price = askArray[0].Value<decimal>(),
-                                quantity = askArray[1].Value<decimal>()
-                            });
+                                orderbook.result.asks.Add(new SOrderBookItem
+                                {
+                                    price = price,
+                                    quantity = quantity
+                                });
+                            }
                         }
                     }
                 }
 
                 // Process bids
-                var bids = result["bids"] as JArray;
-                if (bids != null)
+                if (result.TryGetArray("bids", out var bidsArray))
                 {
-                    foreach (var bid in bids)
+                    foreach (var bid in bidsArray.EnumerateArray())
                     {
-                        var bidArray = bid as JArray;
-                        if (bidArray != null && bidArray.Count >= 2)
+                        if (bid.ValueKind == JsonValueKind.Array && bid.GetArrayLength() >= 2)
                         {
-                            orderbook.result.bids.Add(new SOrderBookItem
+                            var price = bid[0].GetDecimalValue();
+                            var quantity = bid[1].GetDecimalValue();
+                            
+                            if (quantity > 0)
                             {
-                                price = bidArray[0].Value<decimal>(),
-                                quantity = bidArray[1].Value<decimal>()
-                            });
+                                orderbook.result.bids.Add(new SOrderBookItem
+                                {
+                                    price = price,
+                                    quantity = quantity
+                                });
+                            }
                         }
                     }
                 }
@@ -177,43 +188,55 @@ namespace CCXT.Collector.Gateio
             }
         }
 
-        private async Task ProcessTradeData(JObject json)
+        private async Task ProcessTradeData(JsonElement root)
         {
             try
             {
-                var result = json["result"];
-                var symbol = result["currency_pair"]?.ToString();
-                var timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+                if (!root.TryGetProperty("result", out var result))
+                    return;
+
+                var symbol = result.GetStringOrNull("currency_pair");
+                var timestamp = TimeExtension.UnixTime;
 
                 var trades = new List<STradeItem>();
                 
                 // Gate.io sends array of trades
-                if (result is JArray tradeArray)
+                if (result.ValueKind == JsonValueKind.Array)
                 {
-                    foreach (var trade in tradeArray)
+                    foreach (var trade in result.EnumerateArray())
                     {
+                        var createTime = trade.GetInt64OrDefault("create_time", timestamp);
+                        var side = trade.GetStringOrDefault("side", "");
+                        var price = trade.GetDecimalOrDefault("price");
+                        var amount = trade.GetDecimalOrDefault("amount");
+                        
                         trades.Add(new STradeItem
                         {
-                            timestamp = trade["create_time"]?.Value<long>() ?? timestamp,
-                            sideType = trade["side"]?.ToString() == "buy" ? SideType.Bid : SideType.Ask,
+                            timestamp = createTime,
+                            sideType = side == "buy" ? SideType.Bid : SideType.Ask,
                             orderType = OrderType.Limit,
-                            price = trade["price"]?.Value<decimal>() ?? 0,
-                            quantity = trade["amount"]?.Value<decimal>() ?? 0,
-                            amount = (trade["price"]?.Value<decimal>() ?? 0) * (trade["amount"]?.Value<decimal>() ?? 0)
+                            price = price,
+                            quantity = amount,
+                            amount = price * amount
                         });
                     }
                 }
                 else
                 {
                     // Single trade
+                    var createTime = result.GetInt64OrDefault("create_time", timestamp);
+                    var side = result.GetStringOrDefault("side", "");
+                    var price = result.GetDecimalOrDefault("price");
+                    var amount = result.GetDecimalOrDefault("amount");
+                    
                     trades.Add(new STradeItem
                     {
-                        timestamp = result["create_time"]?.Value<long>() ?? timestamp,
-                        sideType = result["side"]?.ToString() == "buy" ? SideType.Bid : SideType.Ask,
+                        timestamp = createTime,
+                        sideType = side == "buy" ? SideType.Bid : SideType.Ask,
                         orderType = OrderType.Limit,
-                        price = result["price"]?.Value<decimal>() ?? 0,
-                        quantity = result["amount"]?.Value<decimal>() ?? 0,
-                        amount = (result["price"]?.Value<decimal>() ?? 0) * (result["amount"]?.Value<decimal>() ?? 0)
+                        price = price,
+                        quantity = amount,
+                        amount = price * amount
                     });
                 }
 
@@ -233,13 +256,15 @@ namespace CCXT.Collector.Gateio
             }
         }
 
-        private async Task ProcessTickerData(JObject json)
+        private async Task ProcessTickerData(JsonElement root)
         {
             try
             {
-                var result = json["result"];
-                var symbol = result["currency_pair"]?.ToString();
-                var timestamp = result["timestamp"]?.Value<long>() ?? DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+                if (!root.TryGetProperty("result", out var result))
+                    return;
+
+                var symbol = result.GetStringOrNull("currency_pair");
+                var timestamp = result.GetInt64OrDefault("timestamp", TimeExtension.UnixTime);
 
                 var ticker = new STicker
                 {
@@ -249,12 +274,12 @@ namespace CCXT.Collector.Gateio
                     result = new STickerItem
                     {
                         timestamp = timestamp,
-                        closePrice = result["last"]?.Value<decimal>() ?? 0,
-                        openPrice = result["open_24h"]?.Value<decimal>() ?? 0,
-                        highPrice = result["high_24h"]?.Value<decimal>() ?? 0,
-                        lowPrice = result["low_24h"]?.Value<decimal>() ?? 0,
-                        volume = result["base_volume"]?.Value<decimal>() ?? 0,
-                        quoteVolume = result["quote_volume"]?.Value<decimal>() ?? 0
+                        closePrice = result.GetDecimalOrDefault("last"),
+                        openPrice = result.GetDecimalOrDefault("open_24h"),
+                        highPrice = result.GetDecimalOrDefault("high_24h"),
+                        lowPrice = result.GetDecimalOrDefault("low_24h"),
+                        volume = result.GetDecimalOrDefault("base_volume"),
+                        quoteVolume = result.GetDecimalOrDefault("quote_volume")
                     }
                 };
 
@@ -266,34 +291,49 @@ namespace CCXT.Collector.Gateio
             }
         }
 
-        private async Task ProcessCandleData(JObject json)
+        private async Task ProcessCandleData(JsonElement root)
         {
             try
             {
-                var result = json["result"];
-                var channel = json["channel"]?.ToString();
+                if (!root.TryGetProperty("result", out var result))
+                    return;
+
+                var channel = root.GetStringOrDefault("channel", "");
                 var parts = channel.Split('_');
                 var interval = parts.Length > 2 ? parts[2] : "1m";
-                var symbol = result[0]?["c"]?.ToString(); // Currency pair
+                var symbol = "";
                 
                 var candles = new List<SCandleItem>();
                 
-                if (result is JArray candleArray)
+                if (result.ValueKind == JsonValueKind.Array)
                 {
-                    foreach (var candle in candleArray)
+                    foreach (var candle in result.EnumerateArray())
                     {
-                        if (candle is JArray c && c.Count >= 6)
+                        if (candle.ValueKind == JsonValueKind.Array && candle.GetArrayLength() >= 6)
                         {
+                            var openTime = candle[0].GetInt64Value();
+                            var volume = candle[1].GetDecimalValue();
+                            var close = candle[2].GetDecimalValue();
+                            var high = candle[3].GetDecimalValue();
+                            var low = candle[4].GetDecimalValue();
+                            var open = candle[5].GetDecimalValue();
+                            
                             candles.Add(new SCandleItem
                             {
-                                openTime = c[0].Value<long>() * 1000, // Convert to milliseconds
-                                closeTime = c[0].Value<long>() * 1000 + 60000, // Assuming 1m interval
-                                open = c[5].Value<decimal>(),
-                                high = c[3].Value<decimal>(),
-                                low = c[4].Value<decimal>(),
-                                close = c[2].Value<decimal>(),
-                                volume = c[1].Value<decimal>()
+                                openTime = openTime * 1000, // Convert to milliseconds
+                                closeTime = openTime * 1000 + 60000, // Assuming 1m interval
+                                open = open,
+                                high = high,
+                                low = low,
+                                close = close,
+                                volume = volume
                             });
+                            
+                            // Extract symbol from first candle if available
+                            if (String.IsNullOrEmpty(symbol) && candle.GetArrayLength() > 6)
+                            {
+                                symbol = candle[6].ValueKind == JsonValueKind.String ? candle[6].GetString() : "";
+                            }
                         }
                     }
                 }
@@ -303,7 +343,7 @@ namespace CCXT.Collector.Gateio
                     exchange = ExchangeName,
                     symbol = ConvertToStandardSymbol(symbol),
                     interval = ConvertInterval(interval),
-                    timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
+                    timestamp = TimeExtension.UnixTime,
                     result = candles
                 };
 
@@ -328,7 +368,7 @@ namespace CCXT.Collector.Gateio
                     payload = new[] { gateSymbol, "100", "100ms" } // symbol, depth level, update frequency
                 };
                 
-                await SendMessageAsync(JsonConvert.SerializeObject(request));
+                await SendMessageAsync(JsonSerializer.Serialize(request));
                 
                 var key = CreateSubscriptionKey("orderbook", symbol);
                 _subscriptions[key] = new SubscriptionInfo
@@ -361,7 +401,7 @@ namespace CCXT.Collector.Gateio
                     payload = new[] { gateSymbol }
                 };
                 
-                await SendMessageAsync(JsonConvert.SerializeObject(request));
+                await SendMessageAsync(JsonSerializer.Serialize(request));
                 
                 var key = CreateSubscriptionKey("trades", symbol);
                 _subscriptions[key] = new SubscriptionInfo
@@ -394,7 +434,7 @@ namespace CCXT.Collector.Gateio
                     payload = new[] { gateSymbol }
                 };
                 
-                await SendMessageAsync(JsonConvert.SerializeObject(request));
+                await SendMessageAsync(JsonSerializer.Serialize(request));
                 
                 var key = CreateSubscriptionKey("ticker", symbol);
                 _subscriptions[key] = new SubscriptionInfo
@@ -428,7 +468,7 @@ namespace CCXT.Collector.Gateio
                     payload = new[] { gateInterval, gateSymbol }
                 };
                 
-                await SendMessageAsync(JsonConvert.SerializeObject(request));
+                await SendMessageAsync(JsonSerializer.Serialize(request));
                 
                 var key = CreateSubscriptionKey($"candles:{interval}", symbol);
                 _subscriptions[key] = new SubscriptionInfo
@@ -471,7 +511,7 @@ namespace CCXT.Collector.Gateio
                     payload = new[] { gateSymbol }
                 };
 
-                await SendMessageAsync(JsonConvert.SerializeObject(unsubscription));
+                await SendMessageAsync(JsonSerializer.Serialize(unsubscription));
                 
                 var key = CreateSubscriptionKey(channel, symbol);
                 if (_subscriptions.TryRemove(key, out var sub))
@@ -490,7 +530,7 @@ namespace CCXT.Collector.Gateio
 
         protected override string CreatePingMessage()
         {
-            return JsonConvert.SerializeObject(new 
+            return JsonSerializer.Serialize(new 
             { 
                 time = DateTimeOffset.UtcNow.ToUnixTimeSeconds(),
                 channel = "spot.ping"

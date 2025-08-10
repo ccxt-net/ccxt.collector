@@ -5,8 +5,8 @@ using System.Text;
 using System.Threading.Tasks;
 using CCXT.Collector.Core.Abstractions;
 using CCXT.Collector.Service;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
+using System.Text.Json;
+using CCXT.Collector.Library;
 
 namespace CCXT.Collector.Korbit
 {
@@ -95,19 +95,20 @@ namespace CCXT.Collector.Korbit
         {
             try
             {
-                var json = JObject.Parse(message);
+                using var doc = JsonDocument.Parse(message); 
+                var json = doc.RootElement;
 
                 // Check for error messages
-                if (json["error"] != null)
+                if (json.TryGetProperty("error", out var errorProp))
                 {
-                    var error = json["error"].ToString();
+                    var error = json.GetStringOrDefault("error");
                     RaiseError($"Korbit error: {error}");
                     return;
                 }
 
                 // Handle different message types
-                var eventType = json["event"]?.ToString();
-                if (!string.IsNullOrEmpty(eventType))
+                var eventType = json.GetStringOrDefault("event");
+                if (!String.IsNullOrEmpty(eventType))
                 {
                     switch (eventType)
                     {
@@ -128,13 +129,11 @@ namespace CCXT.Collector.Korbit
                             break;
                     }
                 }
-                else if (json["data"] != null)
+                else if (json.TryGetProperty("data", out var dataProp))
                 {
-                    // Handle data messages
-                    var data = json["data"];
-                    var channel = json["channel"]?.ToString();
+                    var channel = json.GetStringOrDefault("channel");
                     
-                    if (!string.IsNullOrEmpty(channel))
+                    if (!String.IsNullOrEmpty(channel))
                     {
                         if (channel.Contains("orderbook"))
                             await ProcessOrderbookData(json);
@@ -151,17 +150,17 @@ namespace CCXT.Collector.Korbit
             }
         }
 
-        private async Task ProcessOrderbook(JObject json)
+        private async Task ProcessOrderbook(JsonElement json)
         {
             await ProcessOrderbookData(json);
         }
 
-        private async Task ProcessOrderbookData(JObject json)
+        private async Task ProcessOrderbookData(JsonElement json)
         {
             try
             {
-                var data = json["data"] ?? json;
-                var channel = json["channel"]?.ToString() ?? "";
+                var data = json.TryGetProperty("data", out var dataProp) ? dataProp : json;
+                var channel = json.GetStringOrDefault("channel", "");
                 
                 // Extract symbol from channel name (e.g., "orderbook:btc_krw")
                 var korbitSymbol = "";
@@ -169,15 +168,15 @@ namespace CCXT.Collector.Korbit
                 {
                     korbitSymbol = channel.Split(':')[1];
                 }
-                else if (data["currency_pair"] != null)
+                else 
                 {
-                    korbitSymbol = data["currency_pair"].ToString();
+                    korbitSymbol = data.GetStringOrDefault("currency_pair");
                 }
                 
-                if (string.IsNullOrEmpty(korbitSymbol)) return;
+                if (String.IsNullOrEmpty(korbitSymbol)) return;
 
                 var symbol = ConvertSymbolBack(korbitSymbol);
-                var timestamp = data["timestamp"]?.Value<long>() ?? DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+                var timestamp = data.GetInt64OrDefault("timestamp", TimeExtension.UnixTime);
 
                 var orderbook = new SOrderBook
                 {
@@ -193,34 +192,32 @@ namespace CCXT.Collector.Korbit
                 };
 
                 // Process bids
-                var bids = data["bids"] as JArray;
-                if (bids != null)
+                if (data.TryGetArray("bids", out var bids))
                 {
-                    foreach (var bid in bids)
+                    foreach (var bid in bids.EnumerateArray())
                     {
-                        if (bid is JArray bidArray && bidArray.Count >= 2)
+                        if (bid.ValueKind == JsonValueKind.Array && bid.EnumerateArray().Count() >= 2)
                         {
                             orderbook.result.bids.Add(new SOrderBookItem
                             {
-                                price = bidArray[0].Value<decimal>(),
-                                quantity = bidArray[1].Value<decimal>()
+                                price = bid[0].GetDecimalValue(),
+                                quantity = bid[1].GetDecimalValue()
                             });
                         }
                     }
                 }
 
                 // Process asks
-                var asks = data["asks"] as JArray;
-                if (asks != null)
+                if (data.TryGetArray("asks", out var asks))
                 {
-                    foreach (var ask in asks)
+                    foreach (var ask in asks.EnumerateArray())
                     {
-                        if (ask is JArray askArray && askArray.Count >= 2)
+                        if (ask.ValueKind == JsonValueKind.Array && ask.EnumerateArray().Count() >= 2)
                         {
                             orderbook.result.asks.Add(new SOrderBookItem
                             {
-                                price = askArray[0].Value<decimal>(),
-                                quantity = askArray[1].Value<decimal>()
+                                price = ask[0].GetDecimalValue(),
+                                quantity = ask[1].GetDecimalValue()
                             });
                         }
                     }
@@ -243,17 +240,17 @@ namespace CCXT.Collector.Korbit
             }
         }
 
-        private async Task ProcessTransaction(JObject json)
+        private async Task ProcessTransaction(JsonElement json)
         {
             await ProcessTransactionData(json);
         }
 
-        private async Task ProcessTransactionData(JObject json)
+        private async Task ProcessTransactionData(JsonElement json)
         {
             try
             {
-                var data = json["data"] ?? json;
-                var channel = json["channel"]?.ToString() ?? "";
+                var data = json.TryGetProperty("data", out var dataProp) ? dataProp : json;
+                var channel = json.GetStringOrDefault("channel", "");
                 
                 // Extract symbol from channel name
                 var korbitSymbol = "";
@@ -261,15 +258,15 @@ namespace CCXT.Collector.Korbit
                 {
                     korbitSymbol = channel.Split(':')[1];
                 }
-                else if (data["currency_pair"] != null)
+                else
                 {
-                    korbitSymbol = data["currency_pair"].ToString();
+                    korbitSymbol = data.GetStringOrDefault("currency_pair");
                 }
                 
-                if (string.IsNullOrEmpty(korbitSymbol)) return;
+                if (String.IsNullOrEmpty(korbitSymbol)) return;
 
                 var symbol = ConvertSymbolBack(korbitSymbol);
-                var timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+                var timestamp = TimeExtension.UnixTime;
 
                 var completeOrders = new STrade
                 {
@@ -280,41 +277,39 @@ namespace CCXT.Collector.Korbit
                 };
 
                 // Process transaction list
-                var transactions = data["transactions"] as JArray ?? data as JArray;
-                if (transactions != null)
+                if (data.TryGetArray("transactions", out var transactions))
                 {
-                    foreach (var transaction in transactions)
+                    foreach (var tx in transactions.EnumerateArray())
                     {
-                        var tx = transaction as JObject ?? transaction;
-                        var txTimestamp = tx["timestamp"]?.Value<long>() ?? timestamp;
-                        var side = tx["type"]?.ToString() ?? "buy";
+                        var txTimestamp = tx.GetInt64OrDefault("timestamp", timestamp);
+                        var side = tx.GetStringOrDefault("type", "buy");
 
                         completeOrders.result.Add(new STradeItem
                         {
-                            orderId = tx["tid"]?.ToString() ?? Guid.NewGuid().ToString(),
+                            tradeId = tx.GetStringOrDefault("tid", Guid.NewGuid().ToString()),
                             sideType = side.ToLower() == "buy" ? SideType.Bid : SideType.Ask,
                             orderType = OrderType.Limit,
-                            price = tx["price"]?.Value<decimal>() ?? 0,
-                            quantity = tx["amount"]?.Value<decimal>() ?? 0,
-                            amount = (tx["price"]?.Value<decimal>() ?? 0) * (tx["amount"]?.Value<decimal>() ?? 0),
+                            price = tx.GetDecimalOrDefault("price"),
+                            quantity = tx.GetDecimalOrDefault("amount"),
+                            amount = (tx.GetDecimalOrDefault("price")) * (tx.GetDecimalOrDefault("amount")),
                             timestamp = txTimestamp
                         });
                     }
                 }
-                else if (data["tid"] != null)
+                else if (data.TryGetProperty("tid", out var _))
                 {
                     // Single transaction
-                    var txTimestamp = data["timestamp"]?.Value<long>() ?? timestamp;
-                    var side = data["type"]?.ToString() ?? "buy";
+                    var txTimestamp = data.GetInt64OrDefault("timestamp", timestamp);
+                    var side = data.GetStringOrDefault("type", "buy");
 
                     completeOrders.result.Add(new STradeItem
                     {
-                        orderId = data["tid"]?.ToString() ?? Guid.NewGuid().ToString(),
+                        tradeId = data.GetStringOrDefault("tid", Guid.NewGuid().ToString()),
                         sideType = side.ToLower() == "buy" ? SideType.Bid : SideType.Ask,
                         orderType = OrderType.Limit,
-                        price = data["price"]?.Value<decimal>() ?? 0,
-                        quantity = data["amount"]?.Value<decimal>() ?? 0,
-                        amount = (data["price"]?.Value<decimal>() ?? 0) * (data["amount"]?.Value<decimal>() ?? 0),
+                        price = data.GetDecimalOrDefault("price"),
+                        quantity = data.GetDecimalOrDefault("amount"),
+                        amount = (data.GetDecimalOrDefault("price")) * (data.GetDecimalOrDefault("amount")),
                         timestamp = txTimestamp
                     });
                 }
@@ -328,28 +323,29 @@ namespace CCXT.Collector.Korbit
             }
         }
 
-        private async Task ProcessTickerData(JObject json)
+        private async Task ProcessTickerData(JsonElement json)
         {
             try
             {
-                var data = json["data"] ?? json;
-                var channel = json["channel"]?.ToString() ?? "";
+                var data = json.TryGetProperty("data", out var dataProp) ? dataProp : json;
+                var channel = json.GetStringOrDefault("channel", "");
                 
                 // Extract symbol from channel name
                 var korbitSymbol = "";
+
                 if (channel.Contains(":"))
                 {
                     korbitSymbol = channel.Split(':')[1];
                 }
-                else if (data["currency_pair"] != null)
+                else
                 {
-                    korbitSymbol = data["currency_pair"].ToString();
+                    korbitSymbol = data.GetStringOrDefault("currency_pair");
                 }
                 
-                if (string.IsNullOrEmpty(korbitSymbol)) return;
+                if (String.IsNullOrEmpty(korbitSymbol)) return;
 
                 var symbol = ConvertSymbolBack(korbitSymbol);
-                var timestamp = data["timestamp"]?.Value<long>() ?? DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+                var timestamp = data.GetInt64OrDefault("timestamp", TimeExtension.UnixTime);
 
                 var ticker = new STicker
                 {
@@ -359,16 +355,16 @@ namespace CCXT.Collector.Korbit
                     result = new STickerItem
                     {
                         timestamp = timestamp,
-                        closePrice = data["last"]?.Value<decimal>() ?? 0,
-                        openPrice = data["open"]?.Value<decimal>() ?? 0,
-                        highPrice = data["high"]?.Value<decimal>() ?? 0,
-                        lowPrice = data["low"]?.Value<decimal>() ?? 0,
-                        volume = data["volume"]?.Value<decimal>() ?? 0,
+                        closePrice = data.GetDecimalOrDefault("last"),
+                        openPrice = data.GetDecimalOrDefault("open"),
+                        highPrice = data.GetDecimalOrDefault("high"),
+                        lowPrice = data.GetDecimalOrDefault("low"),
+                        volume = data.GetDecimalOrDefault("volume"),
                         quoteVolume = 0,
-                        percentage = data["change_percent"]?.Value<decimal>() ?? 0,
-                        change = data["change"]?.Value<decimal>() ?? 0,
-                        bidPrice = data["bid"]?.Value<decimal>() ?? 0,
-                        askPrice = data["ask"]?.Value<decimal>() ?? 0,
+                        percentage = data.GetDecimalOrDefault("change_percent"),
+                        change = data.GetDecimalOrDefault("change"),
+                        bidPrice = data.GetDecimalOrDefault("bid"),
+                        askPrice = data.GetDecimalOrDefault("ask"),
                         vwap = 0,
                         prevClosePrice = 0,
                         bidQuantity = 0,
@@ -404,7 +400,7 @@ namespace CCXT.Collector.Korbit
                     }
                 };
 
-                var json = JsonConvert.SerializeObject(subscribeMessage);
+                var json = JsonSerializer.Serialize(subscribeMessage);
                 await SendMessageAsync(json);
                 return true;
             }
@@ -429,7 +425,7 @@ namespace CCXT.Collector.Korbit
                     }
                 };
 
-                var json = JsonConvert.SerializeObject(subscribeMessage);
+                var json = JsonSerializer.Serialize(subscribeMessage);
                 await SendMessageAsync(json);
                 return true;
             }
@@ -454,7 +450,7 @@ namespace CCXT.Collector.Korbit
                     }
                 };
 
-                var json = JsonConvert.SerializeObject(subscribeMessage);
+                var json = JsonSerializer.Serialize(subscribeMessage);
                 await SendMessageAsync(json);
                 return true;
             }
@@ -479,7 +475,7 @@ namespace CCXT.Collector.Korbit
                     }
                 };
 
-                var json = JsonConvert.SerializeObject(subscribeMessage);
+                var json = JsonSerializer.Serialize(subscribeMessage);
                 await SendMessageAsync(json);
                 return true;
             }
@@ -504,7 +500,7 @@ namespace CCXT.Collector.Korbit
                     }
                 };
 
-                var json = JsonConvert.SerializeObject(subscribeMessage);
+                var json = JsonSerializer.Serialize(subscribeMessage);
                 await SendMessageAsync(json);
                 return true;
             }
@@ -529,7 +525,7 @@ namespace CCXT.Collector.Korbit
                     }
                 };
 
-                var json = JsonConvert.SerializeObject(subscribeMessage);
+                var json = JsonSerializer.Serialize(subscribeMessage);
                 await SendMessageAsync(json);
                 return true;
             }
@@ -562,7 +558,7 @@ namespace CCXT.Collector.Korbit
                     }
                 };
 
-                var json = JsonConvert.SerializeObject(unsubscribeMessage);
+                var json = JsonSerializer.Serialize(unsubscribeMessage);
                 await SendMessageAsync(json);
                 return true;
             }
@@ -595,7 +591,7 @@ namespace CCXT.Collector.Korbit
                     }
                 };
 
-                var json = JsonConvert.SerializeObject(unsubscribeMessage);
+                var json = JsonSerializer.Serialize(unsubscribeMessage);
                 await SendMessageAsync(json);
                 return true;
             }
@@ -615,7 +611,7 @@ namespace CCXT.Collector.Korbit
                     @event = "korbit:ping"
                 };
 
-                var json = JsonConvert.SerializeObject(pingMessage);
+                var json = JsonSerializer.Serialize(pingMessage);
                 await SendMessageAsync(json);
             }
             catch (Exception ex)

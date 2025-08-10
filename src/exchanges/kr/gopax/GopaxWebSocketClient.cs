@@ -4,8 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using CCXT.Collector.Core.Abstractions;
 using CCXT.Collector.Service;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
+using System.Text.Json;
 
 namespace CCXT.Collector.Gopax
 {
@@ -93,19 +92,20 @@ namespace CCXT.Collector.Gopax
         {
             try
             {
-                var json = JObject.Parse(message);
+                using var doc = JsonDocument.Parse(message); 
+                var json = doc.RootElement;
 
                 // Check for error messages
-                if (json["error"] != null)
+                if (json.TryGetProperty("error", out var errorProp))
                 {
-                    var error = json["error"].ToString();
+                    var error = json.GetStringOrDefault("error");
                     RaiseError($"Gopax error: {error}");
                     return;
                 }
 
                 // Handle different message types
-                var messageType = json["n"]?.ToString(); // notification type
-                if (!string.IsNullOrEmpty(messageType))
+                var messageType = json.GetStringOrDefault("n"); // notification type
+                if (!String.IsNullOrEmpty(messageType))
                 {
                     switch (messageType)
                     {
@@ -126,11 +126,11 @@ namespace CCXT.Collector.Gopax
                             break;
                     }
                 }
-                else if (json["o"] != null) // orderbook data
+                else if (json.TryGetProperty("o", out var oProp)) // orderbook data
                 {
                     await ProcessOrderbookUpdate(json);
                 }
-                else if (json["t"] != null) // trade data
+                else if (json.TryGetProperty("t", out var tProp)) // trade data
                 {
                     await ProcessTradeUpdate(json);
                 }
@@ -141,15 +141,15 @@ namespace CCXT.Collector.Gopax
             }
         }
 
-        private async Task ProcessOrderbook(JObject json)
+        private async Task ProcessOrderbook(JsonElement json)
         {
             try
             {
-                var gopaxSymbol = json["i"]?.ToString(); // instrument
-                if (string.IsNullOrEmpty(gopaxSymbol)) return;
+                var gopaxSymbol = json.GetStringOrDefault("i"); // instrument
+                if (String.IsNullOrEmpty(gopaxSymbol)) return;
 
                 var symbol = ConvertSymbolBack(gopaxSymbol);
-                var timestamp = json["t"]?.Value<long>() ?? DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+                var timestamp = json.GetInt64OrDefault("t", TimeExtension.UnixTime);
 
                 var orderbook = new SOrderBook
                 {
@@ -165,34 +165,32 @@ namespace CCXT.Collector.Gopax
                 };
 
                 // Process bids
-                var bids = json["b"] as JArray; // bids
-                if (bids != null)
+                if (json.TryGetArray("b", out var bids))
                 {
-                    foreach (var bid in bids)
+                    foreach (var bid in bids.EnumerateArray())
                     {
-                        if (bid is JArray bidArray && bidArray.Count >= 2)
+                        if (bid.ValueKind == JsonValueKind.Array && bid.EnumerateArray().Count() >= 2)
                         {
                             orderbook.result.bids.Add(new SOrderBookItem
                             {
-                                price = bidArray[0].Value<decimal>(),
-                                quantity = bidArray[1].Value<decimal>()
+                                price = bid[0].GetDecimalValue(),
+                                quantity = bid[1].GetDecimalValue()
                             });
                         }
                     }
                 }
 
                 // Process asks
-                var asks = json["a"] as JArray; // asks
-                if (asks != null)
+                if (json.TryGetArray("a", out var asks))
                 {
-                    foreach (var ask in asks)
+                    foreach (var ask in asks.EnumerateArray())
                     {
-                        if (ask is JArray askArray && askArray.Count >= 2)
+                        if (ask.ValueKind == JsonValueKind.Array && ask.EnumerateArray().Count() >= 2)
                         {
                             orderbook.result.asks.Add(new SOrderBookItem
                             {
-                                price = askArray[0].Value<decimal>(),
-                                quantity = askArray[1].Value<decimal>()
+                                price = ask[0].GetDecimalValue(),
+                                quantity = ask[1].GetDecimalValue()
                             });
                         }
                     }
@@ -215,21 +213,21 @@ namespace CCXT.Collector.Gopax
             }
         }
 
-        private async Task ProcessOrderbookUpdate(JObject json)
+        private async Task ProcessOrderbookUpdate(JsonElement json)
         {
             // Process incremental orderbook updates
             await ProcessOrderbook(json);
         }
 
-        private async Task ProcessTrades(JObject json)
+        private async Task ProcessTrades(JsonElement json)
         {
             try
             {
-                var gopaxSymbol = json["i"]?.ToString(); // instrument
-                if (string.IsNullOrEmpty(gopaxSymbol)) return;
+                var gopaxSymbol = json.GetStringOrDefault("i"); // instrument
+                if (String.IsNullOrEmpty(gopaxSymbol)) return;
 
                 var symbol = ConvertSymbolBack(gopaxSymbol);
-                var timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+                var timestamp = TimeExtension.UnixTime;
 
                 var completeOrders = new STrade
                 {
@@ -240,22 +238,21 @@ namespace CCXT.Collector.Gopax
                 };
 
                 // Process trades array
-                var trades = json["trades"] as JArray;
-                if (trades != null)
+                if (json.TryGetArray("trades", out var trades))
                 {
-                    foreach (var trade in trades)
+                    foreach (var trade in trades.EnumerateArray())
                     {
-                        var tradeTimestamp = trade["t"]?.Value<long>() ?? timestamp;
-                        var side = trade["s"]?.ToString(); // side
+                        var tradeTimestamp = trade.GetInt64OrDefault("t", timestamp);
+                        var side = trade.GetStringOrDefault("s"); // side
 
                         completeOrders.result.Add(new STradeItem
                         {
-                            orderId = trade["id"]?.ToString() ?? Guid.NewGuid().ToString(),
+                            tradeId = trade.GetStringOrDefault("id", Guid.NewGuid().ToString()),
                             sideType = side == "buy" ? SideType.Bid : SideType.Ask,
                             orderType = OrderType.Limit,
-                            price = trade["p"]?.Value<decimal>() ?? 0, // price
-                            quantity = trade["q"]?.Value<decimal>() ?? 0, // quantity
-                            amount = (trade["p"]?.Value<decimal>() ?? 0) * (trade["q"]?.Value<decimal>() ?? 0),
+                            price = trade.GetDecimalOrDefault("p"), // price
+                            quantity = trade.GetDecimalOrDefault("q"), // quantity
+                            amount = (trade.GetDecimalOrDefault("p")) * (trade.GetDecimalOrDefault("q")),
                             timestamp = tradeTimestamp
                         });
                     }
@@ -270,16 +267,16 @@ namespace CCXT.Collector.Gopax
             }
         }
 
-        private async Task ProcessTradeUpdate(JObject json)
+        private async Task ProcessTradeUpdate(JsonElement json)
         {
             // Process single trade update
             try
             {
-                var gopaxSymbol = json["i"]?.ToString(); // instrument
-                if (string.IsNullOrEmpty(gopaxSymbol)) return;
+                var gopaxSymbol = json.GetStringOrDefault("i"); // instrument
+                if (String.IsNullOrEmpty(gopaxSymbol)) return;
 
                 var symbol = ConvertSymbolBack(gopaxSymbol);
-                var timestamp = json["t"]?.Value<long>() ?? DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+                var timestamp = json.GetInt64OrDefault("t", TimeExtension.UnixTime);
 
                 var completeOrders = new STrade
                 {
@@ -289,15 +286,15 @@ namespace CCXT.Collector.Gopax
                     result = new List<STradeItem>()
                 };
 
-                var side = json["s"]?.ToString(); // side
+                var side = json.GetStringOrDefault("s"); // side
                 completeOrders.result.Add(new STradeItem
                 {
-                    orderId = json["id"]?.ToString() ?? Guid.NewGuid().ToString(),
+                    tradeId = json.GetStringOrDefault("id", Guid.NewGuid().ToString()),
                     sideType = side == "buy" ? SideType.Bid : SideType.Ask,
                     orderType = OrderType.Limit,
-                    price = json["p"]?.Value<decimal>() ?? 0, // price
-                    quantity = json["q"]?.Value<decimal>() ?? 0, // quantity
-                    amount = (json["p"]?.Value<decimal>() ?? 0) * (json["q"]?.Value<decimal>() ?? 0),
+                    price = json.GetDecimalOrDefault("p"), // price
+                    quantity = json.GetDecimalOrDefault("q"), // quantity
+                    amount = (json.GetDecimalOrDefault("p")) * (json.GetDecimalOrDefault("q")),
                     timestamp = timestamp
                 });
 
@@ -309,15 +306,15 @@ namespace CCXT.Collector.Gopax
             }
         }
 
-        private async Task ProcessTickerData(JObject json)
+        private async Task ProcessTickerData(JsonElement json)
         {
             try
             {
-                var gopaxSymbol = json["i"]?.ToString(); // instrument
-                if (string.IsNullOrEmpty(gopaxSymbol)) return;
+                var gopaxSymbol = json.GetStringOrDefault("i"); // instrument
+                if (String.IsNullOrEmpty(gopaxSymbol)) return;
 
                 var symbol = ConvertSymbolBack(gopaxSymbol);
-                var timestamp = json["t"]?.Value<long>() ?? DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+                var timestamp = json.GetInt64OrDefault("t", TimeExtension.UnixTime);
 
                 var ticker = new STicker
                 {
@@ -327,20 +324,20 @@ namespace CCXT.Collector.Gopax
                     result = new STickerItem
                     {
                         timestamp = timestamp,
-                        closePrice = json["c"]?.Value<decimal>() ?? 0, // close
-                        openPrice = json["o"]?.Value<decimal>() ?? 0, // open
-                        highPrice = json["h"]?.Value<decimal>() ?? 0, // high
-                        lowPrice = json["l"]?.Value<decimal>() ?? 0, // low
-                        volume = json["v"]?.Value<decimal>() ?? 0, // volume
-                        quoteVolume = json["q"]?.Value<decimal>() ?? 0, // quote volume
+                        closePrice = json.GetDecimalOrDefault("c"), // close
+                        openPrice = json.GetDecimalOrDefault("o"), // open
+                        highPrice = json.GetDecimalOrDefault("h"), // high
+                        lowPrice = json.GetDecimalOrDefault("l"), // low
+                        volume = json.GetDecimalOrDefault("v"), // volume
+                        quoteVolume = json.GetDecimalOrDefault("q"), // quote volume
                         percentage = 0,
                         change = 0,
-                        bidPrice = json["bp"]?.Value<decimal>() ?? 0, // best bid price
-                        askPrice = json["ap"]?.Value<decimal>() ?? 0, // best ask price
-                        vwap = json["vw"]?.Value<decimal>() ?? 0, // volume weighted average price
+                        bidPrice = json.GetDecimalOrDefault("bp"), // best bid price
+                        askPrice = json.GetDecimalOrDefault("ap"), // best ask price
+                        vwap = json.GetDecimalOrDefault("vw"), // volume weighted average price
                         prevClosePrice = 0,
-                        bidQuantity = json["bq"]?.Value<decimal>() ?? 0, // best bid quantity
-                        askQuantity = json["aq"]?.Value<decimal>() ?? 0 // best ask quantity
+                        bidQuantity = json.GetDecimalOrDefault("bq"), // best bid quantity
+                        askQuantity = json.GetDecimalOrDefault("aq") // best ask quantity
                     }
                 };
 
@@ -371,7 +368,7 @@ namespace CCXT.Collector.Gopax
                     i = gopaxSymbol
                 };
 
-                var json = JsonConvert.SerializeObject(subscribeMessage);
+                var json = JsonSerializer.Serialize(subscribeMessage);
                 await SendMessageAsync(json);
                 return true;
             }
@@ -394,7 +391,7 @@ namespace CCXT.Collector.Gopax
                     i = gopaxSymbol
                 };
 
-                var json = JsonConvert.SerializeObject(subscribeMessage);
+                var json = JsonSerializer.Serialize(subscribeMessage);
                 await SendMessageAsync(json);
                 return true;
             }
@@ -417,7 +414,7 @@ namespace CCXT.Collector.Gopax
                     i = gopaxSymbol
                 };
 
-                var json = JsonConvert.SerializeObject(subscribeMessage);
+                var json = JsonSerializer.Serialize(subscribeMessage);
                 await SendMessageAsync(json);
                 return true;
             }
@@ -440,7 +437,7 @@ namespace CCXT.Collector.Gopax
                     i = gopaxSymbol
                 };
 
-                var json = JsonConvert.SerializeObject(subscribeMessage);
+                var json = JsonSerializer.Serialize(subscribeMessage);
                 await SendMessageAsync(json);
                 return true;
             }
@@ -463,7 +460,7 @@ namespace CCXT.Collector.Gopax
                     i = gopaxSymbol
                 };
 
-                var json = JsonConvert.SerializeObject(subscribeMessage);
+                var json = JsonSerializer.Serialize(subscribeMessage);
                 await SendMessageAsync(json);
                 return true;
             }
@@ -486,7 +483,7 @@ namespace CCXT.Collector.Gopax
                     i = gopaxSymbol
                 };
 
-                var json = JsonConvert.SerializeObject(subscribeMessage);
+                var json = JsonSerializer.Serialize(subscribeMessage);
                 await SendMessageAsync(json);
                 return true;
             }
@@ -517,7 +514,7 @@ namespace CCXT.Collector.Gopax
                     i = gopaxSymbol
                 };
 
-                var json = JsonConvert.SerializeObject(unsubscribeMessage);
+                var json = JsonSerializer.Serialize(unsubscribeMessage);
                 await SendMessageAsync(json);
                 return true;
             }
@@ -548,7 +545,7 @@ namespace CCXT.Collector.Gopax
                     i = gopaxSymbol
                 };
 
-                var json = JsonConvert.SerializeObject(unsubscribeMessage);
+                var json = JsonSerializer.Serialize(unsubscribeMessage);
                 await SendMessageAsync(json);
                 return true;
             }
@@ -568,7 +565,7 @@ namespace CCXT.Collector.Gopax
                     n = "ping"
                 };
 
-                var json = JsonConvert.SerializeObject(pingMessage);
+                var json = JsonSerializer.Serialize(pingMessage);
                 await SendMessageAsync(json);
             }
             catch (Exception ex)

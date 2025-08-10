@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json.Linq;
+﻿using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace CCXT.Collector.Library
 {
@@ -56,9 +57,9 @@ namespace CCXT.Collector.Library
     public interface IWsData : IWsResult
     {
         /// <summary>
-        ///
+        /// Dynamic data as JsonElement
         /// </summary>
-        JToken data
+        JsonElement data
         {
             get;
             set;
@@ -71,12 +72,58 @@ namespace CCXT.Collector.Library
     public class WsData : WsResult, IWsData
     {
         /// <summary>
-        ///
+        /// Dynamic data as JsonElement
         /// </summary>
-        public JToken data
+        public JsonElement data
         {
             get;
             set;
+        }
+
+        /// <summary>
+        /// Helper method to get value from dynamic data
+        /// </summary>
+        public T GetValue<T>(string path)
+        {
+            var pathParts = path.Split('.');
+            var current = data;
+
+            foreach (var part in pathParts)
+            {
+                if (current.ValueKind == JsonValueKind.Object)
+                {
+                    if (!current.TryGetProperty(part, out current))
+                    {
+                        return default(T);
+                    }
+                }
+                else if (current.ValueKind == JsonValueKind.Array && int.TryParse(part, out var index))
+                {
+                    if (index >= 0 && index < current.GetArrayLength())
+                    {
+                        int i = 0;
+                        foreach (var item in current.EnumerateArray())
+                        {
+                            if (i == index)
+                            {
+                                current = item;
+                                break;
+                            }
+                            i++;
+                        }
+                    }
+                    else
+                    {
+                        return default(T);
+                    }
+                }
+                else
+                {
+                    return default(T);
+                }
+            }
+
+            return current.Deserialize<T>();
         }
     }
 
@@ -100,7 +147,7 @@ namespace CCXT.Collector.Library
     ///
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public class WsResult<T> : WsResult, IWsResult
+    public class WsResult<T> : WsResult, IWsResult<T>
     {
         /// <summary>
         ///

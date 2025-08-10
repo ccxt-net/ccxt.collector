@@ -4,7 +4,7 @@ using System.Collections.Generic;
 namespace CCXT.Collector.Service
 {
     /// <summary>
-    /// Candlestick/K-Line data structure (캔들 데이터)
+    /// Candlestick/K-Line data structure
     /// </summary>
     public class SCandle
     {

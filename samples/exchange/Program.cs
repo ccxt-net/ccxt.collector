@@ -655,9 +655,9 @@ namespace CCXT.Collector.Samples
         public double ADX { get; private set; }
         public double ATR { get; private set; }
         public double VolumeRatio { get; private set; }
-        public string Trend { get; private set; } = string.Empty;
-        public string Volatility { get; private set; } = string.Empty;
-        public string Momentum { get; private set; } = string.Empty;
+        public string Trend { get; private set; } = String.Empty;
+        public string Volatility { get; private set; } = String.Empty;
+        public string Momentum { get; private set; } = String.Empty;
         public bool IsReady => buffer.Count >= 50;
 
         public void Update(SCandle candle)
@@ -801,7 +801,7 @@ namespace CCXT.Collector.Samples
             {
                 Type = type,
                 Strength = strength,
-                Reason = string.Join(", ", reasons)
+                Reason = String.Join(", ", reasons)
             };
         }
     }
@@ -810,7 +810,7 @@ namespace CCXT.Collector.Samples
     {
         public SignalType Type { get; set; }
         public int Strength { get; set; }
-        public string Reason { get; set; } = string.Empty;
+        public string Reason { get; set; } = String.Empty;
     }
 
     enum SignalType

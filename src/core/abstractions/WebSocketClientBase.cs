@@ -148,7 +148,7 @@ namespace CCXT.Collector.Core.Abstractions
                 
                 // Send authentication message
                 var authMessage = CreateAuthenticationMessage(_apiKey, _secretKey);
-                if (!string.IsNullOrEmpty(authMessage))
+                if (!String.IsNullOrEmpty(authMessage))
                 {
                     var socket = _privateWebSocket ?? _webSocket;
                     await SendMessageAsync(authMessage, socket);
@@ -202,7 +202,7 @@ namespace CCXT.Collector.Core.Abstractions
             // Override in derived classes for exchange-specific configuration
         }
 
-        protected async Task ReceiveLoop(ClientWebSocket socket, bool isPrivate)
+        protected virtual async Task ReceiveLoop(ClientWebSocket socket, bool isPrivate)
         {
             // Dynamic buffer sizing for large messages 
             var bufferSize = 1024 * 16;  // 16KB initial buffer
@@ -310,7 +310,7 @@ namespace CCXT.Collector.Core.Abstractions
                 if (IsConnected)
                 {
                     var pingMessage = CreatePingMessage();
-                    if (!string.IsNullOrEmpty(pingMessage))
+                    if (!String.IsNullOrEmpty(pingMessage))
                     {
                         await SendMessageAsync(pingMessage);
                     }

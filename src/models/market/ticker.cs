@@ -1,8 +1,9 @@
 ﻿using CCXT.Collector.Core.Abstractions;
 using CCXT.Collector.Library;
-using Newtonsoft.Json;
+using System.Text.Json;
 using System;
 using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
 namespace CCXT.Collector.Service
 {

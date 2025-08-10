@@ -5,8 +5,7 @@ using System.Threading.Tasks;
 using CCXT.Collector.Core.Abstractions;
 using CCXT.Collector.Library;
 using CCXT.Collector.Service;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
+using System.Text.Json;
 
 namespace CCXT.Collector.Bittrex
 {
@@ -45,38 +44,35 @@ namespace CCXT.Collector.Bittrex
         {
             try
             {
-                var json = JObject.Parse(message);
+                using var doc = JsonDocument.Parse(message); 
+                var json = doc.RootElement;
 
                 // Handle SignalR specific messages
-                var msgType = json["M"]?.ToString();
-                if (msgType != null)
+                if (json.TryGetArray("M", out var mProp))
                 {
                     // SignalR hub messages
-                    var messages = json["M"] as JArray;
-                    if (messages != null)
+                    foreach (var msg in mProp.EnumerateArray())
                     {
-                        foreach (var msg in messages)
-                        {
-                            await ProcessHubMessage(msg as JObject);
-                        }
+                        await ProcessHubMessage(msg);
                     }
                     return;
                 }
 
                 // Handle heartbeat
-                if (json["R"] != null && json["I"]?.ToString() == "0")
+                if (json.TryGetProperty("R", out var rProp) && json.GetStringOrDefault("I") == "0")
                 {
                     // Connection established response
                     return;
                 }
 
                 // Handle subscription response
-                if (json["R"] != null)
+                if (json.TryGetProperty("R", out var rProp2))
                 {
-                    var success = json["R"]?.Value<bool>() ?? false;
+                    var success = rProp2.ValueKind == JsonValueKind.True;
                     if (!success)
                     {
-                        RaiseError($"Subscription failed: {json["E"]}");
+                        var errorMsg = json.GetStringOrDefault("E", "Unknown error");
+                        RaiseError($"Subscription failed: {errorMsg}");
                     }
                     return;
                 }
@@ -87,34 +83,30 @@ namespace CCXT.Collector.Bittrex
             }
         }
 
-        private async Task ProcessHubMessage(JObject message)
+        private async Task ProcessHubMessage(JsonElement message)
         {
             try
             {
-                var hub = message["H"]?.ToString();
-                var method = message["M"]?.ToString();
-                var args = message["A"] as JArray;
-
-                if (hub == "c3" && args != null && args.Count > 0)
+                var hub = message.GetStringOrNull("H");
+                var method = message.GetStringOrNull("M");
+                
+                if (hub == "c3" && message.TryGetArray("A", out var aProp))
                 {
-                    foreach (var arg in args)
+                    foreach (var arg in aProp.EnumerateArray())
                     {
-                        var data = arg as JObject;
-                        if (data == null) continue;
-
                         switch (method)
                         {
                             case "orderBook":
-                                await ProcessOrderbookData(data);
+                                await ProcessOrderbookData(arg);
                                 break;
                             case "trade":
-                                await ProcessTradeData(data);
+                                await ProcessTradeData(arg);
                                 break;
                             case "ticker":
-                                await ProcessTickerData(data);
+                                await ProcessTickerData(arg);
                                 break;
                             case "candle":
-                                await ProcessCandleData(data);
+                                await ProcessCandleData(arg);
                                 break;
                         }
                     }
@@ -126,13 +118,13 @@ namespace CCXT.Collector.Bittrex
             }
         }
 
-        private async Task ProcessOrderbookData(JObject data)
+        private async Task ProcessOrderbookData(JsonElement data)
         {
             try
             {
-                var symbol = data["marketSymbol"]?.ToString();
-                var sequence = data["sequence"]?.Value<long>() ?? 0;
-                var timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+                var symbol = data.GetStringOrNull("marketSymbol");
+                var sequence = data.GetInt64OrDefault("sequence", 0L);
+                var timestamp = TimeExtension.UnixTime;
 
                 // Check sequence for detecting snapshot vs delta
                 var isSnapshot = !_sequenceNumbers.ContainsKey(symbol) || 
@@ -161,13 +153,12 @@ namespace CCXT.Collector.Bittrex
                 };
 
                 // Process bid updates
-                var bidDeltas = data["bidDeltas"] as JArray;
-                if (bidDeltas != null)
+                if (data.TryGetArray("bidDeltas", out var bidDeltas))
                 {
-                    foreach (var bid in bidDeltas)
+                    foreach (var bid in bidDeltas.EnumerateArray())
                     {
-                        var rate = bid["rate"]?.Value<decimal>() ?? 0;
-                        var quantity = bid["quantity"]?.Value<decimal>() ?? 0;
+                        var rate = bid.GetDecimalOrDefault("rate");
+                        var quantity = bid.GetDecimalOrDefault("quantity");
                         
                         if (quantity > 0)
                         {
@@ -181,13 +172,12 @@ namespace CCXT.Collector.Bittrex
                 }
 
                 // Process ask updates
-                var askDeltas = data["askDeltas"] as JArray;
-                if (askDeltas != null)
+                if (data.TryGetArray("askDeltas", out var askDeltas))
                 {
-                    foreach (var ask in askDeltas)
+                    foreach (var ask in askDeltas.EnumerateArray())
                     {
-                        var rate = ask["rate"]?.Value<decimal>() ?? 0;
-                        var quantity = ask["quantity"]?.Value<decimal>() ?? 0;
+                        var rate = ask.GetDecimalOrDefault("rate");
+                        var quantity = ask.GetDecimalOrDefault("quantity");
                         
                         if (quantity > 0)
                         {
@@ -214,34 +204,45 @@ namespace CCXT.Collector.Bittrex
             }
         }
 
-        private async Task ProcessTradeData(JObject data)
+        private async Task ProcessTradeData(JsonElement data)
         {
             try
             {
-                var deltas = data["deltas"] as JArray;
-                if (deltas == null || deltas.Count == 0)
+                if (!data.TryGetArray("deltas", out var deltas))
                     return;
 
-                var symbol = data["marketSymbol"]?.ToString();
-                var timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+                var symbol = data.GetStringOrNull("marketSymbol");
+                var timestamp = TimeExtension.UnixTime;
 
                 var trades = new List<STradeItem>();
 
-                foreach (var trade in deltas)
+                foreach (var trade in deltas.EnumerateArray())
                 {
-                    var executedAt = trade["executedAt"]?.Value<DateTime>();
+                    DateTime? executedAt = null;
+
+                    var execProp = trade.GetStringOrNull("executedAt");
+                    if (!String.IsNullOrEmpty(execProp))
+                    {
+                        if (DateTime.TryParse(execProp, out var dt))
+                            executedAt = dt;
+                    }
+                    
                     var tradeTimestamp = executedAt.HasValue ? 
                         new DateTimeOffset(executedAt.Value).ToUnixTimeMilliseconds() : 
                         timestamp;
 
+                    var takerSide = trade.GetStringOrDefault("takerSide", "");
+                    var rate = trade.GetDecimalOrDefault("rate");
+                    var quantity = trade.GetDecimalOrDefault("quantity");
+                    
                     trades.Add(new STradeItem
                     {
                         timestamp = tradeTimestamp,
-                        sideType = trade["takerSide"]?.ToString() == "BUY" ? SideType.Bid : SideType.Ask,
+                        sideType = takerSide == "BUY" ? SideType.Bid : SideType.Ask,
                         orderType = OrderType.Limit,
-                        price = trade["rate"]?.Value<decimal>() ?? 0,
-                        quantity = trade["quantity"]?.Value<decimal>() ?? 0,
-                        amount = (trade["rate"]?.Value<decimal>() ?? 0) * (trade["quantity"]?.Value<decimal>() ?? 0)
+                        price = rate,
+                        quantity = quantity,
+                        amount = rate * quantity
                     });
                 }
 
@@ -261,12 +262,12 @@ namespace CCXT.Collector.Bittrex
             }
         }
 
-        private async Task ProcessTickerData(JObject data)
+        private async Task ProcessTickerData(JsonElement data)
         {
             try
             {
-                var symbol = data["symbol"]?.ToString();
-                var timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+                var symbol = data.GetStringOrNull("symbol");
+                var timestamp = TimeExtension.UnixTime;
 
                 var ticker = new STicker
                 {
@@ -276,12 +277,12 @@ namespace CCXT.Collector.Bittrex
                     result = new STickerItem
                     {
                         timestamp = timestamp,
-                        closePrice = data["lastTradeRate"]?.Value<decimal>() ?? 0,
-                        openPrice = data["openRate"]?.Value<decimal>() ?? 0,
-                        highPrice = data["highRate"]?.Value<decimal>() ?? 0,
-                        lowPrice = data["lowRate"]?.Value<decimal>() ?? 0,
-                        volume = data["volume"]?.Value<decimal>() ?? 0,
-                        quoteVolume = data["quoteVolume"]?.Value<decimal>() ?? 0
+                        closePrice = data.GetDecimalOrDefault("lastTradeRate"),
+                        openPrice = data.GetDecimalOrDefault("openRate"),
+                        highPrice = data.GetDecimalOrDefault("highRate"),
+                        lowPrice = data.GetDecimalOrDefault("lowRate"),
+                        volume = data.GetDecimalOrDefault("volume"),
+                        quoteVolume = data.GetDecimalOrDefault("quoteVolume")
                     }
                 };
 
@@ -293,20 +294,28 @@ namespace CCXT.Collector.Bittrex
             }
         }
 
-        private async Task ProcessCandleData(JObject data)
+        private async Task ProcessCandleData(JsonElement data)
         {
             try
             {
-                var symbol = data["marketSymbol"]?.ToString();
-                var interval = data["interval"]?.ToString();
-                var delta = data["delta"] as JObject;
-                
-                if (delta == null) return;
+                if (!data.TryGetProperty("delta", out var delta))
+                    return;
 
-                var startsAt = delta["startsAt"]?.Value<DateTime>();
+                var symbol = data.GetStringOrNull("marketSymbol");
+                var interval = data.GetStringOrNull("interval");
+                
+                DateTime? startsAt = null;
+                var startsProp = delta.GetStringOrNull("startsAt");
+
+                if (!String.IsNullOrEmpty(startsProp))
+                {
+                    if (DateTime.TryParse(startsProp, out var dt))
+                        startsAt = dt;
+                }
+                
                 var timestamp = startsAt.HasValue ? 
                     new DateTimeOffset(startsAt.Value).ToUnixTimeMilliseconds() : 
-                    DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+                    TimeExtension.UnixTime;
 
                 var candles = new List<SCandleItem>
                 {
@@ -314,11 +323,11 @@ namespace CCXT.Collector.Bittrex
                     {
                         openTime = timestamp,
                         closeTime = timestamp + 60000, // Assuming 1m interval
-                        open = delta["open"]?.Value<decimal>() ?? 0,
-                        high = delta["high"]?.Value<decimal>() ?? 0,
-                        low = delta["low"]?.Value<decimal>() ?? 0,
-                        close = delta["close"]?.Value<decimal>() ?? 0,
-                        volume = delta["volume"]?.Value<decimal>() ?? 0
+                        open = delta.GetDecimalOrDefault("open"),
+                        high = delta.GetDecimalOrDefault("high"),
+                        low = delta.GetDecimalOrDefault("low"),
+                        close = delta.GetDecimalOrDefault("close"),
+                        volume = delta.GetDecimalOrDefault("volume")
                     }
                 };
 
@@ -327,7 +336,7 @@ namespace CCXT.Collector.Bittrex
                     exchange = ExchangeName,
                     symbol = ConvertToStandardSymbol(symbol),
                     interval = ConvertInterval(interval),
-                    timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
+                    timestamp = TimeExtension.UnixTime,
                     result = candles
                 };
 
@@ -352,7 +361,7 @@ namespace CCXT.Collector.Bittrex
                     I = 1
                 };
 
-                await SendMessageAsync(JsonConvert.SerializeObject(request));
+                await SendMessageAsync(JsonSerializer.Serialize(request));
                 
                 var key = CreateSubscriptionKey("orderbook", symbol);
                 _subscriptions[key] = new SubscriptionInfo
@@ -385,7 +394,7 @@ namespace CCXT.Collector.Bittrex
                     I = 2
                 };
 
-                await SendMessageAsync(JsonConvert.SerializeObject(request));
+                await SendMessageAsync(JsonSerializer.Serialize(request));
                 
                 var key = CreateSubscriptionKey("trades", symbol);
                 _subscriptions[key] = new SubscriptionInfo
@@ -418,7 +427,7 @@ namespace CCXT.Collector.Bittrex
                     I = 3
                 };
 
-                await SendMessageAsync(JsonConvert.SerializeObject(request));
+                await SendMessageAsync(JsonSerializer.Serialize(request));
                 
                 var key = CreateSubscriptionKey("ticker", symbol);
                 _subscriptions[key] = new SubscriptionInfo
@@ -452,7 +461,7 @@ namespace CCXT.Collector.Bittrex
                     I = 4
                 };
 
-                await SendMessageAsync(JsonConvert.SerializeObject(request));
+                await SendMessageAsync(JsonSerializer.Serialize(request));
                 
                 var key = CreateSubscriptionKey($"candles:{interval}", symbol);
                 _subscriptions[key] = new SubscriptionInfo
@@ -495,7 +504,7 @@ namespace CCXT.Collector.Bittrex
                     I = 5
                 };
 
-                await SendMessageAsync(JsonConvert.SerializeObject(request));
+                await SendMessageAsync(JsonSerializer.Serialize(request));
                 
                 var key = CreateSubscriptionKey(channel, symbol);
                 if (_subscriptions.TryRemove(key, out var sub))
@@ -515,7 +524,7 @@ namespace CCXT.Collector.Bittrex
         protected override string CreatePingMessage()
         {
             // SignalR uses a different ping mechanism
-            return JsonConvert.SerializeObject(new { H = "c3", M = "ping", A = new object[0], I = 0 });
+            return JsonSerializer.Serialize(new { H = "c3", M = "ping", A = new object[0], I = 0 });
         }
 
         protected override async Task ResubscribeAsync(SubscriptionInfo subscription)

@@ -6,8 +6,7 @@ using System.Threading.Tasks;
 using CCXT.Collector.Core.Abstractions;
 using CCXT.Collector.Library;
 using CCXT.Collector.Service;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
+using System.Text.Json;
 
 namespace CCXT.Collector.Bithumb
 {
@@ -98,26 +97,27 @@ namespace CCXT.Collector.Bithumb
         {
             try
             {
-                var json = JObject.Parse(message);
+                using var doc = JsonDocument.Parse(message); 
+                var json = doc.RootElement;
 
                 // Check for status messages
-                if (json["status"] != null)
+                if (json.TryGetProperty("status", out var statusProp))
                 {
-                    var status = json["status"].ToString();
+                    var status = json.GetStringOrDefault("status");
                     if (status != "0000")
                     {
-                        RaiseError($"Bithumb error status: {status}, message: {json["msg"]}");
+                        RaiseError($"Bithumb error status: {status}, message: {json.GetProperty("msg")}");
                         return;
                     }
                 }
 
                 // Handle different message types
-                if (json["type"] != null)
+                if (json.TryGetProperty("type", out var typeProp))
                 {
-                    var messageType = json["type"].ToString();
-                    var content = json["content"];
+                    if (!json.TryGetProperty("content", out var content))
+                        return;
 
-                    if (content == null) return;
+                    var messageType = json.GetStringOrDefault("type");
 
                     switch (messageType)
                     {
@@ -139,21 +139,21 @@ namespace CCXT.Collector.Bithumb
             }
         }
 
-        private async Task ProcessTickerData(JToken content)
+        private async Task ProcessTickerData(JsonElement content)
         {
             try
             {
-                var bithumbSymbol = content["symbol"]?.ToString();
-                if (string.IsNullOrEmpty(bithumbSymbol)) return;
+                var bithumbSymbol = content.GetStringOrDefault("symbol");
+                if (String.IsNullOrEmpty(bithumbSymbol)) return;
 
                 var symbol = ConvertSymbolBack(bithumbSymbol);
                 
                 // Parse date and time to timestamp
-                var date = content["date"]?.ToString();
-                var time = content["time"]?.ToString();
-                var timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+                var date = content.GetStringOrDefault("date");
+                var time = content.GetStringOrDefault("time");
+                var timestamp = TimeExtension.UnixTime;
                 
-                if (!string.IsNullOrEmpty(date) && !string.IsNullOrEmpty(time))
+                if (!String.IsNullOrEmpty(date) && !String.IsNullOrEmpty(time))
                 {
                     try
                     {
@@ -163,7 +163,7 @@ namespace CCXT.Collector.Bithumb
                             CultureInfo.InvariantCulture,
                             DateTimeStyles.AssumeLocal
                         );
-                        timestamp = new DateTimeOffset(dateTime).ToUnixTimeMilliseconds();
+                        timestamp = dateTime.ToUnixTime();
                     }
                     catch { }
                 }
@@ -176,18 +176,18 @@ namespace CCXT.Collector.Bithumb
                     result = new STickerItem
                     {
                         timestamp = timestamp,
-                        closePrice = content["closePrice"]?.Value<decimal>() ?? 0,
-                        openPrice = content["openPrice"]?.Value<decimal>() ?? 0,
-                        highPrice = content["highPrice"]?.Value<decimal>() ?? 0,
-                        lowPrice = content["lowPrice"]?.Value<decimal>() ?? 0,
-                        volume = content["volume"]?.Value<decimal>() ?? 0,
-                        quoteVolume = content["value"]?.Value<decimal>() ?? 0,
-                        percentage = content["chgRate"]?.Value<decimal>() ?? 0,
-                        change = content["chgAmt"]?.Value<decimal>() ?? 0,
+                        closePrice = content.GetDecimalOrDefault("closePrice"),
+                        openPrice = content.GetDecimalOrDefault("openPrice"),
+                        highPrice = content.GetDecimalOrDefault("highPrice"),
+                        lowPrice = content.GetDecimalOrDefault("lowPrice"),
+                        volume = content.GetDecimalOrDefault("volume"),
+                        quoteVolume = content.GetDecimalOrDefault("value"),
+                        percentage = content.GetDecimalOrDefault("chgRate"),
+                        change = content.GetDecimalOrDefault("chgAmt"),
                         bidPrice = 0, // Will be updated from orderbook
                         askPrice = 0, // Will be updated from orderbook
                         vwap = 0,
-                        prevClosePrice = content["prevClosePrice"]?.Value<decimal>() ?? 0,
+                        prevClosePrice = content.GetDecimalOrDefault("prevClosePrice"),
                         bidQuantity = 0,
                         askQuantity = 0
                     }
@@ -220,23 +220,23 @@ namespace CCXT.Collector.Bithumb
             }
         }
 
-        private async Task ProcessOrderbookDepth(JToken content)
+        private async Task ProcessOrderbookDepth(JsonElement content)
         {
             try
             {
-                var list = content["list"] as JArray;
-                if (list == null || list.Count == 0) return;
+                if (!(content.TryGetArray("list", out var list)))
+                    return;
 
                 // Group by symbol
-                var symbolGroups = list.GroupBy(item => item["symbol"]?.ToString());
+                var symbolGroups = list.EnumerateArray().GroupBy(item => item.GetStringOrDefault("symbol"));
 
                 foreach (var group in symbolGroups)
                 {
                     var bithumbSymbol = group.Key;
-                    if (string.IsNullOrEmpty(bithumbSymbol)) continue;
+                    if (String.IsNullOrEmpty(bithumbSymbol)) continue;
 
                     var symbol = ConvertSymbolBack(bithumbSymbol);
-                    var timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+                    var timestamp = TimeExtension.UnixTime;
 
                     // Get or create local orderbook for incremental updates
                     if (!_localOrderbook.ContainsKey(symbol + "_asks"))
@@ -250,9 +250,9 @@ namespace CCXT.Collector.Bithumb
                     // Process incremental updates
                     foreach (var item in group)
                     {
-                        var orderType = item["orderType"]?.ToString();
-                        var price = item["price"]?.Value<decimal>() ?? 0;
-                        var quantity = item["quantity"]?.Value<decimal>() ?? 0;
+                        var orderType = item.GetStringOrDefault("orderType");
+                        var price = item.GetDecimalOrDefault("price");
+                        var quantity = item.GetDecimalOrDefault("quantity");
 
                         if (orderType == "ask")
                         {
@@ -323,23 +323,23 @@ namespace CCXT.Collector.Bithumb
             }
         }
 
-        private async Task ProcessTransaction(JToken content)
+        private async Task ProcessTransaction(JsonElement content)
         {
             try
             {
-                var list = content["list"] as JArray;
-                if (list == null || list.Count == 0) return;
+                if (!(content.TryGetArray("list", out var list)))
+                    return;
 
                 // Group by symbol
-                var symbolGroups = list.GroupBy(item => item["symbol"]?.ToString());
+                var symbolGroups = list.EnumerateArray().GroupBy(item => item.GetStringOrDefault("symbol"));
 
                 foreach (var group in symbolGroups)
                 {
                     var bithumbSymbol = group.Key;
-                    if (string.IsNullOrEmpty(bithumbSymbol)) continue;
+                    if (String.IsNullOrEmpty(bithumbSymbol)) continue;
 
                     var symbol = ConvertSymbolBack(bithumbSymbol);
-                    var timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+                    var timestamp = TimeExtension.UnixTime;
 
                     var completeOrders = new STrade
                     {
@@ -354,8 +354,8 @@ namespace CCXT.Collector.Bithumb
                         var txTimestamp = timestamp;
                         
                         // Try to parse transaction date/time
-                        var contDate = item["contDtm"]?.ToString();
-                        if (!string.IsNullOrEmpty(contDate))
+                        var contDate = item.GetStringOrDefault("contDtm");
+                        if (!String.IsNullOrEmpty(contDate))
                         {
                             try
                             {
@@ -365,22 +365,22 @@ namespace CCXT.Collector.Bithumb
                                     CultureInfo.InvariantCulture,
                                     DateTimeStyles.AssumeLocal
                                 );
-                                txTimestamp = new DateTimeOffset(dateTime).ToUnixTimeMilliseconds();
+                                txTimestamp = dateTime.ToUnixTime();
                             }
                             catch { }
                         }
 
-                        var buySellGb = item["buySellGb"]?.ToString();
+                        var buySellGb = item.GetStringOrDefault("buySellGb");
                         var sideType = (buySellGb == "1") ? SideType.Bid : SideType.Ask;
 
                         completeOrders.result.Add(new STradeItem
                         {
-                            orderId = item["contNo"]?.ToString() ?? Guid.NewGuid().ToString(),
+                            tradeId = item.GetStringOrDefault("contNo", Guid.NewGuid().ToString()),
                             sideType = sideType,
                             orderType = OrderType.Limit,
-                            price = item["contPrice"]?.Value<decimal>() ?? 0,
-                            quantity = item["contQty"]?.Value<decimal>() ?? 0,
-                            amount = (item["contPrice"]?.Value<decimal>() ?? 0) * (item["contQty"]?.Value<decimal>() ?? 0),
+                            price = item.GetDecimalOrDefault("contPrice"),
+                            quantity = item.GetDecimalOrDefault("contQty"),
+                            amount = (item.GetDecimalOrDefault("contPrice")) * (item.GetDecimalOrDefault("contQty")),
                             timestamp = txTimestamp
                         });
                     }
@@ -406,7 +406,7 @@ namespace CCXT.Collector.Bithumb
                     symbols = new[] { bithumbSymbol }
                 };
 
-                var json = JsonConvert.SerializeObject(subscribeMessage);
+                var json = JsonSerializer.Serialize(subscribeMessage);
                 await SendMessageAsync(json);
                 return true;
             }
@@ -428,7 +428,7 @@ namespace CCXT.Collector.Bithumb
                     symbols = new[] { bithumbSymbol }
                 };
 
-                var json = JsonConvert.SerializeObject(subscribeMessage);
+                var json = JsonSerializer.Serialize(subscribeMessage);
                 await SendMessageAsync(json);
                 return true;
             }
@@ -450,7 +450,7 @@ namespace CCXT.Collector.Bithumb
                     symbols = new[] { bithumbSymbol }
                 };
 
-                var json = JsonConvert.SerializeObject(subscribeMessage);
+                var json = JsonSerializer.Serialize(subscribeMessage);
                 await SendMessageAsync(json);
                 return true;
             }
@@ -472,7 +472,7 @@ namespace CCXT.Collector.Bithumb
                     symbols = new[] { bithumbSymbol }
                 };
 
-                var json = JsonConvert.SerializeObject(subscribeMessage);
+                var json = JsonSerializer.Serialize(subscribeMessage);
                 await SendMessageAsync(json);
                 return true;
             }
@@ -495,7 +495,7 @@ namespace CCXT.Collector.Bithumb
                     tickTypes = new[] { "24H" } // Can also use 30M, 1H, 12H, MID
                 };
 
-                var json = JsonConvert.SerializeObject(subscribeMessage);
+                var json = JsonSerializer.Serialize(subscribeMessage);
                 await SendMessageAsync(json);
                 return true;
             }
@@ -518,7 +518,7 @@ namespace CCXT.Collector.Bithumb
                     tickTypes = new[] { "24H" } // Can also use 30M, 1H, 12H, MID
                 };
 
-                var json = JsonConvert.SerializeObject(subscribeMessage);
+                var json = JsonSerializer.Serialize(subscribeMessage);
                 await SendMessageAsync(json);
                 return true;
             }
@@ -604,7 +604,7 @@ namespace CCXT.Collector.Bithumb
 
                     if (subscribeMessage != null)
                     {
-                        var json = JsonConvert.SerializeObject(subscribeMessage);
+                        var json = JsonSerializer.Serialize(subscribeMessage);
                         await SendMessageAsync(json);
                     }
                 }

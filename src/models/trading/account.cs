@@ -4,7 +4,7 @@ using System.Collections.Generic;
 namespace CCXT.Collector.Service
 {
     /// <summary>
-    /// Account balance data structure (계정 잔고)
+    /// Account balance data structure
     /// </summary>
     public class SBalance
     {
@@ -71,7 +71,7 @@ namespace CCXT.Collector.Service
     }
 
     /// <summary>
-    /// Order data structure (주문 정보)
+    /// Order data structure
     /// </summary>
     public class SOrderItem
     {
@@ -223,7 +223,7 @@ namespace CCXT.Collector.Service
     }
 
     /// <summary>
-    /// Position data structure (포지션 - for futures/derivatives)
+    /// Position data structure (for futures/derivatives)
     /// </summary>
     public class SPositionItem
     {

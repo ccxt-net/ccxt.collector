@@ -5,8 +5,7 @@ using System.Threading.Tasks;
 using CCXT.Collector.Core.Abstractions;
 using CCXT.Collector.Library;
 using CCXT.Collector.Service;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
+using System.Text.Json;
 
 namespace CCXT.Collector.Binance
 {
@@ -48,12 +47,13 @@ namespace CCXT.Collector.Binance
         {
             try
             {
-                var json = JObject.Parse(message);
+                using var doc = JsonDocument.Parse(message);
+                var json = doc.RootElement;
 
                 // Handle different message types
-                if (json["e"] != null)
+                if (json.TryGetProperty("e", out var eProp))
                 {
-                    var eventType = json["e"].ToString();
+                    var eventType = json.GetStringOrDefault("e");
                     
                     if (isPrivate)
                     {
@@ -92,12 +92,12 @@ namespace CCXT.Collector.Binance
                                 await ProcessKlineData(json);
                                 break;
                             case "error":
-                                RaiseError($"Binance error: {json["m"]}");
+                                RaiseError($"Binance error: {json.GetProperty("m")}");
                                 break;
                         }
                     }
                 }
-                else if (json["result"] == null && json["id"] != null)
+                else if (!json.TryGetProperty("result", out _) && json.TryGetProperty("id", out var idProp))
                 {
                     // Response to subscription request
                     // Binance doesn't send explicit subscription confirmations
@@ -109,12 +109,12 @@ namespace CCXT.Collector.Binance
             }
         }
 
-        private async Task ProcessOrderbookUpdate(JObject json)
+        private async Task ProcessOrderbookUpdate(JsonElement json)
         {
             try
             {
-                var symbol = ConvertSymbol(json["s"].ToString());
-                var updateId = json["u"].Value<long>();
+                var symbol = ConvertSymbol(json.GetStringOrDefault("s"));
+                var updateId = json.GetInt64OrDefault("u");
                 
                 // Check if we should process this update
                 if (_lastUpdateIds.ContainsKey(symbol))
@@ -129,56 +129,60 @@ namespace CCXT.Collector.Binance
                 {
                     exchange = ExchangeName,
                     symbol = symbol,
-                    timestamp = json["E"].Value<long>(),
+                    timestamp = json.GetInt64OrDefault("E"),
                     sequentialId = updateId,
                     result = new SOrderBookData
                     {
-                        timestamp = json["E"].Value<long>(),
+                        timestamp = json.GetInt64OrDefault("E"),
                         asks = new List<SOrderBookItem>(),
                         bids = new List<SOrderBookItem>()
                     }
                 };
 
                 // Process bids
-                var bids = json["b"] as JArray;
-                if (bids != null)
+                if (json.TryGetArray("b", out var bids))
                 {
-                    foreach (var bid in bids)
+                    foreach (var bid in bids.EnumerateArray())
                     {
-                        var price = bid[0].Value<decimal>();
-                        var quantity = bid[1].Value<decimal>();
-                        
-                        if (quantity > 0)
+                        if (bid.GetArrayLength() >= 2)
                         {
-                            orderbook.result.bids.Add(new SOrderBookItem
+                            var price = bid[0].GetDecimalValue();
+                            var quantity = bid[1].GetDecimalValue();
+                            
+                            if (quantity > 0)
                             {
-                                price = price,
-                                quantity = quantity,
-                                amount = price * quantity,
-                                action = "U"  // Update
-                            });
+                                orderbook.result.bids.Add(new SOrderBookItem
+                                {
+                                    price = price,
+                                    quantity = quantity,
+                                    amount = price * quantity,
+                                    action = "U"  // Update
+                                });
+                            }
                         }
                     }
                 }
 
                 // Process asks
-                var asks = json["a"] as JArray;
-                if (asks != null)
+                if (json.TryGetArray("a", out var asks))
                 {
-                    foreach (var ask in asks)
+                    foreach (var ask in asks.EnumerateArray())
                     {
-                        var price = ask[0].Value<decimal>();
-                        var quantity = ask[1].Value<decimal>();
-                        
-                        if (quantity > 0)
+                        if (ask.GetArrayLength() >= 2)
                         {
-                            orderbook.result.asks.Add(new SOrderBookItem
+                            var price = ask[0].GetDecimalValue();
+                            var quantity = ask[1].GetDecimalValue();
+                            
+                            if (quantity > 0)
                             {
-                                price = price,
-                                quantity = quantity,
-                                amount = price * quantity,
-                                action = "U"  // Update
-                            });
+                                orderbook.result.asks.Add(new SOrderBookItem
+                                {
+                                    price = price,
+                                    quantity = quantity,
+                                    amount = price * quantity,
+                                    action = "U"  // Update
+                                });
+                            }
                         }
                     }
                 }
@@ -195,26 +199,26 @@ namespace CCXT.Collector.Binance
             }
         }
 
-        private async Task ProcessTradeData(JObject json)
+        private async Task ProcessTradeData(JsonElement json)
         {
             try
             {
                 var trade = new STrade
                 {
                     exchange = ExchangeName,
-                    symbol = ConvertSymbol(json["s"].ToString()),
-                    timestamp = json["E"].Value<long>(),
+                    symbol = ConvertSymbol(json.GetStringOrDefault("s")),
+                    timestamp = json.GetInt64OrDefault("E"),
                     result = new List<STradeItem>
                     {
                         new STradeItem
                         {
-                            orderId = json["t"].ToString(),
-                            timestamp = json["T"].Value<long>(),
-                            sideType = json["m"].Value<bool>() ? SideType.Ask : SideType.Bid,
+                            tradeId = json.GetStringOrDefault("t"),
+                            timestamp = json.GetInt64OrDefault("T"),
+                            sideType = json.GetBooleanOrFalse("m") ? SideType.Ask : SideType.Bid,
                             orderType = OrderType.Limit,
-                            price = json["p"].Value<decimal>(),
-                            quantity = json["q"].Value<decimal>(),
-                            amount = json["p"].Value<decimal>() * json["q"].Value<decimal>()
+                            price = json.GetDecimalOrDefault("p"),
+                            quantity = json.GetDecimalOrDefault("q"),
+                            amount = json.GetDecimalOrDefault("p") * json.GetDecimalOrDefault("q")
                         }
                     }
                 };
@@ -227,33 +231,33 @@ namespace CCXT.Collector.Binance
             }
         }
 
-        private async Task ProcessTickerData(JObject json)
+        private async Task ProcessTickerData(JsonElement json)
         {
             try
             {
                 var ticker = new STicker
                 {
                     exchange = ExchangeName,
-                    symbol = ConvertSymbol(json["s"].ToString()),
-                    timestamp = json["E"].Value<long>(),
+                    symbol = ConvertSymbol(json.GetStringOrDefault("s")),
+                    timestamp = json.GetInt64OrDefault("E"),
                     result = new STickerItem
                     {
-                        timestamp = json["E"].Value<long>(),
-                        openPrice = json["o"].Value<decimal>(),
-                        highPrice = json["h"].Value<decimal>(),
-                        lowPrice = json["l"].Value<decimal>(),
-                        closePrice = json["c"].Value<decimal>(),
-                        volume = json["v"].Value<decimal>(),
-                        quoteVolume = json["q"].Value<decimal>(),
-                        bidPrice = json["b"].Value<decimal>(),
-                        bidQuantity = json["B"].Value<decimal>(),
-                        askPrice = json["a"].Value<decimal>(),
-                        askQuantity = json["A"].Value<decimal>(),
-                        vwap = json["w"].Value<decimal>(),
-                        count = json["C"].Value<long>(),
-                        change = json["c"].Value<decimal>() - json["o"].Value<decimal>(),
-                        percentage = json["o"].Value<decimal>() > 0 
-                            ? ((json["c"].Value<decimal>() - json["o"].Value<decimal>()) / json["o"].Value<decimal>()) * 100 
+                        timestamp = json.GetInt64OrDefault("E"),
+                        openPrice = json.GetDecimalOrDefault("o"),
+                        highPrice = json.GetDecimalOrDefault("h"),
+                        lowPrice = json.GetDecimalOrDefault("l"),
+                        closePrice = json.GetDecimalOrDefault("c"),
+                        volume = json.GetDecimalOrDefault("v"),
+                        quoteVolume = json.GetDecimalOrDefault("q"),
+                        bidPrice = json.GetDecimalOrDefault("b"),
+                        bidQuantity = json.GetDecimalOrDefault("B"),
+                        askPrice = json.GetDecimalOrDefault("a"),
+                        askQuantity = json.GetDecimalOrDefault("A"),
+                        vwap = json.GetDecimalOrDefault("w"),
+                        count = json.GetInt64OrDefault("C"),
+                        change = json.GetDecimalOrDefault("c") - json.GetDecimalOrDefault("o"),
+                        percentage = json.GetDecimalOrDefault("o") > 0 
+                            ? ((json.GetDecimalOrDefault("c") - json.GetDecimalOrDefault("o")) / json.GetDecimalOrDefault("o")) * 100 
                             : 0
                     }
                 };
@@ -280,7 +284,7 @@ namespace CCXT.Collector.Binance
                     id = DateTime.UtcNow.Ticks
                 };
 
-                await SendMessageAsync(JsonConvert.SerializeObject(subscription));
+                await SendMessageAsync(JsonSerializer.Serialize(subscription));
                 
                 var key = CreateSubscriptionKey("orderbook", symbol);
                 _subscriptions[key] = new SubscriptionInfo
@@ -314,7 +318,7 @@ namespace CCXT.Collector.Binance
                     id = DateTime.UtcNow.Ticks
                 };
 
-                await SendMessageAsync(JsonConvert.SerializeObject(subscription));
+                await SendMessageAsync(JsonSerializer.Serialize(subscription));
                 
                 var key = CreateSubscriptionKey("trades", symbol);
                 _subscriptions[key] = new SubscriptionInfo
@@ -348,7 +352,7 @@ namespace CCXT.Collector.Binance
                     id = DateTime.UtcNow.Ticks
                 };
 
-                await SendMessageAsync(JsonConvert.SerializeObject(subscription));
+                await SendMessageAsync(JsonSerializer.Serialize(subscription));
                 
                 var key = CreateSubscriptionKey("ticker", symbol);
                 _subscriptions[key] = new SubscriptionInfo
@@ -388,7 +392,7 @@ namespace CCXT.Collector.Binance
                     id = DateTime.UtcNow.Ticks
                 };
 
-                await SendMessageAsync(JsonConvert.SerializeObject(unsubscription));
+                await SendMessageAsync(JsonSerializer.Serialize(unsubscription));
                 
                 var key = CreateSubscriptionKey(channel, symbol);
                 if (_subscriptions.TryRemove(key, out var sub))
@@ -407,7 +411,7 @@ namespace CCXT.Collector.Binance
 
         protected override string CreatePingMessage()
         {
-            return JsonConvert.SerializeObject(new { ping = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() });
+            return JsonSerializer.Serialize(new { ping = TimeExtension.UnixTime });
         }
 
         protected override async Task ResubscribeAsync(SubscriptionInfo subscription)
@@ -471,7 +475,7 @@ namespace CCXT.Collector.Binance
                     id = DateTime.UtcNow.Ticks
                 };
 
-                await SendMessageAsync(JsonConvert.SerializeObject(subscription));
+                await SendMessageAsync(JsonSerializer.Serialize(subscription));
                 
                 var key = CreateSubscriptionKey($"kline:{interval}", symbol);
                 _subscriptions[key] = new SubscriptionInfo
@@ -491,36 +495,38 @@ namespace CCXT.Collector.Binance
             }
         }
 
-        private async Task ProcessKlineData(JObject json)
+        private async Task ProcessKlineData(JsonElement json)
         {
             try
             {
-                var klineData = json["k"];
-                var symbol = ConvertSymbol(json["s"].ToString());
-                var timestamp = json["E"].Value<long>();
+                if (!json.TryGetProperty("k", out var klineData))
+                    return;
+                    
+                var symbol = ConvertSymbol(json.GetStringOrDefault("s"));
+                var timestamp = json.GetInt64OrDefault("E");
                 
                 var candle = new SCandle
                 {
                     exchange = ExchangeName,
                     symbol = symbol,
-                    interval = ConvertFromBinanceInterval(klineData["i"].ToString()),
+                    interval = ConvertFromBinanceInterval(klineData.GetStringOrDefault("i")),
                     timestamp = timestamp,
                     result = new List<SCandleItem>
                     {
                         new SCandleItem
                         {
-                            openTime = klineData["t"].Value<long>(),
-                            closeTime = klineData["T"].Value<long>(),
-                            open = decimal.Parse(klineData["o"].ToString()),
-                            high = decimal.Parse(klineData["h"].ToString()),
-                            low = decimal.Parse(klineData["l"].ToString()),
-                            close = decimal.Parse(klineData["c"].ToString()),
-                            volume = decimal.Parse(klineData["v"].ToString()),
-                            quoteVolume = decimal.Parse(klineData["q"].ToString()),
-                            tradeCount = klineData["n"].Value<long>(),
-                            isClosed = klineData["x"].Value<bool>(),
-                            buyVolume = decimal.Parse(klineData["V"].ToString()),
-                            buyQuoteVolume = decimal.Parse(klineData["Q"].ToString())
+                            openTime = klineData.GetInt64OrDefault("t"),
+                            closeTime = klineData.GetInt64OrDefault("T"),
+                            open = klineData.GetDecimalOrDefault("o"),
+                            high = klineData.GetDecimalOrDefault("h"),
+                            low = klineData.GetDecimalOrDefault("l"),
+                            close = klineData.GetDecimalOrDefault("c"),
+                            volume = klineData.GetDecimalOrDefault("v"),
+                            quoteVolume = klineData.GetDecimalOrDefault("q"),
+                            tradeCount = klineData.GetInt64OrDefault("n"),
+                            isClosed = klineData.GetBooleanOrFalse("x"),
+                            buyVolume = klineData.GetDecimalOrDefault("V"),
+                            buyQuoteVolume = klineData.GetDecimalOrDefault("Q")
                         }
                     }
                 };
@@ -620,26 +626,25 @@ namespace CCXT.Collector.Binance
             return true;
         }
 
-        private async Task ProcessAccountUpdate(JObject json)
+        private async Task ProcessAccountUpdate(JsonElement json)
         {
             try
             {
-                var balances = json["B"] as JArray;
-                if (balances != null)
+                if (json.TryGetArray("B", out var balances))
                 {
                     var balanceItems = new List<SBalanceItem>();
-                    var timestamp = json["E"].Value<long>();
+                    var timestamp = json.GetInt64OrDefault("E");
                     
-                    foreach (var item in balances)
+                    foreach (var item in balances.EnumerateArray())
                     {
-                        var free = decimal.Parse(item["f"].ToString());
-                        var locked = decimal.Parse(item["l"].ToString());
+                        var free = item.GetDecimalOrDefault("f");
+                        var locked = item.GetDecimalOrDefault("l");
                         
                         if (free > 0 || locked > 0)
                         {
                             balanceItems.Add(new SBalanceItem
                             {
-                                currency = item["a"].ToString(),
+                                currency = item.GetStringOrDefault("a"),
                                 free = free,
                                 used = locked,
                                 total = free + locked,
@@ -668,7 +673,7 @@ namespace CCXT.Collector.Binance
             }
         }
 
-        private async Task ProcessBalanceUpdate(JObject json)
+        private async Task ProcessBalanceUpdate(JsonElement json)
         {
             try
             {
@@ -677,16 +682,16 @@ namespace CCXT.Collector.Binance
                 {
                     exchange = ExchangeName,
                     accountId = "spot",
-                    timestamp = json["E"].Value<long>(),
+                    timestamp = json.GetInt64OrDefault("E"),
                     balances = new List<SBalanceItem>
                     {
                         new SBalanceItem
                         {
-                            currency = json["a"].ToString(),
-                            free = decimal.Parse(json["f"].ToString()),
-                            used = decimal.Parse(json["l"].ToString()),
-                            total = decimal.Parse(json["f"].ToString()) + decimal.Parse(json["l"].ToString()),
-                            updateTime = json["E"].Value<long>()
+                            currency = json.GetStringOrDefault("a"),
+                            free = json.GetDecimalOrDefault("f"),
+                            used = json.GetDecimalOrDefault("l"),
+                            total = json.GetDecimalOrDefault("f") + json.GetDecimalOrDefault("l"),
+                            updateTime = json.GetInt64OrDefault("E")
                         }
                     }
                 };
@@ -699,29 +704,29 @@ namespace CCXT.Collector.Binance
             }
         }
 
-        private async Task ProcessOrderUpdate(JObject json)
+        private async Task ProcessOrderUpdate(JsonElement json)
         {
             try
             {
                 var order = new SOrderItem
                 {
-                    orderId = json["i"].ToString(),
-                    clientOrderId = json["c"].ToString(),
-                    symbol = ConvertSymbol(json["s"].ToString()),
-                    type = ParseOrderType(json["o"].ToString()),
-                    side = json["S"].ToString() == "BUY" ? OrderSide.Buy : OrderSide.Sell,
-                    status = ParseOrderStatus(json["X"].ToString()),
-                    price = decimal.Parse(json["p"].ToString()),
-                    quantity = decimal.Parse(json["q"].ToString()),
-                    filledQuantity = decimal.Parse(json["z"].ToString()),
-                    createTime = json["O"].Value<long>(),
-                    updateTime = json["E"].Value<long>()
+                    orderId = json.GetStringOrDefault("i"),
+                    clientOrderId = json.GetStringOrDefault("c"),
+                    symbol = ConvertSymbol(json.GetStringOrDefault("s")),
+                    type = ParseOrderType(json.GetStringOrDefault("o")),
+                    side = json.GetStringOrDefault("S") == "BUY" ? OrderSide.Buy : OrderSide.Sell,
+                    status = ParseOrderStatus(json.GetStringOrDefault("X")),
+                    price = json.GetDecimalOrDefault("p"),
+                    quantity = json.GetDecimalOrDefault("q"),
+                    filledQuantity = json.GetDecimalOrDefault("z"),
+                    createTime = json.GetInt64OrDefault("O"),
+                    updateTime = json.GetInt64OrDefault("E")
                 };
 
                 var orders = new SOrder
                 {
                     exchange = ExchangeName,
-                    timestamp = json["E"].Value<long>(),
+                    timestamp = json.GetInt64OrDefault("E"),
                     orders = new List<SOrderItem> { order }
                 };
 

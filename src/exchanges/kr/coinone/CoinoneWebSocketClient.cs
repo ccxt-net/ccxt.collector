@@ -5,8 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using CCXT.Collector.Core.Abstractions;
 using CCXT.Collector.Service;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
+using System.Text.Json;
 
 namespace CCXT.Collector.Coinone
 {
@@ -92,21 +91,22 @@ namespace CCXT.Collector.Coinone
         {
             try
             {
-                var json = JObject.Parse(message);
+                using var doc = JsonDocument.Parse(message); 
+                var json = doc.RootElement;
 
                 // Check for error messages
-                if (json["error_code"] != null)
+                if (json.TryGetProperty("error_code", out var error_codeProp))
                 {
-                    var errorCode = json["error_code"].ToString();
-                    var errorMsg = json["error_msg"]?.ToString() ?? "Unknown error";
+                    var errorCode = json.GetStringOrDefault("error_code");
+                    var errorMsg = json.GetStringOrDefault("error_msg", "Unknown error");
                     RaiseError($"Coinone error {errorCode}: {errorMsg}");
                     return;
                 }
 
                 // Handle different message types
-                if (json["response_type"] != null)
+                if (json.TryGetProperty("response_type", out var response_typeProp))
                 {
-                    var responseType = json["response_type"].ToString();
+                    var responseType = json.GetStringOrDefault("response_type");
 
                     switch (responseType)
                     {
@@ -134,18 +134,18 @@ namespace CCXT.Collector.Coinone
             }
         }
 
-        private async Task ProcessOrderbook(JObject json)
+        private async Task ProcessOrderbook(JsonElement json)
         {
             try
             {
-                var data = json["data"];
-                if (data == null) return;
+                if (!json.TryGetProperty("data", out var data))
+                    return;
 
-                var coinoneSymbol = data["target_currency"]?.ToString();
-                if (string.IsNullOrEmpty(coinoneSymbol)) return;
+                var coinoneSymbol = data.GetStringOrDefault("target_currency");
+                if (String.IsNullOrEmpty(coinoneSymbol)) return;
 
                 var symbol = ConvertSymbolBack(coinoneSymbol);
-                var timestamp = data["timestamp"]?.Value<long>() ?? DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+                var timestamp = data.GetInt64OrDefault("timestamp", TimeExtension.UnixTime);
 
                 var orderbook = new SOrderBook
                 {
@@ -161,29 +161,27 @@ namespace CCXT.Collector.Coinone
                 };
 
                 // Process bids
-                var bids = data["bids"] as JArray;
-                if (bids != null)
+                if (data.TryGetArray("bids", out var bids))
                 {
-                    foreach (var bid in bids)
+                    foreach (var bid in bids.EnumerateArray())
                     {
                         orderbook.result.bids.Add(new SOrderBookItem
                         {
-                            price = bid["price"]?.Value<decimal>() ?? 0,
-                            quantity = bid["qty"]?.Value<decimal>() ?? 0
+                            price = bid.GetDecimalOrDefault("price"),
+                            quantity = bid.GetDecimalOrDefault("qty")
                         });
                     }
                 }
 
                 // Process asks
-                var asks = data["asks"] as JArray;
-                if (asks != null)
+                if (data.TryGetArray("asks", out var asks))
                 {
-                    foreach (var ask in asks)
+                    foreach (var ask in asks.EnumerateArray())
                     {
                         orderbook.result.asks.Add(new SOrderBookItem
                         {
-                            price = ask["price"]?.Value<decimal>() ?? 0,
-                            quantity = ask["qty"]?.Value<decimal>() ?? 0
+                            price = ask.GetDecimalOrDefault("price"),
+                            quantity = ask.GetDecimalOrDefault("qty")
                         });
                     }
                 }
@@ -198,21 +196,21 @@ namespace CCXT.Collector.Coinone
             }
         }
 
-        private async Task ProcessTrades(JObject json)
+        private async Task ProcessTrades(JsonElement json)
         {
             try
             {
-                var data = json["data"];
-                if (data == null) return;
+                if (!json.TryGetProperty("data", out var data))
+                    return;
 
-                var trades = data["trades"] as JArray;
-                if (trades == null || trades.Count == 0) return;
+                if (!(data.TryGetArray("trades", out var trades)))
+                    return;
 
-                var coinoneSymbol = data["target_currency"]?.ToString();
-                if (string.IsNullOrEmpty(coinoneSymbol)) return;
+                var coinoneSymbol = data.GetStringOrDefault("target_currency");
+                if (String.IsNullOrEmpty(coinoneSymbol)) return;
 
                 var symbol = ConvertSymbolBack(coinoneSymbol);
-                var timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+                var timestamp = TimeExtension.UnixTime;
 
                 var completeOrders = new STrade
                 {
@@ -222,19 +220,19 @@ namespace CCXT.Collector.Coinone
                     result = new List<STradeItem>()
                 };
 
-                foreach (var trade in trades)
+                foreach (var trade in trades.EnumerateArray())
                 {
-                    var tradeTimestamp = trade["timestamp"]?.Value<long>() ?? timestamp;
-                    var isBuy = trade["is_buyer_maker"]?.Value<bool>() ?? false;
+                    var tradeTimestamp = trade.GetInt64OrDefault("timestamp", timestamp);
+                    var isBuy = trade.GetBooleanOrFalse("is_buyer_maker");
 
                     completeOrders.result.Add(new STradeItem
                     {
-                        orderId = trade["id"]?.ToString() ?? Guid.NewGuid().ToString(),
+                        tradeId = trade.GetStringOrDefault("id", Guid.NewGuid().ToString()),
                         sideType = isBuy ? SideType.Bid : SideType.Ask,
                         orderType = OrderType.Limit,
-                        price = trade["price"]?.Value<decimal>() ?? 0,
-                        quantity = trade["qty"]?.Value<decimal>() ?? 0,
-                        amount = (trade["price"]?.Value<decimal>() ?? 0) * (trade["qty"]?.Value<decimal>() ?? 0),
+                        price = trade.GetDecimalOrDefault("price"),
+                        quantity = trade.GetDecimalOrDefault("qty"),
+                        amount = (trade.GetDecimalOrDefault("price")) * (trade.GetDecimalOrDefault("qty")),
                         timestamp = tradeTimestamp
                     });
                 }
@@ -247,18 +245,18 @@ namespace CCXT.Collector.Coinone
             }
         }
 
-        private async Task ProcessTickerData(JObject json)
+        private async Task ProcessTickerData(JsonElement json)
         {
             try
             {
-                var data = json["data"];
-                if (data == null) return;
+                if (!json.TryGetProperty("data", out var data))
+                    return;
 
-                var coinoneSymbol = data["target_currency"]?.ToString();
-                if (string.IsNullOrEmpty(coinoneSymbol)) return;
+                var coinoneSymbol = data.GetStringOrDefault("target_currency");
+                if (String.IsNullOrEmpty(coinoneSymbol)) return;
 
                 var symbol = ConvertSymbolBack(coinoneSymbol);
-                var timestamp = data["timestamp"]?.Value<long>() ?? DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+                var timestamp = data.GetInt64OrDefault("timestamp", TimeExtension.UnixTime);
 
                 var ticker = new STicker
                 {
@@ -268,20 +266,20 @@ namespace CCXT.Collector.Coinone
                     result = new STickerItem
                     {
                         timestamp = timestamp,
-                        closePrice = data["last"]?.Value<decimal>() ?? 0,
-                        openPrice = data["first"]?.Value<decimal>() ?? 0,
-                        highPrice = data["high"]?.Value<decimal>() ?? 0,
-                        lowPrice = data["low"]?.Value<decimal>() ?? 0,
-                        volume = data["volume"]?.Value<decimal>() ?? 0,
-                        quoteVolume = data["quote_volume"]?.Value<decimal>() ?? 0,
+                        closePrice = data.GetDecimalOrDefault("last"),
+                        openPrice = data.GetDecimalOrDefault("first"),
+                        highPrice = data.GetDecimalOrDefault("high"),
+                        lowPrice = data.GetDecimalOrDefault("low"),
+                        volume = data.GetDecimalOrDefault("volume"),
+                        quoteVolume = data.GetDecimalOrDefault("quote_volume"),
                         percentage = 0,
                         change = 0,
-                        bidPrice = data["best_bid"]?.Value<decimal>() ?? 0,
-                        askPrice = data["best_ask"]?.Value<decimal>() ?? 0,
+                        bidPrice = data.GetDecimalOrDefault("best_bid"),
+                        askPrice = data.GetDecimalOrDefault("best_ask"),
                         vwap = 0,
-                        prevClosePrice = data["yesterday_last"]?.Value<decimal>() ?? 0,
-                        bidQuantity = data["best_bid_qty"]?.Value<decimal>() ?? 0,
-                        askQuantity = data["best_ask_qty"]?.Value<decimal>() ?? 0
+                        prevClosePrice = data.GetDecimalOrDefault("yesterday_last"),
+                        bidQuantity = data.GetDecimalOrDefault("best_bid_qty"),
+                        askQuantity = data.GetDecimalOrDefault("best_ask_qty")
                     }
                 };
 
@@ -316,7 +314,7 @@ namespace CCXT.Collector.Coinone
                     }
                 };
 
-                var json = JsonConvert.SerializeObject(subscribeMessage);
+                var json = JsonSerializer.Serialize(subscribeMessage);
                 await SendMessageAsync(json);
                 return true;
             }
@@ -343,7 +341,7 @@ namespace CCXT.Collector.Coinone
                     }
                 };
 
-                var json = JsonConvert.SerializeObject(subscribeMessage);
+                var json = JsonSerializer.Serialize(subscribeMessage);
                 await SendMessageAsync(json);
                 return true;
             }
@@ -370,7 +368,7 @@ namespace CCXT.Collector.Coinone
                     }
                 };
 
-                var json = JsonConvert.SerializeObject(subscribeMessage);
+                var json = JsonSerializer.Serialize(subscribeMessage);
                 await SendMessageAsync(json);
                 return true;
             }
@@ -397,7 +395,7 @@ namespace CCXT.Collector.Coinone
                     }
                 };
 
-                var json = JsonConvert.SerializeObject(subscribeMessage);
+                var json = JsonSerializer.Serialize(subscribeMessage);
                 await SendMessageAsync(json);
                 return true;
             }
@@ -424,7 +422,7 @@ namespace CCXT.Collector.Coinone
                     }
                 };
 
-                var json = JsonConvert.SerializeObject(subscribeMessage);
+                var json = JsonSerializer.Serialize(subscribeMessage);
                 await SendMessageAsync(json);
                 return true;
             }
@@ -451,7 +449,7 @@ namespace CCXT.Collector.Coinone
                     }
                 };
 
-                var json = JsonConvert.SerializeObject(subscribeMessage);
+                var json = JsonSerializer.Serialize(subscribeMessage);
                 await SendMessageAsync(json);
                 return true;
             }
@@ -478,7 +476,7 @@ namespace CCXT.Collector.Coinone
                     }
                 };
 
-                var json = JsonConvert.SerializeObject(unsubscribeMessage);
+                var json = JsonSerializer.Serialize(unsubscribeMessage);
                 await SendMessageAsync(json);
                 return true;
             }
@@ -505,7 +503,7 @@ namespace CCXT.Collector.Coinone
                     }
                 };
 
-                var json = JsonConvert.SerializeObject(unsubscribeMessage);
+                var json = JsonSerializer.Serialize(unsubscribeMessage);
                 await SendMessageAsync(json);
                 return true;
             }
@@ -525,7 +523,7 @@ namespace CCXT.Collector.Coinone
                     request_type = "PING"
                 };
 
-                var json = JsonConvert.SerializeObject(pingMessage);
+                var json = JsonSerializer.Serialize(pingMessage);
                 await SendMessageAsync(json);
             }
             catch (Exception ex)

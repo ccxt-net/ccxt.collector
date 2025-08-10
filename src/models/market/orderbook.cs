@@ -1,5 +1,5 @@
 ﻿using CCXT.Collector.Library;
-using Newtonsoft.Json;
+using System.Text.Json.Serialization;
 using System.Collections.Generic;
 
 namespace CCXT.Collector.Service
@@ -76,7 +76,7 @@ namespace CCXT.Collector.Service
         }
 
         /// <summary>
-        /// 호가 매도 총 잔량
+        /// Total ask quantity
         /// </summary>
         public virtual decimal askSumQty
         {
@@ -85,7 +85,7 @@ namespace CCXT.Collector.Service
         }
 
         /// <summary>
-        /// 호가 매수 총 잔량
+        /// Total bid quantity
         /// </summary>
         public virtual decimal bidSumQty
         {

@@ -1,5 +1,4 @@
-﻿using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
+﻿using System.Text.Json.Serialization;
 using System.Collections.Generic;
 using CCXT.Collector.Core.Abstractions;
 using CCXT.Collector.Library;
@@ -224,7 +223,7 @@ namespace CCXT.Collector.Service
         /// <summary>
         ///
         /// </summary>
-        [JsonConverter(typeof(StringEnumConverter))]
+        [JsonConverter(typeof(JsonStringEnumConverter<SideType>))]
         public SideType sideType
         {
             get;
@@ -234,7 +233,7 @@ namespace CCXT.Collector.Service
         /// <summary>
         ///
         /// </summary>
-        [JsonConverter(typeof(StringEnumConverter))]
+        [JsonConverter(typeof(JsonStringEnumConverter<OrderType>))]
         public OrderType orderType
         {
             get;
@@ -244,7 +243,7 @@ namespace CCXT.Collector.Service
         /// <summary>
         ///
         /// </summary>
-        [JsonConverter(typeof(StringEnumConverter))]
+        [JsonConverter(typeof(JsonStringEnumConverter<MakerType>))]
         public MakerType makerType
         {
             get;
@@ -254,7 +253,7 @@ namespace CCXT.Collector.Service
         /// <summary>
         ///
         /// </summary>
-        [JsonConverter(typeof(StringEnumConverter))]
+        [JsonConverter(typeof(JsonStringEnumConverter<OrderStatus>))]
         public OrderStatus orderStatus
         {
             get;

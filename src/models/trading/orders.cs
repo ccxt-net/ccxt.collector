@@ -3,7 +3,7 @@ using System.Collections.Generic;
 namespace CCXT.Collector.Service
 {
     /// <summary>
-    /// Orders container for batch processing (주문 목록 컨테이너)
+    /// Orders container for batch processing
     /// </summary>
     public class SOrder
     {
@@ -29,7 +29,7 @@ namespace CCXT.Collector.Service
     }
 
     /// <summary>
-    /// Positions container for batch processing (포지션 목록 컨테이너)
+    /// Positions container for batch processing
     /// </summary>
     public class SPosition
     {

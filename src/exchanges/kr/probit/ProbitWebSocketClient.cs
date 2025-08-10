@@ -5,8 +5,8 @@ using System.Threading.Tasks;
 using CCXT.Collector.Core.Abstractions;
 using CCXT.Collector.Library;
 using CCXT.Collector.Service;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
+using System.Text.Json;
+
 
 namespace CCXT.Collector.Probit
 {
@@ -30,7 +30,8 @@ namespace CCXT.Collector.Probit
         {
             try
             {
-                var json = JObject.Parse(message);
+                using var doc = JsonDocument.Parse(message); 
+                var json = doc.RootElement;
                 
                 // TODO: Implement message processing based on Probit WebSocket protocol
                 // Handle different message types (orderbook, trades, ticker, etc.)
@@ -56,7 +57,7 @@ namespace CCXT.Collector.Probit
                     symbol = exchangeSymbol
                 };
 
-                await SendMessageAsync(JsonConvert.SerializeObject(subscription));
+                await SendMessageAsync(JsonSerializer.Serialize(subscription));
                 
                 var key = CreateSubscriptionKey("orderbook", market.ToString());
                 _subscriptions[key] = new SubscriptionInfo
@@ -88,7 +89,7 @@ namespace CCXT.Collector.Probit
                     symbol = symbol
                 };
 
-                await SendMessageAsync(JsonConvert.SerializeObject(subscription));
+                await SendMessageAsync(JsonSerializer.Serialize(subscription));
                 
                 var key = CreateSubscriptionKey("orderbook", symbol);
                 _subscriptions[key] = new SubscriptionInfo
@@ -121,7 +122,7 @@ namespace CCXT.Collector.Probit
                     symbol = exchangeSymbol
                 };
 
-                await SendMessageAsync(JsonConvert.SerializeObject(subscription));
+                await SendMessageAsync(JsonSerializer.Serialize(subscription));
                 
                 var key = CreateSubscriptionKey("trades", market.ToString());
                 _subscriptions[key] = new SubscriptionInfo
@@ -153,7 +154,7 @@ namespace CCXT.Collector.Probit
                     symbol = symbol
                 };
 
-                await SendMessageAsync(JsonConvert.SerializeObject(subscription));
+                await SendMessageAsync(JsonSerializer.Serialize(subscription));
                 
                 var key = CreateSubscriptionKey("trades", symbol);
                 _subscriptions[key] = new SubscriptionInfo
@@ -186,7 +187,7 @@ namespace CCXT.Collector.Probit
                     symbol = exchangeSymbol
                 };
 
-                await SendMessageAsync(JsonConvert.SerializeObject(subscription));
+                await SendMessageAsync(JsonSerializer.Serialize(subscription));
                 
                 var key = CreateSubscriptionKey("ticker", market.ToString());
                 _subscriptions[key] = new SubscriptionInfo
@@ -218,7 +219,7 @@ namespace CCXT.Collector.Probit
                     symbol = symbol
                 };
 
-                await SendMessageAsync(JsonConvert.SerializeObject(subscription));
+                await SendMessageAsync(JsonSerializer.Serialize(subscription));
                 
                 var key = CreateSubscriptionKey("ticker", symbol);
                 _subscriptions[key] = new SubscriptionInfo
@@ -251,7 +252,7 @@ namespace CCXT.Collector.Probit
                     symbol = exchangeSymbol
                 };
 
-                await SendMessageAsync(JsonConvert.SerializeObject(unsubscription));
+                await SendMessageAsync(JsonSerializer.Serialize(unsubscription));
                 
                 var key = CreateSubscriptionKey(channel, market.ToString());
                 if (_subscriptions.TryRemove(key, out var sub))
@@ -280,7 +281,7 @@ namespace CCXT.Collector.Probit
                     symbol = symbol
                 };
 
-                await SendMessageAsync(JsonConvert.SerializeObject(unsubscription));
+                await SendMessageAsync(JsonSerializer.Serialize(unsubscription));
                 
                 var key = CreateSubscriptionKey(channel, symbol);
                 if (_subscriptions.TryRemove(key, out var sub))
@@ -300,7 +301,7 @@ namespace CCXT.Collector.Probit
         protected override string CreatePingMessage()
         {
             // TODO: Implement Probit-specific ping message
-            return JsonConvert.SerializeObject(new { type = "ping" });
+            return JsonSerializer.Serialize(new { type = "ping" });
         }
 
         protected override async Task ResubscribeAsync(SubscriptionInfo subscription)
@@ -336,7 +337,7 @@ namespace CCXT.Collector.Probit
                     interval = interval
                 };
 
-                await SendMessageAsync(JsonConvert.SerializeObject(subscription));
+                await SendMessageAsync(JsonSerializer.Serialize(subscription));
                 
                 var key = CreateSubscriptionKey($"candles:{interval}", market.ToString());
                 _subscriptions[key] = new SubscriptionInfo
@@ -371,7 +372,7 @@ namespace CCXT.Collector.Probit
                     interval = interval
                 };
 
-                await SendMessageAsync(JsonConvert.SerializeObject(subscription));
+                await SendMessageAsync(JsonSerializer.Serialize(subscription));
                 
                 var key = CreateSubscriptionKey($"candles:{interval}", symbol);
                 _subscriptions[key] = new SubscriptionInfo

@@ -1,6 +1,6 @@
 ﻿using CCXT.Collector.Core.Abstractions;
 using CCXT.Collector.Library;
-using Newtonsoft.Json;
+using System.Text.Json.Serialization;
 using System.Collections.Generic;
 
 namespace CCXT.Collector.Service
@@ -34,7 +34,7 @@ namespace CCXT.Collector.Service
         /// <summary>
         /// Order/Trade ID
         /// </summary>
-        public string orderId
+        public string tradeId
         {
             get;
             set;
