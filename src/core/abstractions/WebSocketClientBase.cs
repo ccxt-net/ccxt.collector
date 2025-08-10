@@ -1,6 +1,7 @@
 using CCXT.Collector.Service;
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net.WebSockets;
 using System.Text;
@@ -207,6 +208,7 @@ namespace CCXT.Collector.Core.Abstractions
             var bufferSize = 1024 * 16;  // 16KB initial buffer
             var buffer = new ArraySegment<byte>(new byte[bufferSize]);
             var messageBuilder = new StringBuilder();
+            var binaryData = new System.Collections.Generic.List<byte>();
 
             try
             {
@@ -214,6 +216,7 @@ namespace CCXT.Collector.Core.Abstractions
                 {
                     WebSocketReceiveResult result;
                     messageBuilder.Clear();
+                    binaryData.Clear();
 
                     do
                     {
@@ -222,6 +225,18 @@ namespace CCXT.Collector.Core.Abstractions
                         if (result.MessageType == System.Net.WebSockets.WebSocketMessageType.Text)
                         {
                             messageBuilder.Append(Encoding.UTF8.GetString(buffer.Array, 0, result.Count));
+                            
+                            // Resize buffer if nearly full 
+                            if (result.Count == buffer.Count && !result.EndOfMessage)
+                            {
+                                bufferSize *= 2;
+                                buffer = new ArraySegment<byte>(new byte[bufferSize]);
+                            }
+                        }
+                        else if (result.MessageType == System.Net.WebSockets.WebSocketMessageType.Binary)
+                        {
+                            // Handle binary messages (some exchanges like Upbit send binary data)
+                            binaryData.AddRange(buffer.Array.Take(result.Count));
                             
                             // Resize buffer if nearly full 
                             if (result.Count == buffer.Count && !result.EndOfMessage)
@@ -241,6 +256,12 @@ namespace CCXT.Collector.Core.Abstractions
                     if (messageBuilder.Length > 0)
                     {
                         var message = messageBuilder.ToString();
+                        await ProcessMessageAsync(message, isPrivate);
+                    }
+                    else if (binaryData.Count > 0)
+                    {
+                        // Convert binary data to string (assuming UTF-8 encoding)
+                        var message = Encoding.UTF8.GetString(binaryData.ToArray());
                         await ProcessMessageAsync(message, isPrivate);
                     }
                 }

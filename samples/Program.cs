@@ -107,6 +107,7 @@ namespace CCXT.Collector.Samples
             Console.WriteLine("5. Trade History Collection");
             Console.WriteLine("6. Real-time Ticker Updates");
             Console.WriteLine("7. Advanced Indicator Combination");
+            Console.WriteLine("8. ✨ All 15 Exchanges Test Menu");
             Console.WriteLine("0. Exit");
 
             Console.Write("\nEnter your choice: ");
@@ -134,6 +135,9 @@ namespace CCXT.Collector.Samples
                     break;
                 case "7":
                     await RunAdvancedIndicatorSample();
+                    break;
+                case "8":
+                    await AllExchangesSample.RunMenu();
                     break;
                 case "0":
                     return;

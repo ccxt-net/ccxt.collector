@@ -1,26 +1,26 @@
 using System;
 using System.Threading.Tasks;
-using CCXT.Collector.Binance;
+using CCXT.Collector.Bittrex;
 using CCXT.Collector.Library;
 using CCXT.Collector.Service;
 
 namespace CCXT.Collector.Samples.Exchanges
 {
     /// <summary>
-    /// Binance WebSocket sample - World's largest cryptocurrency exchange
+    /// Bittrex WebSocket sample - Demonstrates SignalR-based real-time data streaming
     /// </summary>
-    public class BinanceSample
+    public class BittrexExample
     {
         public static async Task RunSample()
         {
-            Console.WriteLine("\n=== Binance WebSocket Sample ===");
-            Console.WriteLine("Connecting to Binance...\n");
+            Console.WriteLine("\n=== Bittrex WebSocket Sample ===");
+            Console.WriteLine("Connecting to Bittrex via SignalR protocol...\n");
 
-            var client = new BinanceWebSocketClient();
+            var client = new BittrexWebSocketClient();
             
             // Event handlers
-            client.OnConnected += () => Console.WriteLine("[Connected] Binance WebSocket connected");
-            client.OnDisconnected += () => Console.WriteLine("[Disconnected] Binance WebSocket disconnected");
+            client.OnConnected += () => Console.WriteLine("[Connected] Bittrex SignalR connected");
+            client.OnDisconnected += () => Console.WriteLine("[Disconnected] Bittrex SignalR disconnected");
             client.OnError += (error) => Console.WriteLine($"[Error] {error}");
 
             // Market data handlers
@@ -31,7 +31,6 @@ namespace CCXT.Collector.Samples.Exchanges
                     Console.WriteLine($"[Orderbook] {orderbook.symbol}");
                     Console.WriteLine($"  Best Bid: ${orderbook.result.bids[0].price:F2} x {orderbook.result.bids[0].quantity:F8}");
                     Console.WriteLine($"  Best Ask: ${orderbook.result.asks[0].price:F2} x {orderbook.result.asks[0].quantity:F8}");
-                    Console.WriteLine($"  Spread: ${orderbook.result.asks[0].price - orderbook.result.bids[0].price:F2}");
                 }
             };
 
@@ -40,15 +39,13 @@ namespace CCXT.Collector.Samples.Exchanges
                 if (trade.result.Count > 0)
                 {
                     var t = trade.result[0];
-                    Console.WriteLine($"[Trade] {trade.symbol} - ${t.price:F2} x {t.quantity:F8} ({t.sideType})");
+                    Console.WriteLine($"[Trade] {trade.symbol} - ${t.price:F2} x {t.quantity:F8} @ {new DateTime(1970, 1, 1).AddMilliseconds(t.timestamp):HH:mm:ss}");
                 }
             };
 
             client.OnTickerReceived += (ticker) =>
             {
-                Console.WriteLine($"[Ticker] {ticker.symbol}");
-                Console.WriteLine($"  Price: ${ticker.result.closePrice:F2} ({ticker.result.percentage:+0.00;-0.00}%)");
-                Console.WriteLine($"  24h Volume: {ticker.result.volume:F2}");
+                Console.WriteLine($"[Ticker] {ticker.symbol} - ${ticker.result.closePrice:F2} ({ticker.result.percentage:+0.00;-0.00}%)");
             };
 
             try
@@ -56,26 +53,24 @@ namespace CCXT.Collector.Samples.Exchanges
                 // Connect to WebSocket
                 await client.ConnectAsync();
                 
-                // Subscribe to BTC/USDT market
+                // Subscribe to BTC-USDT market (Bittrex uses hyphen separator)
                 var market = new Market("BTC", "USDT");
                 
-                Console.WriteLine("Subscribing to BTC/USDT market data...");
+                Console.WriteLine("Subscribing to BTC-USDT market data...");
                 await client.SubscribeOrderbookAsync(market);
                 await client.SubscribeTradesAsync(market);
                 await client.SubscribeTickerAsync(market);
                 
-                // Also subscribe to ETH/USDT
+                // Also subscribe to ETH-USDT
                 var ethMarket = new Market("ETH", "USDT");
-                Console.WriteLine("Subscribing to ETH/USDT market data...");
-                await client.SubscribeTickerAsync(ethMarket);
-                
-                // Run for 10 seconds
+                Console.WriteLine("Subscribing to ETH-USDT market data...");
+                await client.SubscribeTickerAsync(ethMarket);                // Run for 10 seconds
                 Console.WriteLine("\nCollecting data for 10 seconds...\n");
                 await SampleHelper.WaitForDurationOrEsc(10000);
                 
                 // Properly disconnect with cleanup
-                await SampleHelper.SafeDisconnectAsync(client, "Binance");
-                Console.WriteLine("\nBinance sample completed!");
+                await SampleHelper.SafeDisconnectAsync(client, "Bittrex");
+                Console.WriteLine("\nBittrex sample completed!");
             }
             catch (Exception ex)
             {

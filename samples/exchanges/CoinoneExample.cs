@@ -1,26 +1,26 @@
 using System;
 using System.Threading.Tasks;
-using CCXT.Collector.Upbit;
+using CCXT.Collector.Coinone;
 using CCXT.Collector.Library;
 using CCXT.Collector.Service;
 
 namespace CCXT.Collector.Samples.Exchanges
 {
     /// <summary>
-    /// Upbit WebSocket sample - Korea's largest cryptocurrency exchange
+    /// Coinone WebSocket sample - Korean exchange pioneer
     /// </summary>
-    public class UpbitSample
+    public class CoinoneExample
     {
         public static async Task RunSample()
         {
-            Console.WriteLine("\n=== Upbit WebSocket Sample ===");
-            Console.WriteLine("Connecting to Upbit (Korea)...\n");
+            Console.WriteLine("\n=== Coinone WebSocket Sample ===");
+            Console.WriteLine("Connecting to Coinone (Korea)...\n");
 
-            var client = new UpbitWebSocketClient();
+            var client = new CoinoneWebSocketClient();
             
             // Event handlers
-            client.OnConnected += () => Console.WriteLine("[Connected] Upbit WebSocket connected");
-            client.OnDisconnected += () => Console.WriteLine("[Disconnected] Upbit WebSocket disconnected");
+            client.OnConnected += () => Console.WriteLine("[Connected] Coinone WebSocket connected");
+            client.OnDisconnected += () => Console.WriteLine("[Disconnected] Coinone WebSocket disconnected");
             client.OnError += (error) => Console.WriteLine($"[Error] {error}");
 
             // Market data handlers
@@ -51,6 +51,7 @@ namespace CCXT.Collector.Samples.Exchanges
                 Console.WriteLine($"  Price: ₩{ticker.result.closePrice:N0}");
                 Console.WriteLine($"  Change: {ticker.result.percentage:+0.00;-0.00}%");
                 Console.WriteLine($"  Volume: {ticker.result.volume:F4} BTC");
+                Console.WriteLine($"  Quote Volume: ₩{ticker.result.quoteVolume:N0}");
             };
 
             try
@@ -76,8 +77,8 @@ namespace CCXT.Collector.Samples.Exchanges
                 await SampleHelper.WaitForDurationOrEsc(10000);
                 
                 // Properly disconnect with cleanup
-                await SampleHelper.SafeDisconnectAsync(client, "Upbit");
-                Console.WriteLine("\nUpbit sample completed!");
+                await SampleHelper.SafeDisconnectAsync(client, "Coinone");
+                Console.WriteLine("\nCoinone sample completed!");
             }
             catch (Exception ex)
             {

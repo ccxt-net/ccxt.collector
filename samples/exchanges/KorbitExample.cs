@@ -1,26 +1,26 @@
 using System;
 using System.Threading.Tasks;
-using CCXT.Collector.Upbit;
+using CCXT.Collector.Korbit;
 using CCXT.Collector.Library;
 using CCXT.Collector.Service;
 
 namespace CCXT.Collector.Samples.Exchanges
 {
     /// <summary>
-    /// Upbit WebSocket sample - Korea's largest cryptocurrency exchange
+    /// Korbit WebSocket sample - Pioneer Korean exchange
     /// </summary>
-    public class UpbitSample
+    public class KorbitExample
     {
         public static async Task RunSample()
         {
-            Console.WriteLine("\n=== Upbit WebSocket Sample ===");
-            Console.WriteLine("Connecting to Upbit (Korea)...\n");
+            Console.WriteLine("\n=== Korbit WebSocket Sample ===");
+            Console.WriteLine("Connecting to Korbit (Korea)...\n");
 
-            var client = new UpbitWebSocketClient();
+            var client = new KorbitWebSocketClient();
             
             // Event handlers
-            client.OnConnected += () => Console.WriteLine("[Connected] Upbit WebSocket connected");
-            client.OnDisconnected += () => Console.WriteLine("[Disconnected] Upbit WebSocket disconnected");
+            client.OnConnected += () => Console.WriteLine("[Connected] Korbit WebSocket connected");
+            client.OnDisconnected += () => Console.WriteLine("[Disconnected] Korbit WebSocket disconnected");
             client.OnError += (error) => Console.WriteLine($"[Error] {error}");
 
             // Market data handlers
@@ -51,6 +51,7 @@ namespace CCXT.Collector.Samples.Exchanges
                 Console.WriteLine($"  Price: ₩{ticker.result.closePrice:N0}");
                 Console.WriteLine($"  Change: {ticker.result.percentage:+0.00;-0.00}%");
                 Console.WriteLine($"  Volume: {ticker.result.volume:F4} BTC");
+                Console.WriteLine($"  Quote Volume: ₩{ticker.result.quoteVolume:N0}");
             };
 
             try
@@ -61,14 +62,14 @@ namespace CCXT.Collector.Samples.Exchanges
                 // Subscribe to BTC/KRW market
                 var market = new Market("BTC", "KRW");
                 
-                Console.WriteLine("Subscribing to BTC/KRW market...");
+                Console.WriteLine("Subscribing to BTC_KRW market...");
                 await client.SubscribeOrderbookAsync(market);
                 await client.SubscribeTradesAsync(market);
                 await client.SubscribeTickerAsync(market);
                 
                 // Also subscribe to ETH/KRW
                 var ethMarket = new Market("ETH", "KRW");
-                Console.WriteLine("Subscribing to ETH/KRW market...");
+                Console.WriteLine("Subscribing to ETH_KRW market...");
                 await client.SubscribeTickerAsync(ethMarket);
                 
                 // Run for 10 seconds
@@ -76,8 +77,8 @@ namespace CCXT.Collector.Samples.Exchanges
                 await SampleHelper.WaitForDurationOrEsc(10000);
                 
                 // Properly disconnect with cleanup
-                await SampleHelper.SafeDisconnectAsync(client, "Upbit");
-                Console.WriteLine("\nUpbit sample completed!");
+                await SampleHelper.SafeDisconnectAsync(client, "Korbit");
+                Console.WriteLine("\nKorbit sample completed!");
             }
             catch (Exception ex)
             {

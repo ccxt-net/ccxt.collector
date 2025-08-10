@@ -5,7 +5,136 @@ All notable changes to CCXT.Collector will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [2.1.3] - 2025-08-10
+## [2.1.4] - 2025-08-10
+
+### 🎯 Enhanced Sample Applications and WebSocket Stability
+
+This release focuses on improving the sample applications for all 15 exchanges and enhancing WebSocket connection stability with better cleanup and buffer management. This release emphasizes user experience improvements, fixing console input issues, and ensuring proper WebSocket cleanup.
+
+### Key Highlights
+
+✨ **Unified Sample Structure** - All 15 exchange samples follow consistent pattern  
+🚀 **Interactive Menu System** - New AllExchangesSample with comprehensive testing  
+💾 **WebSocket Stability** - Proper cleanup prevents background execution  
+🔧 **Console Buffer Fix** - Input buffer cleared to prevent old input execution  
+✅ **100% Build Success** - All encoding and syntax errors resolved
+
+### Added
+
+#### Sample Application Enhancements
+- **Unified Sample Structure**: All 15 exchange samples now follow consistent structure
+  - Standardized event handlers for orderbook, trades, and ticker data
+  - Unified console output format across all exchanges
+  - 10-second data collection period for all samples
+  
+- **SampleHelper Utility Class**: New helper methods for sample applications
+  - `WaitForDurationOrEsc()`: Simple countdown timer for data collection
+  - `SafeDisconnectAsync()`: Proper WebSocket cleanup with buffer clearing
+  - `ClearInputBuffer()`: Console input buffer management
+
+- **AllExchangesSample Menu System**: Interactive testing menu for all exchanges
+  - Individual exchange testing (15 exchanges)
+  - Multi-exchange simultaneous testing
+  - Korean exchange group testing
+  - Top 5 global exchanges testing
+
+### Improved
+
+#### WebSocket Connection Management
+- **Enhanced Disconnection Handling**: 
+  - Added 500ms delay before and after disconnection for pending message processing
+  - Proper cleanup of WebSocket resources to prevent background execution
+  - Automatic input buffer clearing after disconnection
+
+- **Console Input Buffer Management**:
+  - Clear buffered keyboard input before reading new input
+  - Prevent old input from being executed in menu system
+  - Fix for persistent input buffer issues
+
+- **Binary Message Support for Upbit**:
+  - Fixed Upbit WebSocket packet reception
+  - Added binary message type handling in WebSocketClientBase
+  - Proper handling of both text and binary WebSocket messages
+
+### Fixed
+
+#### Sample Application Issues
+- **Encoding Problems**: Fixed UTF-8 encoding issues in Korean exchange samples
+  - Corrected Korean Won symbol (₩) display
+  - Fixed arrow symbols (↑↓) in OKX sample
+  - Resolved PowerShell script encoding corruption
+
+- **Background Execution**: Fixed WebSocket connections continuing to run after sample completion
+  - Proper cleanup ensures connections are closed before returning to menu
+  - No more background message processing after disconnection
+
+- **Console Input Issues**: 
+  - Fixed keyboard input being carried over between menu selections
+  - Resolved issue where previous inputs were executed repeatedly
+  - Proper input buffer management throughout application
+
+#### Build Errors
+- Fixed CS8086 errors related to string interpolation
+- Fixed CS1525/CS1003 syntax errors from corrupted files
+- All 15 exchange samples now build without errors
+
+### Technical Details
+
+#### Sample Applications (15 Exchanges)
+| Exchange | Sample File | Special Features |
+|----------|------------|------------------|
+| Binance | BinanceSample.cs | USD/USDT markets |
+| Upbit | UpbitSample.cs | KRW markets, binary messages |
+| Bithumb | BithumbSample.cs | High volume KRW trading |
+| Coinone | CoinoneExample.cs | Korean pioneer exchange |
+| Korbit | KorbitExample.cs | Korea's first exchange |
+| OKX | OkxExample.cs | Derivatives platform |
+| Bybit | BybitExample.cs | Spot and derivatives |
+| Bitget | BitgetExample.cs | Copy trading features |
+| Gate.io | GateioExample.cs | Diverse altcoins |
+| Huobi | HuobiExample.cs | Major Asian exchange |
+| KuCoin | KucoinExample.cs | People's Exchange |
+| Coinbase | CoinbaseExample.cs | US regulated |
+| Crypto.com | CryptocomExample.cs | All-in-one platform |
+| Bittrex | BittrexExample.cs | SignalR protocol |
+
+#### Documentation Updates
+- All code comments and documentation now in English
+- Updated CLAUDE.local.md with English instructions
+- Consistent documentation language across all files
+
+### Quick Start
+
+```csharp
+// Run the interactive sample menu
+using CCXT.Collector.Samples;
+await AllExchangesSample.RunMenu();
+
+// Or test individual exchanges
+using CCXT.Collector.Samples.Exchanges;
+await BinanceSample.RunSample();
+```
+
+### Migration from v2.1.3
+
+No breaking changes in this release. Simply update the package version to get the improvements.
+
+### Installation
+
+```bash
+# NuGet Package Manager
+Install-Package CCXT.Collector -Version 2.1.4
+
+# .NET CLI
+dotnet add package CCXT.Collector --version 2.1.4
+```
+
+```xml
+<!-- Package Reference -->
+<PackageReference Include="CCXT.Collector" Version="2.1.4" />
+```
+
+## [2.1.3] - 2025-01-09
 
 ### 🎯 Complete WebSocket Implementation for 15 Major Exchanges
 

@@ -1,7 +1,7 @@
 # CCXT.Collector
 
 [![NuGet](https://img.shields.io/nuget/v/CCXT.Collector.svg)](https://www.nuget.org/packages/CCXT.Collector)
-[![.NET](https://img.shields.io/badge/.NET-8.0%20%7C%209.0-blue.svg)](https://dotnet.microsoft.com/)
+[![.NET](https://img.shields.io/badge/.NET-8.0%20%7C%209.0%20%7C%2010.0-blue.svg)](https://dotnet.microsoft.com/)
 [![License](https://img.shields.io/github/license/ccxt-net/ccxt.collector)](https://github.com/ccxt-net/ccxt.collector/blob/master/LICENSE.txt)
 
 A powerful .NET library for real-time cryptocurrency exchange data collection with unified WebSocket streaming and technical indicator analysis.
@@ -37,7 +37,7 @@ CCXT.Collector is a comprehensive library that connects to cryptocurrency exchan
 
 *Note: Exchange locations indicate registration/headquarters, not service availability
 
-#### Implementation Status (v2.1.3)
+#### Implementation Status (v2.1.4)
 
 | Feature | Implemented | In Progress | Planned |
 |---------|------------|-------------|----------|
@@ -53,23 +53,23 @@ Binance, Bitget, Bithumb, Bittrex, Bybit, Coinbase, Coinone, Crypto.com, Gate.io
 
 ### NuGet Package Manager
 ```bash
-Install-Package CCXT.Collector -Version 2.1.3
+Install-Package CCXT.Collector -Version 2.1.4
 ```
 
 ### .NET CLI
 ```bash
-dotnet add package CCXT.Collector --version 2.1.3
+dotnet add package CCXT.Collector --version 2.1.4
 ```
 
 ### Package Reference
 ```xml
-<PackageReference Include="CCXT.Collector" Version="2.1.3" />
+<PackageReference Include="CCXT.Collector" Version="2.1.4" />
 ```
 
-### ⚠️ Breaking Changes in v2.1.3
-- Complete WebSocket implementations for Gate.io and Bittrex
-- Standardized data models across all 15 major exchanges
-- See [CHANGELOG](docs/CHANGELOG.md#213---2025-01-09) for complete details
+### ⚠️ Breaking Changes in v2.1.4
+- No breaking changes in this release
+- Enhanced sample applications with improved stability
+- See [CHANGELOG](docs/CHANGELOG.md#214---2025-08-10) for complete details
 
 ### ⚠️ Breaking Changes in v2.1.2
 - `SCandlestick.result` changed from single item to `List<SCandleItem>`
