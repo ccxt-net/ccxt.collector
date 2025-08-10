@@ -265,3 +265,4 @@ __pycache__/
 scripts/nuget-config.ps1
 .claude/
 nul
+.mcp.json
