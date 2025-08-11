@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using CCXT.Collector.Core.Abstractions;
 using CCXT.Collector.Service;
 using System.Text.Json;
+using CCXT.Collector.Models.WebSocket;
 
 
 namespace CCXT.Collector.Phemex

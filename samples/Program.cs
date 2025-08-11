@@ -108,6 +108,9 @@ namespace CCXT.Collector.Samples
             Console.WriteLine("6. Real-time Ticker Updates");
             Console.WriteLine("7. Advanced Indicator Combination");
             Console.WriteLine("8. ✨ All 15 Exchanges Test Menu");
+            Console.WriteLine("9. Connectivity Test (from ccxt.connect)");
+            Console.WriteLine("10. Quick Connectivity Test");
+            Console.WriteLine("11. SignalR Connectivity Test");
             Console.WriteLine("0. Exit");
 
             Console.Write("\nEnter your choice: ");
@@ -138,6 +141,15 @@ namespace CCXT.Collector.Samples
                     break;
                 case "8":
                     await AllExchangesSample.RunMenu();
+                    break;
+                case "9":
+                    await ConnectivityTest.RunTest();
+                    break;
+                case "10":
+                    await QuickConnectivityTest.RunTest();
+                    break;
+                case "11":
+                    await SignalRConnectivityTest.RunTest();
                     break;
                 case "0":
                     return;

@@ -1,5 +1,9 @@
 using CCXT.Collector.Service;
+using CCXT.Collector.Models.WebSocket;
 using System;
+using System.Collections.Generic;
+using System.Collections.Concurrent;
+using System.Linq;
 using System.Net.WebSockets;
 using System.Text;
 using System.Threading;
@@ -7,6 +11,37 @@ using System.Threading.Tasks;
 
 namespace CCXT.Collector.Core.Abstractions
 {
+    /// <summary>
+    /// Exchange operational status
+    /// </summary>
+    public enum ExchangeStatus
+    {
+        /// <summary>
+        /// Exchange is fully operational
+        /// </summary>
+        Active,
+        
+        /// <summary>
+        /// Exchange is undergoing maintenance
+        /// </summary>
+        Maintenance,
+        
+        /// <summary>
+        /// Exchange is deprecated but still accessible
+        /// </summary>
+        Deprecated,
+        
+        /// <summary>
+        /// Exchange has been permanently closed
+        /// </summary>
+        Closed,
+        
+        /// <summary>
+        /// Exchange status is unknown
+        /// </summary>
+        Unknown
+    }
+
     /// <summary>
     /// Base WebSocket client implementation
     /// </summary>
@@ -21,8 +56,17 @@ namespace CCXT.Collector.Core.Abstractions
         protected readonly int _maxReconnectAttempts = 10;  // Increased from 5
         protected readonly int _reconnectDelayMs = 5000;
         
+        // Subscription management
+        protected readonly ConcurrentDictionary<string, SubscriptionInfo> _subscriptions;
+        
         // Exchange rate support for multi-currency 
         protected decimal _exchangeRate = 1.0m;
+        
+        // Exchange status management
+        protected ExchangeStatus _exchangeStatus = ExchangeStatus.Active;
+        protected DateTime? _closedDate = null;
+        protected string _statusMessage = null;
+        protected List<string> _alternativeExchanges = new List<string>();
         
         // Authentication
         protected string _apiKey;
@@ -36,6 +80,13 @@ namespace CCXT.Collector.Core.Abstractions
 
         public bool IsConnected => _webSocket?.State == WebSocketState.Open;
         public bool IsAuthenticated => _isAuthenticated && (_privateWebSocket?.State == WebSocketState.Open || IsConnected);
+        
+        // Exchange status properties
+        public ExchangeStatus Status => _exchangeStatus;
+        public DateTime? ClosedDate => _closedDate;
+        public string StatusMessage => _statusMessage ?? GetDefaultStatusMessage();
+        public List<string> AlternativeExchanges => _alternativeExchanges;
+        public bool IsActive => _exchangeStatus == ExchangeStatus.Active;
 
         #region Events - Public Data
 
@@ -66,12 +117,70 @@ namespace CCXT.Collector.Core.Abstractions
         protected WebSocketClientBase()
         {
             _sendSemaphore = new SemaphoreSlim(1, 1);
+            _subscriptions = new ConcurrentDictionary<string, SubscriptionInfo>();
+        }
+        
+        /// <summary>
+        /// Get default status message based on current status
+        /// </summary>
+        protected virtual string GetDefaultStatusMessage()
+        {
+            return _exchangeStatus switch
+            {
+                ExchangeStatus.Active => $"{ExchangeName} exchange is fully operational.",
+                ExchangeStatus.Maintenance => $"{ExchangeName} exchange is currently under maintenance. Please try again later.",
+                ExchangeStatus.Deprecated => $"{ExchangeName} exchange is deprecated and will be removed in a future version.",
+                ExchangeStatus.Closed => _closedDate.HasValue 
+                    ? $"{ExchangeName} exchange permanently closed on {_closedDate.Value:yyyy-MM-dd}."
+                    : $"{ExchangeName} exchange is permanently closed.",
+                ExchangeStatus.Unknown => $"{ExchangeName} exchange status is unknown.",
+                _ => $"{ExchangeName} exchange status: {_exchangeStatus}"
+            };
+        }
+        
+        /// <summary>
+        /// Set exchange status
+        /// </summary>
+        protected void SetExchangeStatus(ExchangeStatus status, string message = null, DateTime? closedDate = null, params string[] alternatives)
+        {
+            _exchangeStatus = status;
+            _statusMessage = message;
+            _closedDate = closedDate;
+            if (alternatives != null && alternatives.Length > 0)
+            {
+                _alternativeExchanges.Clear();
+                _alternativeExchanges.AddRange(alternatives);
+            }
         }
 
         public virtual async Task<bool> ConnectAsync()
         {
             try
             {
+                // Check if exchange is active before attempting connection
+                if (_exchangeStatus == ExchangeStatus.Closed)
+                {
+                    var errorMsg = $"Cannot connect to {ExchangeName}: {StatusMessage}";
+                    if (_alternativeExchanges?.Count > 0)
+                    {
+                        errorMsg += $" Consider using: {string.Join(", ", _alternativeExchanges)}";
+                    }
+                    RaiseError(errorMsg);
+                    return false;
+                }
+                
+                if (_exchangeStatus == ExchangeStatus.Maintenance)
+                {
+                    RaiseError($"Cannot connect to {ExchangeName}: {StatusMessage}");
+                    return false;
+                }
+                
+                if (_exchangeStatus == ExchangeStatus.Deprecated)
+                {
+                    RaiseError($"Warning: {ExchangeName} is deprecated. {StatusMessage}");
+                    // Continue with connection for deprecated exchanges
+                }
+
                 if (IsConnected)
                     return true;
 
@@ -497,6 +606,20 @@ namespace CCXT.Collector.Core.Abstractions
         }
 
         #endregion
+
+        // Helper method to create a subscription key
+        protected string CreateSubscriptionKey(string channel, string symbol)
+        {
+            return $"{channel}:{symbol}";
+        }
+
+        // Virtual method for resubscribing (can be overridden by derived classes)
+        protected virtual async Task ResubscribeAsync(SubscriptionInfo subscription)
+        {
+            // Default implementation: resubscribe based on channel type
+            // Derived classes can override for exchange-specific behavior
+            await Task.CompletedTask;
+        }
 
         public virtual void Dispose()
         {

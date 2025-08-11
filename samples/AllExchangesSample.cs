@@ -315,7 +315,7 @@ namespace CCXT.Collector.Samples
 
         private static async Task<bool> TestExchangeConnectivity(string name, Func<IWebSocketClient> createClient, string symbol)
         {
-            IWebSocketClient? client = null;
+            IWebSocketClient client = null;
             var cts = new CancellationTokenSource(TimeSpan.FromSeconds(20));
             var orderbookCount = 0;
             var tradeCount = 0;

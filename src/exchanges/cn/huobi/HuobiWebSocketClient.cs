@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using CCXT.Collector.Core.Abstractions;
+using CCXT.Collector.Models.WebSocket;
 using CCXT.Collector.Library;
 using CCXT.Collector.Service;
 using System.Text.Json;

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -6,25 +6,31 @@ using CCXT.Collector.Core.Abstractions;
 using CCXT.Collector.Library;
 using CCXT.Collector.Service;
 using System.Text.Json;
+using CCXT.Collector.Models.WebSocket;
 
 namespace CCXT.Collector.Bittrex
 {
     /*
-     * Bittrex Support Markets: USD, USDT, BTC, ETH
+     * IMPORTANT: Bittrex exchange permanently closed on December 4, 2023
+     * 
+     * This implementation is maintained for historical reference only.
+     * The exchange is no longer operational and all APIs are offline.
+     * 
+     * Alternative exchanges to consider:
+     * - Coinbase
+     * - Binance  
+     * - Kraken
+     * 
+     * Historical API Documentation:
+     *     https://bittrex.github.io/api/v3 (no longer accessible)
      *
-     * API Documentation:
-     *     https://bittrex.github.io/api/v3
-     *
-     * WebSocket API:
-     *     https://bittrex.github.io/api/v3#websockets-overview
-     *     wss://socket-v3.bittrex.com/signalr
-     *
-     * Fees:
-     *     https://global.bittrex.com/fees
+     * Historical WebSocket API:
+     *     wss://socket-v3.bittrex.com/signalr (no longer accessible)
      */
     /// <summary>
-    /// Bittrex WebSocket client for real-time data streaming
+    /// [DEPRECATED] Bittrex WebSocket client - Exchange closed on December 4, 2023
     /// </summary>
+    [Obsolete("Bittrex exchange permanently closed on December 4, 2023. Use alternative exchanges like Coinbase, Binance, or Kraken.")]
     public class BittrexWebSocketClient : WebSocketClientBase
     {
         private readonly Dictionary<string, SOrderBook> _orderbookCache;
@@ -38,6 +44,14 @@ namespace CCXT.Collector.Bittrex
         {
             _orderbookCache = new Dictionary<string, SOrderBook>();
             _sequenceNumbers = new Dictionary<string, long>();
+            
+            // Set exchange status as permanently closed
+            SetExchangeStatus(
+                ExchangeStatus.Closed,
+                "Bittrex exchange permanently closed on December 4, 2023. The exchange is no longer operational.",
+                new DateTime(2023, 12, 4),
+                "Coinbase", "Binance", "Kraken"
+            );
         }
 
         protected override async Task ProcessMessageAsync(string message, bool isPrivate = false)

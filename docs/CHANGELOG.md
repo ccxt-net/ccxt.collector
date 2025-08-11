@@ -7,6 +7,65 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased] - 2025-08-11
 
+### 🎯 Sample Projects Consolidation
+
+Consolidated multiple sample projects into a single unified samples project for better maintainability.
+
+### Changed
+- **Sample Projects Unification**
+  - Merged 4 separate sample projects (ccxt.connect, ccxt.exchange, ccxt.quicktest, ccxt.signalrtest) into one unified `ccxt.samples.csproj`
+  - Updated Program.cs to provide a comprehensive menu system for all sample programs:
+    - Basic WebSocket samples (1-7)
+    - All 15 Exchanges Test Menu (8)
+    - Connectivity Test (9)
+    - Exchange Status Test (10-11)
+    - Quick Connectivity Test (12)
+    - SignalR Connectivity Test (13)
+  - Modified all test entry points from `Main()` to `RunTest()` methods for integration
+  - Updated solution file to reference the single unified samples project
+  - Supports both .NET 8.0 and .NET 9.0 target frameworks
+
+### Removed
+- **Old Sample Project Files**
+  - Deleted `samples/ccxt.connect.csproj`
+  - Deleted `samples/ccxt.exchange.csproj`
+  - Deleted `samples/ccxt.quicktest.csproj`
+  - Deleted `samples/ccxt.signalrtest.csproj`
+
+## [Previous Updates] - 2025-08-11
+
+### 🎯 Exchange Status Management System
+
+Implemented self-contained exchange status management where each WebSocket client manages its own operational status.
+
+### Added
+- **Exchange Status Management** - Self-contained status tracking in each WebSocket client
+  - `ExchangeStatus` enum in WebSocketClientBase (Active, Maintenance, Deprecated, Closed, Unknown)
+  - Status properties added to WebSocketClientBase:
+    - `Status` - Current exchange operational status
+    - `ClosedDate` - Date when exchange was closed (if applicable)
+    - `StatusMessage` - Descriptive status message
+    - `AlternativeExchanges` - List of suggested alternative exchanges
+    - `IsActive` - Quick check if exchange is operational
+  - `SetExchangeStatus()` method for updating exchange status
+  - Automatic connection blocking for closed/maintenance exchanges
+- **Exchange Status Features**
+  - Pre-connection validation in `WebSocketClientBase.ConnectAsync()`
+  - Clear error messages when attempting to connect to unavailable exchanges
+  - Support for maintenance mode and deprecated exchange warnings
+  - Each exchange client self-manages its operational status
+- **Closed Exchange Handling**
+  - Bittrex WebSocket client sets itself as closed (December 4, 2023)
+  - Alternative exchange recommendations provided in error messages
+
+### Fixed
+- **Build Errors Related to ResubscribeAsync**
+  - Changed `ResubscribeAsync` method in WebSocketClientBase from abstract to virtual with default implementation
+  - Added missing `using CCXT.Collector.Models.WebSocket;` to 111+ exchange implementations
+  - Added missing `using System.Linq;` to WebSocketClientBase for array operations
+  - Added `Extra` property to SubscriptionInfo class for storing additional subscription data
+  - All exchange implementations now compile successfully
+
 ### 🎯 Channel Management System
 
 Implemented comprehensive WebSocket channel subscription management system for unified control across all exchanges.

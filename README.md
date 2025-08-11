@@ -22,13 +22,16 @@ CCXT.Collector is a comprehensive library that connects to cryptocurrency exchan
 - ⚡ **High Performance** - System.Text.Json for 20-30% faster parsing, 15-25% less memory usage
 - 🛡️ **Security Ready** - Authentication framework for private channels (implementation in progress)
 
-### 🏢 Supported Exchanges (132 Total)
+### 🏢 Supported Exchanges (130 Active)
+
+#### Exchange Status Management
+The library now includes automatic exchange status tracking to prevent connections to closed or unavailable exchanges. When attempting to connect to a closed exchange, you'll receive a clear error message with suggested alternatives.
 
 #### Major Exchanges by Region
 
 | Region | Exchanges | Count |
 |--------|-----------|-------|
-| 🇺🇸 United States | Coinbase, Kraken, Gemini, Bittrex, Poloniex, Phemex, Crypto.com, and 19 more | 26 |
+| 🇺🇸 United States | Coinbase, Kraken, Gemini, ~~Bittrex~~*, Poloniex, Phemex, Crypto.com, and 18 more | 25 |
 | 🇨🇳 China | Binance*, OKX, Huobi, Bybit, KuCoin, Gate.io, MEXC, Bitget, and 16 more | 24 |
 | 🇰🇷 South Korea | Upbit, Bithumb, Coinone, Korbit, Gopax, Probit, OKCoinKR | 7 |
 | 🇯🇵 Japan | bitFlyer, Coincheck, Bitbank, Zaif, and 4 more | 8 |

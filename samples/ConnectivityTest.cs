@@ -24,7 +24,7 @@ namespace CCXT.Collector.Samples
 {
     public class ConnectivityTest
     {
-        public static async Task Main(string[] args)
+        public static async Task RunTest()
         {
             Console.WriteLine("=====================================");
             Console.WriteLine("  🔌 Connectivity Test - All Exchanges");

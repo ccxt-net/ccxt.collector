@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -6,6 +6,7 @@ using CCXT.Collector.Core.Abstractions;
 using CCXT.Collector.Library;
 using CCXT.Collector.Service;
 using System.Text.Json;
+using CCXT.Collector.Models.WebSocket;
 
 namespace CCXT.Collector.Gateio
 {
