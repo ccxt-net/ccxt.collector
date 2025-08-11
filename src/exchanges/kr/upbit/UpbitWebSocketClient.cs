@@ -497,6 +497,74 @@ namespace CCXT.Collector.Upbit
             return "PING";
         }
 
+        /// <summary>
+        /// Upbit supports batch subscription - multiple markets in one message
+        /// </summary>
+        protected override bool SupportsBatchSubscription()
+        {
+            return true;
+        }
+
+        /// <summary>
+        /// Send batch subscriptions for Upbit - ALL subscriptions must be sent in a SINGLE message
+        /// </summary>
+        protected override async Task<bool> SendBatchSubscriptionsAsync(List<KeyValuePair<string, SubscriptionInfo>> subscriptions)
+        {
+            try
+            {
+                // Group subscriptions by channel type
+                var groupedByChannel = subscriptions
+                    .GroupBy(s => s.Value.Channel.ToLower())
+                    .ToDictionary(g => g.Key, g => g.Select(s => s.Value.Symbol).Distinct().ToList());
+
+                // Build the complete subscription message with ALL channels and symbols
+                var subscriptionMessage = new List<object>();
+                
+                // Add ticket (required first element)
+                subscriptionMessage.Add(new { ticket = Guid.NewGuid().ToString() });
+
+                // Add each channel with its symbols
+                foreach (var channelGroup in groupedByChannel)
+                {
+                    var channel = channelGroup.Key;
+                    var symbols = channelGroup.Value
+                        .Select(s => ConvertToUpbitCode(s))
+                        .Distinct()
+                        .ToArray();
+
+                    if (symbols.Length == 0)
+                        continue;
+
+                    // Map channel names to Upbit types
+                    string upbitType = channel switch
+                    {
+                        "orderbook" or "depth" => "orderbook",
+                        "trades" or "trade" => "trade",
+                        "ticker" => "ticker",
+                        _ => channel
+                    };
+
+                    // Add subscription for this channel
+                    subscriptionMessage.Add(new { type = upbitType, codes = symbols });
+
+                    RaiseError($"Added {upbitType} subscription for {symbols.Length} markets: {string.Join(", ", symbols.Take(3))}{(symbols.Length > 3 ? "..." : "")}");
+                }
+
+                // IMPORTANT: Send ALL subscriptions in a SINGLE message
+                var json = JsonSerializer.Serialize(subscriptionMessage);
+                await SendMessageAsync(json);
+                
+                RaiseError($"Sent complete Upbit subscription message with {subscriptionMessage.Count} elements");
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                RaiseError($"Batch subscription failed: {ex.Message}");
+                return false;
+            }
+        }
+
         protected override async Task ResubscribeAsync(SubscriptionInfo subscription)
         {
             switch (subscription.Channel)

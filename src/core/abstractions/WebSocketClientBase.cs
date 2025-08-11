@@ -153,6 +153,157 @@ namespace CCXT.Collector.Core.Abstractions
             }
         }
 
+        /// <summary>
+        /// Add subscription for later batch processing
+        /// </summary>
+        public virtual void AddSubscription(string channel, string symbol, string interval = null)
+        {
+            var key = CreateSubscriptionKey(channel, symbol, interval);
+            _subscriptions[key] = new SubscriptionInfo
+            {
+                Channel = channel,
+                Symbol = symbol,
+                SubscribedAt = DateTime.UtcNow,
+                IsActive = false, // Not active until connected
+                Extra = interval
+            };
+        }
+
+        /// <summary>
+        /// Add multiple subscriptions for batch processing
+        /// </summary>
+        public virtual void AddSubscriptions(List<(string channel, string symbol, string interval)> subscriptions)
+        {
+            foreach (var (channel, symbol, interval) in subscriptions)
+            {
+                AddSubscription(channel, symbol, interval);
+            }
+        }
+
+        /// <summary>
+        /// Connect to WebSocket and execute all pending subscriptions
+        /// </summary>
+        public virtual async Task<bool> ConnectAndSubscribeAsync()
+        {
+            try
+            {
+                // First connect to the WebSocket
+                var connected = await ConnectAsync();
+                if (!connected)
+                {
+                    RaiseError($"Failed to connect to {ExchangeName}");
+                    return false;
+                }
+
+                // Get all subscriptions that are not yet active
+                var pendingSubscriptions = _subscriptions
+                    .Where(s => !s.Value.IsActive)
+                    .ToList();
+
+                if (pendingSubscriptions.Count == 0)
+                    return true;
+
+                // Check if exchange supports batch subscriptions
+                if (SupportsBatchSubscription())
+                {
+                    // Send batch subscription for exchanges like Upbit
+                    var result = await SendBatchSubscriptionsAsync(pendingSubscriptions);
+                    
+                    if (result)
+                    {
+                        // Mark all subscriptions as active
+                        foreach (var kvp in pendingSubscriptions)
+                        {
+                            kvp.Value.IsActive = true;
+                        }
+                    }
+                    
+                    return result;
+                }
+                else
+                {
+                    // Send individual subscriptions for regular exchanges
+                    var subscriptionTasks = new List<Task<bool>>();
+                    
+                    foreach (var kvp in pendingSubscriptions)
+                    {
+                        var subscription = kvp.Value;
+                        
+                        switch (subscription.Channel.ToLower())
+                        {
+                            case "orderbook":
+                            case "depth":
+                                subscriptionTasks.Add(SubscribeOrderbookAsync(subscription.Symbol));
+                                break;
+                            case "trades":
+                            case "trade":
+                                subscriptionTasks.Add(SubscribeTradesAsync(subscription.Symbol));
+                                break;
+                            case "ticker":
+                                subscriptionTasks.Add(SubscribeTickerAsync(subscription.Symbol));
+                                break;
+                            case "candles":
+                            case "kline":
+                                if (!string.IsNullOrEmpty(subscription.Extra))
+                                    subscriptionTasks.Add(SubscribeCandlesAsync(subscription.Symbol, subscription.Extra));
+                                break;
+                            default:
+                                RaiseError($"Unknown channel type: {subscription.Channel}");
+                                break;
+                        }
+                    }
+
+                    // Wait for all subscriptions to complete
+                    if (subscriptionTasks.Count > 0)
+                    {
+                        var results = await Task.WhenAll(subscriptionTasks);
+                        var successCount = results.Count(r => r);
+                        
+                        if (successCount == 0)
+                        {
+                            RaiseError($"All subscriptions failed for {ExchangeName}");
+                            return false;
+                        }
+                        else if (successCount < results.Length)
+                        {
+                            RaiseError($"Some subscriptions failed: {successCount}/{results.Length} succeeded");
+                        }
+                        
+                        // Mark successful subscriptions as active
+                        foreach (var kvp in pendingSubscriptions)
+                        {
+                            kvp.Value.IsActive = true;
+                        }
+                    }
+
+                    return true;
+                }
+            }
+            catch (Exception ex)
+            {
+                RaiseError($"ConnectAndSubscribe failed: {ex.Message}");
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Check if exchange supports batch subscription (override in derived classes)
+        /// </summary>
+        protected virtual bool SupportsBatchSubscription()
+        {
+            return false; // Default: most exchanges send individual subscriptions
+        }
+
+        /// <summary>
+        /// Send batch subscriptions (override in exchanges that support it like Upbit)
+        /// </summary>
+        protected virtual async Task<bool> SendBatchSubscriptionsAsync(List<KeyValuePair<string, SubscriptionInfo>> subscriptions)
+        {
+            // Default implementation: not supported
+            RaiseError($"{ExchangeName} does not support batch subscriptions");
+            return false;
+        }
+
         public virtual async Task<bool> ConnectAsync()
         {
             try
@@ -611,6 +762,14 @@ namespace CCXT.Collector.Core.Abstractions
         protected string CreateSubscriptionKey(string channel, string symbol)
         {
             return $"{channel}:{symbol}";
+        }
+        
+        // Overloaded method to create a subscription key with interval
+        protected string CreateSubscriptionKey(string channel, string symbol, string interval)
+        {
+            return string.IsNullOrEmpty(interval) 
+                ? $"{channel}:{symbol}" 
+                : $"{channel}:{symbol}:{interval}";
         }
 
         // Virtual method for resubscribing (can be overridden by derived classes)

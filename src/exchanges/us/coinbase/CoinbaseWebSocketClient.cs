@@ -20,8 +20,8 @@ namespace CCXT.Collector.Coinbase
      *     https://docs.cloud.coinbase.com/exchange/reference
      *
      * WebSocket API:
-     *     https://docs.cloud.coinbase.com/exchange/docs/websocket-feed
-     *     https://docs.cloud.coinbase.com/exchange/docs/websocket-channels
+     *     https://docs.cdp.coinbase.com/exchange/websocket-feed/overview
+     *     https://docs.cdp.coinbase.com/exchange/websocket-feed/channels
      *
      * Fees:
      *     https://help.coinbase.com/en/exchange/trading-and-funding/exchange-fees
@@ -675,6 +675,96 @@ namespace CCXT.Collector.Coinbase
                 case "ticker":
                     await SubscribeTickerAsync(subscription.Symbol);
                     break;
+            }
+        }
+
+        #endregion
+
+        #region Batch Subscription Support
+
+        /// <summary>
+        /// Coinbase supports batch subscription - multiple product IDs and channels in single message
+        /// </summary>
+        protected override bool SupportsBatchSubscription()
+        {
+            return true;
+        }
+
+        /// <summary>
+        /// Send batch subscriptions for Coinbase - combines product IDs and channels efficiently
+        /// </summary>
+        protected override async Task<bool> SendBatchSubscriptionsAsync(List<KeyValuePair<string, SubscriptionInfo>> subscriptions)
+        {
+            try
+            {
+                // Group subscriptions by channel type
+                var channelGroups = subscriptions
+                    .GroupBy(s => s.Value.Channel.ToLower())
+                    .ToList();
+
+                var channels = new List<object>();
+                var allProductIds = new List<string>();
+
+                foreach (var channelGroup in channelGroups)
+                {
+                    var channel = channelGroup.Key;
+                    var productIds = channelGroup
+                        .Select(s => ConvertToCoinbaseSymbol(s.Value.Symbol))
+                        .Distinct()
+                        .ToArray();
+
+                    if (productIds.Length == 0)
+                        continue;
+
+                    // Map channel names to Coinbase channel format
+                    string channelName = channel switch
+                    {
+                        "orderbook" or "depth" => "level2",
+                        "trades" or "trade" => "matches",
+                        "ticker" => "ticker",
+                        "candles" or "kline" or "candlestick" => null, // Not supported via WebSocket
+                        _ => channel
+                    };
+
+                    if (channelName == null)
+                        continue; // Skip unsupported channels
+
+                    // Add channel with specific product IDs
+                    channels.Add(new
+                    {
+                        name = channelName,
+                        product_ids = productIds
+                    });
+
+                    // Collect all product IDs for global subscription
+                    allProductIds.AddRange(productIds);
+                }
+
+                if (channels.Count == 0)
+                    return true;
+
+                // Always include heartbeat channel
+                channels.Add("heartbeat");
+
+                // Create Coinbase subscription message
+                // Can specify product_ids globally or per channel
+                var subscriptionMessage = new
+                {
+                    type = "subscribe",
+                    product_ids = allProductIds.Distinct().ToArray(),
+                    channels = channels.ToArray()
+                };
+
+                await SendMessageAsync(JsonSerializer.Serialize(subscriptionMessage));
+
+                RaiseError($"Sent Coinbase batch subscription for {subscriptions.Count} subscriptions across {channels.Count - 1} channels");
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                RaiseError($"Batch subscription failed: {ex.Message}");
+                return false;
             }
         }
 

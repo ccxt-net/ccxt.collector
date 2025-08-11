@@ -7,6 +7,359 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased] - 2025-08-11
 
+### 🔄 Enhanced WebSocket Subscription Management
+
+Implemented batch subscription pattern for improved multi-market and multi-channel data streaming.
+
+### Added
+- **Batch Subscription Management**
+  - `AddSubscription()` method to queue subscriptions before connection
+  - `AddSubscriptions()` method for bulk subscription queueing
+  - `ConnectAndSubscribeAsync()` method to connect and subscribe all channels at once
+  - Support for multiple markets and data types in a single connection flow
+  - `SupportsBatchSubscription()` virtual method for exchange-specific behavior
+  - `SendBatchSubscriptionsAsync()` for exchanges requiring single-packet multi-market subscriptions
+  
+- **Comprehensive Testing Support**
+  - `TestComprehensiveSubscriptions()` method for multi-market multi-channel testing
+  - Support for 12+ simultaneous market subscriptions per exchange
+  - Real-time validation of data from multiple markets and channels
+  - Exchange-specific comprehensive symbol configuration
+
+### Changed
+- **WebSocket Connection Pattern**
+  - Migrated from connect-then-subscribe to batch-subscribe-then-connect pattern
+  - Improved efficiency by reducing round-trip time for multiple subscriptions
+  - Better resource management with pre-planned subscription allocation
+  - Enhanced error handling for partial subscription failures
+  - Utilized existing `_subscriptions` ConcurrentDictionary for subscription management
+  - Added `IsActive` flag to track subscription state (pending vs active)
+
+- **Exchange-Specific Implementations**
+  - **Upbit (Korea)**: 
+    - Implemented special batch subscription to send ALL subscriptions in a SINGLE WebSocket message
+    - Must include all channels (orderbook, trades, ticker) and all markets in one message
+    - Sending separate subscription messages will override previous subscriptions
+    - Format: `[{ticket}, {type, codes}, {format}, {type, codes}, {format}...]`
+  - **Bithumb (Korea)**: 
+    - Added batch subscription support with channel-specific message types
+    - Allows separate subscription messages per channel type
+    - Each message can contain multiple markets in the `symbols` array
+  - **Coinbase**: 
+    - Added flexible batch subscription support with global and per-channel product ID specification
+    - Can specify product IDs globally or per individual channel
+    - Automatic heartbeat channel inclusion for connection monitoring
+    - Must subscribe within 5 seconds of WebSocket connection
+  - **OKX (Global)**: 
+    - Implemented batch subscription with unified args array
+    - Supports multiple channels and symbols in single subscription message
+    - Format: `{op: "subscribe", args: [{channel, instId}, {channel, instId}...]}`
+    - Can mix different channel types (books, trades, tickers) and symbols in one message
+  - **Korbit (Korea)**: 
+    - Implemented batch subscription with comma-separated symbols in channel strings
+    - Format: `ticker:btc_krw,eth_krw,xrp_krw` for multiple markets per channel
+    - Supports combining multiple symbols in a single channel subscription
+    - Includes timestamp and accessToken fields in subscription message
+  - **Huobi (Global)**: 
+    - Implemented batch subscription with individual message sending optimization
+    - Sends separate subscription message for each channel/symbol combination
+    - Format: `{"sub": "market.btcusdt.ticker", "id": "id1"}`
+    - Includes 50ms delay between messages to avoid overwhelming the server
+    - Uses GZIP compression for WebSocket communication
+  - **Crypto.com (Global)**: 
+    - Implemented batch subscription with up to 100 channels per message
+    - Automatically splits large subscription sets into multiple messages
+    - Format: `{"id": 1, "method": "subscribe", "params": {"channels": ["ticker.BTC_USDT", "book.ETH_USDT.10", ...]}, "nonce": 123456}`
+    - Includes 100ms delay between batch messages when multiple are needed
+    - Efficient handling of large-scale multi-market subscriptions
+  - Enhanced efficiency for exchanges requiring batch subscription formats
+
+### 📋 Detailed Batch Subscription Patterns
+
+#### Pattern Overview
+Different exchanges have different requirements for WebSocket subscriptions. The batch subscription feature provides an optimized way to handle these different patterns through a unified interface:
+
+```csharp
+// Unified interface for all exchanges
+client.AddSubscription("orderbook", "BTC/USDT");
+client.AddSubscription("trades", "BTC/USDT");
+await client.ConnectAndSubscribeAsync();
+```
+
+#### Exchange-Specific Message Formats
+
+1. **Upbit (Korea)** - Single message with ALL subscriptions:
+```json
+[
+  {"ticket": "unique-id"},
+  {"type": "orderbook", "codes": ["KRW-BTC", "KRW-ETH"]},
+  {"format": "SIMPLE"},
+  {"type": "trade", "codes": ["KRW-BTC"]},
+  {"format": "SIMPLE"}
+]
+```
+
+2. **Bithumb (Korea)** - Separate messages per channel type:
+```json
+{
+  "type": "ticker",
+  "symbols": ["BTC_KRW", "ETH_KRW", "XRP_KRW"],
+  "tickTypes": ["24H"]
+}
+```
+
+3. **Coinbase** - Flexible product ID specification:
+```json
+{
+  "type": "subscribe",
+  "product_ids": ["BTC-USD", "ETH-USD", "SOL-USD"],
+  "channels": [
+    "heartbeat",
+    {
+      "name": "level2",
+      "product_ids": ["BTC-USD", "ETH-USD"]
+    }
+  ]
+}
+```
+
+4. **OKX (Global)** - Unified args array:
+```json
+{
+  "op": "subscribe",
+  "args": [
+    {"channel": "books", "instId": "BTC-USDT"},
+    {"channel": "trades", "instId": "BTC-USDT"},
+    {"channel": "tickers", "instId": "ETH-USDT"}
+  ]
+}
+```
+
+5. **Korbit (Korea)** - Comma-separated symbols in channel strings:
+```json
+{
+  "accessToken": null,
+  "timestamp": 1234567890,
+  "event": "korbit:subscribe",
+  "data": {
+    "channels": ["ticker:btc_krw,eth_krw,xrp_krw"]
+  }
+}
+```
+
+6. **Huobi (Global)** - Individual messages for each subscription:
+```json
+{"sub": "market.btcusdt.ticker", "id": "id1"}
+{"sub": "market.ethusdt.ticker", "id": "id2"}
+```
+
+7. **Crypto.com (Global)** - Batch up to 100 channels per message:
+```json
+{
+  "id": 1,
+  "method": "subscribe",
+  "params": {
+    "channels": ["ticker.BTC_USDT", "ticker.ETH_USDT", ...]
+  },
+  "nonce": 1234567890
+}
+```
+
+8. **Coinone (Korea)** - Individual messages for each subscription:
+```json
+{
+  "request_type": "SUBSCRIBE",
+  "channel": "ORDERBOOK",
+  "topic": {
+    "quote_currency": "krw",
+    "target_currency": "btc"
+  },
+  "format": "DEFAULT"
+}
+```
+
+9. **Gate.io (Global)** - Multiple symbols in payload array per channel:
+```json
+{
+  "time": 1234567890,
+  "channel": "spot.tickers",
+  "event": "subscribe",
+  "payload": ["BTC_USDT", "ETH_USDT", "SOL_USDT"]
+}
+```
+
+10. **Binance (Global)** - Multiple streams in params array:
+```json
+{
+  "method": "SUBSCRIBE",
+  "params": [
+    "btcusdt@depth@100ms",
+    "btcusdt@trade",
+    "ethusdt@ticker",
+    "ethusdt@kline_1h"
+  ],
+  "id": 1234567890
+}
+```
+
+11. **Bitget (Global)** - Multiple args in single message:
+```json
+{
+  "op": "subscribe",
+  "args": [
+    {"instType": "SPOT", "channel": "books", "instId": "BTCUSDT_SPBL"},
+    {"instType": "SPOT", "channel": "trade", "instId": "BTCUSDT_SPBL"},
+    {"instType": "SPOT", "channel": "ticker", "instId": "ETHUSDT_SPBL"}
+  ]
+}
+```
+
+#### Implementation Details
+
+**Virtual Methods for Custom Behavior**:
+```csharp
+// Indicates if exchange supports batch subscriptions
+protected virtual bool SupportsBatchSubscription()
+
+// Custom batch subscription implementation
+protected virtual async Task<bool> SendBatchSubscriptionsAsync(
+    List<KeyValuePair<string, SubscriptionInfo>> subscriptions)
+```
+
+**Benefits**:
+- **Efficiency**: Reduces connection setup time and network overhead
+- **Compliance**: Meets each exchange's specific requirements
+- **Simplicity**: Unified interface for different patterns
+- **Flexibility**: Supports both batch and individual subscription modes
+- **Optimization**: Exchange-specific optimizations while maintaining common interface
+
+**Performance Considerations**:
+- **Upbit**: Critical to send all subscriptions at once (overrides on resend)
+- **Bithumb**: Can optimize by grouping same channel types
+- **OKX**: Efficient single message reduces latency
+- **Korbit**: Comma-separation reduces message count
+- **Huobi**: 50ms delay prevents rate limiting issues
+- **Crypto.com**: 100-channel limit balances efficiency and server load
+- **Coinone**: 50ms delay between messages respects 20 connections per IP limit
+- **Gate.io**: Groups symbols by channel, handles special orderbook/candle formats
+- **Binance**: Up to 200 streams per message, automatic batching for larger sets
+- **Bitget**: Up to 100 args per message, unified args array for all channels
+
+### 🧪 Comprehensive Test Suite Implementation
+
+Implemented a complete XUnit test framework covering all 15 major exchanges with standardized WebSocket connectivity and data reception tests.
+
+### Added
+- **Test Infrastructure**
+  - `WebSocketTestBase` - Reusable base class for all exchange tests with common test methods
+  - `ExchangeTestCollection` - XUnit collection for sequential test execution to avoid rate limiting
+  - `ExchangeTestFixture` - Shared fixture with test symbols and configuration for each exchange
+  - Comprehensive test documentation in `tests/README.md`
+
+- **Exchange Test Coverage** - All 15 major exchanges now have complete test implementations:
+  - ✅ Binance, Bitget, Bithumb, Bittrex (closed), Bybit
+  - ✅ Coinbase, Coinone, Crypto.com
+  - ✅ Gate.io, Huobi
+  - ✅ Korbit, Kucoin
+  - ✅ OKX, Upbit
+  - Each exchange has 5 standard tests: Connection, Orderbook, Trade, Ticker, Multiple Subscriptions
+
+- **Test Features**
+  - Unified testing framework with consistent test structure across all exchanges
+  - Exchange-specific test symbols (KRW pairs for Korean exchanges, USDT/USD for global)
+  - Comprehensive validation (orderbook integrity, trade data, ticker spreads)
+  - Special handling for closed exchanges (Bittrex)
+  - Performance tracking with message counters and latency monitoring
+  - XUnit traits for flexible test filtering by exchange, region, or test type
+
+- **Test Categories**
+  - **Connection Tests**: WebSocket connection establishment, timeout validation, error handling
+  - **Orderbook Tests**: Real-time updates with bid/ask validation, price ordering, spread checks
+  - **Trade Tests**: Stream reception, data integrity, side type validation
+  - **Ticker Tests**: Price updates, spread validation, volume checks
+  - **Multiple Subscriptions**: Concurrent channels, data aggregation, performance under load
+
+- **Test Configuration**
+  - **Timeouts**: Connection (5s), Data Reception (10s), Test Duration (10s)
+  - **Test Symbols by Market**:
+    - Global Exchanges: BTC/USDT, ETH/USDT, exchange-specific tokens
+    - Korean Exchanges: BTC/KRW, ETH/KRW, XRP/KRW
+    - US Exchanges: BTC/USD, ETH/USD, SOL/USD
+
+- **Test Validation Rules**
+  - **Orderbook**: Bid prices descending, ask prices ascending, positive spread, non-empty levels
+  - **Trade**: Positive prices/quantities, valid trade IDs, correct side types
+  - **Ticker**: Ask >= Bid price, valid price ranges, non-zero volumes
+
+### Changed
+- **Test Organization**
+  - Migrated from custom test implementations to standardized base class approach
+  - Updated existing tests (Binance, Bithumb, Upbit) to use new framework
+  - Simplified test structure for better maintainability
+
+### Fixed
+- **Test Compilation Issues**
+  - Fixed namespace references for all exchange clients
+  - Resolved dictionary indexer issues with thread-safe incrementing
+  - Added missing `System.Linq` reference for collection operations
+- **Test Runtime Issues** (2025-08-11)
+  - Fixed TestOutputHelper disposal error by implementing SafeWriteLine method with disposal flag
+  - Added proper Skip attributes to Kucoin tests since WebSocket implementation is incomplete
+  - Ensured thread-safe counter operations using lock statements instead of Interlocked operations on dictionary indexers
+
+### Test Execution
+
+Run tests using the following commands:
+```bash
+# Run all tests
+dotnet test
+
+# Test specific exchange
+dotnet test --filter "Exchange=Binance"
+
+# Test by region (Korean exchanges)
+dotnet test --filter "Region=Korea"
+
+# Test by type (Connection tests only)
+dotnet test --filter "Type=Connection"
+
+# Run with detailed output
+dotnet test --logger "console;verbosity=detailed"
+```
+
+### Test Coverage Status
+
+| Exchange | Region | Connection | Orderbook | Trade | Ticker | Multiple Subs | Status |
+|----------|--------|------------|-----------|-------|--------|---------------|---------|
+| Binance | Global | ✅ | ✅ | ✅ | ✅ | ✅ | Active |
+| Bitget | China | ✅ | ✅ | ✅ | ✅ | ✅ | Active |
+| Bithumb | Korea | ✅ | ✅ | ✅ | ✅ | ✅ | Active |
+| Bittrex | US | ⚠️ | - | - | - | - | Closed (Dec 2023) |
+| Bybit | Singapore | ✅ | ✅ | ✅ | ✅ | ✅ | Active |
+| Coinbase | US | ✅ | ✅ | ✅ | ✅ | ✅ | Active |
+| Coinone | Korea | ✅ | ✅ | ✅ | ✅ | ✅ | Active |
+| Crypto.com | US | ✅ | ✅ | ✅ | ✅ | ✅ | Active |
+| Gate.io | China | ✅ | ✅ | ✅ | ✅ | ✅ | Active |
+| Huobi | China | ✅ | ✅ | ✅ | ✅ | ✅ | Active |
+| Korbit | Korea | ✅ | ✅ | ✅ | ✅ | ✅ | Active |
+| Kucoin | China | ⏸️ | ⏸️ | ⏸️ | ⏸️ | ⏸️ | Incomplete Implementation |
+| OKX | China | ✅ | ✅ | ✅ | ✅ | ✅ | Active |
+| Upbit | Korea | ✅ | ✅ | ✅ | ✅ | ✅ | Active |
+
+### Adding New Exchange Tests
+
+To add tests for a new exchange:
+1. Create test file in `tests/exchanges/[ExchangeName]Tests.cs`
+2. Inherit from `WebSocketTestBase`
+3. Implement `CreateClient()` and `ConnectClientAsync()` methods
+4. Use base class test methods or add exchange-specific tests
+
+### Known Issues
+- **Bittrex**: Exchange closed on December 4, 2023 - tests verify proper error handling
+- **Kucoin**: WebSocket implementation is incomplete - tests are skipped with `[Fact(Skip)]` attributes
+- **Rate Limiting**: Some exchanges may rate limit during rapid testing
+- **Network Latency**: Tests may fail on slow connections - adjust timeouts if needed
+
 ### 🎯 Sample Project Simplified
 
 Simplified the samples project to focus solely on WebSocket connectivity testing for all 15 exchanges.
@@ -826,6 +1179,147 @@ For detailed migration instructions, see [API_REFERENCE.md](docs/API_REFERENCE.m
 - Upbit WebSocket limited to 5 concurrent subscriptions
 - Bithumb doesn't support explicit unsubscribe (requires resubscription)
 - Some exchanges may have connection limits per IP
+
+## 🧪 WebSocket Test Suite (samples/ccxt.samples)
+
+Comprehensive WebSocket connection and data reception test suite for validating exchange implementations.
+
+### Test Options
+
+#### 1. Test All Exchanges
+- 15개 모든 거래소의 기본 연결 및 데이터 수신 테스트
+- 각 거래소당 1개 마켓의 orderbook, trades, ticker 데이터 확인
+- 전체 결과 요약 제공
+
+#### 2. Test Single Exchange
+- 특정 거래소 선택하여 상세 테스트
+- 데이터 타입별 수신 상태 확인
+- 개별 거래소 문제 진단 시 유용
+
+#### 3. Quick Connectivity Check
+- 모든 거래소의 연결 상태만 빠르게 확인
+- 병렬 실행으로 빠른 결과 제공
+- 네트워크 상태 및 거래소 서비스 상태 확인
+
+#### 4. Test Batch Subscriptions ⭐ **NEW**
+- **배치 구독 기능 테스트**
+- `AddSubscription()` + `ConnectAndSubscribeAsync()` 패턴 검증
+- 여러 마켓과 데이터 타입을 한 번에 구독하는 기능 테스트
+- 거래소별 배치 구독 최적화 패턴 확인
+
+#### 5. Test Multi-Market Data Reception ⭐ **NEW**
+- **다중 마켓 데이터 수신 테스트**
+- 동시에 여러 마켓에서 데이터 수신 여부 확인
+- 마켓별 데이터 수신 카운트 표시
+- 거래소별 다중 마켓 처리 성능 확인
+
+### Supported Exchanges
+
+#### Korean Exchanges (KRW Markets)
+- **Upbit**: BTC/KRW, ETH/KRW, XRP/KRW
+- **Bithumb**: BTC/KRW, ETH/KRW, XRP/KRW
+- **Coinone**: BTC/KRW, ETH/KRW, XRP/KRW
+- **Korbit**: BTC/KRW, ETH/KRW, XRP/KRW
+- **Gopax**: BTC/KRW, ETH/KRW, XRP/KRW
+
+#### Global Exchanges (USDT Markets)
+- **Binance**: BTC/USDT, ETH/USDT, SOL/USDT
+- **Bitget**: BTC/USDT, ETH/USDT, SOL/USDT
+- **Bybit**: BTC/USDT, ETH/USDT, SOL/USDT
+- **OKX**: BTC/USDT, ETH/USDT, SOL/USDT
+- **Huobi**: BTC/USDT, ETH/USDT, SOL/USDT
+- **Gate.io**: BTC/USDT, ETH/USDT, SOL/USDT
+- **Kucoin**: BTC/USDT, ETH/USDT, SOL/USDT
+- **Crypto.com**: BTC/USDT, ETH/USDT, SOL/USDT
+
+#### US Exchanges (USD Markets)
+- **Coinbase**: BTC/USD, ETH/USD, SOL/USD
+
+#### Other
+- **Bittrex**: ⚠️ Exchange closed (December 2023)
+
+### Batch Subscription Test Details
+
+#### Test Target Exchanges (11 supported)
+배치 구독을 지원하는 거래소들을 대상으로 테스트:
+
+1. **Upbit** - 단일 메시지에 모든 구독 포함
+2. **Bithumb** - 채널별 그룹화 메시지
+3. **Binance** - 최대 200개 스트림 배치
+4. **Bitget** - 최대 100개 args 배치
+5. **Coinbase** - 글로벌/채널별 product ID 지정
+6. **OKX** - 통합 args 배열
+7. **Huobi** - 개별 메시지 + 50ms 지연
+8. **Crypto.com** - 최대 100개 채널/메시지
+9. **Gate.io** - 채널별 symbol 그룹화
+10. **Korbit** - 쉼표로 구분된 symbol
+11. **Coinone** - 개별 메시지 + 50ms 지연
+
+#### Test Scenarios
+각 거래소당:
+- 2개 마켓 (BTC, ETH)
+- 3개 데이터 타입 (orderbook, trades, ticker)
+- 총 6개 구독을 배치로 처리
+- 8초 내 데이터 수신 확인
+
+### Running Tests
+
+```bash
+cd samples
+dotnet run
+```
+
+### Expected Results
+
+```
+=====================================
+  CCXT.Collector WebSocket Test
+=====================================
+
+Select test option:
+1. Test All Exchanges
+2. Test Single Exchange  
+3. Quick Connectivity Check
+4. Test Batch Subscriptions
+5. Test Multi-Market Data Reception
+0. Exit
+
+Your choice: 4
+
+Testing Batch Subscription functionality...
+
+Testing Upbit          batch subscription... ✅ PASS (3 data types)
+Testing Bithumb        batch subscription... ✅ PASS (3 data types)
+Testing Binance        batch subscription... ✅ PASS (3 data types)
+Testing Bitget         batch subscription... ✅ PASS (2 data types)
+Testing Coinbase       batch subscription... ✅ PASS (3 data types)
+
+=== Batch Subscription Test Summary ===
+Passed: 11/11
+
+Data reception summary:
+  • Upbit: 3/3 data types
+  • Bithumb: 3/3 data types  
+  • Binance: 3/3 data types
+  • Coinbase: 3/3 data types
+```
+
+### Troubleshooting
+
+#### Connection Failures
+1. 인터넷 연결 상태 확인
+2. 방화벽 설정 확인 (WebSocket 포트 허용)
+3. 거래소 서비스 상태 확인
+
+#### Data Reception Failures
+1. 마켓 심볼 형식 확인 (BTC/USDT, BTC/KRW 등)
+2. 거래소별 지원 데이터 타입 확인
+3. 네트워크 지연으로 인한 타임아웃 가능성
+
+#### Batch Subscription Failures
+1. 거래소별 구독 제한 확인
+2. 연결 후 구독 순서 확인
+3. 메시지 형식 및 프로토콜 호환성 확인
 
 ## Future Roadmap
 

@@ -596,5 +596,135 @@ namespace CCXT.Collector.Gateio
         }
 
         #endregion
+
+        #region Batch Subscription Support
+
+        /// <summary>
+        /// Gate.io supports batch subscription - multiple symbols in payload array
+        /// </summary>
+        protected override bool SupportsBatchSubscription()
+        {
+            return true;
+        }
+
+        /// <summary>
+        /// Send batch subscriptions for Gate.io - groups symbols by channel type
+        /// </summary>
+        protected override async Task<bool> SendBatchSubscriptionsAsync(List<KeyValuePair<string, SubscriptionInfo>> subscriptions)
+        {
+            try
+            {
+                // Group subscriptions by channel type
+                var groupedByChannel = subscriptions
+                    .GroupBy(s => s.Value.Channel.ToLower())
+                    .ToDictionary(g => g.Key, g => g.Select(s => s.Value.Symbol).Distinct().ToList());
+
+                foreach (var channelGroup in groupedByChannel)
+                {
+                    var channel = channelGroup.Key;
+                    var symbols = channelGroup.Value
+                        .Select(s => ConvertToExchangeSymbol(s))
+                        .Distinct()
+                        .ToArray();
+
+                    if (symbols.Length == 0)
+                        continue;
+
+                    // Map channel names to Gate.io channel format
+                    string gateChannel = channel switch
+                    {
+                        "orderbook" or "depth" => "spot.order_book",
+                        "trades" or "trade" => "spot.trades",
+                        "ticker" => "spot.tickers",
+                        "candles" or "candlestick" => "spot.candlesticks",
+                        _ => $"spot.{channel}"
+                    };
+
+                    // Handle special cases for channels that need interval data
+                    if (gateChannel == "spot.candlesticks")
+                    {
+                        // For candlesticks, we need to group by interval as well
+                        var candleGroups = subscriptions
+                            .Where(s => s.Value.Channel.ToLower().Contains("candle"))
+                            .GroupBy(s => s.Value.Extra ?? "1m");
+
+                        foreach (var intervalGroup in candleGroups)
+                        {
+                            var interval = ConvertToExchangeInterval(intervalGroup.Key);
+                            var candleSymbols = intervalGroup
+                                .Select(s => ConvertToExchangeSymbol(s.Value.Symbol))
+                                .Distinct()
+                                .ToArray();
+
+                            // Gate.io candlesticks payload format: [interval, symbol1, symbol2, ...]
+                            var candlePayload = new List<string> { interval };
+                            candlePayload.AddRange(candleSymbols);
+
+                            var candleRequest = new
+                            {
+                                time = DateTimeOffset.UtcNow.ToUnixTimeSeconds(),
+                                channel = gateChannel,
+                                @event = "subscribe",
+                                payload = candlePayload.ToArray()
+                            };
+
+                            await SendMessageAsync(JsonSerializer.Serialize(candleRequest));
+                            RaiseError($"Subscribed to {gateChannel} for {candleSymbols.Length} symbols with interval {interval}");
+                        }
+                    }
+                    else if (gateChannel == "spot.order_book")
+                    {
+                        // For order book, we need to include depth level
+                        // Gate.io format: ["symbol", "depth", "interval"]
+                        var orderbookPayload = new List<string>();
+                        foreach (var symbol in symbols)
+                        {
+                            orderbookPayload.Add(symbol);
+                            orderbookPayload.Add("20");  // Default depth
+                            orderbookPayload.Add("100ms"); // Default update interval
+                        }
+
+                        var orderbookRequest = new
+                        {
+                            time = DateTimeOffset.UtcNow.ToUnixTimeSeconds(),
+                            channel = gateChannel,
+                            @event = "subscribe",
+                            payload = orderbookPayload.ToArray()
+                        };
+
+                        await SendMessageAsync(JsonSerializer.Serialize(orderbookRequest));
+                        RaiseError($"Subscribed to {gateChannel} for {symbols.Length} symbols");
+                    }
+                    else
+                    {
+                        // Standard channels (trades, tickers) - just array of symbols
+                        var request = new
+                        {
+                            time = DateTimeOffset.UtcNow.ToUnixTimeSeconds(),
+                            channel = gateChannel,
+                            @event = "subscribe",
+                            payload = symbols
+                        };
+
+                        await SendMessageAsync(JsonSerializer.Serialize(request));
+                        RaiseError($"Subscribed to {gateChannel} for {symbols.Length} symbols: {string.Join(", ", symbols.Take(3))}{(symbols.Length > 3 ? "..." : "")}");
+                    }
+
+                    // Small delay between different channel subscriptions
+                    await Task.Delay(50);
+                }
+
+                RaiseError($"Completed Gate.io batch subscription for {subscriptions.Count} total subscriptions");
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                RaiseError($"Batch subscription failed: {ex.Message}");
+                return false;
+            }
+        }
+
+        #endregion
     }
 }

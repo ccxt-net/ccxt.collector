@@ -953,5 +953,78 @@ namespace CCXT.Collector.Okx
 
             return ((close - open) / open) * 100;
         }
+
+        #region Batch Subscription Support
+
+        /// <summary>
+        /// OKX supports batch subscription - multiple channels and symbols in one message
+        /// </summary>
+        protected override bool SupportsBatchSubscription()
+        {
+            return true;
+        }
+
+        /// <summary>
+        /// Send batch subscriptions for OKX - all channels and symbols in single args array
+        /// </summary>
+        protected override async Task<bool> SendBatchSubscriptionsAsync(List<KeyValuePair<string, SubscriptionInfo>> subscriptions)
+        {
+            try
+            {
+                // Build args array with all subscriptions
+                var args = new List<object>();
+                
+                foreach (var kvp in subscriptions)
+                {
+                    var subscription = kvp.Value;
+                    var instId = ConvertToOkxSymbol(subscription.Symbol);
+                    
+                    // Map channel names to OKX channel types
+                    string okxChannel = subscription.Channel.ToLower() switch
+                    {
+                        "orderbook" or "depth" => "books",
+                        "trades" or "trade" => "trades",
+                        "ticker" => "tickers",
+                        "candles" or "kline" => !string.IsNullOrEmpty(subscription.Extra) 
+                            ? $"candle{ConvertToChannelInterval(subscription.Extra)}" 
+                            : "candle1m",
+                        _ => subscription.Channel
+                    };
+
+                    // Add to args array
+                    args.Add(new
+                    {
+                        channel = okxChannel,
+                        instId = instId
+                    });
+                }
+
+                if (args.Count == 0)
+                    return true;
+
+                // Create subscription message with all channels and symbols
+                var subscriptionMessage = new
+                {
+                    op = "subscribe",
+                    args = args
+                };
+
+                // Send the batch subscription
+                var json = JsonSerializer.Serialize(subscriptionMessage);
+                await SendMessageAsync(json);
+                
+                // Log the batch subscription
+                RaiseError($"Sent OKX batch subscription with {args.Count} items");
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                RaiseError($"Batch subscription failed: {ex.Message}");
+                return false;
+            }
+        }
+
+        #endregion
     }
 }

@@ -1,6 +1,6 @@
 using System;
 using System.Threading.Tasks;
-using CCXT.Collector.Bithumb;
+using CCXT.Collector.Bybit;
 using CCXT.Collector.Core.Abstractions;
 using CCXT.Collector.Tests.Base;
 using Xunit;
@@ -9,27 +9,26 @@ using Xunit.Abstractions;
 namespace CCXT.Collector.Tests.Exchanges
 {
     /// <summary>
-    /// Test suite for Bithumb exchange WebSocket integration
+    /// Test suite for Bybit exchange WebSocket integration
     /// </summary>
     [Collection("Exchange Tests")]
     [Trait("Category", "Exchange")]
-    [Trait("Exchange", "Bithumb")]
-    [Trait("Region", "Korea")]
-    public class BithumbTests : WebSocketTestBase
+    [Trait("Exchange", "Bybit")]
+    public class BybitTests : WebSocketTestBase
     {
         private readonly ExchangeTestFixture _fixture;
 
-        public BithumbTests(ITestOutputHelper output, ExchangeTestFixture fixture) 
-            : base(output, "Bithumb")
+        public BybitTests(ITestOutputHelper output, ExchangeTestFixture fixture) 
+            : base(output, "Bybit")
         {
             _fixture = fixture;
             _testSymbols.Clear();
-            _testSymbols.AddRange(_fixture.GetTestSymbols("Bithumb"));
+            _testSymbols.AddRange(_fixture.GetTestSymbols("Bybit"));
         }
 
         protected override IWebSocketClient CreateClient()
         {
-            return new BithumbWebSocketClient();
+            return new BybitWebSocketClient();
         }
 
         protected override async Task<bool> ConnectClientAsync(IWebSocketClient client)
@@ -42,36 +41,36 @@ namespace CCXT.Collector.Tests.Exchanges
 
         [Fact]
         [Trait("Type", "Connection")]
-        public async Task Bithumb_WebSocket_Connection()
+        public async Task Bybit_WebSocket_Connection()
         {
             await TestWebSocketConnection();
-            _fixture.MarkExchangeTested("Bithumb", true);
+            _fixture.MarkExchangeTested("Bybit", true);
         }
 
         [Fact]
         [Trait("Type", "DataStream")]
-        public async Task Bithumb_Orderbook_Stream()
+        public async Task Bybit_Orderbook_Stream()
         {
             await TestOrderbookDataReception();
         }
 
         [Fact]
         [Trait("Type", "DataStream")]
-        public async Task Bithumb_Trade_Stream()
+        public async Task Bybit_Trade_Stream()
         {
             await TestTradeDataReception();
         }
 
         [Fact]
         [Trait("Type", "DataStream")]
-        public async Task Bithumb_Ticker_Stream()
+        public async Task Bybit_Ticker_Stream()
         {
             await TestTickerDataReception();
         }
 
         [Fact]
         [Trait("Type", "MultipleSubscriptions")]
-        public async Task Bithumb_Multiple_Subscriptions()
+        public async Task Bybit_Multiple_Subscriptions()
         {
             await TestMultipleSubscriptions();
         }

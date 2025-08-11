@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using CCXT.Collector.Service;
 
@@ -23,6 +24,21 @@ namespace CCXT.Collector.Core.Abstractions
         /// Authenticated connection status
         /// </summary>
         bool IsAuthenticated { get; }
+
+        /// <summary>
+        /// Add subscription for later batch processing
+        /// </summary>
+        void AddSubscription(string channel, string symbol, string interval = null);
+
+        /// <summary>
+        /// Add multiple subscriptions for batch processing
+        /// </summary>
+        void AddSubscriptions(List<(string channel, string symbol, string interval)> subscriptions);
+
+        /// <summary>
+        /// Connect to WebSocket and execute all pending subscriptions
+        /// </summary>
+        Task<bool> ConnectAndSubscribeAsync();
 
         /// <summary>
         /// Connect to WebSocket (public channels)

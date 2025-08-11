@@ -19,7 +19,11 @@ namespace CCXT.Collector.Bitget
      *     https://bitgetlimited.github.io/apidoc/en/spot/
      *
      * WebSocket API:
-     *     https://www.bitget.com/api-doc/spot/websocket/connect
+     *     https://www.bitget.com/api-doc/spot/websocket/public/Tickers-Channel
+     *     https://www.bitget.com/api-doc/spot/websocket/public/Candlesticks-Channel
+     *     https://www.bitget.com/api-doc/spot/websocket/public/Trades-Channel
+     *     https://www.bitget.com/api-doc/spot/websocket/public/Depth-Channel
+     *     https://www.bitget.com/api-doc/spot/websocket/public/Auction-Channel
      *
      * Fees:
      *     https://www.bitget.com/fee
@@ -927,5 +931,112 @@ namespace CCXT.Collector.Bitget
                 _ => 60000
             };
         }
+
+        #region Batch Subscription Support
+
+        /// <summary>
+        /// Bitget supports batch subscription - multiple args in single message
+        /// </summary>
+        protected override bool SupportsBatchSubscription()
+        {
+            return true;
+        }
+
+        /// <summary>
+        /// Send batch subscriptions for Bitget - combines multiple channels/symbols in args array
+        /// </summary>
+        protected override async Task<bool> SendBatchSubscriptionsAsync(List<KeyValuePair<string, SubscriptionInfo>> subscriptions)
+        {
+            try
+            {
+                // Build list of all subscription args
+                var args = new List<object>();
+                
+                foreach (var kvp in subscriptions)
+                {
+                    var subscription = kvp.Value;
+                    var instId = ConvertToExchangeSymbol(subscription.Symbol);
+                    
+                    // Map channel names to Bitget channel format
+                    string channelName = subscription.Channel.ToLower() switch
+                    {
+                        "orderbook" or "depth" => "books",
+                        "trades" or "trade" => "trade",
+                        "ticker" => "ticker",
+                        "candles" or "kline" or "candlestick" => !string.IsNullOrEmpty(subscription.Extra) 
+                            ? $"candle{ConvertToChannelInterval(subscription.Extra)}"
+                            : "candle1m",
+                        _ => subscription.Channel
+                    };
+
+                    // Create subscription arg object
+                    var arg = new
+                    {
+                        instType = "SPOT",
+                        channel = channelName,
+                        instId = instId
+                    };
+
+                    args.Add(arg);
+                }
+
+                if (args.Count == 0)
+                    return true;
+
+                // Bitget allows multiple args in a single subscription message
+                // Typical limit is around 100 subscriptions per connection
+                const int maxArgsPerMessage = 100;
+                
+                if (args.Count <= maxArgsPerMessage)
+                {
+                    // Send all args in one message
+                    var subscriptionMessage = new
+                    {
+                        op = "subscribe",
+                        args = args.ToArray()
+                    };
+
+                    await SendMessageAsync(JsonSerializer.Serialize(subscriptionMessage));
+                    RaiseError($"Sent Bitget batch subscription with {args.Count} channels");
+                }
+                else
+                {
+                    // Split into multiple messages if exceeding limit
+                    var messageCount = (args.Count + maxArgsPerMessage - 1) / maxArgsPerMessage;
+                    
+                    for (int i = 0; i < messageCount; i++)
+                    {
+                        var batch = args
+                            .Skip(i * maxArgsPerMessage)
+                            .Take(maxArgsPerMessage)
+                            .ToArray();
+
+                        var subscriptionMessage = new
+                        {
+                            op = "subscribe",
+                            args = batch
+                        };
+
+                        await SendMessageAsync(JsonSerializer.Serialize(subscriptionMessage));
+                        RaiseError($"Sent Bitget batch subscription {i + 1}/{messageCount} with {batch.Length} channels");
+                        
+                        // Small delay between batches if multiple messages
+                        if (i < messageCount - 1)
+                            await Task.Delay(100);
+                    }
+                }
+
+                RaiseError($"Completed Bitget batch subscription for {subscriptions.Count} total subscriptions");
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                RaiseError($"Batch subscription failed: {ex.Message}");
+                return false;
+            }
+        }
+
+        #endregion
     }
 }

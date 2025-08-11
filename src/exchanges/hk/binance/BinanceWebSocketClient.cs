@@ -18,8 +18,11 @@ namespace CCXT.Collector.Binance
          *     https://github.com/binance/binance-spot-api-docs
          *
          * WebSocket API:
-         *     https://binance-docs.github.io/apidocs/spot/en/#websocket-market-streams
-         *     https://github.com/binance/binance-spot-api-docs/blob/master/web-socket-streams.md
+         *     https://developers.binance.com/docs/binance-spot-api-docs/websocket-api/general-api-information
+         *     https://developers.binance.com/docs/binance-spot-api-docs/websocket-api/request-format
+         *     https://developers.binance.com/docs/binance-spot-api-docs/websocket-api/response-format
+         *     https://developers.binance.com/docs/binance-spot-api-docs/websocket-api/market-data-requests
+         *     https://developers.binance.com/docs/binance-spot-api-docs/websocket-api/trading-requests
          *
          * Fees:
          *     https://www.binance.com/en/fee/schedule
@@ -768,6 +771,110 @@ namespace CCXT.Collector.Binance
                 "EXPIRED" => OrderStatus.Expired,
                 _ => OrderStatus.Open
             };
+        }
+
+        #endregion
+
+        #region Batch Subscription Support
+
+        /// <summary>
+        /// Binance supports batch subscription - multiple streams in params array
+        /// </summary>
+        protected override bool SupportsBatchSubscription()
+        {
+            return true;
+        }
+
+        /// <summary>
+        /// Send batch subscriptions for Binance - combines multiple streams in single message
+        /// </summary>
+        protected override async Task<bool> SendBatchSubscriptionsAsync(List<KeyValuePair<string, SubscriptionInfo>> subscriptions)
+        {
+            try
+            {
+                // Build list of all stream names
+                var streamNames = new List<string>();
+                
+                foreach (var kvp in subscriptions)
+                {
+                    var subscription = kvp.Value;
+                    var binanceSymbol = ConvertToBinanceSymbol(subscription.Symbol).ToLower();
+                    
+                    // Map channel names to Binance stream format
+                    string streamName = subscription.Channel.ToLower() switch
+                    {
+                        "orderbook" or "depth" => $"{binanceSymbol}@depth@100ms",
+                        "trades" or "trade" => $"{binanceSymbol}@trade",
+                        "ticker" => $"{binanceSymbol}@ticker",
+                        "candles" or "kline" or "candlestick" => !string.IsNullOrEmpty(subscription.Extra) 
+                            ? $"{binanceSymbol}@kline_{ConvertToBinanceInterval(subscription.Extra)}"
+                            : $"{binanceSymbol}@kline_1h",
+                        "aggTrade" => $"{binanceSymbol}@aggTrade",
+                        "miniTicker" => $"{binanceSymbol}@miniTicker",
+                        "bookTicker" => $"{binanceSymbol}@bookTicker",
+                        _ => $"{binanceSymbol}@{subscription.Channel}"
+                    };
+
+                    streamNames.Add(streamName);
+                }
+
+                if (streamNames.Count == 0)
+                    return true;
+
+                // Binance allows multiple streams in a single subscription message
+                // Limit to 200 streams per connection (Binance's typical limit)
+                const int maxStreamsPerMessage = 200;
+                
+                if (streamNames.Count <= maxStreamsPerMessage)
+                {
+                    // Send all streams in one message
+                    var subscriptionMessage = new
+                    {
+                        method = "SUBSCRIBE",
+                        @params = streamNames.ToArray(),
+                        id = DateTime.UtcNow.Ticks
+                    };
+
+                    await SendMessageAsync(JsonSerializer.Serialize(subscriptionMessage));
+                    RaiseError($"Sent Binance batch subscription with {streamNames.Count} streams");
+                }
+                else
+                {
+                    // Split into multiple messages if exceeding limit
+                    var messageCount = (streamNames.Count + maxStreamsPerMessage - 1) / maxStreamsPerMessage;
+                    
+                    for (int i = 0; i < messageCount; i++)
+                    {
+                        var batch = streamNames
+                            .Skip(i * maxStreamsPerMessage)
+                            .Take(maxStreamsPerMessage)
+                            .ToArray();
+
+                        var subscriptionMessage = new
+                        {
+                            method = "SUBSCRIBE",
+                            @params = batch,
+                            id = DateTime.UtcNow.Ticks + i
+                        };
+
+                        await SendMessageAsync(JsonSerializer.Serialize(subscriptionMessage));
+                        RaiseError($"Sent Binance batch subscription {i + 1}/{messageCount} with {batch.Length} streams");
+                        
+                        // Small delay between batches if multiple messages
+                        if (i < messageCount - 1)
+                            await Task.Delay(100);
+                    }
+                }
+
+                RaiseError($"Completed Binance batch subscription for {subscriptions.Count} total subscriptions");
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                RaiseError($"Batch subscription failed: {ex.Message}");
+                return false;
+            }
         }
 
         #endregion

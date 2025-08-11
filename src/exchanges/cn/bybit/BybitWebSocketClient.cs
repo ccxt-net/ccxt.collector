@@ -19,7 +19,11 @@ namespace CCXT.Collector.Bybit
      *
      * WebSocket API:
      *     https://bybit-exchange.github.io/docs/v5/ws/connect
-     *     https://bybit-exchange.github.io/docs/v5/ws/public/orderbook
+     *     https://bybit-exchange.github.io/docs/v5/spread/websocket/public/orderbook
+     *     https://bybit-exchange.github.io/docs/v5/spread/websocket/public/trade
+     *     https://bybit-exchange.github.io/docs/v5/spread/websocket/public/ticker
+     *     https://bybit-exchange.github.io/docs/v5/spread/websocket/private/order
+     *     https://bybit-exchange.github.io/docs/v5/spread/websocket/private/execution
      *
      * Fees:
      *     https://www.bybit.com/en-US/help-center/bybitHC_Article?id=360039261154

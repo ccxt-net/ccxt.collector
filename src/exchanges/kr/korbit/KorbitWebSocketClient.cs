@@ -7,6 +7,7 @@ using CCXT.Collector.Core.Abstractions;
 using CCXT.Collector.Service;
 using System.Text.Json;
 using CCXT.Collector.Library;
+using CCXT.Collector.Models.WebSocket;
 
 namespace CCXT.Collector.Korbit
 {
@@ -651,5 +652,91 @@ namespace CCXT.Collector.Korbit
                 return false;
             }
         }
+
+        #region Batch Subscription Support
+
+        /// <summary>
+        /// Korbit supports batch subscription - multiple symbols with comma separation in channel strings
+        /// </summary>
+        protected override bool SupportsBatchSubscription()
+        {
+            return true;
+        }
+
+        /// <summary>
+        /// Send batch subscriptions for Korbit - multiple symbols comma-separated per channel type
+        /// Example: 'ticker:btc_krw,eth_krw,xrp_krw'
+        /// </summary>
+        protected override async Task<bool> SendBatchSubscriptionsAsync(List<KeyValuePair<string, SubscriptionInfo>> subscriptions)
+        {
+            try
+            {
+                // Group subscriptions by channel type
+                var groupedByChannel = subscriptions
+                    .GroupBy(s => s.Value.Channel.ToLower())
+                    .ToList();
+
+                // Build channels array with all subscriptions
+                var channels = new List<string>();
+
+                foreach (var channelGroup in groupedByChannel)
+                {
+                    var channel = channelGroup.Key;
+                    var symbols = channelGroup
+                        .Select(s => ConvertSymbol(s.Value.Symbol))
+                        .Distinct()
+                        .ToList();
+
+                    if (symbols.Count == 0)
+                        continue;
+
+                    // Map channel names to Korbit channel types
+                    string korbitChannel = channel switch
+                    {
+                        "orderbook" or "depth" => "orderbook",
+                        "trades" or "trade" => "transaction",
+                        "ticker" => "ticker",
+                        _ => channel
+                    };
+
+                    // Create channel string with comma-separated symbols
+                    // Example: "ticker:btc_krw,eth_krw,xrp_krw"
+                    var channelString = $"{korbitChannel}:{string.Join(",", symbols)}";
+                    channels.Add(channelString);
+
+                    RaiseError($"Added {korbitChannel} subscription for {symbols.Count} markets: {string.Join(", ", symbols.Take(3))}{(symbols.Count > 3 ? "..." : "")}");
+                }
+
+                if (channels.Count == 0)
+                    return true;
+
+                // Create subscription message with all channels
+                var subscribeMessage = new
+                {
+                    accessToken = (string)null,  // null for public channels
+                    timestamp = TimeExtension.UnixTime,
+                    @event = "korbit:subscribe",
+                    data = new
+                    {
+                        channels = channels.ToArray()
+                    }
+                };
+
+                // Send the batch subscription
+                var json = JsonSerializer.Serialize(subscribeMessage);
+                await SendMessageAsync(json);
+
+                RaiseError($"Sent Korbit batch subscription with {channels.Count} channel groups");
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                RaiseError($"Batch subscription failed: {ex.Message}");
+                return false;
+            }
+        }
+
+        #endregion
     }
 }

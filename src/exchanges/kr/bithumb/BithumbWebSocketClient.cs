@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using CCXT.Collector.Core.Abstractions;
 using CCXT.Collector.Library;
 using CCXT.Collector.Service;
+using CCXT.Collector.Models.WebSocket;
 using System.Text.Json;
 
 namespace CCXT.Collector.Bithumb
@@ -18,8 +19,13 @@ namespace CCXT.Collector.Bithumb
      *     https://api.bithumb.com/
      * 
      * WebSocket API:
-     *     https://apidocs.bithumb.com/docs/websocket_api
-     *     wss://pubwss.bithumb.com/pub/ws
+     *     https://apidocs.bithumb.com/v2.1.5/reference/%EA%B8%B0%EB%B3%B8-%EC%A0%95%EB%B3%B4
+     *     https://apidocs.bithumb.com/v2.1.5/reference/%EC%9A%94%EC%B2%AD-%ED%8F%AC%EB%A7%B7
+     *     https://apidocs.bithumb.com/v2.1.5/reference/%ED%98%84%EC%9E%AC%EA%B0%80-ticker
+     *     https://apidocs.bithumb.com/v2.1.5/reference/%EC%B2%B4%EA%B2%B0-trade
+     *     https://apidocs.bithumb.com/v2.1.5/reference/%ED%98%B8%EA%B0%80-orderbook
+     *     https://apidocs.bithumb.com/v2.1.5/reference/%EB%82%B4-%EC%A3%BC%EB%AC%B8-%EB%B0%8F-%EC%B2%B4%EA%B2%B0-myorder
+     *     https://apidocs.bithumb.com/v2.1.5/reference/%EB%82%B4-%EC%9E%90%EC%82%B0-myasset
      * 
      * Supported Markets: KRW
      * 
@@ -647,6 +653,71 @@ namespace CCXT.Collector.Bithumb
             catch (Exception ex)
             {
                 RaiseError($"Subscribe candles error: {ex.Message}");
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Bithumb supports batch subscription - multiple markets in one message
+        /// Note: Unlike Upbit, Bithumb allows separate subscription messages per channel
+        /// </summary>
+        protected override bool SupportsBatchSubscription()
+        {
+            return true;
+        }
+
+        /// <summary>
+        /// Send batch subscriptions for Bithumb - can send separate messages per channel
+        /// </summary>
+        protected override async Task<bool> SendBatchSubscriptionsAsync(List<KeyValuePair<string, SubscriptionInfo>> subscriptions)
+        {
+            try
+            {
+                // Group subscriptions by channel type
+                var groupedByChannel = subscriptions
+                    .GroupBy(s => s.Value.Channel.ToLower())
+                    .ToList();
+
+                foreach (var channelGroup in groupedByChannel)
+                {
+                    var channel = channelGroup.Key;
+                    var symbols = channelGroup
+                        .Select(s => ConvertSymbol(s.Value.Symbol))
+                        .Distinct()
+                        .ToArray();
+
+                    if (symbols.Length == 0)
+                        continue;
+
+                    // Map channel names to Bithumb message types
+                    string messageType = channel switch
+                    {
+                        "orderbook" or "depth" => "orderbookdepth",
+                        "trades" or "trade" => "transaction",
+                        "ticker" => "ticker",
+                        _ => channel
+                    };
+
+                    // Create subscription message with all symbols for this channel
+                    var subscribeMessage = new
+                    {
+                        type = messageType,
+                        symbols = symbols  // Send all symbols at once
+                    };
+
+                    // Send the batch subscription for this channel
+                    var json = JsonSerializer.Serialize(subscribeMessage);
+                    await SendMessageAsync(json);
+                    
+                    // Log the batch subscription
+                    RaiseError($"Subscribed to {messageType} for {symbols.Length} markets: {string.Join(", ", symbols.Take(5))}{(symbols.Length > 5 ? "..." : "")}");
+                }
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                RaiseError($"Batch subscription failed: {ex.Message}");
                 return false;
             }
         }

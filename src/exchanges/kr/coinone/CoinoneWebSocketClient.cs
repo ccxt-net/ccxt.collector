@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using CCXT.Collector.Core.Abstractions;
 using CCXT.Collector.Service;
+using CCXT.Collector.Models.WebSocket;
 using System.Text.Json;
 
 namespace CCXT.Collector.Coinone
@@ -15,7 +16,14 @@ namespace CCXT.Collector.Coinone
      * API Documentation:
      *     https://docs.coinone.co.kr/
      *     https://api.coinone.co.kr/
-     * 
+     *
+     * WebSocket API Documentation: 
+     *     https://docs.coinone.co.kr/reference/public-websocket-1
+     *     https://docs.coinone.co.kr/reference/public-websocket-ping
+     *     https://docs.coinone.co.kr/reference/public-websocket-orderbook
+     *     https://docs.coinone.co.kr/reference/public-websocket-ticker
+     *     https://docs.coinone.co.kr/reference/public-websocket-trade
+     *
      * WebSocket API:
      *     wss://stream.coinone.co.kr
      * 
@@ -563,5 +571,93 @@ namespace CCXT.Collector.Coinone
                 return false;
             }
         }
+
+        #region Batch Subscription Support
+
+        /// <summary>
+        /// Coinone supports batch subscription - sends individual messages for each subscription
+        /// </summary>
+        protected override bool SupportsBatchSubscription()
+        {
+            return true;
+        }
+
+        /// <summary>
+        /// Send batch subscriptions for Coinone - sends individual subscription messages for each channel/symbol combination
+        /// Note: Coinone requires individual subscription messages, but we batch the sending process
+        /// </summary>
+        protected override async Task<bool> SendBatchSubscriptionsAsync(List<KeyValuePair<string, SubscriptionInfo>> subscriptions)
+        {
+            try
+            {
+                // Group subscriptions for efficient processing
+                var totalCount = 0;
+                var subscriptionMessages = new List<(string json, string description)>();
+
+                foreach (var kvp in subscriptions)
+                {
+                    var subscription = kvp.Value;
+                    
+                    // Parse symbol to get base and quote currencies
+                    var parts = subscription.Symbol.Split('/');
+                    if (parts.Length != 2)
+                    {
+                        RaiseError($"Invalid symbol format: {subscription.Symbol}");
+                        continue;
+                    }
+
+                    var baseCurrency = parts[0].ToLower();  // e.g., "btc"
+                    var quoteCurrency = parts[1].ToLower(); // e.g., "krw"
+                    
+                    // Map channel names to Coinone channel types
+                    string coinoneChannel = subscription.Channel.ToLower() switch
+                    {
+                        "orderbook" or "depth" => "ORDERBOOK",
+                        "trades" or "trade" => "TRADE",
+                        "ticker" => "TICKER",
+                        _ => subscription.Channel.ToUpper()
+                    };
+
+                    // Create subscription message
+                    var subscriptionObj = new
+                    {
+                        request_type = "SUBSCRIBE",
+                        channel = coinoneChannel,
+                        topic = new
+                        {
+                            quote_currency = quoteCurrency,
+                            target_currency = baseCurrency
+                        },
+                        format = "DEFAULT" // Can be "SHORT" for reduced data
+                    };
+
+                    var message = JsonSerializer.Serialize(subscriptionObj);
+                    subscriptionMessages.Add((message, $"{coinoneChannel}:{baseCurrency}/{quoteCurrency}"));
+                    totalCount++;
+                }
+
+                // Send all subscription messages with a small delay between each
+                foreach (var (message, description) in subscriptionMessages)
+                {
+                    await SendMessageAsync(message);
+                    RaiseError($"Subscribed to {description}");
+                    
+                    // Small delay between messages to avoid overwhelming the server
+                    // Coinone has a limit of 20 connections per IP
+                    await Task.Delay(50);
+                }
+
+                RaiseError($"Sent {totalCount} Coinone subscription messages");
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                RaiseError($"Batch subscription failed: {ex.Message}");
+                return false;
+            }
+        }
+
+        #endregion
     }
 }

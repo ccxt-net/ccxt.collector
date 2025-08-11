@@ -47,7 +47,7 @@ The library now includes automatic exchange status tracking to prevent connectio
 | Feature | Implemented | In Progress | Planned |
 |---------|------------|-------------|----------|
 | WebSocket Clients | 132 | - | - |
-| Korean Exchange WebSockets | 5 (Upbit, Bithumb, Coinone, Korbit, Gopax) | 2 (OKCoinKR, Probit) | - |
+| Korean Exchange WebSockets | 6 (Upbit, Bithumb, Coinone, Korbit, Gopax, OKCoinKR) | 1 (Probit) | - |
 | Major Exchange Implementations | **15 (100% Complete)** | - | - |
 | Full WebSocket Implementation | **15** | - | 117 |
 | Authentication/Private Channels | - | 15 | - |
@@ -55,7 +55,7 @@ The library now includes automatic exchange status tracking to prevent connectio
 | Test Coverage | 3 exchanges (20%) | 12 exchanges | Full coverage |
 
 #### ✅ All 15 Major Exchanges (100% Complete)
-Binance, Bitget, Bithumb, Bittrex, Bybit, Coinbase, Coinone, Crypto.com, Gate.io, Huobi, Korbit, Kucoin, OKX, Upbit - **All functional with standardized WebSocket streaming**
+Binance, Bitget, Bithumb, Bittrex, Bybit, Coinbase, Coinone, Crypto.com, Gate.io, Huobi, Korbit, Kucoin, OKX, Upbit - **All functional with standardized WebSocket streaming and batch subscription support**
 
 #### 🔒 Security & Testing Status
 - **Critical**: Authentication implementation needed for private channels

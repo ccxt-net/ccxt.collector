@@ -19,7 +19,7 @@ namespace CCXT.Collector.Crypto
      *     https://exchange-docs.crypto.com/spot/index.html
      *
      * WebSocket API:
-     *     https://exchange-docs.crypto.com/exchange/v1/rest-ws/index.html#websocket-api
+     *     https://exchange-docs.crypto.com/exchange/v1/rest-ws/index.html#websocket-subscriptions
      *
      * Fees:
      *     https://crypto.com/exchange/document/fees-limits
@@ -687,6 +687,97 @@ namespace CCXT.Collector.Crypto
                 "1M" => 2592000000,
                 _ => 60000
             };
+        }
+
+        #endregion
+
+        #region Batch Subscription Support
+
+        /// <summary>
+        /// Crypto.com supports batch subscription - up to 100 channels per message
+        /// </summary>
+        protected override bool SupportsBatchSubscription()
+        {
+            return true;
+        }
+
+        /// <summary>
+        /// Send batch subscriptions for Crypto.com - batches up to 100 channels per message
+        /// </summary>
+        protected override async Task<bool> SendBatchSubscriptionsAsync(List<KeyValuePair<string, SubscriptionInfo>> subscriptions)
+        {
+            try
+            {
+                // Build list of all channels
+                var channels = new List<string>();
+                
+                foreach (var kvp in subscriptions)
+                {
+                    var subscription = kvp.Value;
+                    var instrumentName = ConvertToCryptoSymbol(subscription.Symbol);
+                    
+                    // Map channel names to Crypto.com channel format
+                    string channelName = subscription.Channel.ToLower() switch
+                    {
+                        "orderbook" or "depth" => $"book.{instrumentName}.10",
+                        "trades" or "trade" => $"trade.{instrumentName}",
+                        "ticker" => $"ticker.{instrumentName}",
+                        "candles" or "kline" or "candlestick" => !string.IsNullOrEmpty(subscription.Extra) 
+                            ? $"candlestick.{ConvertToCryptoInterval(subscription.Extra)}.{instrumentName}"
+                            : $"candlestick.1M.{instrumentName}",
+                        _ => $"{subscription.Channel}.{instrumentName}"
+                    };
+
+                    channels.Add(channelName);
+                }
+
+                if (channels.Count == 0)
+                    return true;
+
+                // Crypto.com supports up to 100 channels per subscription message
+                const int maxChannelsPerMessage = 100;
+                var messageCount = (channels.Count + maxChannelsPerMessage - 1) / maxChannelsPerMessage;
+
+                for (int i = 0; i < messageCount; i++)
+                {
+                    // Take up to 100 channels for this message
+                    var batchChannels = channels
+                        .Skip(i * maxChannelsPerMessage)
+                        .Take(maxChannelsPerMessage)
+                        .ToArray();
+
+                    // Create subscription message
+                    var subscriptionMessage = new
+                    {
+                        id = _nextId++,
+                        method = "subscribe",
+                        @params = new
+                        {
+                            channels = batchChannels
+                        },
+                        nonce = TimeExtension.UnixTime
+                    };
+
+                    // Send the batch subscription
+                    var json = JsonSerializer.Serialize(subscriptionMessage);
+                    await SendMessageAsync(json);
+                    
+                    RaiseError($"Sent Crypto.com batch subscription {i + 1}/{messageCount} with {batchChannels.Length} channels");
+
+                    // Small delay between batches if multiple messages
+                    if (i < messageCount - 1)
+                        await Task.Delay(100);
+                }
+
+                RaiseError($"Completed Crypto.com batch subscription: {channels.Count} total channels in {messageCount} message(s)");
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                RaiseError($"Batch subscription failed: {ex.Message}");
+                return false;
+            }
         }
 
         #endregion

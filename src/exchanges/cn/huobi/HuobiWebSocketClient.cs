@@ -25,7 +25,10 @@ namespace CCXT.Collector.Huobi
      *     https://huobiapi.github.io/docs/spot/v1/en/#websocket-market-data
      *     https://huobiapi.github.io/docs/spot/v1/en/#websocket-asset-and-order
      *
-     * Important: Huobi uses GZIP compression for WebSocket messages
+     * Important Notes:
+     *     - Huobi uses GZIP compression for WebSocket messages
+     *     - Individual subscription messages required (no batching in single message)
+     *     - Suggested not to subscribe too many topics in a single connection
      *
      * Fees:
      *     https://www.htx.com/en-us/fee/
@@ -861,5 +864,81 @@ namespace CCXT.Collector.Huobi
 
             return ((close - open) / open) * 100;
         }
+
+        #region Batch Subscription Support
+
+        /// <summary>
+        /// Huobi supports batch subscription - sends individual messages for each subscription
+        /// </summary>
+        protected override bool SupportsBatchSubscription()
+        {
+            return true;
+        }
+
+        /// <summary>
+        /// Send batch subscriptions for Huobi - sends individual subscription messages for each channel/symbol combination
+        /// Note: Huobi requires individual subscription messages, but we batch the sending process
+        /// </summary>
+        protected override async Task<bool> SendBatchSubscriptionsAsync(List<KeyValuePair<string, SubscriptionInfo>> subscriptions)
+        {
+            try
+            {
+                // Group subscriptions for logging
+                var totalCount = 0;
+                var subscriptionMessages = new List<string>();
+
+                foreach (var kvp in subscriptions)
+                {
+                    var subscription = kvp.Value;
+                    var huobiSymbol = ConvertToHuobiSymbol(subscription.Symbol);
+                    
+                    // Map channel names to Huobi subscription topics
+                    string topic = subscription.Channel.ToLower() switch
+                    {
+                        "orderbook" or "depth" => $"market.{huobiSymbol}.depth.step0",
+                        "trades" or "trade" => $"market.{huobiSymbol}.trade.detail",
+                        "ticker" => $"market.{huobiSymbol}.ticker",
+                        "detail" => $"market.{huobiSymbol}.detail",
+                        "candles" or "kline" => !string.IsNullOrEmpty(subscription.Extra) 
+                            ? $"market.{huobiSymbol}.kline.{ConvertToHuobiInterval(subscription.Extra)}"
+                            : $"market.{huobiSymbol}.kline.1min",
+                        _ => $"market.{huobiSymbol}.{subscription.Channel}"
+                    };
+
+                    // Create subscription message
+                    var subscriptionObj = new
+                    {
+                        sub = topic,
+                        id = $"id{_nextId++}"
+                    };
+
+                    var message = JsonSerializer.Serialize(subscriptionObj);
+                    subscriptionMessages.Add(message);
+                    totalCount++;
+
+                    // Update subscription info with the actual channel
+                    subscription.Channel = topic;
+                }
+
+                // Send all subscription messages
+                foreach (var message in subscriptionMessages)
+                {
+                    await SendMessageAsync(message);
+                    // Small delay between messages to avoid overwhelming the server
+                    await Task.Delay(50);
+                }
+
+                RaiseError($"Sent {totalCount} Huobi subscription messages");
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                RaiseError($"Batch subscription failed: {ex.Message}");
+                return false;
+            }
+        }
+
+        #endregion
     }
 }
