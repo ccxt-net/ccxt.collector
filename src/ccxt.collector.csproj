@@ -33,7 +33,7 @@
 	</PropertyGroup>
 
     <PropertyGroup>
-		<NoWarn>CS1998</NoWarn>
+		<NoWarn>CS1998;CS0618</NoWarn>
 	</PropertyGroup>
 
     <ItemGroup>

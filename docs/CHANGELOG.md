@@ -7,30 +7,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased] - 2025-08-11
 
-### 🎯 Sample Projects Consolidation
+### 🎯 Sample Project Simplified
 
-Consolidated multiple sample projects into a single unified samples project for better maintainability.
+Simplified the samples project to focus solely on WebSocket connectivity testing for all 15 exchanges.
 
 ### Changed
-- **Sample Projects Unification**
-  - Merged 4 separate sample projects (ccxt.connect, ccxt.exchange, ccxt.quicktest, ccxt.signalrtest) into one unified `ccxt.samples.csproj`
-  - Updated Program.cs to provide a comprehensive menu system for all sample programs:
-    - Basic WebSocket samples (1-7)
-    - All 15 Exchanges Test Menu (8)
-    - Connectivity Test (9)
-    - Exchange Status Test (10-11)
-    - Quick Connectivity Test (12)
-    - SignalR Connectivity Test (13)
-  - Modified all test entry points from `Main()` to `RunTest()` methods for integration
-  - Updated solution file to reference the single unified samples project
+- **Simplified Testing Framework**
+  - Consolidated all sample projects into a single, focused `ccxt.samples.csproj`
+  - Created streamlined Program.cs with three testing modes:
+    - Test All Exchanges: Sequential testing of all 15 exchanges
+    - Test Single Exchange: Interactive selection for individual exchange testing
+    - Quick Connectivity Check: Parallel connectivity verification for all exchanges
+  - Each test validates WebSocket connection and data reception (orderbook, trades, ticker)
   - Supports both .NET 8.0 and .NET 9.0 target frameworks
 
 ### Removed
-- **Old Sample Project Files**
-  - Deleted `samples/ccxt.connect.csproj`
-  - Deleted `samples/ccxt.exchange.csproj`
-  - Deleted `samples/ccxt.quicktest.csproj`
-  - Deleted `samples/ccxt.signalrtest.csproj`
+- **Unnecessary Sample Files**
+  - Removed all individual exchange example files
+  - Removed complex sample scenarios (AllExchangesSample, ConnectivityTest, etc.)
+  - Removed ExchangeStatusTest files with outdated references
+  - Kept only essential WebSocket connectivity testing functionality
 
 ## [Previous Updates] - 2025-08-11
 

@@ -7,8 +7,9 @@
     <AssemblyName>CCXT.Collector.Samples</AssemblyName>
     <RootNamespace>CCXT.Collector.Samples</RootNamespace>
     <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
   </PropertyGroup>
-  
+
   <PropertyGroup>
 		<NoWarn>CS1998;CS0618</NoWarn>
 	</PropertyGroup>
@@ -20,12 +21,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\src\ccxt.collector.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <!-- Exclude problematic test files that reference non-existent classes -->
-    <Compile Remove="ExchangeStatusTest.cs" />
-    <Compile Remove="ExchangeStatusTestV2.cs" />
   </ItemGroup>
 
   <ItemGroup>

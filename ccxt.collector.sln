@@ -46,7 +46,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{C8D5274F-A
 		docs\ROADMAP.md = docs\ROADMAP.md
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ccxt.exchange", "tests\ccxt.exchange.csproj", "{C1A7AF2A-AFCE-7EF1-E7AD-D7CAAC3E437B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ccxt.tests", "tests\ccxt.tests.csproj", "{C1A7AF2A-AFCE-7EF1-E7AD-D7CAAC3E437B}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "samples", "samples", "{96BEFDEF-19DC-4DAA-93D9-AEB4E344E438}"
 EndProject
