@@ -1,8 +1,5 @@
 using CCXT.Collector.Service;
 using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net.WebSockets;
 using System.Text;
 using System.Threading;
@@ -18,7 +15,6 @@ namespace CCXT.Collector.Core.Abstractions
         protected ClientWebSocket _webSocket;
         protected ClientWebSocket _privateWebSocket; // For authenticated channels
         protected CancellationTokenSource _cancellationTokenSource;
-        protected readonly ConcurrentDictionary<string, SubscriptionInfo> _subscriptions;
         protected readonly SemaphoreSlim _sendSemaphore;
         protected Timer _pingTimer;
         protected int _reconnectAttempts = 0;
@@ -69,7 +65,6 @@ namespace CCXT.Collector.Core.Abstractions
 
         protected WebSocketClientBase()
         {
-            _subscriptions = new ConcurrentDictionary<string, SubscriptionInfo>();
             _sendSemaphore = new SemaphoreSlim(1, 1);
         }
 
@@ -350,20 +345,7 @@ namespace CCXT.Collector.Core.Abstractions
             
             await Task.Delay(delay);
             
-            if (await ConnectAsync())
-            {
-                // Resubscribe to all active channels
-                foreach (var sub in _subscriptions.Values.Where(s => s.IsActive))
-                {
-                    await ResubscribeAsync(sub);
-                }
-            }
-        }
-
-        protected virtual async Task ResubscribeAsync(SubscriptionInfo subscription)
-        {
-            // Override in derived classes
-            await Task.CompletedTask;
+            await ConnectAsync();
         }
 
         #region Abstract Methods for Public Subscriptions
@@ -512,11 +494,6 @@ namespace CCXT.Collector.Core.Abstractions
         protected void InvokePositionCallback(SPosition positions)
         {
             OnPositionUpdate?.Invoke(positions);
-        }
-
-        protected string CreateSubscriptionKey(string channel, string symbol)
-        {
-            return $"{channel}:{symbol}";
         }
 
         #endregion

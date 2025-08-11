@@ -7,6 +7,45 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased] - 2025-08-11
 
+### 🎯 Channel Management System
+
+Implemented comprehensive WebSocket channel subscription management system for unified control across all exchanges.
+
+### Added
+- **Channel Management System** - New centralized system for managing WebSocket subscriptions
+  - `IChannelManager` interface for channel operations
+  - `ChannelManager` implementation with full CRUD operations
+  - `ChannelInfo` class for channel metadata and statistics
+  - `ChannelStatistics` for aggregated metrics
+- **Channel Operations**
+  - Register channels by exchange, symbol, and data type
+  - Remove individual channels or all channels for an exchange
+  - Query active channels with filtering options
+  - Track message counts and error statistics per channel
+- **Automatic Connection Management**
+  - WebSocket connects automatically when first channel is registered
+  - WebSocket disconnects automatically when last channel is removed
+  - Connection state tracking per exchange
+  - Idle exchange detection and disconnection
+- **Unified Batch Mode** - All exchanges now work consistently
+  - Users register channels first (channels remain pending)
+  - Then apply subscriptions with `ApplyBatchSubscriptionsAsync()`
+  - This provides consistent behavior across all exchanges
+  - All subscriptions are applied sequentially for better error handling
+  - User experience is unified - no need to understand exchange differences
+  - Clear two-phase process: register then apply
+
+### Fixed
+- **JSON Safety Improvements**
+  - Added array bounds checking to prevent `IndexOutOfRangeException`
+  - Fixed unsafe `GetProperty()` calls that could throw `KeyNotFoundException`
+  - Ensured all exchanges use safe JSON parsing methods
+- **Affected Exchanges**
+  - Crypto.com: Added bounds checking for 3-element arrays
+  - Coinbase: Added bounds checking for 2-3 element arrays  
+  - Bitget: Added bounds checking for 2-element arrays
+  - Verified Binance, Korbit, Gopax already had proper checks
+
 ### 📊 Code Analysis Report
 
 Comprehensive code analysis conducted identifying key improvement areas and security concerns.
@@ -14,7 +53,7 @@ Comprehensive code analysis conducted identifying key improvement areas and secu
 ### Security Issues Identified
 - **Critical**: Plain text API keys stored in `_apiKey` and `_secretKey` fields
 - **High**: Missing secure credential storage mechanism
-- **Medium**: Insufficient input validation for JSON parsing
+- **Medium**: Insufficient input validation for JSON parsing (partially addressed)
 
 ### Quality Improvements Needed
 - **Test Coverage**: Only 20% of exchanges have tests (Binance, Bithumb, Upbit)

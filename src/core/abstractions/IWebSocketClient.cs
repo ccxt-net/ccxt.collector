@@ -156,18 +156,6 @@ namespace CCXT.Collector.Core.Abstractions
     }
 
     /// <summary>
-    /// WebSocket subscription info
-    /// </summary>
-    public class SubscriptionInfo
-    {
-        public string Channel { get; set; }
-        public string Symbol { get; set; }
-        public DateTime SubscribedAt { get; set; }
-        public bool IsActive { get; set; }
-        public string Extra { get; set; } // For storing additional data like interval for candles
-    }
-
-    /// <summary>
     /// WebSocket message types
     /// </summary>
     public enum CustomWebSocketMessageType
