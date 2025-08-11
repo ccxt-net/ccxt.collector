@@ -137,19 +137,19 @@ namespace CCXT.Collector.Gateio
                 {
                     foreach (var ask in asks.EnumerateArray())
                     {
-                        if (ask.ValueKind == JsonValueKind.Array && ask.GetArrayLength() >= 2)
+                        if (ask.GetArrayLength() < 2)
+                            continue;
+
+                        var price = ask[0].GetDecimalValue();
+                        var quantity = ask[1].GetDecimalValue();
+
+                        if (quantity > 0)
                         {
-                            var price = ask[0].GetDecimalValue();
-                            var quantity = ask[1].GetDecimalValue();
-                            
-                            if (quantity > 0)
+                            orderbook.result.asks.Add(new SOrderBookItem
                             {
-                                orderbook.result.asks.Add(new SOrderBookItem
-                                {
-                                    price = price,
-                                    quantity = quantity
-                                });
-                            }
+                                price = price,
+                                quantity = quantity
+                            });
                         }
                     }
                 }
@@ -159,19 +159,19 @@ namespace CCXT.Collector.Gateio
                 {
                     foreach (var bid in bidsArray.EnumerateArray())
                     {
-                        if (bid.ValueKind == JsonValueKind.Array && bid.GetArrayLength() >= 2)
+                        if (bid.GetArrayLength() < 2)
+                            continue;
+
+                        var price = bid[0].GetDecimalValue();
+                        var quantity = bid[1].GetDecimalValue();
+
+                        if (quantity > 0)
                         {
-                            var price = bid[0].GetDecimalValue();
-                            var quantity = bid[1].GetDecimalValue();
-                            
-                            if (quantity > 0)
+                            orderbook.result.bids.Add(new SOrderBookItem
                             {
-                                orderbook.result.bids.Add(new SOrderBookItem
-                                {
-                                    price = price,
-                                    quantity = quantity
-                                });
-                            }
+                                price = price,
+                                quantity = quantity
+                            });
                         }
                     }
                 }
@@ -304,36 +304,36 @@ namespace CCXT.Collector.Gateio
                 var symbol = "";
                 
                 var candles = new List<SCandleItem>();
-                
+
                 if (result.ValueKind == JsonValueKind.Array)
                 {
                     foreach (var candle in result.EnumerateArray())
                     {
-                        if (candle.ValueKind == JsonValueKind.Array && candle.GetArrayLength() >= 6)
+                        if (candle.GetArrayLength() < 6)
+                            continue;
+
+                        var openTime = candle[0].GetInt64Value();
+                        var volume = candle[1].GetDecimalValue();
+                        var close = candle[2].GetDecimalValue();
+                        var high = candle[3].GetDecimalValue();
+                        var low = candle[4].GetDecimalValue();
+                        var open = candle[5].GetDecimalValue();
+
+                        candles.Add(new SCandleItem
                         {
-                            var openTime = candle[0].GetInt64Value();
-                            var volume = candle[1].GetDecimalValue();
-                            var close = candle[2].GetDecimalValue();
-                            var high = candle[3].GetDecimalValue();
-                            var low = candle[4].GetDecimalValue();
-                            var open = candle[5].GetDecimalValue();
-                            
-                            candles.Add(new SCandleItem
-                            {
-                                openTime = openTime * 1000, // Convert to milliseconds
-                                closeTime = openTime * 1000 + 60000, // Assuming 1m interval
-                                open = open,
-                                high = high,
-                                low = low,
-                                close = close,
-                                volume = volume
-                            });
-                            
-                            // Extract symbol from first candle if available
-                            if (String.IsNullOrEmpty(symbol) && candle.GetArrayLength() > 6)
-                            {
-                                symbol = candle[6].ValueKind == JsonValueKind.String ? candle[6].GetString() : "";
-                            }
+                            openTime = openTime * 1000, // Convert to milliseconds
+                            closeTime = openTime * 1000 + 60000, // Assuming 1m interval
+                            open = open,
+                            high = high,
+                            low = low,
+                            close = close,
+                            volume = volume
+                        });
+
+                        // Extract symbol from first candle if available
+                        if (String.IsNullOrEmpty(symbol) && candle.GetArrayLength() > 6)
+                        {
+                            symbol = candle[6].ValueKind == JsonValueKind.String ? candle[6].GetString() : "";
                         }
                     }
                 }

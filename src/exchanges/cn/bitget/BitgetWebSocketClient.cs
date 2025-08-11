@@ -62,7 +62,8 @@ namespace CCXT.Collector.Bitget
                     var code = json.GetStringOrDefault("code");
                     if (code != "0")
                     {
-                        RaiseError($"Subscription failed: {json.GetProperty("msg")}");
+                        var errorMsg = json.GetStringOrDefault("msg", "Unknown error");
+                        RaiseError($"Subscription failed: {errorMsg}");
                     }
                     return;
                 }
@@ -177,6 +178,9 @@ namespace CCXT.Collector.Bitget
                 {
                     foreach (var ask in asks.EnumerateArray())
                     {
+                        if (ask.GetArrayLength() < 2)
+                            continue;
+                            
                         var price = ask[0].GetDecimalValue();
                         var amount = ask[1].GetDecimalValue();
 
@@ -194,6 +198,9 @@ namespace CCXT.Collector.Bitget
                 {
                     foreach (var bid in bids.EnumerateArray())
                     {
+                        if (bid.GetArrayLength() < 2)
+                            continue;
+                            
                         var price = bid[0].GetDecimalValue();
                         var amount = bid[1].GetDecimalValue();
                         

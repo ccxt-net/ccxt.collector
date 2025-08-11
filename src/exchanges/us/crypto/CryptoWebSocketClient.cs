@@ -54,7 +54,8 @@ namespace CCXT.Collector.Crypto
                     var code = json.GetInt32OrDefault("code", -1);
                     if (code != 0)
                     {
-                        RaiseError($"Subscription error: {json.GetProperty("message")}");
+                        var errorMessage = json.GetStringOrDefault("message", "Unknown error");
+                        RaiseError($"Subscription error: {errorMessage}");
                     }
                     return;
                 }
@@ -197,6 +198,9 @@ namespace CCXT.Collector.Crypto
                 {
                     foreach (var ask in asks.EnumerateArray())
                     {
+                        if (ask.GetArrayLength() < 3)
+                            continue;
+                            
                         var price = ask[0].GetDecimalValue();
                         var quantity = ask[1].GetDecimalValue();
                         var numOrders = ask[2].GetInt32Value();
@@ -216,6 +220,9 @@ namespace CCXT.Collector.Crypto
                 {
                     foreach (var bid in bids.EnumerateArray())
                     {
+                        if (bid.GetArrayLength() < 3)
+                            continue;
+                            
                         var price = bid[0].GetDecimalValue();
                         var quantity = bid[1].GetDecimalValue();
                         var numOrders = bid[2].GetInt32Value();

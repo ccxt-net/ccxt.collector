@@ -61,7 +61,8 @@ namespace CCXT.Collector.Bybit
                 {
                     if (!json.GetBooleanOrFalse("success"))
                     {
-                        RaiseError($"Subscription failed: {json.GetProperty("ret_msg")}");
+                        var retMsg = json.GetStringOrDefault("ret_msg", "Unknown error");
+                        RaiseError($"Subscription failed: {retMsg}");
                     }
 
                     return;
@@ -158,6 +159,9 @@ namespace CCXT.Collector.Bybit
                 {
                     foreach (var ask in asks.EnumerateArray())
                     {
+                        if (ask.GetArrayLength() < 2)
+                            continue;
+
                         var price = ask[0].GetDecimalValue();
                         var quantity = ask[1].GetDecimalValue();
                         
@@ -175,6 +179,9 @@ namespace CCXT.Collector.Bybit
                 {
                     foreach (var bid in bids.EnumerateArray())
                     {
+                        if (bid.GetArrayLength() < 2)
+                            continue;
+
                         var price = bid[0].GetDecimalValue();
                         var quantity = bid[1].GetDecimalValue();
                         

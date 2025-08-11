@@ -92,7 +92,8 @@ namespace CCXT.Collector.Binance
                                 await ProcessKlineData(json);
                                 break;
                             case "error":
-                                RaiseError($"Binance error: {json.GetProperty("m")}");
+                                var errorMessage = json.GetStringOrDefault("m", "Unknown error");
+                                RaiseError($"Binance error: {errorMessage}");
                                 break;
                         }
                     }
@@ -144,21 +145,22 @@ namespace CCXT.Collector.Binance
                 {
                     foreach (var bid in bids.EnumerateArray())
                     {
-                        if (bid.GetArrayLength() >= 2)
+                        if (bid.GetArrayLength() < 4)
+                            continue;
+
+                        var price = bid[0].GetDecimalValue();
+                        var quantity = bid[1].GetDecimalValue();
+                        var orders = bid[3].GetInt32Value();
+
+                        if (quantity > 0)
                         {
-                            var price = bid[0].GetDecimalValue();
-                            var quantity = bid[1].GetDecimalValue();
-                            
-                            if (quantity > 0)
+                            orderbook.result.bids.Add(new SOrderBookItem
                             {
-                                orderbook.result.bids.Add(new SOrderBookItem
-                                {
-                                    price = price,
-                                    quantity = quantity,
-                                    amount = price * quantity,
-                                    action = "U"  // Update
-                                });
-                            }
+                                price = price,
+                                quantity = quantity,
+                                amount = price * quantity,
+                                action = "U"  // Update
+                            });
                         }
                     }
                 }
@@ -168,21 +170,21 @@ namespace CCXT.Collector.Binance
                 {
                     foreach (var ask in asks.EnumerateArray())
                     {
-                        if (ask.GetArrayLength() >= 2)
+                        if (ask.GetArrayLength() < 2)
+                            continue;
+
+                        var price = ask[0].GetDecimalValue();
+                        var quantity = ask[1].GetDecimalValue();
+
+                        if (quantity > 0)
                         {
-                            var price = ask[0].GetDecimalValue();
-                            var quantity = ask[1].GetDecimalValue();
-                            
-                            if (quantity > 0)
+                            orderbook.result.asks.Add(new SOrderBookItem
                             {
-                                orderbook.result.asks.Add(new SOrderBookItem
-                                {
-                                    price = price,
-                                    quantity = quantity,
-                                    amount = price * quantity,
-                                    action = "U"  // Update
-                                });
-                            }
+                                price = price,
+                                quantity = quantity,
+                                amount = price * quantity,
+                                action = "U"  // Update
+                            });
                         }
                     }
                 }

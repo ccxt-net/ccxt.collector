@@ -183,6 +183,9 @@ namespace CCXT.Collector.Coinbase
                 {
                     foreach (var bid in bids.EnumerateArray())
                     {
+                        if (bid.GetArrayLength() < 2)
+                            continue;
+                            
                         var price = bid[0].GetDecimalValue();
                         var size = bid[1].GetDecimalValue();
                         
@@ -200,6 +203,9 @@ namespace CCXT.Collector.Coinbase
                 {
                     foreach (var ask in asks.EnumerateArray())
                     {
+                        if (ask.GetArrayLength() < 2)
+                            continue;
+                            
                         var price = ask[0].GetDecimalValue();
                         var size = ask[1].GetDecimalValue();
                         
@@ -250,6 +256,9 @@ namespace CCXT.Collector.Coinbase
                 {
                     foreach (var change in changes.EnumerateArray())
                     {
+                        if (change.GetArrayLength() < 3)
+                            continue;
+                            
                         var side = change[0].ToString();
                         var price = change[1].GetDecimalValue();
                         var size = change[2].GetDecimalValue();

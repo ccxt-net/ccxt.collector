@@ -5,7 +5,33 @@ All notable changes to CCXT.Collector will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [2.1.5] - 2025-08-11
+## [Unreleased] - 2025-08-11
+
+### 📊 Code Analysis Report
+
+Comprehensive code analysis conducted identifying key improvement areas and security concerns.
+
+### Security Issues Identified
+- **Critical**: Plain text API keys stored in `_apiKey` and `_secretKey` fields
+- **High**: Missing secure credential storage mechanism
+- **Medium**: Insufficient input validation for JSON parsing
+
+### Quality Improvements Needed
+- **Test Coverage**: Only 20% of exchanges have tests (Binance, Bithumb, Upbit)
+- **Dependency Injection**: Missing DI pattern reduces testability
+- **Code Duplication**: Exchange implementations share similar patterns
+
+### Performance Opportunities
+- Replace dynamic byte arrays with `ArrayPool<byte>` for buffer management
+- Implement message batching for reduced network calls
+- Add in-memory caching for frequently accessed data
+
+### Documentation Updated
+- Updated all markdown documentation with latest project status
+- Added security and testing status to README
+- Updated roadmap with new priority tasks based on analysis
+
+## [2.1.5] - 2025-01-11
 
 ### 🎯 Complete Migration from Newtonsoft.Json to System.Text.Json
 
@@ -138,7 +164,7 @@ dotnet add package CCXT.Collector --version 2.1.5
 <PackageReference Include="CCXT.Collector" Version="2.1.5" />
 ```
 
-## [2.1.4] - 2025-08-10
+## [2.1.4] - 2025-01-10
 
 ### 🎯 Enhanced Sample Applications and WebSocket Stability
 
@@ -322,7 +348,7 @@ This release completes the WebSocket implementation for all 15 exchanges, ensuri
 - **Bittrex**: SignalR hub-based communication (c3 hub)
 - **Symbol Formats**: Each exchange maintains its native format with automatic conversion
 
-## [2.1.2] - 2025-08-10
+## [2.1.2] - 2025-01-10
 
 ### 🚀 Callback Optimization & API Breaking Changes
 
@@ -366,7 +392,7 @@ This release introduces significant performance improvements through batch proce
 - **Processing Efficiency**: Reduced overhead for high-frequency data streams
 - **Memory Optimization**: Better batch processing reduces GC pressure
 
-## [2.1.1] - 2025-08-10
+## [2.1.1] - 2025-01-10
 
 ### Improved
 - **WebSocket Base Class Enhancements** (best practices):
@@ -379,7 +405,7 @@ This release introduces significant performance improvements through batch proce
 - RabbitMQ.Client dependency and related infrastructure
 - FactoryX class and message queue configuration
 
-## [2.1.0] - 2025-08-10
+## [2.1.0] - 2025-01-10
 
 ### 🎯 Performance Optimization & Architecture Refinement
 
@@ -501,7 +527,7 @@ await client.SubscribeOrderbookAsync(market);
 
 ### 
 
-### Changed - Code Reorganization (2025-08-10)
+### Changed - Code Reorganization (2025-01-10)
 
 #### 📁 Complete Source Code Restructuring
 - **Core Framework** (`src/Core/`): Reorganized core components
@@ -549,7 +575,7 @@ await client.SubscribeOrderbookAsync(market);
 - Test projects and samples updated to use new namespaces
 - Complete.cs and other service models retained in CCXT.Collector.Service namespace for compatibility
 
-## [2.0.0] - 2025-08-10
+## [2.0.0] - 2025-01-10
 
 ### 🚀 Complete WebSocket Architecture Overhaul - 132 Exchange Support
 
@@ -641,7 +667,7 @@ This major release represents a complete architectural transformation, expanding
 - Consistent data format across exchanges
 - Rich sample code and documentation
 
-## [1.5.2] - 2025-02-01
+## [1.5.2] - 2024-02-01
 
 ### Core Features
 - Basic REST API integration for exchanges

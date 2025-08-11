@@ -183,22 +183,22 @@ namespace CCXT.Collector.Okx
                     {
                         foreach (var ask in asks.EnumerateArray())
                         {
-                            if (ask.GetArrayLength() >= 4)
-                            {
-                                var price = ask[0].GetDecimalValue();
-                                var quantity = ask[1].GetDecimalValue();
-                                var orders = ask[3].GetInt32Value();
+                            if (ask.GetArrayLength() < 4)
+                                continue;
 
-                                if (quantity > 0)
+                            var price = ask[0].GetDecimalValue();
+                            var quantity = ask[1].GetDecimalValue();
+                            var orders = ask[3].GetInt32Value();
+
+                            if (quantity > 0)
+                            {
+                                orderbook.result.asks.Add(new SOrderBookItem
                                 {
-                                    orderbook.result.asks.Add(new SOrderBookItem
-                                    {
-                                        price = price,
-                                        quantity = quantity,
-                                        amount = price * quantity,
-                                        count = orders
-                                    });
-                                }
+                                    price = price,
+                                    quantity = quantity,
+                                    amount = price * quantity,
+                                    count = orders
+                                });
                             }
                         }
                     }
@@ -208,22 +208,22 @@ namespace CCXT.Collector.Okx
                     {
                         foreach (var bid in bids.EnumerateArray())
                         {
-                            if (bid.GetArrayLength() >= 4)
-                            {
-                                var price = bid[0].GetDecimalValue();
-                                var quantity = bid[1].GetDecimalValue();
-                                var orders = bid[3].GetInt32Value();
+                            if (bid.GetArrayLength() < 4)
+                                continue;
 
-                                if (quantity > 0)
+                            var price = bid[0].GetDecimalValue();
+                            var quantity = bid[1].GetDecimalValue();
+                            var orders = bid[3].GetInt32Value();
+
+                            if (quantity > 0)
+                            {
+                                orderbook.result.bids.Add(new SOrderBookItem
                                 {
-                                    orderbook.result.bids.Add(new SOrderBookItem
-                                    {
-                                        price = price,
-                                        quantity = quantity,
-                                        amount = price * quantity,
-                                        count = orders
-                                    });
-                                }
+                                    price = price,
+                                    quantity = quantity,
+                                    amount = price * quantity,
+                                    count = orders
+                                });
                             }
                         }
                     }

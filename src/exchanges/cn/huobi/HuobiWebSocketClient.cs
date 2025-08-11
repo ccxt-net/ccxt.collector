@@ -248,20 +248,20 @@ namespace CCXT.Collector.Huobi
                 {
                     foreach (var ask in asks.EnumerateArray())
                     {
-                        if (ask.GetArrayLength() >= 2)
+                        if (ask.GetArrayLength() < 2)
+                            continue;
+
+                        var price = ask[0].GetDecimalValue();
+                        var quantity = ask[1].GetDecimalValue();
+
+                        if (quantity > 0)
                         {
-                            var price = ask[0].GetDecimalValue();
-                            var quantity = ask[1].GetDecimalValue();
-                            
-                            if (quantity > 0)
+                            orderbook.result.asks.Add(new SOrderBookItem
                             {
-                                orderbook.result.asks.Add(new SOrderBookItem
-                                {
-                                    price = price,
-                                    quantity = quantity,
-                                    amount = price * quantity
-                                });
-                            }
+                                price = price,
+                                quantity = quantity,
+                                amount = price * quantity
+                            });
                         }
                     }
                 }
@@ -271,20 +271,20 @@ namespace CCXT.Collector.Huobi
                 {
                     foreach (var bid in bids.EnumerateArray())
                     {
-                        if (bid.GetArrayLength() >= 2)
+                        if (bid.GetArrayLength() < 2)
+                            continue;
+
+                        var price = bid[0].GetDecimalValue();
+                        var quantity = bid[1].GetDecimalValue();
+
+                        if (quantity > 0)
                         {
-                            var price = bid[0].GetDecimalValue();
-                            var quantity = bid[1].GetDecimalValue();
-                            
-                            if (quantity > 0)
+                            orderbook.result.bids.Add(new SOrderBookItem
                             {
-                                orderbook.result.bids.Add(new SOrderBookItem
-                                {
-                                    price = price,
-                                    quantity = quantity,
-                                    amount = price * quantity
-                                });
-                            }
+                                price = price,
+                                quantity = quantity,
+                                amount = price * quantity
+                            });
                         }
                     }
                 }

@@ -169,14 +169,14 @@ namespace CCXT.Collector.Gopax
                 {
                     foreach (var bid in bids.EnumerateArray())
                     {
-                        if (bid.ValueKind == JsonValueKind.Array && bid.EnumerateArray().Count() >= 2)
+                        if (bid.EnumerateArray().Count() < 2)
+                            continue;
+
+                        orderbook.result.bids.Add(new SOrderBookItem
                         {
-                            orderbook.result.bids.Add(new SOrderBookItem
-                            {
-                                price = bid[0].GetDecimalValue(),
-                                quantity = bid[1].GetDecimalValue()
-                            });
-                        }
+                            price = bid[0].GetDecimalValue(),
+                            quantity = bid[1].GetDecimalValue()
+                        });
                     }
                 }
 
@@ -185,14 +185,14 @@ namespace CCXT.Collector.Gopax
                 {
                     foreach (var ask in asks.EnumerateArray())
                     {
-                        if (ask.ValueKind == JsonValueKind.Array && ask.EnumerateArray().Count() >= 2)
+                        if (ask.EnumerateArray().Count() < 2)
+                            continue;
+
+                        orderbook.result.asks.Add(new SOrderBookItem
                         {
-                            orderbook.result.asks.Add(new SOrderBookItem
-                            {
-                                price = ask[0].GetDecimalValue(),
-                                quantity = ask[1].GetDecimalValue()
-                            });
-                        }
+                            price = ask[0].GetDecimalValue(),
+                            quantity = ask[1].GetDecimalValue()
+                        });
                     }
                 }
 

@@ -67,7 +67,8 @@ namespace CCXT.Collector.Upbit
                                 await ProcessPosition(json);
                                 break;
                             case "error":
-                                RaiseError($"Upbit private error: {json.GetProperty("message")}");
+                                var privateErrorMessage = json.GetStringOrDefault("message", "Unknown private error");
+                                RaiseError($"Upbit private error: {privateErrorMessage}");
                                 break;
                         }
                     }
@@ -89,7 +90,8 @@ namespace CCXT.Collector.Upbit
                                 await ProcessCandle(json);
                                 break;
                             case "error":
-                                RaiseError($"Upbit error: {json.GetProperty("message")}");
+                                var publicErrorMessage = json.GetStringOrDefault("message", "Unknown error");
+                                RaiseError($"Upbit error: {publicErrorMessage}");
                                 break;
                         }
                     }

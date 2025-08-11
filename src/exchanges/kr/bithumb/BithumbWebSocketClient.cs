@@ -106,7 +106,8 @@ namespace CCXT.Collector.Bithumb
                     var status = json.GetStringOrDefault("status");
                     if (status != "0000")
                     {
-                        RaiseError($"Bithumb error status: {status}, message: {json.GetProperty("msg")}");
+                        var errorMsg = json.GetStringOrDefault("msg", "Unknown error");
+                        RaiseError($"Bithumb error status: {status}, message: {errorMsg}");
                         return;
                     }
                 }
