@@ -10,11 +10,14 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 CCXT.Collector is a .NET library that connects to cryptocurrency exchanges worldwide via WebSocket to receive real-time market data (orderbook, trades, ticker, etc.) and delivers it to callback functions using unified data classes. Additionally, it analyzes the data per exchange and market to calculate technical indicators in real-time, providing these indicator values through callbacks. This allows developers to handle both raw market data and technical analysis from different exchanges with a consistent interface.
 
-### Recent Major Updates (2025-01-11)
+### Recent Major Updates (2025-08-12)
 - **v2.1.5 Release**: Complete migration from Newtonsoft.Json to System.Text.Json
   - 20-30% faster JSON parsing, 15-25% less memory usage
   - JsonExtensions utility class with safe property access methods
   - All 15 exchanges tested and working with new implementation
+  - Unified subscription handling with `MarkSubscriptionActive` method
+  - Batch subscription system implemented for 11 exchanges
+  - Automatic resubscription on reconnection via `RestoreActiveSubscriptionsAsync`
 - **v2.1.3-2.1.4 Updates**: Complete WebSocket implementation for 15 major exchanges
   - Full implementations: Gate.io (JSON protocol), Bittrex (SignalR protocol)
   - Standardized data models: STrade, STradeItem, SCandle, SCandleItem
@@ -23,14 +26,16 @@ CCXT.Collector is a .NET library that connects to cryptocurrency exchanges world
   - Plain text API key storage needs urgent attention
   - Missing secure credential management system
   - Input validation and sanitization required
-- **Test Coverage Status**: Only 20% coverage (3 of 15 exchanges)
-  - Binance, Bithumb, Upbit have tests
-  - Remaining 12 exchanges need test implementation
+- **Test Coverage Status**: 100% coverage for major exchanges
+  - All 15 major exchanges have unified WebSocket test suite
+  - Test base framework (`WebSocketTestBase`) provides consistent testing
+  - Integration tests validate connection, subscription, and data reception
 - **Code Reorganization**: Complete restructuring of source code:
   - Core abstractions and infrastructure in `Core/` folder
   - Data models in `Models/Market/`, `Models/Trading/`, `Models/WebSocket/`
   - Technical indicators in `Indicators/` with subcategories
   - Utility classes in `Utilities/` folder
+  - Channel management system with `ChannelManager` and `SubscriptionInfo`
 - **Exchange Implementations (15 Total)**:
   - ✅ Complete: Binance, Bitget, Bithumb, Bittrex, Bybit, Coinbase, Coinone, Crypto.com, Gate.io, Huobi, Korbit, Kucoin, OKX, Upbit
   - OkEX merged with OKX (rebranded)
@@ -78,15 +83,22 @@ dotnet publish -c Release -r ubuntu.18.04-x64 -f net8.0
 1. **Core Framework** (`src/Core/`):
    - **Abstractions** (`Core/Abstractions/`):
      - `IWebSocketClient.cs` - WebSocket client interface defining callback events
+     - `IChannelManager.cs` - Channel management interface
      - `WebSocketClientBase.cs` - Enhanced base implementation with:
        - Dynamic buffer resizing for large messages
        - Exponential backoff reconnection (max 60s)
        - Exchange rate support for multi-currency
-       - Improved error recovery (10 retry attempts)
+       - Automatic subscription restoration on reconnect
+       - Subscription tracking with `SubscriptionInfo`
    - **Configuration** (`Core/Configuration/`):
      - `config.cs` - Configuration classes
      - `settings.cs` - Application settings
    - **Infrastructure** (`Core/Infrastructure/`):
+     - `ChannelManager.cs` - Advanced subscription management with:
+       - Batch subscription mode for efficient connection
+       - Channel statistics and monitoring
+       - Automatic idle exchange disconnection
+       - Pending subscription queue management
      - `factory.cs` - Factory pattern implementations
      - `logger.cs` - Logging infrastructure
      - `selector.cs` - Selector utilities
@@ -117,9 +129,14 @@ dotnet publish -c Release -r ubuntu.18.04-x64 -f net8.0
    - **Series** (`Indicators/Series/`): Various serie classes for indicator data
 
 4. **Utilities** (`src/Utilities/`):
-   - `extension.cs` - Extension methods
+   - `JsonExtension.cs` - Safe JSON property access with:
+     - Type-flexible parsing (string/number handling)
+     - Unix timestamp normalization (seconds/milliseconds)
+     - Array handling with empty/non-empty distinction
+     - Diagnostic hooks for debugging
+   - `TimeExtension.cs` - Time-related extension methods
+   - `LinqExtension.cs` - LINQ extensions
    - `Statistics.cs` - Statistical calculations
-   - `Ohlc.cs` - OHLC utilities
    - `logger.cs` - Logging utilities
 
 5. **Exchange Implementations** (`src/exchanges/`): Each exchange has:
@@ -191,12 +208,13 @@ The application uses `appsettings.json` for configuration:
 - **Per-market Analysis**: Independent indicator calculation for each exchange and trading pair
 - **High Performance**: System.Text.Json for 20-30% faster parsing, 15-25% less memory usage
 
-### Critical Issues (As of 2025-08-11 Analysis)
+### Critical Issues (As of 2025-08-12 Analysis)
 
 - **🔴 Security**: Plain text API key storage - needs secure credential management implementation
-- **🔴 Testing**: Only 20% test coverage (3 of 15 exchanges have tests)
-- **🟠 Code Quality**: Missing dependency injection pattern reduces testability
+- **🟢 Testing**: 100% test coverage for major exchanges with unified test suite
+- **🟠 Error Handling**: Single parse failure triggers full reconnection - needs threshold
 - **🟠 Performance**: Buffer management can be optimized with ArrayPool<byte>
+- **🟠 Observability**: Limited metrics injection for channel statistics
 
 ### Exchange-Specific Notes
 

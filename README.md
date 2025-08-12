@@ -18,8 +18,9 @@ CCXT.Collector is a comprehensive library that connects to cryptocurrency exchan
 - 🔄 **Unified Data Classes** - Consistent data format across all exchanges (STicker, SOrderBook, STrade, SCandle)
 - 📈 **25+ Technical Indicators** - Real-time calculation per exchange/market with optimized algorithms
 - 🔌 **Callback Architecture** - Asynchronous event-driven data handling with typed callbacks
-- 🔐 **Automatic Reconnection** - Resilient WebSocket connection management (10 retry attempts, max 60s delay)
+- 🔐 **Automatic Reconnection** - Resilient WebSocket connection management with subscription restoration
 - ⚡ **High Performance** - System.Text.Json for 20-30% faster parsing, 15-25% less memory usage
+- 📊 **Channel Management** - Advanced subscription tracking with batch mode and statistics
 - 🛡️ **Security Ready** - Authentication framework for private channels (implementation in progress)
 
 ### 🏢 Supported Exchanges (130 Active)
@@ -42,7 +43,7 @@ The library now includes automatic exchange status tracking to prevent connectio
 
 *Note: Exchange locations indicate registration/headquarters, not service availability
 
-#### Implementation Status (v2.1.5 - 2025-01-11)
+#### Implementation Status (v2.1.5 - 2025-08-12)
 
 | Feature | Implemented | In Progress | Planned |
 |---------|------------|-------------|----------|
@@ -50,16 +51,19 @@ The library now includes automatic exchange status tracking to prevent connectio
 | Korean Exchange WebSockets | 6 (Upbit, Bithumb, Coinone, Korbit, Gopax, OKCoinKR) | 1 (Probit) | - |
 | Major Exchange Implementations | **15 (100% Complete)** | - | - |
 | Full WebSocket Implementation | **15** | - | 117 |
+| Batch Subscription System | **11** | 4 | - |
+| Auto-Resubscription on Reconnect | **15** | - | 117 |
 | Authentication/Private Channels | - | 15 | - |
 | Technical Indicators | 25+ | - | 25+ more |
-| Test Coverage | 3 exchanges (20%) | 12 exchanges | Full coverage |
+| Test Coverage | 15 exchanges (100% major) | - | 117 exchanges |
 
 #### ✅ All 15 Major Exchanges (100% Complete)
 Binance, Bitget, Bithumb, Bittrex, Bybit, Coinbase, Coinone, Crypto.com, Gate.io, Huobi, Korbit, Kucoin, OKX, Upbit - **All functional with standardized WebSocket streaming and batch subscription support**
 
 #### 🔒 Security & Testing Status
 - **Critical**: Authentication implementation needed for private channels
-- **Testing**: Only Binance, Bithumb, Upbit have test coverage
+- **Testing**: All 15 major exchanges have unified WebSocket test suite
+- **Channel Management**: Advanced ChannelManager with batch subscription support
 - **Security**: API key management system under development
 
 ## 📦 Installation
@@ -83,7 +87,8 @@ dotnet add package CCXT.Collector --version 2.1.5
 - **IMPORTANT**: Complete migration from Newtonsoft.Json to System.Text.Json
 - All JSON processing now uses System.Text.Json for better performance and reduced dependencies
 - Added JsonExtensions utility class with safe property access methods
-- See [CHANGELOG](docs/CHANGELOG.md#215---2025-08-11) for migration details
+- Unified subscription handling with `MarkSubscriptionActive` across all exchanges
+- See [CHANGELOG](docs/CHANGELOG.md#215---2025-08-12) for migration details
 
 ### ⚠️ Breaking Changes in v2.1.2
 - `SCandlestick.result` changed from single item to `List<SCandleItem>`

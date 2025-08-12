@@ -12,7 +12,7 @@ namespace CCXT.Collector.Indicator
             set;
         }
 
-        protected decimal AccelerationFactor = 0.02m;
+        private decimal AccelerationFactor = 0.02m;
         protected decimal MaximumAccelerationFactor = 0.2m;
 
         public SAR()

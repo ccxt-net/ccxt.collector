@@ -10,17 +10,17 @@ namespace CCXT.Collector.Models.WebSocket
         /// <summary>
         /// Gets or sets the channel name
         /// </summary>
-        public string Channel { get; set; }
+        public string Channel { get; set; } = string.Empty;
 
         /// <summary>
         /// Gets or sets the symbol being subscribed to
         /// </summary>
-        public string Symbol { get; set; }
+        public string Symbol { get; set; } = string.Empty;
 
         /// <summary>
         /// Gets or sets the subscription ID (if applicable)
         /// </summary>
-        public string SubscriptionId { get; set; }
+        public string SubscriptionId { get; set; } = string.Empty;
 
         /// <summary>
         /// Gets or sets whether the subscription is active
@@ -45,7 +45,7 @@ namespace CCXT.Collector.Models.WebSocket
         /// <summary>
         /// Gets or sets extra data (e.g., interval for candle subscriptions)
         /// </summary>
-        public string Extra { get; set; }
+        public string Extra { get; set; } = string.Empty;
 
         /// <summary>
         /// Creates a new instance of SubscriptionInfo

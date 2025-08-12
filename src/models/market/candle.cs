@@ -11,17 +11,17 @@ namespace CCXT.Collector.Service
         /// <summary>
         /// Exchange name
         /// </summary>
-        public string exchange { get; set; }
+        public string exchange { get; set; } = string.Empty;
 
         /// <summary>
         /// Trading symbol (e.g., "BTC/USDT")
         /// </summary>
-        public string symbol { get; set; }
+        public string symbol { get; set; } = string.Empty;
 
         /// <summary>
         /// Candle interval (1m, 5m, 15m, 30m, 1h, 4h, 1d, 1w, 1M)
         /// </summary>
-        public string interval { get; set; }
+        public string interval { get; set; } = string.Empty;
 
         /// <summary>
         /// Timestamp when data was received

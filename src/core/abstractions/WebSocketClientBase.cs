@@ -1,4 +1,5 @@
 using CCXT.Collector.Service;
+using System.Buffers;
 using CCXT.Collector.Models.WebSocket;
 using System;
 using System.Collections.Generic;
@@ -8,7 +9,6 @@ using System.Net.WebSockets;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Buffers;
 
 namespace CCXT.Collector.Core.Abstractions
 {
@@ -42,7 +42,7 @@ namespace CCXT.Collector.Core.Abstractions
         /// </summary>
         Unknown
     }
-
+    
     /// <summary>
     /// Base WebSocket client implementation
     /// </summary>
@@ -100,7 +100,7 @@ namespace CCXT.Collector.Core.Abstractions
         public ExchangeStatus Status => _exchangeStatus;
         public DateTime? ClosedDate => _closedDate;
         public string StatusMessage => _statusMessage ?? GetDefaultStatusMessage();
-        public List<string> AlternativeExchanges => _alternativeExchanges;
+        public List<string> AlternativeExchanges => _alternativeExchanges = new List<string>();
         public bool IsActive => _exchangeStatus == ExchangeStatus.Active;
 
         #region Events - Public Data
@@ -428,7 +428,7 @@ namespace CCXT.Collector.Core.Abstractions
 
                 // Send authentication message
                 var authMessage = CreateAuthenticationMessage(_apiKey, _secretKey);
-                if (!String.IsNullOrEmpty(authMessage))
+                if (!string.IsNullOrEmpty(authMessage))
                 {
                     var socket = _privateWebSocket ?? _webSocket;
                     await SendMessageAsync(authMessage, socket);
@@ -619,7 +619,7 @@ namespace CCXT.Collector.Core.Abstractions
                 if (IsConnected)
                 {
                     var pingMessage = CreatePingMessage();
-                    if (!String.IsNullOrEmpty(pingMessage))
+                    if (!string.IsNullOrEmpty(pingMessage))
                     {
                         await SendMessageAsync(pingMessage);
                     }
@@ -869,12 +869,15 @@ namespace CCXT.Collector.Core.Abstractions
                 {
                     case "orderbook":
                     case "depth":
-                        ok = await SubscribeOrderbookAsync(symbol); break;
+                        ok = await SubscribeOrderbookAsync(symbol);
+                        break;
                     case "trades":
                     case "trade":
-                        ok = await SubscribeTradesAsync(symbol); break;
+                        ok = await SubscribeTradesAsync(symbol);
+                        break;
                     case "ticker":
-                        ok = await SubscribeTickerAsync(symbol); break;
+                        ok = await SubscribeTickerAsync(symbol);
+                        break;
                     case "candles":
                     case "kline":
                         if (!string.IsNullOrEmpty(interval))
@@ -982,13 +985,30 @@ namespace CCXT.Collector.Core.Abstractions
             }
         }
 
-        public virtual void Dispose()
+        private bool _disposed = false;
+
+        protected virtual void Dispose(bool disposing)
         {
-            _ = DisconnectAsync().ConfigureAwait(false);
-            _sendSemaphore?.Dispose();
-            _cancellationTokenSource?.Dispose();
-            _pingTimer?.Dispose();
-            _privateWebSocket?.Dispose();
+            if (!_disposed)
+            {
+                if (disposing)
+                {
+                    // Dispose managed resources
+                    _ = DisconnectAsync().ConfigureAwait(false);
+                    _sendSemaphore?.Dispose();
+                    _cancellationTokenSource?.Dispose();
+                    _pingTimer?.Dispose();
+                    _privateWebSocket?.Dispose();
+                }
+                // Free unmanaged resources (none in this class)
+                _disposed = true;
+            }
+        }
+
+        public void Dispose()
+        {
+            this.Dispose(true);
+            GC.SuppressFinalize(this);
         }
     }
 }

@@ -120,7 +120,7 @@ namespace CCXT.Collector.Crypto
                     return;
 
                 var instrumentName = result.GetStringOrDefault("instrument_name");
-                if (String.IsNullOrEmpty(instrumentName))
+                if (string.IsNullOrEmpty(instrumentName))
                     return;
 
                 var symbol = ConvertToStandardSymbol(instrumentName);
@@ -172,7 +172,7 @@ namespace CCXT.Collector.Crypto
                     return;
 
                 var instrumentName = result.GetStringOrDefault("instrument_name");
-                if (String.IsNullOrEmpty(instrumentName))
+                if (string.IsNullOrEmpty(instrumentName))
                     return;
 
                 var symbol = ConvertToStandardSymbol(instrumentName);
@@ -259,7 +259,7 @@ namespace CCXT.Collector.Crypto
                     return;
 
                 var instrumentName = result.GetStringOrDefault("instrument_name");
-                if (String.IsNullOrEmpty(instrumentName))
+                if (string.IsNullOrEmpty(instrumentName))
                     return;
 
                 var symbol = ConvertToStandardSymbol(instrumentName);
@@ -317,7 +317,7 @@ namespace CCXT.Collector.Crypto
                 var instrumentName = result.GetStringOrDefault("instrument_name");
                 var interval = result.GetStringOrDefault("interval");
                 
-                if (String.IsNullOrEmpty(instrumentName) || String.IsNullOrEmpty(interval))
+                if (string.IsNullOrEmpty(instrumentName) || string.IsNullOrEmpty(interval))
                     return;
 
                 var symbol = ConvertToStandardSymbol(instrumentName);

@@ -105,7 +105,7 @@ namespace CCXT.Collector.Gopax
 
                 // Handle different message types
                 var messageType = json.GetStringOrDefault("n"); // notification type
-                if (!String.IsNullOrEmpty(messageType))
+                if (!string.IsNullOrEmpty(messageType))
                 {
                     switch (messageType)
                     {
@@ -146,7 +146,7 @@ namespace CCXT.Collector.Gopax
             try
             {
                 var gopaxSymbol = json.GetStringOrDefault("i"); // instrument
-                if (String.IsNullOrEmpty(gopaxSymbol)) return;
+                if (string.IsNullOrEmpty(gopaxSymbol)) return;
 
                 var symbol = ConvertSymbolBack(gopaxSymbol);
                 var timestamp = json.GetInt64OrDefault("t", TimeExtension.UnixTime);
@@ -224,7 +224,7 @@ namespace CCXT.Collector.Gopax
             try
             {
                 var gopaxSymbol = json.GetStringOrDefault("i"); // instrument
-                if (String.IsNullOrEmpty(gopaxSymbol)) return;
+                if (string.IsNullOrEmpty(gopaxSymbol)) return;
 
                 var symbol = ConvertSymbolBack(gopaxSymbol);
                 var timestamp = TimeExtension.UnixTime;
@@ -273,7 +273,7 @@ namespace CCXT.Collector.Gopax
             try
             {
                 var gopaxSymbol = json.GetStringOrDefault("i"); // instrument
-                if (String.IsNullOrEmpty(gopaxSymbol)) return;
+                if (string.IsNullOrEmpty(gopaxSymbol)) return;
 
                 var symbol = ConvertSymbolBack(gopaxSymbol);
                 var timestamp = json.GetInt64OrDefault("t", TimeExtension.UnixTime);
@@ -311,7 +311,7 @@ namespace CCXT.Collector.Gopax
             try
             {
                 var gopaxSymbol = json.GetStringOrDefault("i"); // instrument
-                if (String.IsNullOrEmpty(gopaxSymbol)) return;
+                if (string.IsNullOrEmpty(gopaxSymbol)) return;
 
                 var symbol = ConvertSymbolBack(gopaxSymbol);
                 var timestamp = json.GetInt64OrDefault("t", TimeExtension.UnixTime);

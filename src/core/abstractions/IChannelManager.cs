@@ -109,17 +109,17 @@ namespace CCXT.Collector.Core.Abstractions
         /// <summary>
         /// Unique channel identifier
         /// </summary>
-        public string ChannelId { get; set; }
+        public string ChannelId { get; set; } = string.Empty;
 
         /// <summary>
         /// Exchange name
         /// </summary>
-        public string Exchange { get; set; }
+        public string Exchange { get; set; } = string.Empty;
 
         /// <summary>
         /// Trading pair symbol
         /// </summary>
-        public string Symbol { get; set; }
+        public string Symbol { get; set; } = string.Empty;
 
         /// <summary>
         /// Data type
@@ -129,7 +129,7 @@ namespace CCXT.Collector.Core.Abstractions
         /// <summary>
         /// Interval for candle data
         /// </summary>
-        public string Interval { get; set; }
+        public string Interval { get; set; } = string.Empty;
 
         /// <summary>
         /// Subscription timestamp
@@ -154,7 +154,7 @@ namespace CCXT.Collector.Core.Abstractions
         /// <summary>
         /// Last error message if any
         /// </summary>
-        public string LastError { get; set; }
+        public string LastError { get; set; } = string.Empty;
 
         /// <summary>
         /// Error count
@@ -188,7 +188,7 @@ namespace CCXT.Collector.Core.Abstractions
         /// <summary>
         /// Trading pair symbol
         /// </summary>
-        public string Symbol { get; set; }
+        public string Symbol { get; set; } = string.Empty;
 
         /// <summary>
         /// Data type to subscribe
@@ -198,7 +198,7 @@ namespace CCXT.Collector.Core.Abstractions
         /// <summary>
         /// Interval for candle data (optional)
         /// </summary>
-        public string Interval { get; set; }
+        public string Interval { get; set; } = string.Empty;
     }
 
     /// <summary>

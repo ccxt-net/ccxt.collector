@@ -11,12 +11,12 @@ namespace CCXT.Collector.Service
         /// <summary>
         /// Exchange name
         /// </summary>
-        public string exchange { get; set; }
+        public string exchange { get; set; } = string.Empty;
 
         /// <summary>
         /// Account ID (if multiple accounts)
         /// </summary>
-        public string accountId { get; set; }
+        public string accountId { get; set; } = string.Empty;
 
         /// <summary>
         /// Update timestamp
@@ -42,7 +42,7 @@ namespace CCXT.Collector.Service
         /// <summary>
         /// Currency symbol (BTC, ETH, USDT, etc.)
         /// </summary>
-        public string currency { get; set; }
+        public string currency { get; set; } = string.Empty;
 
         /// <summary>
         /// Free/available balance
@@ -78,17 +78,17 @@ namespace CCXT.Collector.Service
         /// <summary>
         /// Order ID
         /// </summary>
-        public string orderId { get; set; }
+        public string orderId { get; set; } = string.Empty;
 
         /// <summary>
         /// Client order ID (user defined)
         /// </summary>
-        public string clientOrderId { get; set; }
+        public string clientOrderId { get; set; } = string.Empty;
 
         /// <summary>
         /// Trading symbol
         /// </summary>
-        public string symbol { get; set; }
+        public string symbol { get; set; } = string.Empty;
 
         /// <summary>
         /// Order type (limit, market, stop, etc.)
@@ -148,7 +148,7 @@ namespace CCXT.Collector.Service
         /// <summary>
         /// Fee currency
         /// </summary>
-        public string feeCurrency { get; set; }
+        public string feeCurrency { get; set; } = string.Empty;
 
         /// <summary>
         /// Order creation time
@@ -163,7 +163,7 @@ namespace CCXT.Collector.Service
         /// <summary>
         /// Time in force (GTC, IOC, FOK, etc.)
         /// </summary>
-        public string timeInForce { get; set; }
+        public string timeInForce { get; set; } = string.Empty;
 
         /// <summary>
         /// Is post-only order
@@ -189,7 +189,7 @@ namespace CCXT.Collector.Service
         /// <summary>
         /// Trade ID
         /// </summary>
-        public string tradeId { get; set; }
+        public string tradeId { get; set; } = string.Empty;
 
         /// <summary>
         /// Fill price
@@ -209,7 +209,7 @@ namespace CCXT.Collector.Service
         /// <summary>
         /// Fee currency
         /// </summary>
-        public string feeCurrency { get; set; }
+        public string feeCurrency { get; set; } = string.Empty;
 
         /// <summary>
         /// Fill timestamp
@@ -230,12 +230,12 @@ namespace CCXT.Collector.Service
         /// <summary>
         /// Position ID
         /// </summary>
-        public string positionId { get; set; }
+        public string positionId { get; set; } = string.Empty;
 
         /// <summary>
         /// Trading symbol
         /// </summary>
-        public string symbol { get; set; }
+        public string symbol { get; set; } = string.Empty;
 
         /// <summary>
         /// Position side (long/short)
@@ -245,7 +245,7 @@ namespace CCXT.Collector.Service
         /// <summary>
         /// Position mode (hedge/one-way)
         /// </summary>
-        public string mode { get; set; }
+        public string mode { get; set; } = string.Empty;
 
         /// <summary>
         /// Position size (contracts or base currency)
@@ -410,7 +410,7 @@ namespace CCXT.Collector.Service
         /// <summary>
         /// Exchange name
         /// </summary>
-        public string exchange { get; set; }
+        public string exchange { get; set; } = string.Empty;
 
         /// <summary>
         /// Event data (can be SBalance, SOrder, or SPosition)
@@ -420,6 +420,6 @@ namespace CCXT.Collector.Service
         /// <summary>
         /// Event message/description
         /// </summary>
-        public string message { get; set; }
+        public string message { get; set; } = string.Empty;
     }
 }

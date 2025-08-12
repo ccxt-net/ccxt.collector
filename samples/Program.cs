@@ -528,9 +528,9 @@ namespace CCXT.Collector.Samples
 
         class TestResult
         {
-            public string Name { get; set; } = "";
+            public string Name { get; set; } = string.Empty;
             public bool Success { get; set; }
-            public string Message { get; set; } = "";
+            public string Message { get; set; } = string.Empty;
             public bool OrderbookReceived { get; set; }
             public bool TradesReceived { get; set; }
             public bool TickerReceived { get; set; }
@@ -538,17 +538,17 @@ namespace CCXT.Collector.Samples
 
         class BatchTestResult
         {
-            public string Name { get; set; } = "";
+            public string Name { get; set; } = string.Empty;
             public bool Success { get; set; }
-            public string Message { get; set; } = "";
+            public string Message { get; set; } = string.Empty;
             public int DataReceived { get; set; }
         }
 
         class MultiMarketTestResult
         {
-            public string Name { get; set; } = "";
+            public string Name { get; set; } = string.Empty;
             public bool Success { get; set; }
-            public string Message { get; set; } = "";
+            public string Message { get; set; } = string.Empty;
             public Dictionary<string, int> MarketData { get; set; } = new Dictionary<string, int>();
         }
     }

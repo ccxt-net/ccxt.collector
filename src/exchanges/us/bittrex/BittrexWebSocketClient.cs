@@ -235,7 +235,7 @@ namespace CCXT.Collector.Bittrex
                     DateTime? executedAt = null;
 
                     var execProp = trade.GetStringOrNull("executedAt");
-                    if (!String.IsNullOrEmpty(execProp))
+                    if (!string.IsNullOrEmpty(execProp))
                     {
                         if (DateTime.TryParse(execProp, out var dt))
                             executedAt = dt;
@@ -321,7 +321,7 @@ namespace CCXT.Collector.Bittrex
                 DateTime? startsAt = null;
                 var startsProp = delta.GetStringOrNull("startsAt");
 
-                if (!String.IsNullOrEmpty(startsProp))
+                if (!string.IsNullOrEmpty(startsProp))
                 {
                     if (DateTime.TryParse(startsProp, out var dt))
                         startsAt = dt;

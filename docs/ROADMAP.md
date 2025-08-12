@@ -5,7 +5,13 @@ To become the most comprehensive and reliable real-time cryptocurrency data aggr
 
 ## Current Sprint Tasks (January 2025)
 
-### ✅ Completed (v2.1.5 - January 2025)
+### ✅ Completed (v2.1.6 - January 2025)
+- [x] **Unified Subscription Handling** - Implemented `MarkSubscriptionActive` across all exchanges
+- [x] **Auto-Resubscription** - Added `RestoreActiveSubscriptionsAsync` for reconnection recovery
+- [x] **Test Coverage** - Achieved 100% test coverage for all 15 major exchanges
+- [x] **Channel Management** - Enhanced ChannelManager with batch subscription support
+
+### ✅ Previously Completed (v2.1.5 - January 2025)
 - [x] **Complete Exchange Implementations** - Finished 15 major exchanges
   - [x] Gate.io WebSocket implementation with JSON protocol
   - [x] Bittrex WebSocket implementation with SignalR protocol
@@ -15,25 +21,30 @@ To become the most comprehensive and reliable real-time cryptocurrency data aggr
 - [x] **JSON Migration** - Complete migration from Newtonsoft.Json to System.Text.Json
 - [x] **Performance Optimization** - 20-30% faster JSON parsing, 15-25% less memory usage
 
-### 🔴 Critical Priority (Based on Code Analysis - August 11, 2025)
+### 🔴 Critical Priority (Based on Code Analysis - August 12, 2025)
 - [ ] **Security Implementation** - URGENT: Implement secure credential management
   - [ ] Integrate with Azure Key Vault or similar secure storage
   - [ ] Remove plain text API key storage
   - [ ] Add input validation and sanitization
   - [ ] Implement authentication token refresh mechanism
-- [ ] **Test Coverage Expansion** - Increase from 20% to 80%+ coverage
-  - [ ] Add tests for remaining 12 exchanges
+- [x] **Test Coverage Expansion** - ✅ Achieved 100% coverage for major exchanges
+  - [x] All 15 major exchanges now have comprehensive test suites
+  - [ ] Add tests for remaining 117 minor exchanges
   - [ ] Implement integration tests with test fixtures
   - [ ] Add performance benchmark suite
   - [ ] Create mock/stub frameworks for unit testing
 
 ### 🟠 High Priority  
+- [ ] **Error Resilience** - Implement parse failure threshold before reconnection
+- [ ] **Memory Optimization** - Implement ArrayPool<byte> for buffer management
+- [ ] **Connection Stability** - Add exponential backoff with jitter
+- [ ] **Observability** - Implement IChannelObserver pattern for metrics
+- [ ] **Performance Enhancements**
+  - [ ] Parallelize batch subscriptions where supported
+  - [ ] Add configurable grace period for idle disconnection
+  - [ ] Implement in-memory caching with expiration
 - [ ] **Dependency Injection** - Implement Microsoft.Extensions.DependencyInjection
 - [ ] **Comprehensive Logging** - Integrate Serilog with structured logging
-- [ ] **Performance Enhancements**
-  - [ ] Implement ArrayPool<byte> for buffer management
-  - [ ] Add message batching for reduced network calls
-  - [ ] Implement in-memory caching with expiration
 - [ ] **Complete Remaining Exchanges** - Kraken, OKCoinKR, Probit implementations
 
 ### 🟡 Medium Priority

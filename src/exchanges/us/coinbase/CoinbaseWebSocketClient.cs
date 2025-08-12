@@ -117,7 +117,7 @@ namespace CCXT.Collector.Coinbase
             try
             {
                 var productId = json.GetStringOrDefault("product_id");
-                if (String.IsNullOrEmpty(productId))
+                if (string.IsNullOrEmpty(productId))
                     return;
 
                 var symbol = ConvertToStandardSymbol(productId);
@@ -160,7 +160,7 @@ namespace CCXT.Collector.Coinbase
             try
             {
                 var productId = json.GetStringOrDefault("product_id");
-                if (String.IsNullOrEmpty(productId))
+                if (string.IsNullOrEmpty(productId))
                     return;
 
                 var symbol = ConvertToStandardSymbol(productId);
@@ -237,7 +237,7 @@ namespace CCXT.Collector.Coinbase
             try
             {
                 var productId = json.GetStringOrDefault("product_id");
-                if (String.IsNullOrEmpty(productId))
+                if (string.IsNullOrEmpty(productId))
                     return;
 
                 var symbol = ConvertToStandardSymbol(productId);
@@ -319,7 +319,7 @@ namespace CCXT.Collector.Coinbase
             try
             {
                 var productId = json.GetStringOrDefault("product_id");
-                if (String.IsNullOrEmpty(productId))
+                if (string.IsNullOrEmpty(productId))
                     return;
 
                 var symbol = ConvertToStandardSymbol(productId);
@@ -360,7 +360,7 @@ namespace CCXT.Collector.Coinbase
                 var type = json.GetStringOrDefault("type");
                 var productId = json.GetStringOrDefault("product_id");
                 
-                if (String.IsNullOrEmpty(productId))
+                if (string.IsNullOrEmpty(productId))
                     return;
 
                 var symbol = ConvertToStandardSymbol(productId);
@@ -534,19 +534,19 @@ namespace CCXT.Collector.Coinbase
             return JsonSerializer.Serialize(new
             {
                 type = "subscribe",
-                product_ids = new string[] { },
+                product_ids = Array.Empty<string>(),
                 channels = new[]
                 {
                     new
                     {
                         name = "user",
-                        product_ids = new string[] { }
+                        product_ids = Array.Empty<string>()
                     }
                 },
-                signature = signature,
+                signature,
                 key = apiKey,
                 passphrase = "", // Coinbase requires passphrase
-                timestamp = timestamp
+                timestamp
             });
         }
 
@@ -577,7 +577,7 @@ namespace CCXT.Collector.Coinbase
 
         private long ConvertToUnixTimeMillis(string timeString)
         {
-            if (String.IsNullOrEmpty(timeString))
+            if (string.IsNullOrEmpty(timeString))
                 return TimeExtension.UnixTime;
 
             // Try parsing as ISO 8601 with timezone info first
@@ -706,7 +706,9 @@ namespace CCXT.Collector.Coinbase
                     };
 
                     if (channelName == null)
+                    {
                         continue; // Skip unsupported channels
+                    }
 
                     // Add channel with specific product IDs
                     channels.Add(new

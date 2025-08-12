@@ -32,7 +32,7 @@ namespace CCXT.Collector.Library
             }
         }
 
-        private IConfiguration __configuration_root = null;
+        private IConfiguration __configuration_root;
 
         public IConfiguration ConfigurationRoot
         {
@@ -52,7 +52,7 @@ namespace CCXT.Collector.Library
             }
         }
 
-        private IConfigurationSection __configuration_section = null;
+        private IConfigurationSection __configuration_section;
         public IConfigurationSection ConfigAppSection
         {
             get
@@ -63,7 +63,7 @@ namespace CCXT.Collector.Library
             }
         }
 
-        private bool? __use_polling_ticker = null;
+        private bool? __use_polling_ticker;
 
         public bool UsePollingTicker
         {
@@ -75,15 +75,9 @@ namespace CCXT.Collector.Library
             }
         }
 
-        public bool UsePollingOrderboook
-        {
-            get
-            {
-                return this.GetAppBoolean("use.polling.orderbook");
-            }
-        }
+        public bool UsePollingOrderbook => this.GetAppBoolean("use.polling.orderbook");
 
-        private bool? __use_publish_trade = null;
+        private bool? __use_publish_trade;
 
         public bool UsePublishTrade
         {
@@ -95,7 +89,7 @@ namespace CCXT.Collector.Library
             }
         }
 
-        private int? __snapshot_skip_counter = null;
+        private int? __snapshot_skip_counter;
 
         public int SnapshotSkipCounter
         {
@@ -110,13 +104,7 @@ namespace CCXT.Collector.Library
         /// <summary>
         ///
         /// </summary>
-        public bool IsWindows
-        {
-            get
-            {
-                return RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
-            }
-        }
+        public bool IsWindows => RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
 
         /// <summary>
         /// 
@@ -129,7 +117,7 @@ namespace CCXT.Collector.Library
         {
             var _result = "";
 
-            if (String.IsNullOrEmpty(appkey) == false)
+            if (string.IsNullOrEmpty(appkey) == false)
             {
                 if (this.IsWindows == true)
                 {
@@ -142,7 +130,7 @@ namespace CCXT.Collector.Library
                     _result = configSection[appkey];
             }
 
-            if (String.IsNullOrEmpty(_result) == true)
+            if (string.IsNullOrEmpty(_result) == true)
                 _result = defaultValue;
 
             return _result;
@@ -181,7 +169,7 @@ namespace CCXT.Collector.Library
         public virtual long GetAppInteger64(string appkey, int defaultValue = 0)
         {
             var _value = GetAppString(appkey);
-            return String.IsNullOrEmpty(_value) ? defaultValue : Convert.ToInt64(_value);
+            return string.IsNullOrEmpty(_value) ? defaultValue : Convert.ToInt64(_value);
         }
 
         /// <summary>
@@ -193,7 +181,7 @@ namespace CCXT.Collector.Library
         public virtual decimal GetAppDecimal(string appkey, decimal defaultValue = 0)
         {
             var _value = GetAppString(appkey);
-            return String.IsNullOrEmpty(_value) ? defaultValue : Convert.ToDecimal(_value);
+            return string.IsNullOrEmpty(_value) ? defaultValue : Convert.ToDecimal(_value);
         }
 
         /// <summary>
@@ -205,7 +193,7 @@ namespace CCXT.Collector.Library
         public virtual int GetHexInteger(string appkey, int defaultValue = 0)
         {
             var _value = GetAppString(appkey);
-            return String.IsNullOrEmpty(_value) ? defaultValue : Convert.ToInt32(_value, 16);
+            return string.IsNullOrEmpty(_value) ? defaultValue : Convert.ToInt32(_value, 16);
         }
 
         /// <summary>
@@ -217,7 +205,7 @@ namespace CCXT.Collector.Library
         public virtual int GetAppInteger(string appkey, int defaultValue = 0)
         {
             var _value = GetAppString(appkey);
-            return String.IsNullOrEmpty(_value) ? defaultValue : Convert.ToInt32(_value);
+            return string.IsNullOrEmpty(_value) ? defaultValue : Convert.ToInt32(_value);
         }
 
         /// <summary>
@@ -229,7 +217,7 @@ namespace CCXT.Collector.Library
         public virtual bool GetAppBoolean(string appkey, bool defaultValue = false)
         {
             var _value = GetAppString(appkey);
-            return String.IsNullOrEmpty(_value) ? defaultValue : _value.ToLower() == "true";
+            return string.IsNullOrEmpty(_value) ? defaultValue : _value.ToLower() == "true";
         }
 
         /// <summary>
@@ -241,7 +229,7 @@ namespace CCXT.Collector.Library
         public virtual DateTime GetAppDateTime(string appSection, string appkey)
         {
             var _value = GetAppSection(appSection, appkey);
-            return String.IsNullOrEmpty(_value) ? DateTime.UtcNow : Convert.ToDateTime(_value);
+            return string.IsNullOrEmpty(_value) ? DateTime.UtcNow : Convert.ToDateTime(_value);
         }
 
         /// <summary>
@@ -254,7 +242,7 @@ namespace CCXT.Collector.Library
         public virtual int GetAppInteger(string appSection, string appkey, int defaultValue = 0)
         {
             var _value = GetAppSection(appSection, appkey);
-            return String.IsNullOrEmpty(_value) ? defaultValue : Convert.ToInt32(_value);
+            return string.IsNullOrEmpty(_value) ? defaultValue : Convert.ToInt32(_value);
         }
 
         /// <summary>
@@ -267,7 +255,7 @@ namespace CCXT.Collector.Library
         public virtual bool GetAppBoolean(string appSection, string appkey, bool defaultValue = false)
         {
             var _value = GetAppSection(appSection, appkey);
-            return String.IsNullOrEmpty(_value) ? defaultValue : _value.ToLower() == "true";
+            return string.IsNullOrEmpty(_value) ? defaultValue : _value.ToLower() == "true";
         }
 
         /// <summary>
@@ -280,7 +268,7 @@ namespace CCXT.Collector.Library
         public virtual long GetAppInteger64(string appSection, string appkey, int defaultValue = 0)
         {
             var _value = GetAppSection(appSection, appkey);
-            return String.IsNullOrEmpty(_value) ? defaultValue : Convert.ToInt64(_value);
+            return string.IsNullOrEmpty(_value) ? defaultValue : Convert.ToInt64(_value);
         }
 
         /// <summary>
@@ -293,7 +281,7 @@ namespace CCXT.Collector.Library
         public virtual decimal GetAppDecimal(string appSection, string appkey, decimal defaultValue = 0)
         {
             var _value = GetAppSection(appSection, appkey);
-            return String.IsNullOrEmpty(_value) ? defaultValue : Convert.ToDecimal(_value);
+            return string.IsNullOrEmpty(_value) ? defaultValue : Convert.ToDecimal(_value);
         }
 
         /// <summary>
@@ -306,28 +294,16 @@ namespace CCXT.Collector.Library
         public virtual int GetHexInteger(string appSection, string appkey, int defaultValue = 0)
         {
             var _value = GetAppSection(appSection, appkey);
-            return String.IsNullOrEmpty(_value) ? defaultValue : Convert.ToInt32(_value, 16);
+            return string.IsNullOrEmpty(_value) ? defaultValue : Convert.ToInt32(_value, 16);
         }
 
         #region Common
 
-        public string CollectorVersion
-        {
-            get
-            {
-                return this.GetAppString("collector.version");
-            }
-        }
+        public string CollectorVersion => this.GetAppString("collector.version");
 
-        public bool UseAutoStart
-        {
-            get
-            {
-                return this.GetAppBoolean("collector.auto.start");
-            }
-        }
+        public bool UseAutoStart => this.GetAppBoolean("collector.auto.start");
 
-        private string __name_start_exchange = null;
+        private string __name_start_exchange;
 
         public string StartExchangeName
         {
@@ -339,7 +315,7 @@ namespace CCXT.Collector.Library
             }
         }
 
-        private long? __polling_prev_time = null;
+        private long? __polling_prev_time;
 
         public long PollingPrevTime
         {
@@ -351,7 +327,7 @@ namespace CCXT.Collector.Library
             }
         }
 
-        private long? __polling_term_time = null;
+        private long? __polling_term_time;
 
         public long PollingTermTime
         {
@@ -367,29 +343,11 @@ namespace CCXT.Collector.Library
 
         #region Arbitrage
 
-        public bool UsePollingArbitrage
-        {
-            get
-            {
-                return this.GetAppBoolean("use.polling.arbitrage");
-            }
-        }
+        public bool UsePollingArbitrage => this.GetAppBoolean("use.polling.arbitrage");
 
-        public string ArbitrageBaseNames
-        {
-            get
-            {
-                return this.GetAppString("arbitrage.base.names");
-            }
-        }
+        public string ArbitrageBaseNames => this.GetAppString("arbitrage.base.names");
 
-        public string ArbitrageQuoteNames
-        {
-            get
-            {
-                return this.GetAppString("arbitrage.quote.names");
-            }
-        }
+        public string ArbitrageQuoteNames => this.GetAppString("arbitrage.quote.names");
 
         #endregion Arbitrage
     }

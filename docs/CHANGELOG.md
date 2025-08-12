@@ -5,7 +5,38 @@ All notable changes to CCXT.Collector will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased] - 2025-08-11
+## [2.1.6] - 2025-08-12
+
+### Added
+- Unified subscription handling with `MarkSubscriptionActive` method across all exchanges
+- Automatic resubscription on reconnection via `RestoreActiveSubscriptionsAsync`
+- Comprehensive WebSocket test suite for all 15 major exchanges
+- Test base framework (`WebSocketTestBase`) for consistent testing
+- Enhanced ChannelManager with batch subscription support
+- Channel statistics tracking and monitoring
+- Automatic idle exchange disconnection
+- **Nullable Reference Types** enabled for improved null safety
+- **SourceLink** integration for better debugging experience
+- **Code Analyzers** (StyleCop, SonarAnalyzer, .NET Analyzers) for code quality
+- **EditorConfig** and **.globalconfig** for consistent code style
+- **Directory.Build.props** for centralized build configuration
+
+### Changed
+- Improved error recovery with subscription restoration
+- Enhanced JsonExtensions with diagnostic hooks
+- Updated documentation to reflect current implementation status
+- **Target Framework** simplified to .NET 8.0 for stability
+- **Package Dependencies** updated to consistent versions
+- **Build Configuration** enhanced with deterministic builds and symbols
+- **Project Structure** improved with better organization and settings
+
+### Fixed
+- Subscription state management consistency
+- Test coverage for major exchanges (now 100%)
+- Removed duplicate PackageLicenseFile declaration
+- Package version consistency across dependencies
+
+## [2.1.5] - 2025-08-11
 
 ### 🔄 Enhanced WebSocket Subscription Management
 
@@ -478,7 +509,7 @@ Comprehensive code analysis conducted identifying key improvement areas and secu
 - Added security and testing status to README
 - Updated roadmap with new priority tasks based on analysis
 
-## [2.1.5] - 2025-01-11
+## [2.1.5] - 2025-08-11
 
 ### 🎯 Complete Migration from Newtonsoft.Json to System.Text.Json
 

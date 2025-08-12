@@ -116,12 +116,12 @@ namespace CCXT.Collector.Service
         /// <summary>
         /// Exchange name
         /// </summary>
-        public string exchange { get; set; }
+        public string exchange { get; set; } = string.Empty;
 
         /// <summary>
         /// Trading symbol/pair
         /// </summary>
-        public string symbol { get; set; }
+        public string symbol { get; set; } = string.Empty;
 
         /// <summary>
         /// Unix timestamp in milliseconds

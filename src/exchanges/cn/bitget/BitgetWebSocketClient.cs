@@ -151,7 +151,7 @@ namespace CCXT.Collector.Bitget
                     return;
 
                 var instId = arg.GetStringOrDefault("instId");
-                if (String.IsNullOrEmpty(instId))
+                if (string.IsNullOrEmpty(instId))
                     return;
 
                 if (!(json.TryGetArray("data", out var dataProp)))
@@ -290,7 +290,7 @@ namespace CCXT.Collector.Bitget
                     return;
 
                 var instId = arg.GetStringOrDefault("instId");
-                if (String.IsNullOrEmpty(instId))
+                if (string.IsNullOrEmpty(instId))
                     return;
 
                 if (!(json.TryGetArray("data", out var dataProp)))
@@ -349,7 +349,7 @@ namespace CCXT.Collector.Bitget
                     return;
 
                 var instId = arg.GetStringOrDefault("instId");
-                if (String.IsNullOrEmpty(instId))
+                if (string.IsNullOrEmpty(instId))
                     return;
 
                 if (!(json.TryGetArray("data", out var dataProp)))
@@ -401,7 +401,7 @@ namespace CCXT.Collector.Bitget
                 var channel = arg.GetStringOrDefault("channel");
 
                 var instId = arg.GetStringOrDefault("instId");
-                if (String.IsNullOrEmpty(instId))
+                if (string.IsNullOrEmpty(instId))
                     return;
 
                 if (!(json.TryGetArray("data", out var data)))

@@ -154,7 +154,7 @@ namespace CCXT.Collector.Okx
                     return;
 
                 var instId = arg.GetStringOrDefault("instId");
-                if (String.IsNullOrEmpty(instId))
+                if (string.IsNullOrEmpty(instId))
                     return;
 
                 if (!json.TryGetArray("data", out var dataArray))
@@ -310,7 +310,7 @@ namespace CCXT.Collector.Okx
                     return;
 
                 var instId = arg.GetStringOrDefault("instId");
-                if (String.IsNullOrEmpty(instId))
+                if (string.IsNullOrEmpty(instId))
                     return;
 
                 if (!json.TryGetArray("data", out var dataArray))
@@ -365,7 +365,7 @@ namespace CCXT.Collector.Okx
                     return;
 
                 var instId = arg.GetStringOrDefault("instId");
-                if (String.IsNullOrEmpty(instId))
+                if (string.IsNullOrEmpty(instId))
                     return;
 
                 if (!json.TryGetArray("data", out var dataArray))
@@ -417,7 +417,7 @@ namespace CCXT.Collector.Okx
 
                 var channel = arg.GetStringOrDefault("channel");
                 var instId = arg.GetStringOrDefault("instId");
-                if (String.IsNullOrEmpty(instId))
+                if (string.IsNullOrEmpty(instId))
                     return;
 
                 if (!json.TryGetArray("data", out var dataArray))

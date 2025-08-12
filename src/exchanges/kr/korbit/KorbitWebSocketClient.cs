@@ -109,7 +109,7 @@ namespace CCXT.Collector.Korbit
 
                 // Handle different message types
                 var eventType = json.GetStringOrDefault("event");
-                if (!String.IsNullOrEmpty(eventType))
+                if (!string.IsNullOrEmpty(eventType))
                 {
                     switch (eventType)
                     {
@@ -134,7 +134,7 @@ namespace CCXT.Collector.Korbit
                 {
                     var channel = json.GetStringOrDefault("channel");
                     
-                    if (!String.IsNullOrEmpty(channel))
+                    if (!string.IsNullOrEmpty(channel))
                     {
                         if (channel.Contains("orderbook"))
                             await ProcessOrderbookData(json);
@@ -174,7 +174,7 @@ namespace CCXT.Collector.Korbit
                     korbitSymbol = data.GetStringOrDefault("currency_pair");
                 }
                 
-                if (String.IsNullOrEmpty(korbitSymbol)) return;
+                if (string.IsNullOrEmpty(korbitSymbol)) return;
 
                 var symbol = ConvertSymbolBack(korbitSymbol);
                 var timestamp = data.GetInt64OrDefault("timestamp", TimeExtension.UnixTime);
@@ -264,7 +264,7 @@ namespace CCXT.Collector.Korbit
                     korbitSymbol = data.GetStringOrDefault("currency_pair");
                 }
                 
-                if (String.IsNullOrEmpty(korbitSymbol)) return;
+                if (string.IsNullOrEmpty(korbitSymbol)) return;
 
                 var symbol = ConvertSymbolBack(korbitSymbol);
                 var timestamp = TimeExtension.UnixTime;
@@ -343,7 +343,7 @@ namespace CCXT.Collector.Korbit
                     korbitSymbol = data.GetStringOrDefault("currency_pair");
                 }
                 
-                if (String.IsNullOrEmpty(korbitSymbol)) return;
+                if (string.IsNullOrEmpty(korbitSymbol)) return;
 
                 var symbol = ConvertSymbolBack(korbitSymbol);
                 var timestamp = data.GetInt64OrDefault("timestamp", TimeExtension.UnixTime);

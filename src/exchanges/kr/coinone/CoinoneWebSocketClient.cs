@@ -150,7 +150,7 @@ namespace CCXT.Collector.Coinone
                     return;
 
                 var coinoneSymbol = data.GetStringOrDefault("target_currency");
-                if (String.IsNullOrEmpty(coinoneSymbol)) return;
+                if (string.IsNullOrEmpty(coinoneSymbol)) return;
 
                 var symbol = ConvertSymbolBack(coinoneSymbol);
                 var timestamp = data.GetInt64OrDefault("timestamp", TimeExtension.UnixTime);
@@ -215,7 +215,7 @@ namespace CCXT.Collector.Coinone
                     return;
 
                 var coinoneSymbol = data.GetStringOrDefault("target_currency");
-                if (String.IsNullOrEmpty(coinoneSymbol)) return;
+                if (string.IsNullOrEmpty(coinoneSymbol)) return;
 
                 var symbol = ConvertSymbolBack(coinoneSymbol);
                 var timestamp = TimeExtension.UnixTime;
@@ -261,7 +261,7 @@ namespace CCXT.Collector.Coinone
                     return;
 
                 var coinoneSymbol = data.GetStringOrDefault("target_currency");
-                if (String.IsNullOrEmpty(coinoneSymbol)) return;
+                if (string.IsNullOrEmpty(coinoneSymbol)) return;
 
                 var symbol = ConvertSymbolBack(coinoneSymbol);
                 var timestamp = data.GetInt64OrDefault("timestamp", TimeExtension.UnixTime);

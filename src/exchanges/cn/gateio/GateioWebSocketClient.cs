@@ -332,7 +332,7 @@ namespace CCXT.Collector.Gateio
                         });
 
                         // Extract symbol from first candle if available
-                        if (String.IsNullOrEmpty(symbol) && candle.GetArrayLength() > 6)
+                        if (string.IsNullOrEmpty(symbol) && candle.GetArrayLength() > 6)
                         {
                             symbol = candle[6].ValueKind == JsonValueKind.String ? candle[6].GetString() : "";
                         }

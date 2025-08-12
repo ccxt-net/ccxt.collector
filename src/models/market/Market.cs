@@ -43,7 +43,7 @@ namespace CCXT.Collector.Service
         /// <returns>Market instance</returns>
         public static Market Parse(string symbol)
         {
-            if (String.IsNullOrEmpty(symbol))
+            if (string.IsNullOrEmpty(symbol))
                 throw new ArgumentNullException(nameof(symbol));
 
             var parts = symbol.Split('/');
@@ -60,7 +60,7 @@ namespace CCXT.Collector.Service
         {
             market = default;
             
-            if (String.IsNullOrEmpty(symbol))
+            if (string.IsNullOrEmpty(symbol))
                 return false;
 
             var parts = symbol.Split('/');

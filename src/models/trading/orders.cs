@@ -10,7 +10,7 @@ namespace CCXT.Collector.Service
         /// <summary>
         /// Exchange name
         /// </summary>
-        public string exchange { get; set; }
+        public string exchange { get; set; } = string.Empty;
 
         /// <summary>
         /// Timestamp when data was received
@@ -36,7 +36,7 @@ namespace CCXT.Collector.Service
         /// <summary>
         /// Exchange name
         /// </summary>
-        public string exchange { get; set; }
+        public string exchange { get; set; } = string.Empty;
 
         /// <summary>
         /// Timestamp when data was received

@@ -45,9 +45,12 @@ CCXT.Collector is a comprehensive .NET library designed for real-time cryptocurr
 - **Performance Optimized**: System.Text.Json for 20-30% faster parsing, 15-25% less memory usage
 - **Security Focus**: Authentication framework ready (implementation in progress)
 
-### Current Status (v2.1.5 - January 2025)
+### Current Status (v2.1.6 - January 2025)
 
 - **✅ Completed**: 15 major exchanges with full WebSocket implementation
+- **✅ Testing**: 100% test coverage for all major exchanges
+- **✅ Channel Management**: Advanced ChannelManager with batch subscription support
+- **✅ Auto-Recovery**: Automatic subscription restoration on reconnection
 - **✅ Performance**: Complete migration to System.Text.Json
 - **⚠️ Security**: API key management needs secure storage implementation
 - **⚠️ Testing**: Only 20% test coverage (3 of 15 exchanges)

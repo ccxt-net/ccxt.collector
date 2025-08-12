@@ -8,6 +8,7 @@ using CCXT.Collector.Library;
 using CCXT.Collector.Service;
 using CCXT.Collector.Models.WebSocket;
 using System.Text.Json;
+using System.Diagnostics.CodeAnalysis;
 
 namespace CCXT.Collector.Bithumb
 {
@@ -151,7 +152,7 @@ namespace CCXT.Collector.Bithumb
             try
             {
                 var bithumbSymbol = content.GetStringOrDefault("symbol");
-                if (String.IsNullOrEmpty(bithumbSymbol)) return;
+                if (string.IsNullOrEmpty(bithumbSymbol)) return;
 
                 var symbol = ConvertSymbolBack(bithumbSymbol);
                 
@@ -160,7 +161,7 @@ namespace CCXT.Collector.Bithumb
                 var time = content.GetStringOrDefault("time");
                 var timestamp = TimeExtension.UnixTime;
                 
-                if (!String.IsNullOrEmpty(date) && !String.IsNullOrEmpty(time))
+                if (!string.IsNullOrEmpty(date) && !string.IsNullOrEmpty(time))
                 {
                     try
                     {
@@ -240,7 +241,7 @@ namespace CCXT.Collector.Bithumb
                 foreach (var group in symbolGroups)
                 {
                     var bithumbSymbol = group.Key;
-                    if (String.IsNullOrEmpty(bithumbSymbol)) continue;
+                    if (string.IsNullOrEmpty(bithumbSymbol)) continue;
 
                     var symbol = ConvertSymbolBack(bithumbSymbol);
                     var timestamp = TimeExtension.UnixTime;
@@ -343,7 +344,7 @@ namespace CCXT.Collector.Bithumb
                 foreach (var group in symbolGroups)
                 {
                     var bithumbSymbol = group.Key;
-                    if (String.IsNullOrEmpty(bithumbSymbol)) continue;
+                    if (string.IsNullOrEmpty(bithumbSymbol)) continue;
 
                     var symbol = ConvertSymbolBack(bithumbSymbol);
                     var timestamp = TimeExtension.UnixTime;
@@ -362,7 +363,7 @@ namespace CCXT.Collector.Bithumb
                         
                         // Try to parse transaction date/time
                         var contDate = item.GetStringOrDefault("contDtm");
-                        if (!String.IsNullOrEmpty(contDate))
+                        if (!string.IsNullOrEmpty(contDate))
                         {
                             try
                             {
@@ -625,6 +626,13 @@ namespace CCXT.Collector.Bithumb
             }
         }
 
+        /// <summary>
+        /// Attempts to subscribe to candle data for the specified market and interval.
+        /// Note: Bithumb does not support candle subscriptions via WebSocket; use REST API instead.
+        /// </summary>
+        /// <param name="market">The market object.</param>
+        /// <param name="interval">The candle interval (e.g., "1m", "5m").</param>
+        /// <returns>False, as Bithumb does not support candle subscriptions via WebSocket.</returns>
         public override async Task<bool> SubscribeCandlesAsync(Market market, string interval)
         {
             try
@@ -632,15 +640,24 @@ namespace CCXT.Collector.Bithumb
                 // Bithumb doesn't have a specific candles WebSocket channel
                 // You would need to construct candles from trades or use REST API
                 RaiseError("Bithumb doesn't support candles via WebSocket. Use REST API instead.");
+                await Task.CompletedTask;
                 return false;
             }
             catch (Exception ex)
             {
                 RaiseError($"Subscribe candles error: {ex.Message}");
+                await Task.CompletedTask;
                 return false;
             }
         }
 
+        /// <summary>
+        /// Attempts to subscribe to candle data for the specified symbol and interval.
+        /// Note: Bithumb does not support candle subscriptions via WebSocket; use REST API instead.
+        /// </summary>
+        /// <param name="symbol">The market symbol (e.g., "BTC/KRW").</param>
+        /// <param name="interval">The candle interval (e.g., "1m", "5m").</param>
+        /// <returns>False, as Bithumb does not support candle subscriptions via WebSocket.</returns>
         public override async Task<bool> SubscribeCandlesAsync(string symbol, string interval)
         {
             try
@@ -648,11 +665,13 @@ namespace CCXT.Collector.Bithumb
                 // Bithumb doesn't have a specific candles WebSocket channel
                 // You would need to construct candles from trades or use REST API
                 RaiseError("Bithumb doesn't support candles via WebSocket. Use REST API instead.");
+                await Task.CompletedTask;
                 return false;
             }
             catch (Exception ex)
             {
                 RaiseError($"Subscribe candles error: {ex.Message}");
+                await Task.CompletedTask;
                 return false;
             }
         }
@@ -669,6 +688,8 @@ namespace CCXT.Collector.Bithumb
         /// <summary>
         /// Send batch subscriptions for Bithumb - can send separate messages per channel
         /// </summary>
+        /// <param name="subscriptions">List of channel-symbol subscription pairs.</param>
+        /// <returns>True if all batch subscriptions were sent successfully; otherwise, false.</returns>
         protected override async Task<bool> SendBatchSubscriptionsAsync(List<KeyValuePair<string, SubscriptionInfo>> subscriptions)
         {
             try
