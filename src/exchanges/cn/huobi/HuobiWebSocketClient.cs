@@ -562,14 +562,7 @@ namespace CCXT.Collector.Huobi
 
                 await SendMessageAsync(JsonSerializer.Serialize(subscription));
 
-                var key = CreateSubscriptionKey("orderbook", symbol);
-                _subscriptions[key] = new SubscriptionInfo
-                {
-                    Channel = $"market.{huobiSymbol}.depth.step0",
-                    Symbol = symbol,
-                    SubscribedAt = DateTime.UtcNow,
-                    IsActive = true
-                };
+                MarkSubscriptionActive("orderbook", symbol);
 
                 return true;
             }
@@ -593,14 +586,7 @@ namespace CCXT.Collector.Huobi
 
                 await SendMessageAsync(JsonSerializer.Serialize(subscription));
 
-                var key = CreateSubscriptionKey("trades", symbol);
-                _subscriptions[key] = new SubscriptionInfo
-                {
-                    Channel = $"market.{huobiSymbol}.trade.detail",
-                    Symbol = symbol,
-                    SubscribedAt = DateTime.UtcNow,
-                    IsActive = true
-                };
+                MarkSubscriptionActive("trades", symbol);
 
                 return true;
             }
@@ -624,14 +610,7 @@ namespace CCXT.Collector.Huobi
 
                 await SendMessageAsync(JsonSerializer.Serialize(subscription));
 
-                var key = CreateSubscriptionKey("ticker", symbol);
-                _subscriptions[key] = new SubscriptionInfo
-                {
-                    Channel = $"market.{huobiSymbol}.detail",
-                    Symbol = symbol,
-                    SubscribedAt = DateTime.UtcNow,
-                    IsActive = true
-                };
+                MarkSubscriptionActive("ticker", symbol);
 
                 return true;
             }

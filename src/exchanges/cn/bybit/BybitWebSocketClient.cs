@@ -570,14 +570,7 @@ namespace CCXT.Collector.Bybit
 
                 await SendMessageAsync(JsonSerializer.Serialize(subscription));
 
-                var key = CreateSubscriptionKey("orderbook", symbol);
-                _subscriptions[key] = new SubscriptionInfo
-                {
-                    Channel = "orderbook",
-                    Symbol = symbol,
-                    SubscribedAt = DateTime.UtcNow,
-                    IsActive = true
-                };
+                MarkSubscriptionActive("orderbook", symbol);
 
                 return true;
             }
@@ -604,14 +597,7 @@ namespace CCXT.Collector.Bybit
 
                 await SendMessageAsync(JsonSerializer.Serialize(subscription));
 
-                var key = CreateSubscriptionKey("trades", symbol);
-                _subscriptions[key] = new SubscriptionInfo
-                {
-                    Channel = "publicTrade",
-                    Symbol = symbol,
-                    SubscribedAt = DateTime.UtcNow,
-                    IsActive = true
-                };
+                MarkSubscriptionActive("trades", symbol);
 
                 return true;
             }
@@ -638,14 +624,7 @@ namespace CCXT.Collector.Bybit
 
                 await SendMessageAsync(JsonSerializer.Serialize(subscription));
 
-                var key = CreateSubscriptionKey("ticker", symbol);
-                _subscriptions[key] = new SubscriptionInfo
-                {
-                    Channel = "tickers",
-                    Symbol = symbol,
-                    SubscribedAt = DateTime.UtcNow,
-                    IsActive = true
-                };
+                MarkSubscriptionActive("ticker", symbol);
 
                 return true;
             }

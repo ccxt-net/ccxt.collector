@@ -371,14 +371,7 @@ namespace CCXT.Collector.Gateio
                 
                 await SendMessageAsync(JsonSerializer.Serialize(request));
                 
-                var key = CreateSubscriptionKey("orderbook", symbol);
-                _subscriptions[key] = new SubscriptionInfo
-                {
-                    Channel = "orderbook",
-                    Symbol = symbol,
-                    SubscribedAt = DateTime.UtcNow,
-                    IsActive = true
-                };
+                MarkSubscriptionActive("orderbook", symbol);
 
                 return true;
             }
@@ -404,14 +397,7 @@ namespace CCXT.Collector.Gateio
                 
                 await SendMessageAsync(JsonSerializer.Serialize(request));
                 
-                var key = CreateSubscriptionKey("trades", symbol);
-                _subscriptions[key] = new SubscriptionInfo
-                {
-                    Channel = "trades",
-                    Symbol = symbol,
-                    SubscribedAt = DateTime.UtcNow,
-                    IsActive = true
-                };
+                MarkSubscriptionActive("trades", symbol);
 
                 return true;
             }
@@ -437,14 +423,7 @@ namespace CCXT.Collector.Gateio
                 
                 await SendMessageAsync(JsonSerializer.Serialize(request));
                 
-                var key = CreateSubscriptionKey("ticker", symbol);
-                _subscriptions[key] = new SubscriptionInfo
-                {
-                    Channel = "ticker",
-                    Symbol = symbol,
-                    SubscribedAt = DateTime.UtcNow,
-                    IsActive = true
-                };
+                MarkSubscriptionActive("ticker", symbol);
 
                 return true;
             }
@@ -471,15 +450,7 @@ namespace CCXT.Collector.Gateio
                 
                 await SendMessageAsync(JsonSerializer.Serialize(request));
                 
-                var key = CreateSubscriptionKey($"candles:{interval}", symbol);
-                _subscriptions[key] = new SubscriptionInfo
-                {
-                    Channel = "candles",
-                    Symbol = symbol,
-                    SubscribedAt = DateTime.UtcNow,
-                    IsActive = true,
-                    Extra = interval
-                };
+                MarkSubscriptionActive($"candles:{interval}", symbol);
 
                 return true;
             }

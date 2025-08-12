@@ -272,14 +272,7 @@ namespace CCXT.Collector.Upbit
 
                 await SendMessageAsync(JsonSerializer.Serialize(subscription));
                 
-                var key = CreateSubscriptionKey("orderbook", market.ToString());
-                _subscriptions[key] = new SubscriptionInfo
-                {
-                    Channel = "orderbook",
-                    Symbol = market.ToString(),
-                    SubscribedAt = DateTime.UtcNow,
-                    IsActive = true
-                };
+                MarkSubscriptionActive("orderbook", market.ToString());
 
                 return true;
             }
@@ -304,14 +297,7 @@ namespace CCXT.Collector.Upbit
 
                 await SendMessageAsync(JsonSerializer.Serialize(subscription));
                 
-                var key = CreateSubscriptionKey("orderbook", symbol);
-                _subscriptions[key] = new SubscriptionInfo
-                {
-                    Channel = "orderbook",
-                    Symbol = symbol,
-                    SubscribedAt = DateTime.UtcNow,
-                    IsActive = true
-                };
+                MarkSubscriptionActive("orderbook", symbol);
 
                 return true;
             }
@@ -336,14 +322,7 @@ namespace CCXT.Collector.Upbit
 
                 await SendMessageAsync(JsonSerializer.Serialize(subscription));
                 
-                var key = CreateSubscriptionKey("trade", market.ToString());
-                _subscriptions[key] = new SubscriptionInfo
-                {
-                    Channel = "trade",
-                    Symbol = market.ToString(),
-                    SubscribedAt = DateTime.UtcNow,
-                    IsActive = true
-                };
+                MarkSubscriptionActive("trade", market.ToString());
 
                 return true;
             }
@@ -368,14 +347,7 @@ namespace CCXT.Collector.Upbit
 
                 await SendMessageAsync(JsonSerializer.Serialize(subscription));
                 
-                var key = CreateSubscriptionKey("trade", symbol);
-                _subscriptions[key] = new SubscriptionInfo
-                {
-                    Channel = "trade",
-                    Symbol = symbol,
-                    SubscribedAt = DateTime.UtcNow,
-                    IsActive = true
-                };
+                MarkSubscriptionActive("trade", symbol);
 
                 return true;
             }
@@ -400,14 +372,7 @@ namespace CCXT.Collector.Upbit
 
                 await SendMessageAsync(JsonSerializer.Serialize(subscription));
                 
-                var key = CreateSubscriptionKey("ticker", market.ToString());
-                _subscriptions[key] = new SubscriptionInfo
-                {
-                    Channel = "ticker",
-                    Symbol = market.ToString(),
-                    SubscribedAt = DateTime.UtcNow,
-                    IsActive = true
-                };
+                MarkSubscriptionActive("ticker", market.ToString());
 
                 return true;
             }
@@ -432,14 +397,7 @@ namespace CCXT.Collector.Upbit
 
                 await SendMessageAsync(JsonSerializer.Serialize(subscription));
                 
-                var key = CreateSubscriptionKey("ticker", symbol);
-                _subscriptions[key] = new SubscriptionInfo
-                {
-                    Channel = "ticker",
-                    Symbol = symbol,
-                    SubscribedAt = DateTime.UtcNow,
-                    IsActive = true
-                };
+                MarkSubscriptionActive("ticker", symbol);
 
                 return true;
             }
@@ -681,14 +639,7 @@ namespace CCXT.Collector.Upbit
 
                 await SendMessageAsync(JsonSerializer.Serialize(subscription));
                 
-                var key = CreateSubscriptionKey($"candle:{interval}", market.ToString());
-                _subscriptions[key] = new SubscriptionInfo
-                {
-                    Channel = "candle",
-                    Symbol = market.ToString(),
-                    SubscribedAt = DateTime.UtcNow,
-                    IsActive = true
-                };
+                MarkSubscriptionActive($"candle:{interval}", market.ToString());
 
                 return true;
             }
@@ -714,14 +665,7 @@ namespace CCXT.Collector.Upbit
 
                 await SendMessageAsync(JsonSerializer.Serialize(subscription));
                 
-                var key = CreateSubscriptionKey($"candle:{interval}", symbol);
-                _subscriptions[key] = new SubscriptionInfo
-                {
-                    Channel = "candle",
-                    Symbol = symbol,
-                    SubscribedAt = DateTime.UtcNow,
-                    IsActive = true
-                };
+                MarkSubscriptionActive($"candle:{interval}", symbol);
 
                 return true;
             }

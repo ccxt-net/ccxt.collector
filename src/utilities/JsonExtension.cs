@@ -160,15 +160,31 @@ public static class JsonExtensions
     /// </summary>
     public static long GetUnixTimeOrDefault(this JsonElement element, string dateFieldName, long @default = 0)
     {
-        if (element.TryGetProperty(dateFieldName, out var dateProp) &&
-            dateProp.ValueKind == JsonValueKind.String &&
-            DateTimeOffset.TryParse(dateProp.GetString(), CultureInfo.InvariantCulture,
-                DateTimeStyles.AssumeUniversal | DateTimeStyles.AdjustToUniversal, out var dto))
+        if (!element.TryGetProperty(dateFieldName, out var dateProp))
+            return @default;
+
+    // Support numeric epoch (seconds or milliseconds)
+        if (dateProp.ValueKind == JsonValueKind.Number && dateProp.TryGetInt64(out var epochNum))
         {
-            return dto.ToUnixTimeMilliseconds();
+            return NormalizeEpoch(epochNum);
         }
 
-        return @default; // default value
+        if (dateProp.ValueKind == JsonValueKind.String)
+        {
+            var s = dateProp.GetString();
+            if (string.IsNullOrWhiteSpace(s)) return @default;
+
+            if (DateTimeOffset.TryParse(s, CultureInfo.InvariantCulture,
+                DateTimeStyles.AssumeUniversal | DateTimeStyles.AdjustToUniversal, out var dto))
+                return dto.ToUnixTimeMilliseconds();
+
+            if (long.TryParse(s, NumberStyles.Any, CultureInfo.InvariantCulture, out var epochParsed))
+                return NormalizeEpoch(epochParsed);
+        }
+
+        return @default;
+
+        static long NormalizeEpoch(long raw) => raw >= 1_000_000_000_000 ? raw : raw * 1000;
     }
 
     /// <summary>
@@ -185,6 +201,26 @@ public static class JsonExtensions
         arrayElement = default;
         return false;
     }
+
+    /// <summary>
+    /// Treat an empty array as valid (only presence matters).
+    /// </summary>
+    public static bool TryGetArrayAllowEmpty(this JsonElement element, string propertyName, out JsonElement arrayElement)
+    {
+        if (element.TryGetProperty(propertyName, out var prop) && prop.ValueKind == JsonValueKind.Array)
+        {
+            arrayElement = prop;
+            return true;
+        }
+        arrayElement = default;
+        return false;
+    }
+
+    /// <summary>
+    /// Explicit alternative emphasizing the original TryGetArray semantics (non-empty array required).
+    /// </summary>
+    public static bool TryGetNonEmptyArray(this JsonElement element, string propertyName, out JsonElement arrayElement)
+        => TryGetArray(element, propertyName, out arrayElement);
 
     /// <summary>
     /// Get decimal value from JsonElement, handling both number and string types

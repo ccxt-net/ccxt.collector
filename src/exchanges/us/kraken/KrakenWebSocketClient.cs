@@ -73,14 +73,7 @@ namespace CCXT.Collector.Kraken
 
                 await SendMessageAsync(JsonSerializer.Serialize(subscription));
                 
-                var key = CreateSubscriptionKey("orderbook", symbol);
-                _subscriptions[key] = new SubscriptionInfo
-                {
-                    Channel = "orderbook",
-                    Symbol = symbol,
-                    SubscribedAt = DateTime.UtcNow,
-                    IsActive = true
-                };
+                MarkSubscriptionActive("orderbook", symbol);
 
                 return true;
             }
@@ -105,14 +98,7 @@ namespace CCXT.Collector.Kraken
 
                 await SendMessageAsync(JsonSerializer.Serialize(subscription));
                 
-                var key = CreateSubscriptionKey("trades", symbol);
-                _subscriptions[key] = new SubscriptionInfo
-                {
-                    Channel = "trades",
-                    Symbol = symbol,
-                    SubscribedAt = DateTime.UtcNow,
-                    IsActive = true
-                };
+                MarkSubscriptionActive("trades", symbol);
 
                 return true;
             }
@@ -137,14 +123,7 @@ namespace CCXT.Collector.Kraken
 
                 await SendMessageAsync(JsonSerializer.Serialize(subscription));
                 
-                var key = CreateSubscriptionKey("ticker", symbol);
-                _subscriptions[key] = new SubscriptionInfo
-                {
-                    Channel = "ticker",
-                    Symbol = symbol,
-                    SubscribedAt = DateTime.UtcNow,
-                    IsActive = true
-                };
+                MarkSubscriptionActive("ticker", symbol);
 
                 return true;
             }
@@ -224,15 +203,7 @@ namespace CCXT.Collector.Kraken
 
                 await SendMessageAsync(JsonSerializer.Serialize(subscription));
                 
-                var key = CreateSubscriptionKey($"candles:{interval}", symbol);
-                _subscriptions[key] = new SubscriptionInfo
-                {
-                    Channel = "candles",
-                    Symbol = symbol,
-                    SubscribedAt = DateTime.UtcNow,
-                    IsActive = true,
-                    Extra = interval // Store interval for resubscription
-                };
+                MarkSubscriptionActive("candles", symbol, interval);
 
                 return true;
             }
