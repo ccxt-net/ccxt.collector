@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using CCXT.Collector.Core.Abstractions;
-using CCXT.Collector.Service;
 
 namespace CCXT.Collector.Core.Infrastructure
 {
@@ -32,7 +31,7 @@ namespace CCXT.Collector.Core.Infrastructure
         {
             var exchangeLower = exchange.ToLower();
             _exchangeClients[exchangeLower] = client;
-            
+
             // Initialize pending subscriptions list for this exchange
             _pendingSubscriptions[exchangeLower] = new List<ChannelSubscriptionRequest>();
         }
@@ -50,7 +49,7 @@ namespace CCXT.Collector.Core.Infrastructure
             try
             {
                 var exchangeLower = exchange.ToLower();
-                
+
                 // Check if exchange client is registered
                 if (!_exchangeClients.TryGetValue(exchangeLower, out var client))
                 {
@@ -89,11 +88,11 @@ namespace CCXT.Collector.Core.Infrastructure
                 lock (_lockObject)
                 {
                     // Check if already in pending list
-                    var exists = pendingList.Any(r => 
-                        r.Symbol == symbol && 
-                        r.DataType == dataType && 
+                    var exists = pendingList.Any(r =>
+                        r.Symbol == symbol &&
+                        r.DataType == dataType &&
                         r.Interval == interval);
-                    
+
                     if (!exists)
                     {
                         pendingList.Add(subscriptionRequest);
@@ -115,7 +114,7 @@ namespace CCXT.Collector.Core.Infrastructure
                 };
 
                 _channels[channelId] = channelInfo;
-                
+
                 Console.WriteLine($"Channel registered (pending): {channelId}");
                 Console.WriteLine($"Total pending channels for {exchange}: {pendingList.Count}");
 
@@ -155,7 +154,7 @@ namespace CCXT.Collector.Core.Infrastructure
                     // Mark as inactive and remove
                     channelInfo.IsActive = false;
                     _channels.TryRemove(channelId, out _);
-                    
+
                     // Check if this was the last channel for this exchange
                     var remainingChannels = GetExchangeChannels(channelInfo.Exchange).Count(c => c.IsActive);
                     if (remainingChannels == 0 && client.IsConnected)
@@ -164,7 +163,7 @@ namespace CCXT.Collector.Core.Infrastructure
                         Console.WriteLine($"[{channelInfo.Exchange}] No active channels remaining, disconnecting WebSocket");
                         await client.DisconnectAsync();
                     }
-                    
+
                     return true;
                 }
 
@@ -181,7 +180,7 @@ namespace CCXT.Collector.Core.Infrastructure
         {
             var exchangeChannels = GetExchangeChannels(exchange).ToList();
             var removedCount = 0;
-            
+
             // Get the client first to disconnect after removing all channels
             var exchangeLower = exchange.ToLower();
             IWebSocketClient client = null;
@@ -194,7 +193,7 @@ namespace CCXT.Collector.Core.Infrastructure
                 {
                     removed.IsActive = false;
                     removedCount++;
-                    
+
                     // Try to unsubscribe from server if client is available
                     if (client != null && client.IsConnected)
                     {
@@ -228,7 +227,7 @@ namespace CCXT.Collector.Core.Infrastructure
 
         public IEnumerable<ChannelInfo> GetExchangeChannels(string exchange)
         {
-            return _channels.Values.Where(c => 
+            return _channels.Values.Where(c =>
                 string.Equals(c.Exchange, exchange, StringComparison.OrdinalIgnoreCase));
         }
 
@@ -375,7 +374,7 @@ namespace CCXT.Collector.Core.Infrastructure
         public async Task<bool> ApplyBatchSubscriptionsAsync(string exchange)
         {
             var exchangeLower = exchange.ToLower();
-            
+
             // Get client
             if (!_exchangeClients.TryGetValue(exchangeLower, out var client))
             {
@@ -403,14 +402,14 @@ namespace CCXT.Collector.Core.Infrastructure
 
             // Apply all pending subscriptions
             Console.WriteLine($"Applying {pendingList.Count} subscriptions for {exchange}");
-            
+
             bool success = true;
-            
+
             // Apply subscriptions one by one for all exchanges (unified batch mode)
             foreach (var request in pendingList)
             {
                 bool subscriptionSuccess = false;
-                
+
                 switch (request.DataType)
                 {
                     case ChannelDataType.Orderbook:
@@ -429,7 +428,7 @@ namespace CCXT.Collector.Core.Infrastructure
                         }
                         break;
                 }
-                
+
                 if (subscriptionSuccess)
                 {
                     // Mark channel as active
@@ -445,7 +444,7 @@ namespace CCXT.Collector.Core.Infrastructure
                     success = false;
                 }
             }
-            
+
             if (success)
             {
                 // Clear pending list after successful application
@@ -495,7 +494,7 @@ namespace CCXT.Collector.Core.Infrastructure
         {
             // Note: In a real implementation, we would need to be careful about 
             // multiple subscriptions and properly manage event handler lifecycle
-            
+
             switch (channelInfo.DataType)
             {
                 case ChannelDataType.Orderbook:
@@ -510,7 +509,7 @@ namespace CCXT.Collector.Core.Infrastructure
                 case ChannelDataType.Candles:
                     // Track candle updates for this channel
                     break;
-                // Add other data types as needed
+                    // Add other data types as needed
             }
         }
 

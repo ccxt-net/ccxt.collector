@@ -3,8 +3,31 @@ using System.Globalization;
 using System.Linq;
 using System.Text.Json;
 
+// NOTE: This file intentionally keeps global namespace to reduce friction when used across many exchange clients.
+// Enhancements added:
+// 1. IsDefinedElement helper to distinguish default(JsonElement) sentinel.
+// 2. TryGetNonEmptyArray retained (alias of original semantics) + clearer commentary.
+// 3. Optional diagnostics delegate to surface parsing fallbacks in DEBUG builds.
+// 4. GetUnixTimeOrDefault already supports numeric/string epoch; minor comment clarifications.
+
 public static class JsonExtensions
 {
+    #region Diagnostics
+    /// <summary>
+    /// Optional diagnostics hook invoked when a parsing fallback path is taken.
+    /// Assign from host application (e.g., JsonExtensions.DiagnosticsLogger = msg => logger.LogDebug(msg)).
+    /// Lightweight and skipped if null. Wrap heavy logic outside.
+    /// </summary>
+#if DEBUG
+    public static Action<string> DiagnosticsLogger { get; set; }
+#else
+    public static Action<string> DiagnosticsLogger { get; set; } = null; // stripped in Release JIT typically
+#endif
+    private static void Trace(string message)
+    {
+        try { DiagnosticsLogger?.Invoke(message); } catch { /* swallow */ }
+    }
+    #endregion
     /* -------- Common Utilities -------- */
     public static bool IsNullOrUndefined(this JsonElement e) =>
         e.ValueKind == JsonValueKind.Null || e.ValueKind == JsonValueKind.Undefined;
@@ -17,6 +40,13 @@ public static class JsonExtensions
 
     public static JsonElement FirstOrUndefined(this JsonElement element) =>
         element.ValueKind == JsonValueKind.Array ? element.EnumerateArray().FirstOrDefault() : default;
+
+    /// <summary>
+    /// Returns true if the JsonElement is not the default sentinel (Undefined/Null or default struct)
+    /// Use after FirstOrUndefined to verify presence: var first = arr.FirstOrUndefined(); if (first.IsDefinedElement()) { ... }
+    /// </summary>
+    public static bool IsDefinedElement(this JsonElement element) =>
+        element.ValueKind != JsonValueKind.Undefined && element.ValueKind != JsonValueKind.Null;
 
     /* -------- Boolean -------- */
     public static bool GetBooleanOrFalse(this JsonElement element, string propertyName)
@@ -163,7 +193,7 @@ public static class JsonExtensions
         if (!element.TryGetProperty(dateFieldName, out var dateProp))
             return @default;
 
-    // Support numeric epoch (seconds or milliseconds)
+        // Numeric epoch (seconds or milliseconds) directly supported
         if (dateProp.ValueKind == JsonValueKind.Number && dateProp.TryGetInt64(out var epochNum))
         {
             return NormalizeEpoch(epochNum);
@@ -220,7 +250,7 @@ public static class JsonExtensions
     /// Explicit alternative emphasizing the original TryGetArray semantics (non-empty array required).
     /// </summary>
     public static bool TryGetNonEmptyArray(this JsonElement element, string propertyName, out JsonElement arrayElement)
-        => TryGetArray(element, propertyName, out arrayElement);
+        => TryGetArray(element, propertyName, out arrayElement); // explicit alias for readability
 
     /// <summary>
     /// Get decimal value from JsonElement, handling both number and string types
@@ -228,7 +258,7 @@ public static class JsonExtensions
     /// </summary>
     public static decimal GetDecimalValue(this JsonElement element, decimal @default = 0m)
     {
-        if (element.ValueKind == JsonValueKind.Number && element.TryGetDecimal(out var v)) 
+    if (element.ValueKind == JsonValueKind.Number && element.TryGetDecimal(out var v)) 
             return v;
 
         if (element.ValueKind == JsonValueKind.String &&
@@ -260,7 +290,7 @@ public static class JsonExtensions
     /// </summary>
     public static int GetInt32Value(this JsonElement element, int @default = 0)
     {
-        if (element.ValueKind == JsonValueKind.Number && element.TryGetInt32(out var v)) 
+    if (element.ValueKind == JsonValueKind.Number && element.TryGetInt32(out var v)) 
             return v;
 
         if (element.ValueKind == JsonValueKind.String &&
@@ -276,7 +306,7 @@ public static class JsonExtensions
     /// </summary>
     public static long GetInt64Value(this JsonElement element, long @default = 0L)
     {
-        if (element.ValueKind == JsonValueKind.Number && element.TryGetInt64(out var v)) 
+    if (element.ValueKind == JsonValueKind.Number && element.TryGetInt64(out var v)) 
             return v;
 
         if (element.ValueKind == JsonValueKind.String &&

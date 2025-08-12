@@ -41,5 +41,40 @@ namespace CCXT.Collector.Tests.Utilities
             var ok = json.RootElement.TryGetNonEmptyArray("arr", out _);
             Assert.False(ok);
         }
+
+        [Fact]
+        public void FirstOrUndefined_IsDefinedElement_Works()
+        {
+            var json = JsonDocument.Parse("{ \"arr\": [1,2,3] }");
+            var first = json.RootElement.GetProperty("arr").FirstOrUndefined();
+            Assert.True(first.IsDefinedElement());
+        }
+
+        [Fact]
+        public void FirstOrUndefined_EmptyArray_NotDefined()
+        {
+            var json = JsonDocument.Parse("{ \"arr\": [] }");
+            var first = json.RootElement.GetProperty("arr").FirstOrUndefined();
+            Assert.False(first.IsDefinedElement());
+        }
+
+        [Fact]
+        public void GetUnixTimeOrDefault_StringEpochSeconds()
+        {
+            var sec = 1_700_000_100L;
+            var json = JsonDocument.Parse($"{{ \"t\": \"{sec}\" }}");
+            var ms = json.RootElement.GetUnixTimeOrDefault("t");
+            Assert.Equal(sec * 1000, ms);
+        }
+
+        [Fact]
+        public void GetUnixTimeOrDefault_StringIso()
+        {
+            var dto = DateTimeOffset.UtcNow;
+            var iso = dto.ToString("O");
+            var json = JsonDocument.Parse($"{{ \"t\": \"{iso}\" }}");
+            var ms = json.RootElement.GetUnixTimeOrDefault("t");
+            Assert.Equal(dto.ToUnixTimeMilliseconds(), ms);
+        }
     }
 }

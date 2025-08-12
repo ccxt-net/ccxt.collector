@@ -571,6 +571,7 @@ namespace CCXT.Collector.Core.Abstractions
             {
                 _consecutiveMessageFailures++;
                 _totalMessageFailures++;
+
                 RaiseError($"Message processing error ({_consecutiveMessageFailures}/{_maxConsecutiveMessageFailures}): {ex.Message}");
 
                 if (_consecutiveMessageFailures >= _maxConsecutiveMessageFailures)
@@ -662,6 +663,7 @@ namespace CCXT.Collector.Core.Abstractions
             var jitterFactor = 0.3; // 30%
             var rand = new Random();
             var jitter = 1.0 + (rand.NextDouble() * 2 - 1) * jitterFactor; // 0.7 ~ 1.3
+
             var delay = (int)(baseDelay * jitter);
             RaiseError($"Reconnecting in {delay}ms (base {baseDelay}ms, attempt {_reconnectAttempts}/{_maxReconnectAttempts})...");
 
