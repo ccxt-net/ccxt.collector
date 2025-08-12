@@ -597,76 +597,11 @@ namespace CCXT.Collector.Crypto
 
         #region Helper Methods
 
-        private string ConvertToCryptoSymbol(string symbol)
-        {
-            // Convert from standard format (BTC/USDT) to Crypto.com format (BTC_USDT)
-            return symbol.Replace("/", "_");
-        }
-
-        private string ConvertToStandardSymbol(string instrumentName)
-        {
-            // Convert from Crypto.com format (BTC_USDT) to standard format (BTC/USDT)
-            return instrumentName.Replace("_", "/");
-        }
-
-        private string ConvertToCryptoInterval(string interval)
-        {
-            return interval switch
-            {
-                "1m" => "1M",
-                "5m" => "5M",
-                "15m" => "15M",
-                "30m" => "30M",
-                "1h" => "1H",
-                "4h" => "4H",
-                "6h" => "6H",
-                "12h" => "12H",
-                "1d" => "1D",
-                "1w" => "7D",
-                "2w" => "14D",
-                "1M" => "1M",
-                _ => "1M"
-            };
-        }
-
-        private string ConvertInterval(string cryptoInterval)
-        {
-            return cryptoInterval switch
-            {
-                "1M" => "1m",
-                "5M" => "5m",
-                "15M" => "15m",
-                "30M" => "30m",
-                "1H" => "1h",
-                "4H" => "4h",
-                "6H" => "6h",
-                "12H" => "12h",
-                "1D" => "1d",
-                "7D" => "1w",
-                "14D" => "2w",
-                _ => "1m"
-            };
-        }
-
-        private long GetIntervalMilliseconds(string interval)
-        {
-            return interval switch
-            {
-                "1m" => 60000,
-                "5m" => 300000,
-                "15m" => 900000,
-                "30m" => 1800000,
-                "1h" => 3600000,
-                "4h" => 14400000,
-                "6h" => 21600000,
-                "12h" => 43200000,
-                "1d" => 86400000,
-                "1w" => 604800000,
-                "2w" => 1209600000,
-                "1M" => 2592000000,
-                _ => 60000
-            };
-        }
+    private string ConvertToCryptoSymbol(string symbol) => CCXT.Collector.Core.Infrastructure.ParsingHelpers.ToUnderscoreSymbol(symbol);
+    private string ConvertToStandardSymbol(string instrumentName) => CCXT.Collector.Core.Infrastructure.ParsingHelpers.FromUnderscoreSymbol(instrumentName);
+    private string ConvertToCryptoInterval(string interval) => CCXT.Collector.Core.Infrastructure.ParsingHelpers.ToCryptoInterval(interval);
+    private string ConvertInterval(string cryptoInterval) => CCXT.Collector.Core.Infrastructure.ParsingHelpers.FromCryptoInterval(cryptoInterval);
+    private long GetIntervalMilliseconds(string interval) => CCXT.Collector.Core.Infrastructure.ParsingHelpers.IntervalToMilliseconds(interval);
 
         #endregion
 

@@ -1,14 +1,13 @@
-﻿using System;
+﻿using CCXT.Collector.Core.Abstractions;
+using CCXT.Collector.Models.WebSocket;
+using CCXT.Collector.Service;
+using System;
+using CCXT.Collector.Core.Infrastructure; // 공통 파싱 Helper
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.WebSockets;
-using System.Text;
-using System.Threading.Tasks;
-using CCXT.Collector.Core.Abstractions;
-using CCXT.Collector.Library;
-using CCXT.Collector.Service;
 using System.Text.Json;
-using CCXT.Collector.Models.WebSocket;
+using System.Threading.Tasks;
 
 namespace CCXT.Collector.Coinbase
 {
@@ -21,7 +20,11 @@ namespace CCXT.Collector.Coinbase
      *
      * WebSocket API:
      *     https://docs.cdp.coinbase.com/exchange/websocket-feed/overview
+     *     https://docs.cdp.coinbase.com/exchange/websocket-feed/best-practices
+     *     https://docs.cdp.coinbase.com/exchange/websocket-feed/authentication
      *     https://docs.cdp.coinbase.com/exchange/websocket-feed/channels
+     *     https://docs.cdp.coinbase.com/exchange/websocket-feed/rate-limits
+     *     https://docs.cdp.coinbase.com/exchange/websocket-feed/errors
      *
      * Fees:
      *     https://help.coinbase.com/en/exchange/trading-and-funding/exchange-fees
@@ -36,7 +39,7 @@ namespace CCXT.Collector.Coinbase
 
         public override string ExchangeName => "Coinbase";
         protected override string WebSocketUrl => "wss://ws-feed.exchange.coinbase.com";
-        protected override string PrivateWebSocketUrl => "wss://ws-feed.exchange.coinbase.com";
+        protected override string PrivateWebSocketUrl => "wss://ws-direct.exchange.coinbase.com";
         protected override int PingIntervalMs => 30000; // 30 seconds
 
         public CoinbaseWebSocketClient()
@@ -406,7 +409,7 @@ namespace CCXT.Collector.Coinbase
                 {
                     type = "subscribe",
                     product_ids = new[] { productId },
-                    channels = new[] { "level2", "heartbeat" }
+                    channels = new[] { "level2_batch", "heartbeat" }
                 };
 
                 await SendMessageAsync(JsonSerializer.Serialize(subscription));
@@ -487,7 +490,7 @@ namespace CCXT.Collector.Coinbase
                 var productId = ConvertToCoinbaseSymbol(symbol);
                 var channelName = channel switch
                 {
-                    "orderbook" => "level2",
+                    "orderbook" => "level2_batch",
                     "trades" => "matches",
                     "ticker" => "ticker",
                     _ => channel
@@ -566,13 +569,13 @@ namespace CCXT.Collector.Coinbase
         private string ConvertToCoinbaseSymbol(string symbol)
         {
             // Convert from standard format (BTC/USD) to Coinbase format (BTC-USD)
-            return symbol.Replace("/", "-");
+            return ParsingHelpers.ToDashSymbol(symbol);
         }
 
         private string ConvertToStandardSymbol(string productId)
         {
             // Convert from Coinbase format (BTC-USD) to standard format (BTC/USD)
-            return productId.Replace("-", "/");
+            return ParsingHelpers.FromDashSymbol(productId);
         }
 
         private long ConvertToUnixTimeMillis(string timeString)
@@ -607,26 +610,21 @@ namespace CCXT.Collector.Coinbase
 
         private OrderType ParseOrderType(string type)
         {
-            return type?.ToLower() switch
-            {
-                "limit" => OrderType.Limit,
-                "market" => OrderType.Market,
-                "stop" => OrderType.Stop,
-                _ => OrderType.Limit
-            };
+            return ParsingHelpers.ParseGenericOrderType(type);
         }
 
         private OrderStatus ParseOrderStatus(string type, JsonElement json)
         {
-            return type switch
+            if (type == "done")
             {
-                "received" => OrderStatus.New,
-                "open" => OrderStatus.Open,
-                "done" => ParseDoneReason(json.GetStringOrDefault("reason")),
-                "match" => OrderStatus.PartiallyFilled,
-                "change" => OrderStatus.Open,
-                _ => OrderStatus.Open
-            };
+                var reason = json.GetStringOrDefault("reason");
+                if (string.Equals(reason, "filled", StringComparison.OrdinalIgnoreCase))
+                    return OrderStatus.Filled;
+                if (string.Equals(reason, "canceled", StringComparison.OrdinalIgnoreCase))
+                    return OrderStatus.Canceled;
+            }
+            // 나머지는 일반 매핑 재사용
+            return ParsingHelpers.ParseGenericOrderStatus(type);
         }
 
         private OrderStatus ParseDoneReason(string reason)
@@ -646,9 +644,12 @@ namespace CCXT.Collector.Coinbase
             switch (subscription.Channel)
             {
                 case "level2":
+                case "level2_batch":
+                case "orderbook":
                     await SubscribeOrderbookAsync(subscription.Symbol);
                     break;
                 case "matches":
+                case "trades":
                     await SubscribeTradesAsync(subscription.Symbol);
                     break;
                 case "ticker":
@@ -698,7 +699,7 @@ namespace CCXT.Collector.Coinbase
                     // Map channel names to Coinbase channel format
                     string channelName = channel switch
                     {
-                        "orderbook" or "depth" => "level2",
+                        "orderbook" or "depth" => "level2_batch",
                         "trades" or "trade" => "matches",
                         "ticker" => "ticker",
                         "candles" or "kline" or "candlestick" => null, // Not supported via WebSocket

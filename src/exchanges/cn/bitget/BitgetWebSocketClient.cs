@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using CCXT.Collector.Core.Abstractions;
 using CCXT.Collector.Models.WebSocket;
 using CCXT.Collector.Library;
+using CCXT.Collector.Core.Infrastructure; // 공통 파싱 Helper
 using CCXT.Collector.Service;
 using System.Text.Json;
 
@@ -54,27 +55,47 @@ namespace CCXT.Collector.Bitget
                 using var doc = JsonDocument.Parse(message); 
                 var json = doc.RootElement;
 
-                // Handle ping/pong
-                if (json.GetStringOrDefault("action") == "ping")
+                // Handle ping/pong - Bitget uses "op" field
+                var op = json.GetStringOrDefault("op");
+                if (op == "ping")
                 {
                     await HandlePingMessage(json);
                     return;
                 }
 
                 // Handle subscription responses
-                if (json.GetStringOrDefault("event") == "subscribe")
+                var eventType = json.GetStringOrDefault("event");
+                if (eventType == "subscribe" || eventType == "subscription")
                 {
                     var code = json.GetStringOrDefault("code");
-                    if (code != "0")
+                    if (code != "0" && code != null)
                     {
                         var errorMsg = json.GetStringOrDefault("msg", "Unknown error");
-                        RaiseError($"Subscription failed: {errorMsg}");
+                        var arg = json.TryGetProperty("arg", out var argProp) ? JsonSerializer.Serialize(argProp) : "";
+                        RaiseError($"Subscription failed - Code: {code}, Msg: {errorMsg}, Arg: {arg}");
+                    }
+                    else
+                    {
+                        // Log successful subscription for debugging
+                        var arg = json.TryGetProperty("arg", out var argProp) ? JsonSerializer.Serialize(argProp) : "";
+                        RaiseError($"Subscription successful: {arg}");
                     }
                     return;
                 }
 
+                // Handle error responses
+                if (eventType == "error")
+                {
+                    var errorMsg = json.GetStringOrDefault("msg", "Unknown error");
+                    var errorCode = json.GetStringOrDefault("code", "");
+                    var arg = json.TryGetProperty("arg", out var argProp) ? JsonSerializer.Serialize(argProp) : "";
+                    RaiseError($"Bitget Error {errorCode}: {errorMsg} (arg: {arg})");
+                    return;
+                }
+
                 // Handle data messages
-                if (json.GetStringOrDefault("action") == "update" || json.GetStringOrDefault("action") == "snapshot")
+                var action = json.GetStringOrDefault("action");
+                if (action == "update" || action == "snapshot" || json.TryGetProperty("data", out _))
                 {
                     if (json.TryGetProperty("arg", out var arg))
                     {
@@ -105,12 +126,16 @@ namespace CCXT.Collector.Bitget
                                 case "books":
                                 case "books5":
                                 case "books15":
+                                case "depth":
+                                case "orderbook":
                                     await ProcessOrderbookData(json);
                                     break;
                                 case "trade":
+                                case "trades":
                                     await ProcessTradeData(json);
                                     break;
                                 case "ticker":
+                                case "tickers":
                                     await ProcessTickerData(json);
                                     break;
                                 case "candle1m":
@@ -135,9 +160,10 @@ namespace CCXT.Collector.Bitget
 
         private async Task HandlePingMessage(JsonElement json)
         {
+            // Bitget expects pong response with "op" field
             var pong = new
             {
-                action = "pong",
+                op = "pong",
                 ts = json.GetStringOrDefault("ts")
             };
             await SendMessageAsync(JsonSerializer.Serialize(pong));
@@ -161,7 +187,7 @@ namespace CCXT.Collector.Bitget
                 if (data.ValueKind == JsonValueKind.Undefined)
                     return;
 
-                var symbol = ConvertToStandardSymbol(instId);
+                var symbol = ParsingHelpers.NormalizeSymbol(instId);
                 var timestamp = data.GetInt64OrDefault("ts", TimeExtension.UnixTime);
                 var action = json.GetStringOrDefault("action");
 
@@ -296,15 +322,11 @@ namespace CCXT.Collector.Bitget
                 if (!(json.TryGetArray("data", out var dataProp)))
                     return;
 
-                var data = dataProp.EnumerateArray().FirstOrDefault();                
-                if (data.ValueKind == JsonValueKind.Undefined)
-                    return;
-
-                var symbol = ConvertToStandardSymbol(instId);
+                var symbol = ParsingHelpers.NormalizeSymbol(instId);
                 var trades = new List<STradeItem>();
                 long latestTimestamp = 0;
                 
-                foreach (var trade in data.EnumerateArray())
+                foreach (var trade in dataProp.EnumerateArray())
                 {
                     var timestamp = trade.GetInt64OrDefault("ts", TimeExtension.UnixTime);
                     if (timestamp > latestTimestamp)
@@ -359,7 +381,7 @@ namespace CCXT.Collector.Bitget
                 if (data.ValueKind == JsonValueKind.Undefined)
                     return;
 
-                var symbol = ConvertToStandardSymbol(instId);
+                var symbol = ParsingHelpers.NormalizeSymbol(instId);
                 var timestamp = data.GetInt64OrDefault("ts", TimeExtension.UnixTime);
                 
                 var ticker = new STicker
@@ -407,9 +429,9 @@ namespace CCXT.Collector.Bitget
                 if (!(json.TryGetArray("data", out var data)))
                     return;
 
-                var symbol = ConvertToStandardSymbol(instId);
-                var interval = ConvertInterval(channel);
-                var intervalMs = GetIntervalMilliseconds(interval);
+                var symbol = ParsingHelpers.NormalizeSymbol(instId);
+                var interval = ParsingHelpers.FromBitgetChannelInterval(channel);
+                var intervalMs = ParsingHelpers.IntervalToMilliseconds(interval);
                 
                 var candleItems = new List<SCandleItem>();
                 long latestTimestamp = 0;
@@ -517,10 +539,10 @@ namespace CCXT.Collector.Bitget
                     {
                         orderId = order.GetStringOrDefault("orderId"),
                         clientOrderId = order.GetStringOrDefault("clientOid"),
-                        symbol = ConvertToStandardSymbol(order.GetStringOrDefault("instId")),
+                        symbol = ParsingHelpers.NormalizeSymbol(order.GetStringOrDefault("instId")),
                         side = order.GetStringOrDefault("side") == "buy" ? OrderSide.Buy : OrderSide.Sell,
-                        type = ConvertOrderType(order.GetStringOrDefault("orderType")),
-                        status = ConvertOrderStatus(order.GetStringOrDefault("status")),
+                        type = ParsingHelpers.ParseGenericOrderType(order.GetStringOrDefault("orderType")),
+                        status = ParsingHelpers.ParseGenericOrderStatus(order.GetStringOrDefault("status")),
                         price = order.GetDecimalOrDefault("price"),
                         quantity = order.GetDecimalOrDefault("size"),
                         filledQuantity = order.GetDecimalOrDefault("fillSize"),
@@ -561,7 +583,7 @@ namespace CCXT.Collector.Bitget
                 {
                     positionList.Add(new SPositionItem
                     {
-                        symbol = ConvertToStandardSymbol(pos.GetStringOrDefault("instId")),
+                        symbol = ParsingHelpers.NormalizeSymbol(pos.GetStringOrDefault("instId")),
                         side = pos.GetStringOrDefault("holdSide") == "long" ? PositionSide.Long : PositionSide.Short,
                         size = pos.GetDecimalOrDefault("total"),
                         entryPrice = pos.GetDecimalOrDefault("averageOpenPrice"),
@@ -593,7 +615,7 @@ namespace CCXT.Collector.Bitget
         {
             try
             {
-                var instId = ConvertToExchangeSymbol(symbol);
+                var instId = ParsingHelpers.RemoveDelimiter(symbol);
                 var subscription = new
                 {
                     op = "subscribe",
@@ -601,7 +623,7 @@ namespace CCXT.Collector.Bitget
                     {
                         new
                         {
-                            instType = "SPOT",
+                            instType = "sp",
                             channel = "books",
                             instId = instId
                         }
@@ -625,7 +647,7 @@ namespace CCXT.Collector.Bitget
         {
             try
             {
-                var instId = ConvertToExchangeSymbol(symbol);
+                var instId = ParsingHelpers.RemoveDelimiter(symbol);
                 var subscription = new
                 {
                     op = "subscribe",
@@ -633,7 +655,7 @@ namespace CCXT.Collector.Bitget
                     {
                         new
                         {
-                            instType = "SPOT",
+                            instType = "sp",
                             channel = "trade",
                             instId = instId
                         }
@@ -657,7 +679,7 @@ namespace CCXT.Collector.Bitget
         {
             try
             {
-                var instId = ConvertToExchangeSymbol(symbol);
+                var instId = ParsingHelpers.RemoveDelimiter(symbol);
                 var subscription = new
                 {
                     op = "subscribe",
@@ -665,7 +687,7 @@ namespace CCXT.Collector.Bitget
                     {
                         new
                         {
-                            instType = "SPOT",
+                            instType = "sp",
                             channel = "ticker",
                             instId = instId
                         }
@@ -689,8 +711,8 @@ namespace CCXT.Collector.Bitget
         {
             try
             {
-                var instId = ConvertToExchangeSymbol(symbol);
-                var channelInterval = ConvertToChannelInterval(interval);
+                var instId = ParsingHelpers.RemoveDelimiter(symbol);
+                var channelInterval = ParsingHelpers.ToBitgetChannelInterval(interval);
                 
                 var subscription = new
                 {
@@ -699,7 +721,7 @@ namespace CCXT.Collector.Bitget
                     {
                         new
                         {
-                            instType = "SPOT",
+                            instType = "sp",
                             channel = $"candle{channelInterval}",
                             instId = instId
                         }
@@ -723,7 +745,7 @@ namespace CCXT.Collector.Bitget
         {
             try
             {
-                var instId = ConvertToExchangeSymbol(symbol);
+                var instId = ParsingHelpers.RemoveDelimiter(symbol);
                 var unsubscription = new
                 {
                     op = "unsubscribe",
@@ -731,7 +753,7 @@ namespace CCXT.Collector.Bitget
                     {
                         new
                         {
-                            instType = "SPOT",
+                            instType = "sp",
                             channel = channel,
                             instId = instId
                         }
@@ -757,7 +779,8 @@ namespace CCXT.Collector.Bitget
 
         protected override string CreatePingMessage()
         {
-            return JsonSerializer.Serialize(new { action = "ping" });
+            // Bitget uses "ping" as the op field, not action
+            return JsonSerializer.Serialize(new { op = "ping" });
         }
 
         protected override string CreateAuthenticationMessage(string apiKey, string secretKey)
@@ -797,112 +820,7 @@ namespace CCXT.Collector.Bitget
             }
         }
 
-        private string ConvertToExchangeSymbol(string symbol)
-        {
-            // Convert from standard format (BTC/USDT) to Bitget format (BTCUSDT_SPBL)
-            return symbol.Replace("/", "") + "_SPBL";
-        }
-
-        private string ConvertToStandardSymbol(string instId)
-        {
-            // Convert from Bitget format (BTCUSDT_SPBL) to standard format (BTC/USDT)
-            if (instId.EndsWith("_SPBL"))
-            {
-                instId = instId.Replace("_SPBL", "");
-            }
-            
-            // Simple conversion - may need more sophisticated logic
-            if (instId.EndsWith("USDT"))
-            {
-                var baseCurrency = instId.Replace("USDT", "");
-                return $"{baseCurrency}/USDT";
-            }
-            else if (instId.EndsWith("USDC"))
-            {
-                var baseCurrency = instId.Replace("USDC", "");
-                return $"{baseCurrency}/USDC";
-            }
-            else if (instId.EndsWith("BTC"))
-            {
-                var baseCurrency = instId.Replace("BTC", "");
-                return $"{baseCurrency}/BTC";
-            }
-            
-            return instId;
-        }
-
-        private string ConvertToChannelInterval(string interval)
-        {
-            return interval switch
-            {
-                "1m" => "1m",
-                "5m" => "5m",
-                "15m" => "15m",
-                "30m" => "30m",
-                "1h" => "1H",
-                "4h" => "4H",
-                "1d" => "1D",
-                "1w" => "1W",
-                _ => "1m"
-            };
-        }
-
-        private string ConvertInterval(string channel)
-        {
-            if (channel == null) return "1m";
-            
-            return channel.Replace("candle", "") switch
-            {
-                "1m" => "1m",
-                "5m" => "5m",
-                "15m" => "15m",
-                "30m" => "30m",
-                "1H" => "1h",
-                "4H" => "4h",
-                "1D" => "1d",
-                "1W" => "1w",
-                _ => "1m"
-            };
-        }
-
-        private OrderType ConvertOrderType(string type)
-        {
-            return type?.ToLower() switch
-            {
-                "limit" => OrderType.Limit,
-                "market" => OrderType.Market,
-                _ => OrderType.Limit
-            };
-        }
-
-        private OrderStatus ConvertOrderStatus(string status)
-        {
-            return status?.ToLower() switch
-            {
-                "new" => OrderStatus.Open,
-                "init" => OrderStatus.Open,
-                "partial-fill" => OrderStatus.PartiallyFilled,
-                "full-fill" => OrderStatus.Filled,
-                "cancelled" => OrderStatus.Canceled,
-                _ => OrderStatus.Open
-            };
-        }
-
-        private long GetIntervalMilliseconds(string interval)
-        {
-            return interval switch
-            {
-                "1m" => 60000,
-                "5m" => 300000,
-                "15m" => 900000,
-                "30m" => 1800000,
-                "1h" => 3600000,
-                "4h" => 14400000,
-                "1d" => 86400000,
-                "1w" => 604800000,
-                _ => 60000
-            };
-        }
+    // 이후: 개별 심볼/인터벌/주문타입/상태 변환 메소드는 ExchangeParsingHelpers로 대체되었습니다.
 
         #region Batch Subscription Support
 
@@ -927,7 +845,7 @@ namespace CCXT.Collector.Bitget
                 foreach (var kvp in subscriptions)
                 {
                     var subscription = kvp.Value;
-                    var instId = ConvertToExchangeSymbol(subscription.Symbol);
+                    var instId = ParsingHelpers.RemoveDelimiter(subscription.Symbol);
                     
                     // Map channel names to Bitget channel format
                     string channelName = subscription.Channel.ToLower() switch
@@ -936,7 +854,7 @@ namespace CCXT.Collector.Bitget
                         "trades" or "trade" => "trade",
                         "ticker" => "ticker",
                         "candles" or "kline" or "candlestick" => !string.IsNullOrEmpty(subscription.Extra) 
-                            ? $"candle{ConvertToChannelInterval(subscription.Extra)}"
+                            ? $"candle{ParsingHelpers.ToBitgetChannelInterval(subscription.Extra)}"
                             : "candle1m",
                         _ => subscription.Channel
                     };
@@ -944,7 +862,7 @@ namespace CCXT.Collector.Bitget
                     // Create subscription arg object
                     var arg = new
                     {
-                        instType = "SPOT",
+                        instType = "sp",
                         channel = channelName,
                         instId = instId
                     };

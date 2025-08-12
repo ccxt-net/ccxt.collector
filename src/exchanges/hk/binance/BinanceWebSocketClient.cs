@@ -7,6 +7,7 @@ using CCXT.Collector.Library;
 using CCXT.Collector.Service;
 using System.Text.Json;
 using CCXT.Collector.Models.WebSocket;
+using CCXT.Collector.Core.Infrastructure; // 공통 파싱 Helper
 
 namespace CCXT.Collector.Binance
 {
@@ -414,29 +415,8 @@ namespace CCXT.Collector.Binance
 
         #region Helper Methods
 
-        private string ConvertToBinanceSymbol(string symbol)
-        {
-            // Convert from "BTC/USDT" to "BTCUSDT"
-            return symbol.Replace("/", "");
-        }
-
-        private string ConvertSymbol(string binanceSymbol)
-        {
-            // Convert from "BTCUSDT" to "BTC/USDT"
-            // Common base currencies
-            string[] quotes = { "USDT", "BUSD", "USDC", "BTC", "ETH", "BNB" };
-            
-            foreach (var quote in quotes)
-            {
-                if (binanceSymbol.EndsWith(quote))
-                {
-                    var baseSymbol = binanceSymbol.Substring(0, binanceSymbol.Length - quote.Length);
-                    return $"{baseSymbol}/{quote}";
-                }
-            }
-            
-            return binanceSymbol;
-        }
+    private string ConvertToBinanceSymbol(string symbol) => ParsingHelpers.RemoveDelimiter(symbol);
+    private string ConvertSymbol(string binanceSymbol) => ParsingHelpers.NormalizeSymbol(binanceSymbol);
 
         #endregion
 
@@ -514,51 +494,8 @@ namespace CCXT.Collector.Binance
             }
         }
 
-        private string ConvertToBinanceInterval(string interval)
-        {
-            return interval?.ToLower() switch
-            {
-                "1m" => "1m",
-                "3m" => "3m",
-                "5m" => "5m",
-                "15m" => "15m",
-                "30m" => "30m",
-                "1h" or "60m" => "1h",
-                "2h" => "2h",
-                "4h" => "4h",
-                "6h" => "6h",
-                "8h" => "8h",
-                "12h" => "12h",
-                "1d" or "24h" => "1d",
-                "3d" => "3d",
-                "1w" or "7d" => "1w",
-                "1M" or "30d" => "1M",
-                _ => "1h"
-            };
-        }
-
-        private string ConvertFromBinanceInterval(string interval)
-        {
-            return interval switch
-            {
-                "1m" => "1m",
-                "3m" => "3m",
-                "5m" => "5m",
-                "15m" => "15m",
-                "30m" => "30m",
-                "1h" => "1h",
-                "2h" => "2h",
-                "4h" => "4h",
-                "6h" => "6h",
-                "8h" => "8h",
-                "12h" => "12h",
-                "1d" => "1d",
-                "3d" => "3d",
-                "1w" => "1w",
-                "1M" => "1M",
-                _ => interval
-            };
-        }
+    private string ConvertToBinanceInterval(string interval) => ParsingHelpers.ToBinanceInterval(interval);
+    private string ConvertFromBinanceInterval(string interval) => ParsingHelpers.FromBinanceInterval(interval);
 
         #endregion
 
@@ -713,34 +650,8 @@ namespace CCXT.Collector.Binance
             }
         }
 
-        private OrderType ParseOrderType(string type)
-        {
-            return type switch
-            {
-                "LIMIT" => OrderType.Limit,
-                "MARKET" => OrderType.Market,
-                "STOP" => OrderType.Stop,
-                "STOP_LOSS" => OrderType.Stop,
-                "STOP_LOSS_LIMIT" => OrderType.StopLimit,
-                "TAKE_PROFIT" => OrderType.TakeProfit,
-                "TAKE_PROFIT_LIMIT" => OrderType.TakeProfitLimit,
-                _ => OrderType.Limit
-            };
-        }
-
-        private OrderStatus ParseOrderStatus(string status)
-        {
-            return status switch
-            {
-                "NEW" => OrderStatus.New,
-                "PARTIALLY_FILLED" => OrderStatus.PartiallyFilled,
-                "FILLED" => OrderStatus.Filled,
-                "CANCELED" => OrderStatus.Canceled,
-                "REJECTED" => OrderStatus.Rejected,
-                "EXPIRED" => OrderStatus.Expired,
-                _ => OrderStatus.Open
-            };
-        }
+    private OrderType ParseOrderType(string type) => (OrderType)CCXT.Collector.Core.Infrastructure.ParsingHelpers.ParseGenericOrderType(type);
+    private OrderStatus ParseOrderStatus(string status) => (OrderStatus)CCXT.Collector.Core.Infrastructure.ParsingHelpers.ParseGenericOrderStatus(status);
 
         #endregion
 

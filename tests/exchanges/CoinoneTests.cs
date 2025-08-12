@@ -1,8 +1,7 @@
-using System;
-using System.Threading.Tasks;
 using CCXT.Collector.Coinone;
 using CCXT.Collector.Core.Abstractions;
 using CCXT.Collector.Tests.Base;
+using System.Threading.Tasks;
 using Xunit;
 using Xunit.Abstractions;
 

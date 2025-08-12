@@ -6,6 +6,45 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [2.1.6] - 2025-08-12
+## [2.1.7] - UNRELEASED
+
+### Added
+- Centralized parsing utility `ExchangeParsingHelpers` (symbols, intervals, order type/status) with support for:
+  - Symbol normalization (slash, dash, underscore variants)
+  - Interval families: Binance, Upbit, Bitget, OKX, Bybit, Huobi, Bittrex, Gate.io, Crypto.com
+  - Generic order type & status mapping (shared across major exchanges)
+  - Interval -> milliseconds conversion unified
+- Crypto.com WebSocket full implementation (ticker/orderbook/trade/candles, heartbeat, batch subscribe)
+- Bitget HTML manual test harness (`samples/bitget-websocket-test.html`)
+
+### Changed
+- Refactored major exchange clients (Binance, Upbit, OKX, Bybit, Huobi, Bitget, Coinbase, Coinone, Bittrex, Gate.io, Crypto.com) to remove duplicated symbol / interval / order parsing logic
+- Standardized instType usage (Bitget: `sp`), symbol formatting, and channel naming
+- Unified candle interval handling; removed per-exchange switch blocks now covered by helper
+- Updated Coinbase: `level2` → `level2_batch`, separate public/private URLs
+- Coinone: response_type = DATA handling and MarkSubscriptionActive integration
+- Tests: Adjusted Bitget symbols (MATIC → SOL) and pruned redundant usings
+
+### Fixed
+- Residual Bitget build errors from removed local conversion methods
+- Inconsistent interval casing (e.g., OKX H vs h) now normalized via helpers
+- Multiple trade data array traversal issues (Bitget, Crypto.com) resolved
+
+### Removed
+- Dozens of private Convert*/Parse* methods across exchange WebSocket clients (now centralized)
+
+### Technical Debt / TODO
+- Replace remaining TODO in OKX candle subscription using `ToOkxInterval` (currently placeholder call in one location)
+- Review remaining exchanges (Kraken, Bitfinex, Korbit, etc.) for any legacy interval/order mappings not yet migrated
+- Consider strategy pattern if future derivatives/futures-specific interval variants diverge
+
+### Migration Notes
+Existing public APIs unchanged; all refactors are internal. Consumers benefit automatically from normalized outputs.
+
+### Performance Impact
+Reduced per-message allocations and branch depth (removed repeated switch expressions) – micro-benchmarks pending.
+
+---
 
 ### Added
 - Unified subscription handling with `MarkSubscriptionActive` method across all exchanges
@@ -44,6 +83,38 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Fixed data parsing for orderbook, trades, and ticker messages
   - Added proper subscription confirmation handling with success/failure detection
   - Fixed ping/pong message format for v2 API
+- **Crypto.com WebSocket implementation** - Fixed message processing and data parsing
+  - Fixed subscription response handling with proper method checking
+  - Fixed orderbook data structure parsing from nested update arrays
+  - Fixed ticker data parsing with proper field mappings
+- **Coinone WebSocket implementation** - Fixed v2 API compatibility
+  - Fixed response_type handling to check for "DATA" instead of channel names
+  - Fixed MarkSubscriptionActive calls with correct channel names
+  - Updated symbol formation using both target_currency and quote_currency
+- **Coinbase WebSocket implementation** - Fixed authentication requirements
+  - Changed orderbook subscription from `level2` to `level2_batch` (public access)
+  - Fixed WebSocket URLs: public (ws-feed.exchange.coinbase.com) vs private (ws-direct.exchange.coinbase.com)
+- **Bitget WebSocket implementation** - Fixed subscription format and parameters
+  - Changed instType from "SPOT" to "sp" for proper API compatibility
+  - Removed "_SPBL" suffix from symbol format (now uses simple concatenation like "BTCUSDT")
+  - Fixed all subscription methods (orderbook, trades, ticker, candles) to use correct format
+  - Updated batch subscription to use correct instType
+  - Fixed ping/pong messages to use "op" field instead of "action" field
+  - Updated test symbols to use SOL/USDT instead of MATIC/USDT (MATIC not available on Bitget)
+  - Fixed symbol formation using both target_currency and quote_currency
+  - Fixed MarkSubscriptionActive calls with correct channel names for each subscription type
+  - Fixed ticker subscription to use "ticker" channel instead of "orderbook"
+- **Coinbase WebSocket implementation** - Updated for current API requirements
+  - Changed orderbook subscription to use `level2_batch` channel (public access without authentication)
+  - Fixed WebSocket URLs: public feed (ws-feed.exchange.coinbase.com) vs direct feed (ws-direct.exchange.coinbase.com)
+  - Updated channel mapping for batch subscriptions
+  - Fixed resubscription logic to handle multiple channel name variations
+- **Bitget WebSocket implementation** - Updated to match current API format
+  - Fixed instType to use "SP" instead of "SPOT" for spot trading
+  - Fixed symbol format to use hyphen separator (BTC-USDT) instead of underscore
+  - Updated trade channel name to "trades" for consistency
+  - Fixed WebSocket URLs to use v2 endpoints (wss://ws.bitget.com/v2/ws/public)
+  - Fixed ProcessTradeData to correctly iterate over data array
 - Subscription state management consistency
 - Test coverage for major exchanges (now 100%)
 - Removed duplicate PackageLicenseFile declaration

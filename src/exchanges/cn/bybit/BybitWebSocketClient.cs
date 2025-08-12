@@ -791,48 +791,8 @@ namespace CCXT.Collector.Bybit
             };
         }
 
-        private string ConvertInterval(string bybitInterval)
-        {
-            return bybitInterval switch
-            {
-                "1" => "1m",
-                "3" => "3m",
-                "5" => "5m",
-                "15" => "15m",
-                "30" => "30m",
-                "60" => "1h",
-                "120" => "2h",
-                "240" => "4h",
-                "360" => "6h",
-                "720" => "12h",
-                "D" => "1d",
-                "W" => "1w",
-                "M" => "1M",
-                _ => "1m"
-            };
-        }
-
-        private OrderType ConvertOrderType(string type)
-        {
-            return type?.ToLower() switch
-            {
-                "limit" => OrderType.Limit,
-                "market" => OrderType.Market,
-                _ => OrderType.Limit
-            };
-        }
-
-        private OrderStatus ConvertOrderStatus(string status)
-        {
-            return status switch
-            {
-                "New" => OrderStatus.New,
-                "PartiallyFilled" => OrderStatus.PartiallyFilled,
-                "Filled" => OrderStatus.Filled,
-                "Cancelled" => OrderStatus.Canceled,
-                "Rejected" => OrderStatus.Rejected,
-                _ => OrderStatus.Open
-            };
-        }
+    private string ConvertInterval(string bybitInterval) => CCXT.Collector.Core.Infrastructure.ParsingHelpers.FromBybitIntervalCode(bybitInterval);
+    private OrderType ConvertOrderType(string type) => (OrderType)CCXT.Collector.Core.Infrastructure.ParsingHelpers.ParseGenericOrderType(type);
+    private OrderStatus ConvertOrderStatus(string status) => (OrderStatus)CCXT.Collector.Core.Infrastructure.ParsingHelpers.ParseGenericOrderStatus(status);
     }
 }

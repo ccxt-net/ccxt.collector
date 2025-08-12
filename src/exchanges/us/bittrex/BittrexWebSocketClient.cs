@@ -533,49 +533,10 @@ namespace CCXT.Collector.Bittrex
 
         #region Helper Methods
 
-        private string ConvertToExchangeSymbol(string symbol)
-        {
-            // Convert BTC/USDT to BTC-USDT
-            return symbol.Replace("/", "-");
-        }
-
-        private string ConvertToStandardSymbol(string exchangeSymbol)
-        {
-            // Convert BTC-USDT to BTC/USDT
-            return exchangeSymbol?.Replace("-", "/");
-        }
-
-        private string ConvertToExchangeInterval(string interval)
-        {
-            // Convert standard interval to Bittrex format
-            return interval switch
-            {
-                "1m" => "MINUTE_1",
-                "5m" => "MINUTE_5",
-                "15m" => "MINUTE_15",
-                "30m" => "MINUTE_30",
-                "1h" => "HOUR_1",
-                "4h" => "HOUR_4",
-                "1d" => "DAY_1",
-                _ => "MINUTE_1"
-            };
-        }
-
-        private string ConvertInterval(string bittrexInterval)
-        {
-            // Convert Bittrex interval to standard format
-            return bittrexInterval switch
-            {
-                "MINUTE_1" => "1m",
-                "MINUTE_5" => "5m",
-                "MINUTE_15" => "15m",
-                "MINUTE_30" => "30m",
-                "HOUR_1" => "1h",
-                "HOUR_4" => "4h",
-                "DAY_1" => "1d",
-                _ => "1m"
-            };
-        }
+    private string ConvertToExchangeSymbol(string symbol) => CCXT.Collector.Core.Infrastructure.ParsingHelpers.ToDashSymbol(symbol);
+    private string ConvertToStandardSymbol(string exchangeSymbol) => CCXT.Collector.Core.Infrastructure.ParsingHelpers.FromDashSymbol(exchangeSymbol);
+    private string ConvertToExchangeInterval(string interval) => CCXT.Collector.Core.Infrastructure.ParsingHelpers.ToBittrexInterval(interval);
+    private string ConvertInterval(string bittrexInterval) => CCXT.Collector.Core.Infrastructure.ParsingHelpers.FromBittrexInterval(bittrexInterval);
 
         #endregion
     }

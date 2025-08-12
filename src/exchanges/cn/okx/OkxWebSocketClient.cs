@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using CCXT.Collector.Core.Abstractions;
 using CCXT.Collector.Models.WebSocket;
 using CCXT.Collector.Library;
+using CCXT.Collector.Core.Infrastructure; // 공통 파싱 Helper
 using CCXT.Collector.Service;
 using System.Text.Json;
 
@@ -162,7 +163,7 @@ namespace CCXT.Collector.Okx
 
                 foreach (var data in dataArray.EnumerateArray())
                 {
-                    var symbol = ConvertToStandardSymbol(instId);
+                    var symbol = ParsingHelpers.NormalizeSymbol(instId);
                     var timestamp = data.GetInt64OrDefault("ts", TimeExtension.UnixTime);
                     var action = json.GetStringOrDefault("action", "snapshot");
 
@@ -316,7 +317,7 @@ namespace CCXT.Collector.Okx
                 if (!json.TryGetArray("data", out var dataArray))
                     return;
 
-                var symbol = ConvertToStandardSymbol(instId);
+                var symbol = ParsingHelpers.NormalizeSymbol(instId);
                 var trades = new List<STradeItem>();
                 long latestTimestamp = 0;
 
@@ -373,7 +374,7 @@ namespace CCXT.Collector.Okx
 
                 foreach (var data in dataArray.EnumerateArray())
                 {
-                    var symbol = ConvertToStandardSymbol(instId);
+                    var symbol = ParsingHelpers.NormalizeSymbol(instId);
                     var timestamp = data.GetInt64OrDefault("ts", TimeExtension.UnixTime);
 
                     var ticker = new STicker
@@ -423,7 +424,7 @@ namespace CCXT.Collector.Okx
                 if (!json.TryGetArray("data", out var dataArray))
                     return;
 
-                var symbol = ConvertToStandardSymbol(instId);
+                var symbol = ParsingHelpers.NormalizeSymbol(instId);
                 var interval = ConvertInterval(channel);
                 var candleItems = new List<SCandleItem>();
                 long latestTimestamp = 0;
@@ -541,7 +542,7 @@ namespace CCXT.Collector.Okx
                     {
                         orderId = order.GetStringOrDefault("ordId"),
                         clientOrderId = order.GetStringOrDefault("clOrdId"),
-                        symbol = ConvertToStandardSymbol(order.GetStringOrDefault("instId")),
+                        symbol = ParsingHelpers.NormalizeSymbol(order.GetStringOrDefault("instId")),
                         side = order.GetStringOrDefault("side") == "buy" ? OrderSide.Buy : OrderSide.Sell,
                         type = ConvertOrderType(order.GetStringOrDefault("ordType")),
                         status = ConvertOrderStatus(order.GetStringOrDefault("state")),
@@ -585,7 +586,7 @@ namespace CCXT.Collector.Okx
                 {
                     positionList.Add(new SPositionItem
                     {
-                        symbol = ConvertToStandardSymbol(pos.GetStringOrDefault("instId")),
+                        symbol = ParsingHelpers.NormalizeSymbol(pos.GetStringOrDefault("instId")),
                         side = pos.GetStringOrDefault("posSide") == "long" ? PositionSide.Long : PositionSide.Short,
                         size = pos.GetDecimalOrDefault("pos"),
                         entryPrice = pos.GetDecimalOrDefault("avgPx"),
@@ -711,7 +712,7 @@ namespace CCXT.Collector.Okx
             try
             {
                 var instId = ConvertToOkxSymbol(symbol);
-                var channelInterval = ConvertToChannelInterval(interval);
+                var channelInterval = ParsingHelpers.ToOkxInterval(interval); // OKX 전용 interval 변환 적용
 
                 var subscription = new
                 {
@@ -823,107 +824,14 @@ namespace CCXT.Collector.Okx
             }
         }
 
-        private string ConvertToOkxSymbol(string symbol)
-        {
-            // Convert from standard format (BTC/USDT) to OKX format (BTC-USDT)
-            return symbol.Replace("/", "-");
-        }
-
-        private string ConvertToStandardSymbol(string instId)
-        {
-            // Convert from OKX format (BTC-USDT) to standard format (BTC/USDT)
-            return instId.Replace("-", "/");
-        }
-
-        private string ConvertToChannelInterval(string interval)
-        {
-            return interval switch
-            {
-                "1m" => "1m",
-                "3m" => "3m",
-                "5m" => "5m",
-                "15m" => "15m",
-                "30m" => "30m",
-                "1h" => "1H",
-                "2h" => "2H",
-                "4h" => "4H",
-                "6h" => "6H",
-                "12h" => "12H",
-                "1d" => "1D",
-                "1w" => "1W",
-                "1M" => "1M",
-                _ => "1m"
-            };
-        }
-
-        private string ConvertInterval(string channel)
-        {
-            if (channel == null) return "1m";
-
-            return channel.Replace("candle", "") switch
-            {
-                "1m" => "1m",
-                "3m" => "3m",
-                "5m" => "5m",
-                "15m" => "15m",
-                "30m" => "30m",
-                "1H" => "1h",
-                "2H" => "2h",
-                "4H" => "4h",
-                "6H" => "6h",
-                "12H" => "12h",
-                "1D" => "1d",
-                "1W" => "1w",
-                "1M" => "1M",
-                _ => "1m"
-            };
-        }
-
-        private OrderType ConvertOrderType(string type)
-        {
-            return type?.ToLower() switch
-            {
-                "limit" => OrderType.Limit,
-                "market" => OrderType.Market,
-                "post_only" => OrderType.Limit,
-                "fok" => OrderType.Limit,
-                "ioc" => OrderType.Limit,
-                _ => OrderType.Limit
-            };
-        }
-
-        private OrderStatus ConvertOrderStatus(string status)
-        {
-            return status?.ToLower() switch
-            {
-                "live" => OrderStatus.Open,
-                "partially_filled" => OrderStatus.PartiallyFilled,
-                "filled" => OrderStatus.Filled,
-                "canceled" => OrderStatus.Canceled,
-                _ => OrderStatus.Open
-            };
-        }
-
-        private long GetIntervalMilliseconds(string interval)
-        {
-            return interval switch
-            {
-                "1m" => 60000,
-                "3m" => 180000,
-                "5m" => 300000,
-                "15m" => 900000,
-                "30m" => 1800000,
-                "1h" => 3600000,
-                "2h" => 7200000,
-                "4h" => 14400000,
-                "6h" => 21600000,
-                "12h" => 43200000,
-                "1d" => 86400000,
-                "1w" => 604800000,
-                "1M" => 2592000000,
-                _ => 60000
-            };
-        }
+    // Replaced by ExchangeParsingHelpers (symbol/interval/order conversions & interval ms)
+    private string ConvertToOkxSymbol(string symbol) => CCXT.Collector.Core.Infrastructure.ParsingHelpers.ToDashSymbol(symbol);
+    private string ConvertToStandardSymbol(string instId) => CCXT.Collector.Core.Infrastructure.ParsingHelpers.FromDashSymbol(instId);
+    private string ConvertToChannelInterval(string interval) => CCXT.Collector.Core.Infrastructure.ParsingHelpers.ToOkxInterval(interval);
+    private string ConvertInterval(string channel) => CCXT.Collector.Core.Infrastructure.ParsingHelpers.FromOkxInterval(channel);
+    private OrderType ConvertOrderType(string type) => (OrderType)CCXT.Collector.Core.Infrastructure.ParsingHelpers.ParseGenericOrderType(type);
+    private OrderStatus ConvertOrderStatus(string status) => (OrderStatus)CCXT.Collector.Core.Infrastructure.ParsingHelpers.ParseGenericOrderStatus(status);
+    private long GetIntervalMilliseconds(string interval) => CCXT.Collector.Core.Infrastructure.ParsingHelpers.IntervalToMilliseconds(interval);
 
         private decimal CalculatePercentage(decimal open, decimal close)
         {
@@ -965,7 +873,7 @@ namespace CCXT.Collector.Okx
                         "trades" or "trade" => "trades",
                         "ticker" => "tickers",
                         "candles" or "kline" => !string.IsNullOrEmpty(subscription.Extra) 
-                            ? $"candle{ConvertToChannelInterval(subscription.Extra)}" 
+                            ? $"candle{ParsingHelpers.ToOkxInterval(subscription.Extra)}" 
                             : "candle1m",
                         _ => subscription.Channel
                     };

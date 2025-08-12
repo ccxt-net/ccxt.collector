@@ -1,12 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using CCXT.Collector.Core.Abstractions;
-using CCXT.Collector.Service;
+﻿using CCXT.Collector.Core.Abstractions;
 using CCXT.Collector.Models.WebSocket;
+using CCXT.Collector.Service;
+using System;
+using System.Collections.Generic;
 using System.Text.Json;
+using System.Threading.Tasks;
 
 namespace CCXT.Collector.Coinone
 {
@@ -118,16 +116,26 @@ namespace CCXT.Collector.Coinone
 
                     switch (responseType)
                     {
-                        case "ORDERBOOK":
-                            await ProcessOrderbook(json);
+                        case "DATA":
+                            // Data messages contain the actual market data
+                            if (json.TryGetProperty("channel", out var channelProp))
+                            {
+                                var channel = json.GetStringOrDefault("channel");
+                                switch (channel)
+                                {
+                                    case "ORDERBOOK":
+                                        await ProcessOrderbook(json);
+                                        break;
+                                    case "TRADE":
+                                        await ProcessTrades(json);
+                                        break;
+                                    case "TICKER":
+                                        await ProcessTickerData(json);
+                                        break;
+                                }
+                            }
                             break;
-                        case "TRADE":
-                            await ProcessTrades(json);
-                            break;
-                        case "TICKER":
-                            await ProcessTickerData(json);
-                            break;
-                        case "SUBSCRIBE":
+                        case "SUBSCRIBED":
                             // Subscription confirmation
                             break;
                         case "PONG":
@@ -149,10 +157,13 @@ namespace CCXT.Collector.Coinone
                 if (!json.TryGetProperty("data", out var data))
                     return;
 
-                var coinoneSymbol = data.GetStringOrDefault("target_currency");
-                if (string.IsNullOrEmpty(coinoneSymbol)) return;
+                // Get both target and quote currency to form the symbol
+                var targetCurrency = data.GetStringOrDefault("target_currency");
+                var quoteCurrency = data.GetStringOrDefault("quote_currency");
+                if (string.IsNullOrEmpty(targetCurrency) || string.IsNullOrEmpty(quoteCurrency)) 
+                    return;
 
-                var symbol = ConvertSymbolBack(coinoneSymbol);
+                var symbol = $"{targetCurrency.ToUpper()}/{quoteCurrency.ToUpper()}";
                 var timestamp = data.GetInt64OrDefault("timestamp", TimeExtension.UnixTime);
 
                 var orderbook = new SOrderBook
@@ -214,10 +225,13 @@ namespace CCXT.Collector.Coinone
                 if (!(data.TryGetArray("trades", out var trades)))
                     return;
 
-                var coinoneSymbol = data.GetStringOrDefault("target_currency");
-                if (string.IsNullOrEmpty(coinoneSymbol)) return;
+                // Get both target and quote currency to form the symbol
+                var targetCurrency = data.GetStringOrDefault("target_currency");
+                var quoteCurrency = data.GetStringOrDefault("quote_currency");
+                if (string.IsNullOrEmpty(targetCurrency) || string.IsNullOrEmpty(quoteCurrency)) 
+                    return;
 
-                var symbol = ConvertSymbolBack(coinoneSymbol);
+                var symbol = $"{targetCurrency.ToUpper()}/{quoteCurrency.ToUpper()}";
                 var timestamp = TimeExtension.UnixTime;
 
                 var completeOrders = new STrade
@@ -260,10 +274,13 @@ namespace CCXT.Collector.Coinone
                 if (!json.TryGetProperty("data", out var data))
                     return;
 
-                var coinoneSymbol = data.GetStringOrDefault("target_currency");
-                if (string.IsNullOrEmpty(coinoneSymbol)) return;
+                // Get both target and quote currency to form the symbol
+                var targetCurrency = data.GetStringOrDefault("target_currency");
+                var quoteCurrency = data.GetStringOrDefault("quote_currency");
+                if (string.IsNullOrEmpty(targetCurrency) || string.IsNullOrEmpty(quoteCurrency)) 
+                    return;
 
-                var symbol = ConvertSymbolBack(coinoneSymbol);
+                var symbol = $"{targetCurrency.ToUpper()}/{quoteCurrency.ToUpper()}";
                 var timestamp = data.GetInt64OrDefault("timestamp", TimeExtension.UnixTime);
 
                 var ticker = new STicker
@@ -324,6 +341,7 @@ namespace CCXT.Collector.Coinone
 
                 var json = JsonSerializer.Serialize(subscribeMessage);
                 await SendMessageAsync(json);
+                MarkSubscriptionActive("orderbook", $"{market.Base}/{market.Quote}");
                 return true;
             }
             catch (Exception ex)
@@ -351,6 +369,7 @@ namespace CCXT.Collector.Coinone
 
                 var json = JsonSerializer.Serialize(subscribeMessage);
                 await SendMessageAsync(json);
+                MarkSubscriptionActive("orderbook", symbol);
                 return true;
             }
             catch (Exception ex)
@@ -378,6 +397,7 @@ namespace CCXT.Collector.Coinone
 
                 var json = JsonSerializer.Serialize(subscribeMessage);
                 await SendMessageAsync(json);
+                MarkSubscriptionActive("trades", $"{market.Base}/{market.Quote}");
                 return true;
             }
             catch (Exception ex)
@@ -405,6 +425,7 @@ namespace CCXT.Collector.Coinone
 
                 var json = JsonSerializer.Serialize(subscribeMessage);
                 await SendMessageAsync(json);
+                MarkSubscriptionActive("trades", symbol);
                 return true;
             }
             catch (Exception ex)
@@ -432,6 +453,7 @@ namespace CCXT.Collector.Coinone
 
                 var json = JsonSerializer.Serialize(subscribeMessage);
                 await SendMessageAsync(json);
+                MarkSubscriptionActive("ticker", $"{market.Base}/{market.Quote}");
                 return true;
             }
             catch (Exception ex)
@@ -459,6 +481,7 @@ namespace CCXT.Collector.Coinone
 
                 var json = JsonSerializer.Serialize(subscribeMessage);
                 await SendMessageAsync(json);
+                MarkSubscriptionActive("ticker", symbol);
                 return true;
             }
             catch (Exception ex)

@@ -48,7 +48,7 @@ namespace CCXT.Collector.Tests.Base
                 ["Binance"] = new List<string> { "BTC/USDT", "ETH/USDT", "BNB/USDT" },
                 ["Bybit"] = new List<string> { "BTC/USDT", "ETH/USDT", "SOL/USDT" },
                 ["OKX"] = new List<string> { "BTC/USDT", "ETH/USDT", "XRP/USDT" },
-                ["Bitget"] = new List<string> { "BTC/USDT", "ETH/USDT", "MATIC/USDT" },
+                ["Bitget"] = new List<string> { "BTC/USDT", "ETH/USDT", "SOL/USDT" },
                 ["Kucoin"] = new List<string> { "BTC/USDT", "ETH/USDT", "KCS/USDT" },
                 ["Gate.io"] = new List<string> { "BTC/USDT", "ETH/USDT", "GT/USDT" },
                 ["Huobi"] = new List<string> { "BTC/USDT", "ETH/USDT", "HT/USDT" },

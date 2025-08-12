@@ -7,6 +7,7 @@ using CCXT.Collector.Library;
 using CCXT.Collector.Service;
 using System.Text.Json;
 using CCXT.Collector.Models.WebSocket;
+using CCXT.Collector.Core.Infrastructure; // 공통 파싱 Helper
 
 namespace CCXT.Collector.Upbit
 {
@@ -541,45 +542,15 @@ namespace CCXT.Collector.Upbit
 
         #region Helper Methods
 
-        private string ConvertToUpbitCode(string symbol)
-        {
-            // Convert from "BTC/KRW" to "KRW-BTC"
-            // Upbit uses Quote-Base format (reversed)
-            var parts = symbol.Split('/');
-            if (parts.Length == 2)
-            {
-                var baseCoin = parts[0];  // BTC
-                var quoteCoin = parts[1];  // KRW
-                return $"{quoteCoin}-{baseCoin}";
-            }
-            
-            return symbol;
-        }
-
-        private string ConvertFromUpbitCode(string code)
-        {
-            // Convert from "KRW-BTC" to "BTC/KRW"
-            var parts = code.Split('-');
-            if (parts.Length == 2)
-            {
-                var quoteCoin = parts[0];  // KRW
-                var baseCoin = parts[1];   // BTC
-                return $"{baseCoin}/{quoteCoin}";
-            }
-            
-            return code;
-        }
+    private string ConvertToUpbitCode(string symbol) => ParsingHelpers.ToUpbitCode(symbol);
+    private string ConvertFromUpbitCode(string code) => ParsingHelpers.FromUpbitCode(code);
 
         /// <summary>
         /// Formats a Market object to Upbit-specific symbol format
         /// </summary>
         /// <param name="market">Market to format</param>
         /// <returns>Formatted symbol (e.g., "KRW-BTC")</returns>
-        protected override string FormatSymbol(Market market)
-        {
-            // Upbit uses Quote-Base format (reversed) with hyphen separator and uppercase
-            return $"{market.Quote.ToUpper()}-{market.Base.ToUpper()}";
-        }
+    protected override string FormatSymbol(Market market) => $"{market.Quote.ToUpper()}-{market.Base.ToUpper()}"; // 유지
 
         #endregion
 
@@ -676,45 +647,8 @@ namespace CCXT.Collector.Upbit
             }
         }
 
-        private string ConvertToUpbitInterval(string interval)
-        {
-            // Convert standard intervals to Upbit format
-            return interval?.ToLower() switch
-            {
-                "1m" => "1",
-                "3m" => "3",
-                "5m" => "5",
-                "10m" => "10",
-                "15m" => "15",
-                "30m" => "30",
-                "60m" or "1h" => "60",
-                "240m" or "4h" => "240",
-                "1d" or "24h" => "D",
-                "1w" or "7d" => "W",
-                "1M" or "30d" => "M",
-                _ => "60" // Default to 1 hour
-            };
-        }
-
-        private string ConvertUpbitInterval(string unit)
-        {
-            // Convert Upbit interval format to standard
-            return unit switch
-            {
-                "1" => "1m",
-                "3" => "3m",
-                "5" => "5m",
-                "10" => "10m",
-                "15" => "15m",
-                "30" => "30m",
-                "60" => "1h",
-                "240" => "4h",
-                "D" => "1d",
-                "W" => "1w",
-                "M" => "1M",
-                _ => "1h"
-            };
-        }
+    private string ConvertToUpbitInterval(string interval) => ParsingHelpers.ToUpbitIntervalUnit(interval);
+    private string ConvertUpbitInterval(string unit) => ParsingHelpers.FromUpbitIntervalUnit(unit);
 
         #endregion
 
@@ -806,29 +740,8 @@ namespace CCXT.Collector.Upbit
             await Task.CompletedTask;
         }
 
-        private OrderType ParseOrderType(string type)
-        {
-            return type?.ToLower() switch
-            {
-                "limit" => OrderType.Limit,
-                "market" => OrderType.Market,
-                "stop" => OrderType.Stop,
-                _ => OrderType.Limit
-            };
-        }
-
-        private OrderStatus ParseOrderStatus(string state)
-        {
-            return state?.ToLower() switch
-            {
-                "wait" => OrderStatus.Open,
-                "watch" => OrderStatus.Open,
-                "done" => OrderStatus.Filled,
-                "cancel" => OrderStatus.Canceled,
-                "partial" => OrderStatus.PartiallyFilled,
-                _ => OrderStatus.New
-            };
-        }
+    private OrderType ParseOrderType(string type) => (OrderType)CCXT.Collector.Core.Infrastructure.ParsingHelpers.ParseGenericOrderType(type);
+    private OrderStatus ParseOrderStatus(string state) => (OrderStatus)CCXT.Collector.Core.Infrastructure.ParsingHelpers.ParseGenericOrderStatus(state);
 
         #endregion
 

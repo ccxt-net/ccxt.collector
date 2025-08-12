@@ -530,41 +530,10 @@ namespace CCXT.Collector.Gateio
 
         #region Helper Methods
 
-        private string ConvertToExchangeSymbol(string symbol)
-        {
-            // Convert BTC/USDT to BTC_USDT
-            return symbol.Replace("/", "_");
-        }
-
-        private string ConvertToStandardSymbol(string exchangeSymbol)
-        {
-            // Convert BTC_USDT to BTC/USDT
-            return exchangeSymbol?.Replace("_", "/");
-        }
-
-        private string ConvertToExchangeInterval(string interval)
-        {
-            // Convert standard interval to Gate.io format
-            return interval switch
-            {
-                "1m" => "1m",
-                "5m" => "5m",
-                "15m" => "15m",
-                "30m" => "30m",
-                "1h" => "1h",
-                "4h" => "4h",
-                "8h" => "8h",
-                "1d" => "1d",
-                "1w" => "1w",
-                _ => "1m"
-            };
-        }
-
-        private string ConvertInterval(string gateInterval)
-        {
-            // Gate.io uses same format as standard
-            return gateInterval;
-        }
+    private string ConvertToExchangeSymbol(string symbol) => CCXT.Collector.Core.Infrastructure.ParsingHelpers.ToUnderscoreSymbol(symbol);
+    private string ConvertToStandardSymbol(string exchangeSymbol) => CCXT.Collector.Core.Infrastructure.ParsingHelpers.FromUnderscoreSymbol(exchangeSymbol);
+    private string ConvertToExchangeInterval(string interval) => CCXT.Collector.Core.Infrastructure.ParsingHelpers.ToGateioInterval(interval);
+    private string ConvertInterval(string gateInterval) => CCXT.Collector.Core.Infrastructure.ParsingHelpers.FromGateioInterval(gateInterval);
 
         #endregion
 
