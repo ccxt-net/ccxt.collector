@@ -43,7 +43,7 @@ The library now includes automatic exchange status tracking to prevent connectio
 
 *Note: Exchange locations indicate registration/headquarters, not service availability
 
-#### Implementation Status (v2.1.6 - 2025-08-12)
+#### Implementation Status (v2.1.7 - 2025-08-13)
 
 | Feature | Implemented | In Progress | Planned |
 |---------|------------|-------------|----------|
@@ -70,23 +70,31 @@ Binance, Bitget, Bithumb, Bittrex, Bybit, Coinbase, Coinone, Crypto.com, Gate.io
 
 ### NuGet Package Manager
 ```bash
-Install-Package CCXT.Collector -Version 2.1.6
+Install-Package CCXT.Collector -Version 2.1.7
 ```
 
 ### .NET CLI
 ```bash
-dotnet add package CCXT.Collector --version 2.1.6
+dotnet add package CCXT.Collector --version 2.1.7
 ```
 
 ### Package Reference
 ```xml
-<PackageReference Include="CCXT.Collector" Version="2.1.6" />
+<PackageReference Include="CCXT.Collector" Version="2.1.7" />
 ```
+
+### ⚠️ Breaking Changes in v2.1.7
+- **Bitget WebSocket**: Fixed subscription format with correct instType ("sp" instead of "SPOT") and ping/pong protocol
+- **Crypto.com WebSocket**: Corrected message parsing and subscription handling
+- **Coinone WebSocket**: Fixed response_type handling and channel processing
+- **Coinbase WebSocket**: Changed to level2_batch channel for public access
+- **Sample Project**: Enhanced with comprehensive testing utilities and multi-exchange support
+- See [CHANGELOG](docs/CHANGELOG.md#217---2025-08-13) for full details
 
 ### ⚠️ Breaking Changes in v2.1.6
 - **KuCoin WebSocket**: Complete rewrite with dynamic endpoint resolution and proper protocol handling
 - **Korbit WebSocket**: Migration to v2 API with array-based message format
-- See [CHANGELOG](docs/CHANGELOG.md#216---2025-08-12) for full details
+- See [CHANGELOG](docs/CHANGELOG.md#216---2025-08-13) for full details
 
 ### ⚠️ Breaking Changes in v2.1.5
 - **IMPORTANT**: Complete migration from Newtonsoft.Json to System.Text.Json

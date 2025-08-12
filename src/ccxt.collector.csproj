@@ -10,9 +10,9 @@
         <RootNamespace>CCXT.Collector</RootNamespace>
         
         <!-- Versioning -->
-        <Version>2.1.6</Version>
-        <AssemblyVersion>2.1.6.0</AssemblyVersion>
-        <FileVersion>2.1.6.0</FileVersion>
+        <Version>2.1.7</Version>
+        <AssemblyVersion>2.1.7.0</AssemblyVersion>
+        <FileVersion>2.1.7.0</FileVersion>
         
         <!-- Package Information -->
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
@@ -30,7 +30,7 @@
         <PackageIcon>ccxt.net.api.png</PackageIcon>
         <PackageReadmeFile>README.md</PackageReadmeFile>
         <PackageTags>cryptocurrency;exchange;trading;market-data;websocket;realtime;orderbook;ticker;trades;bot;crypto;exchange-markets</PackageTags>
-        <PackageReleaseNotes>v2.1.6 - Enhanced project configuration with improved code quality settings. See CHANGELOG.md for details.</PackageReleaseNotes>
+        <PackageReleaseNotes>v2.1.7 - Fixed WebSocket implementations for Crypto.com, Coinone, Coinbase, and Bitget exchanges. Enhanced sample project with comprehensive testing utilities. See CHANGELOG.md for details.</PackageReleaseNotes>
         
         <!-- Repository Information -->
         <RepositoryUrl>https://github.com/ccxt-net/ccxt.collector</RepositoryUrl>
