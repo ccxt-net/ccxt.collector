@@ -50,7 +50,7 @@ namespace CCXT.Collector.Okx
                 var json = doc.RootElement;
 
                 // Handle ping/pong
-                if (json.TryGetProperty("op", out var op) && op.GetString() == "ping")
+                if (json.GetStringOrDefault("op") == "ping")
                 {
                     await HandlePingMessage();
                     return;

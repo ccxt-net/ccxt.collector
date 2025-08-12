@@ -31,6 +31,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Project Structure** improved with better organization and settings
 
 ### Fixed
+- **KuCoin WebSocket implementation** - Complete rewrite with proper protocol handling
+  - Fixed dynamic WebSocket endpoint resolution via REST API token endpoint
+  - Implemented welcome message protocol and ping/pong heartbeat mechanism
+  - Fixed topic-based message routing for orderbook, trades, and ticker data
+  - Fixed trade timestamp parsing (nanoseconds as string to milliseconds)
+  - Added proper subscription acknowledgment handling
+- **Korbit WebSocket implementation** - Updated to v2 API with correct protocol
+  - Fixed WebSocket URL to use v2 public endpoint (wss://ws-api.korbit.co.kr/v2/public)
+  - Fixed subscription message format to use array-based v2 API structure
+  - Fixed message type routing based on 'type' field instead of 'event'
+  - Fixed data parsing for orderbook, trades, and ticker messages
+  - Added proper subscription confirmation handling with success/failure detection
+  - Fixed ping/pong message format for v2 API
 - Subscription state management consistency
 - Test coverage for major exchanges (now 100%)
 - Removed duplicate PackageLicenseFile declaration

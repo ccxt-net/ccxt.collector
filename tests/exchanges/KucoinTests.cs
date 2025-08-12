@@ -10,12 +10,11 @@ namespace CCXT.Collector.Tests.Exchanges
 {
     /// <summary>
     /// Test suite for Kucoin exchange WebSocket integration
-    /// Note: Kucoin WebSocket implementation is not yet complete
     /// </summary>
     [Collection("Exchange Tests")]
     [Trait("Category", "Exchange")]
     [Trait("Exchange", "Kucoin")]
-    [Trait("Status", "Incomplete")]
+    [Trait("Status", "Complete")]
     public class KucoinTests : WebSocketTestBase
     {
         private readonly ExchangeTestFixture _fixture;
@@ -41,7 +40,7 @@ namespace CCXT.Collector.Tests.Exchanges
 
         #region Test Methods
 
-        [Fact(Skip = "Kucoin WebSocket implementation is not yet complete")]
+        [Fact]
         [Trait("Type", "Connection")]
         public async Task Kucoin_WebSocket_Connection()
         {
@@ -49,28 +48,28 @@ namespace CCXT.Collector.Tests.Exchanges
             _fixture.MarkExchangeTested("Kucoin", true);
         }
 
-        [Fact(Skip = "Kucoin WebSocket implementation is not yet complete")]
+        [Fact]
         [Trait("Type", "DataStream")]
         public async Task Kucoin_Orderbook_Stream()
         {
             await TestOrderbookDataReception();
         }
 
-        [Fact(Skip = "Kucoin WebSocket implementation is not yet complete")]
+        [Fact]
         [Trait("Type", "DataStream")]
         public async Task Kucoin_Trade_Stream()
         {
             await TestTradeDataReception();
         }
 
-        [Fact(Skip = "Kucoin WebSocket implementation is not yet complete")]
+        [Fact]
         [Trait("Type", "DataStream")]
         public async Task Kucoin_Ticker_Stream()
         {
             await TestTickerDataReception();
         }
 
-        [Fact(Skip = "Kucoin WebSocket implementation is not yet complete")]
+        [Fact]
         [Trait("Type", "MultipleSubscriptions")]
         public async Task Kucoin_Multiple_Subscriptions()
         {

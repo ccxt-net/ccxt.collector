@@ -684,7 +684,7 @@ namespace CCXT.Collector.Huobi
 
         protected override string CreatePingMessage()
         {
-            return JsonSerializer.Serialize(new { ping = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() });
+            return JsonSerializer.Serialize(new { ping = TimeExtension.UnixTime });
         }
 
         protected override string CreateAuthenticationMessage(string apiKey, string secretKey)

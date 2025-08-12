@@ -221,7 +221,51 @@ logger.WriteException("WebSocket error", ex);
 ```
 
 ---
-## 7. Risk Assessment Matrix
+## 7. Exchange Implementation Status (2025-08-12)
+
+### Complete WebSocket Implementations (15 Exchanges)
+| Exchange | Location | Status | Test Coverage | Notes |
+|----------|----------|--------|---------------|-------|
+| Binance | `src/exchanges/hk/binance` | ✅ Complete | 100% | Full WebSocket support |
+| Upbit | `src/exchanges/kr/upbit` | ✅ Complete | 100% | Single message batch critical |
+| Bithumb | `src/exchanges/kr/bithumb` | ✅ Complete | 100% | Channel grouping pattern |
+| OKX | `src/exchanges/cn/okx` | ✅ Complete | 100% | Unified message format |
+| Huobi | `src/exchanges/cn/huobi` | ✅ Complete | 100% | GZIP compression support |
+| Crypto.com | `src/exchanges/us/crypto` | ✅ Complete | 100% | 100 channels/msg limit |
+| Gate.io | `src/exchanges/cn/gateio` | ✅ Complete | 100% | JSON protocol |
+| **KuCoin** | `src/exchanges/cn/kucoin` | ✅ Complete | 100% | **v2 API (2025-08-12): Dynamic endpoint, welcome protocol** |
+| **Korbit** | `src/exchanges/kr/korbit` | ✅ Complete | 100% | **v2 API (2025-08-12): Array-based messages** |
+| Coinone | `src/exchanges/kr/coinone` | ✅ Complete | 100% | Individual subscriptions |
+| Coinbase | `src/exchanges/us/coinbase` | ✅ Complete | 100% | Flexible product IDs |
+| Bybit | `src/exchanges/sg/bybit` | ✅ Complete | 100% | Public/private streams |
+| Bitget | `src/exchanges/sg/bitget` | ✅ Complete | 100% | Full implementation |
+| Bittrex | `src/exchanges/us/bittrex` | ✅ Complete | 100% | SignalR protocol |
+| Kucoin | `src/exchanges/cn/kucoin` | ✅ Complete | 100% | Dynamic endpoint resolution |
+
+### Recent Implementation Updates (2025-08-12)
+
+#### KuCoin WebSocket (Fixed)
+- **Issue**: TODO stubs, non-functional implementation
+- **Solution**: Complete rewrite with v1 API implementation
+  - Dynamic WebSocket endpoint resolution via REST API
+  - Welcome message protocol handling
+  - Proper ping/pong heartbeat mechanism
+  - Topic-based message routing for all data types
+  - Fixed nanosecond timestamp parsing (string to long conversion)
+- **Test Result**: All 5 tests passing
+
+#### Korbit WebSocket (Migrated to v2)
+- **Issue**: Using deprecated v1 API, no data reception
+- **Solution**: Complete migration to v2 API
+  - Updated URL: `wss://ws-api.korbit.co.kr/v2/public`
+  - Array-based subscription format
+  - Fixed orderbook parsing (objects with price/qty properties)
+  - Message type routing via 'type' field
+  - Proper subscription confirmation handling
+- **Test Result**: All 5 tests passing
+
+---
+## 8. Risk Assessment Matrix
 
 ### Critical Risks (Immediate Action Required)
 | Risk | Business Impact | Technical Severity | Mitigation Strategy | Priority |
@@ -243,7 +287,7 @@ logger.WriteException("WebSocket error", ex);
 - ✅ Test coverage expanded to 100% for major exchanges
 
 ---
-## 7. Performance Metrics
+## 9. Performance Metrics
 
 | Metric | Current | Target | Gap Analysis |
 |--------|---------|--------|--------------|
@@ -255,7 +299,7 @@ logger.WriteException("WebSocket error", ex);
 | Test Coverage | 100% major exchanges | 100% all | 117 exchanges remaining |
 
 ---
-## 8. Architecture Recommendations
+## 10. Architecture Recommendations
 
 ### Immediate Actions (P0-P1)
 1. **Error Resilience**: Implement parse failure threshold (5 failures before reconnect)
@@ -273,7 +317,7 @@ logger.WriteException("WebSocket error", ex);
 3. **Testing**: Achieve 100% coverage across all 132 exchanges
 
 ---
-## 9. Test Coverage Analysis
+## 11. Test Coverage Analysis
 
 ### Current State
 | Category | Coverage | Notes |
@@ -290,7 +334,7 @@ logger.WriteException("WebSocket error", ex);
 - **Unified assertions**: Consistent validation across exchanges
 
 ---
-## 10. Conclusion
+## 12. Conclusion
 
 CCXT.Collector demonstrates mature architecture with recent significant improvements. The successful System.Text.Json migration and batch subscription implementation represent major achievements. Priority should focus on error resilience and resource optimization to achieve enterprise-grade reliability.
 

@@ -1,11 +1,10 @@
+using CCXT.Collector.Core.Abstractions;
+using CCXT.Collector.Service;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
-using CCXT.Collector.Core.Abstractions;
-using CCXT.Collector.Service;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -60,7 +59,14 @@ namespace CCXT.Collector.Tests.Base
             {
                 try
                 {
+                    // Write to xUnit output
                     _output?.WriteLine(message);
+                    
+                    // Also write to Console for visibility
+                    //Console.WriteLine(message);
+                    
+                    // And to Debug output (visible in IDE)
+                    //System.Diagnostics.Debug.WriteLine(message);
                 }
                 catch
                 {

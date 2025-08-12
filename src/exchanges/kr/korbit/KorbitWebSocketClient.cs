@@ -1,13 +1,11 @@
-﻿using System;
+﻿using CCXT.Collector.Core.Abstractions;
+using CCXT.Collector.Models.WebSocket;
+using CCXT.Collector.Service;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using CCXT.Collector.Core.Abstractions;
-using CCXT.Collector.Service;
 using System.Text.Json;
-using CCXT.Collector.Library;
-using CCXT.Collector.Models.WebSocket;
+using System.Threading.Tasks;
 
 namespace CCXT.Collector.Korbit
 {
@@ -19,8 +17,9 @@ namespace CCXT.Collector.Korbit
      *     https://apidocs.korbit.co.kr/ko/#websocket-api
      * 
      * WebSocket API:
-     *     wss://ws.korbit.co.kr/v1/user/push
-     *     wss://ws2.korbit.co.kr/v1/user/push (Alternative)
+     *     https://docs.korbit.co.kr/#WebSocket
+     *     https://docs.korbit.co.kr/#WS-method-subscribe_type-ticker
+     *     https://docs.korbit.co.kr/#WS-method-subscribe_type-myOrder
      * 
      * Supported Markets: KRW
      * 
@@ -44,7 +43,7 @@ namespace CCXT.Collector.Korbit
         private readonly object _lockObject = new object();
 
         public override string ExchangeName => "Korbit";
-        protected override string WebSocketUrl => "wss://ws.korbit.co.kr/v1/user/push";
+        protected override string WebSocketUrl => "wss://ws-api.korbit.co.kr/v2/public";
         protected override int PingIntervalMs => 60000; // 60 seconds
 
         public KorbitWebSocketClient()
@@ -107,47 +106,94 @@ namespace CCXT.Collector.Korbit
                     return;
                 }
 
-                // Handle different message types
-                var eventType = json.GetStringOrDefault("event");
-                if (!string.IsNullOrEmpty(eventType))
+                // Handle different message types based on 'type' field
+                var messageType = json.GetStringOrDefault("type");
+                if (!string.IsNullOrEmpty(messageType))
                 {
-                    switch (eventType)
+                    switch (messageType)
                     {
-                        case "korbit:connected":
-                            // Connection established
+                        case "orderbook":
+                            await ProcessOrderbookData(json);
                             break;
-                        case "korbit:subscribe":
-                            // Subscription confirmed
+                        case "trade":
+                            await ProcessTransactionData(json);
                             break;
-                        case "korbit:push-orderbook":
-                            await ProcessOrderbook(json);
-                            break;
-                        case "korbit:push-transaction":
-                            await ProcessTransaction(json);
-                            break;
-                        case "korbit:push-ticker":
+                        case "ticker":
                             await ProcessTickerData(json);
+                            break;
+                        case "subscribe":
+                            // Subscription confirmed
+                            HandleSubscriptionConfirmation(json);
+                            break;
+                        case "pong":
+                            // Pong received, connection is alive
+                            break;
+                        default:
+                            // Unknown message type, ignore
                             break;
                     }
                 }
-                else if (json.TryGetProperty("data", out var dataProp))
+                else
                 {
-                    var channel = json.GetStringOrDefault("channel");
-                    
-                    if (!string.IsNullOrEmpty(channel))
+                    // Check for success/error responses
+                    if (json.TryGetProperty("success", out var success))
                     {
-                        if (channel.Contains("orderbook"))
-                            await ProcessOrderbookData(json);
-                        else if (channel.Contains("transaction"))
-                            await ProcessTransactionData(json);
-                        else if (channel.Contains("ticker"))
-                            await ProcessTickerData(json);
+                        var isSuccess = success.ValueKind == JsonValueKind.True;
+                        if (!isSuccess && json.TryGetProperty("message", out var msg))
+                        {
+                            RaiseError($"Korbit error: {msg.GetString()}");
+                        }
                     }
                 }
             }
             catch (Exception ex)
             {
                 RaiseError($"Error processing message: {ex.Message}");
+            }
+        }
+
+        private void HandleSubscriptionConfirmation(JsonElement json)
+        {
+            try
+            {
+                // v2 API returns success and message
+                if (json.TryGetProperty("success", out var success))
+                {
+                    var isSuccess = success.ValueKind == JsonValueKind.True;
+                    RaiseError($"[INFO] Subscription confirmed: {isSuccess}");
+                    
+                    if (!isSuccess && json.TryGetProperty("message", out var msg))
+                    {
+                        RaiseError($"[ERROR] Subscription failed: {msg.GetString()}");
+                    }
+                }
+                
+                // Get type and symbols from the subscription response
+                var type = json.GetStringOrDefault("type");
+                if (json.TryGetArray("symbols", out var symbols))
+                {
+                    foreach (var korbitSymbol in symbols.EnumerateArray())
+                    {
+                        var symStr = korbitSymbol.GetString();
+                        if (!string.IsNullOrEmpty(symStr))
+                        {
+                            var symbol = ConvertSymbolBack(symStr);
+                            var channelName = type switch
+                            {
+                                "orderbook" => "orderbook",
+                                "trade" => "trades",
+                                "ticker" => "ticker",
+                                _ => type
+                            };
+                            MarkSubscriptionActive(channelName, symbol);
+                            RaiseError($"[INFO] Marked {channelName} subscription active for {symbol}");
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                RaiseError($"Error handling subscription confirmation: {ex.Message}");
             }
         }
 
@@ -160,24 +206,20 @@ namespace CCXT.Collector.Korbit
         {
             try
             {
-                var data = json.TryGetProperty("data", out var dataProp) ? dataProp : json;
-                var channel = json.GetStringOrDefault("channel", "");
-                
-                // Extract symbol from channel name (e.g., "orderbook:btc_krw")
-                var korbitSymbol = "";
-                if (channel.Contains(":"))
-                {
-                    korbitSymbol = channel.Split(':')[1];
-                }
-                else 
-                {
-                    korbitSymbol = data.GetStringOrDefault("currency_pair");
-                }
-                
+                // v2 API format: {"type":"orderbook","timestamp":1700000027754,"symbol":"btc_krw","snapshot":true,"data":{...}}
+                var korbitSymbol = json.GetStringOrDefault("symbol");
                 if (string.IsNullOrEmpty(korbitSymbol)) return;
 
                 var symbol = ConvertSymbolBack(korbitSymbol);
-                var timestamp = data.GetInt64OrDefault("timestamp", TimeExtension.UnixTime);
+                var timestamp = json.GetInt64OrDefault("timestamp", TimeExtension.UnixTime);
+                var isSnapshot = json.GetBooleanOrFalse("snapshot");
+                
+                // Get the data object
+                if (!json.TryGetProperty("data", out var data))
+                {
+                    RaiseError($"[ERROR] No data property in orderbook message");
+                    return;
+                }
 
                 var orderbook = new SOrderBook
                 {
@@ -192,34 +234,28 @@ namespace CCXT.Collector.Korbit
                     }
                 };
 
-                // Process bids
+                // Process bids - v2 API returns objects with price and qty properties
                 if (data.TryGetArray("bids", out var bids))
                 {
                     foreach (var bid in bids.EnumerateArray())
                     {
-                        if (bid.EnumerateArray().Count() < 2)
-                            continue;
-
                         orderbook.result.bids.Add(new SOrderBookItem
                         {
-                            price = bid[0].GetDecimalValue(),
-                            quantity = bid[1].GetDecimalValue()
+                            price = bid.GetDecimalOrDefault("price"),
+                            quantity = bid.GetDecimalOrDefault("qty")
                         });
                     }
                 }
 
-                // Process asks
+                // Process asks - v2 API returns objects with price and qty properties
                 if (data.TryGetArray("asks", out var asks))
                 {
                     foreach (var ask in asks.EnumerateArray())
                     {
-                        if (ask.EnumerateArray().Count() < 2)
-                            continue;
-
                         orderbook.result.asks.Add(new SOrderBookItem
                         {
-                            price = ask[0].GetDecimalValue(),
-                            quantity = ask[1].GetDecimalValue()
+                            price = ask.GetDecimalOrDefault("price"),
+                            quantity = ask.GetDecimalOrDefault("qty")
                         });
                     }
                 }
@@ -250,24 +286,19 @@ namespace CCXT.Collector.Korbit
         {
             try
             {
-                var data = json.TryGetProperty("data", out var dataProp) ? dataProp : json;
-                var channel = json.GetStringOrDefault("channel", "");
-                
-                // Extract symbol from channel name
-                var korbitSymbol = "";
-                if (channel.Contains(":"))
-                {
-                    korbitSymbol = channel.Split(':')[1];
-                }
-                else
-                {
-                    korbitSymbol = data.GetStringOrDefault("currency_pair");
-                }
-                
+                // v2 API format: {"type":"trade","timestamp":1700000027754,"symbol":"btc_krw","data":{...}}
+                var korbitSymbol = json.GetStringOrDefault("symbol");
                 if (string.IsNullOrEmpty(korbitSymbol)) return;
 
                 var symbol = ConvertSymbolBack(korbitSymbol);
-                var timestamp = TimeExtension.UnixTime;
+                var timestamp = json.GetInt64OrDefault("timestamp", TimeExtension.UnixTime);
+                
+                // Get the data object/array
+                if (!json.TryGetProperty("data", out var data))
+                {
+                    RaiseError($"[ERROR] No data property in trade message");
+                    return;
+                }
 
                 var completeOrders = new STrade
                 {
@@ -277,43 +308,31 @@ namespace CCXT.Collector.Korbit
                     result = new List<STradeItem>()
                 };
 
-                // Process transaction list
-                if (data.TryGetArray("transactions", out var transactions))
+                // Process trade data - v2 API single trade format
+                // Data contains: {"id":"12345","price":"99000000","amount":"0.01","type":"buy"|"sell","timestamp":1700000027754}
+                var tradeId = data.GetStringOrDefault("id", Guid.NewGuid().ToString());
+                var price = data.GetDecimalOrDefault("price");
+                var amount = data.GetDecimalOrDefault("amount");
+                var side = data.GetStringOrDefault("type", "");
+                var tradeTimestamp = data.GetInt64OrDefault("timestamp", timestamp);
+                
+                var sideType = side.ToLower() switch
                 {
-                    foreach (var tx in transactions.EnumerateArray())
-                    {
-                        var txTimestamp = tx.GetInt64OrDefault("timestamp", timestamp);
-                        var side = tx.GetStringOrDefault("type", "buy");
+                    "buy" => SideType.Bid,
+                    "sell" => SideType.Ask,
+                    _ => SideType.Unknown
+                };
 
-                        completeOrders.result.Add(new STradeItem
-                        {
-                            tradeId = tx.GetStringOrDefault("tid", Guid.NewGuid().ToString()),
-                            sideType = side.ToLower() == "buy" ? SideType.Bid : SideType.Ask,
-                            orderType = OrderType.Limit,
-                            price = tx.GetDecimalOrDefault("price"),
-                            quantity = tx.GetDecimalOrDefault("amount"),
-                            amount = (tx.GetDecimalOrDefault("price")) * (tx.GetDecimalOrDefault("amount")),
-                            timestamp = txTimestamp
-                        });
-                    }
-                }
-                else if (data.TryGetProperty("tid", out var _))
+                completeOrders.result.Add(new STradeItem
                 {
-                    // Single transaction
-                    var txTimestamp = data.GetInt64OrDefault("timestamp", timestamp);
-                    var side = data.GetStringOrDefault("type", "buy");
-
-                    completeOrders.result.Add(new STradeItem
-                    {
-                        tradeId = data.GetStringOrDefault("tid", Guid.NewGuid().ToString()),
-                        sideType = side.ToLower() == "buy" ? SideType.Bid : SideType.Ask,
-                        orderType = OrderType.Limit,
-                        price = data.GetDecimalOrDefault("price"),
-                        quantity = data.GetDecimalOrDefault("amount"),
-                        amount = (data.GetDecimalOrDefault("price")) * (data.GetDecimalOrDefault("amount")),
-                        timestamp = txTimestamp
-                    });
-                }
+                    tradeId = tradeId,
+                    sideType = sideType,
+                    orderType = OrderType.Limit,
+                    price = price,
+                    quantity = amount,
+                    amount = price * amount,
+                    timestamp = tradeTimestamp
+                });
 
                 if (completeOrders.result.Count > 0)
                     InvokeTradeCallback(completeOrders);
@@ -328,26 +347,21 @@ namespace CCXT.Collector.Korbit
         {
             try
             {
-                var data = json.TryGetProperty("data", out var dataProp) ? dataProp : json;
-                var channel = json.GetStringOrDefault("channel", "");
-                
-                // Extract symbol from channel name
-                var korbitSymbol = "";
-
-                if (channel.Contains(":"))
-                {
-                    korbitSymbol = channel.Split(':')[1];
-                }
-                else
-                {
-                    korbitSymbol = data.GetStringOrDefault("currency_pair");
-                }
-                
+                // v2 API format: {"type":"ticker","timestamp":1700000027754,"symbol":"btc_krw","snapshot":true,"data":{...}}
+                var korbitSymbol = json.GetStringOrDefault("symbol");
                 if (string.IsNullOrEmpty(korbitSymbol)) return;
 
                 var symbol = ConvertSymbolBack(korbitSymbol);
-                var timestamp = data.GetInt64OrDefault("timestamp", TimeExtension.UnixTime);
+                var timestamp = json.GetInt64OrDefault("timestamp", TimeExtension.UnixTime);
+                
+                // Get the data object
+                if (!json.TryGetProperty("data", out var data))
+                {
+                    RaiseError($"[ERROR] No data property in ticker message");
+                    return;
+                }
 
+                // v2 API ticker data contains: close, open, high, low, volume, etc.
                 var ticker = new STicker
                 {
                     exchange = ExchangeName,
@@ -356,20 +370,20 @@ namespace CCXT.Collector.Korbit
                     result = new STickerItem
                     {
                         timestamp = timestamp,
-                        closePrice = data.GetDecimalOrDefault("last"),
+                        closePrice = data.GetDecimalOrDefault("close"),
                         openPrice = data.GetDecimalOrDefault("open"),
                         highPrice = data.GetDecimalOrDefault("high"),
                         lowPrice = data.GetDecimalOrDefault("low"),
                         volume = data.GetDecimalOrDefault("volume"),
-                        quoteVolume = 0,
-                        percentage = data.GetDecimalOrDefault("change_percent"),
-                        change = data.GetDecimalOrDefault("change"),
+                        quoteVolume = data.GetDecimalOrDefault("value", 0), // KRW trading value
+                        percentage = data.GetDecimalOrDefault("changePercent", 0),
+                        change = data.GetDecimalOrDefault("change", 0),
                         bidPrice = data.GetDecimalOrDefault("bid"),
                         askPrice = data.GetDecimalOrDefault("ask"),
                         vwap = 0,
                         prevClosePrice = 0,
-                        bidQuantity = 0,
-                        askQuantity = 0
+                        bidQuantity = data.GetDecimalOrDefault("bidVolume", 0),
+                        askQuantity = data.GetDecimalOrDefault("askVolume", 0)
                     }
                 };
 
@@ -392,17 +406,20 @@ namespace CCXT.Collector.Korbit
             try
             {
                 var korbitSymbol = FormatSymbol(market);
-                var subscribeMessage = new
+                // v2 API requires array format
+                var subscribeMessage = new[]
                 {
-                    @event = "korbit:subscribe",
-                    data = new
+                    new
                     {
-                        channels = new[] { $"orderbook:{korbitSymbol}" }
+                        method = "subscribe",
+                        type = "orderbook",
+                        symbols = new[] { korbitSymbol }
                     }
                 };
 
                 var json = JsonSerializer.Serialize(subscribeMessage);
                 await SendMessageAsync(json);
+                MarkSubscriptionActive("orderbook", market.ToString());
                 return true;
             }
             catch (Exception ex)
@@ -417,17 +434,20 @@ namespace CCXT.Collector.Korbit
             try
             {
                 var korbitSymbol = ConvertSymbol(symbol);
-                var subscribeMessage = new
+                // v2 API requires array format
+                var subscribeMessage = new[]
                 {
-                    @event = "korbit:subscribe",
-                    data = new
+                    new
                     {
-                        channels = new[] { $"orderbook:{korbitSymbol}" }
+                        method = "subscribe",
+                        type = "orderbook",
+                        symbols = new[] { korbitSymbol }
                     }
                 };
 
                 var json = JsonSerializer.Serialize(subscribeMessage);
                 await SendMessageAsync(json);
+                MarkSubscriptionActive("orderbook", symbol);
                 return true;
             }
             catch (Exception ex)
@@ -442,17 +462,20 @@ namespace CCXT.Collector.Korbit
             try
             {
                 var korbitSymbol = FormatSymbol(market);
-                var subscribeMessage = new
+                // v2 API requires array format with 'trade' type
+                var subscribeMessage = new[]
                 {
-                    @event = "korbit:subscribe",
-                    data = new
+                    new
                     {
-                        channels = new[] { $"transaction:{korbitSymbol}" }
+                        method = "subscribe",
+                        type = "trade",
+                        symbols = new[] { korbitSymbol }
                     }
                 };
 
                 var json = JsonSerializer.Serialize(subscribeMessage);
                 await SendMessageAsync(json);
+                MarkSubscriptionActive("trades", market.ToString());
                 return true;
             }
             catch (Exception ex)
@@ -467,17 +490,20 @@ namespace CCXT.Collector.Korbit
             try
             {
                 var korbitSymbol = ConvertSymbol(symbol);
-                var subscribeMessage = new
+                // v2 API requires array format with 'trade' type
+                var subscribeMessage = new[]
                 {
-                    @event = "korbit:subscribe",
-                    data = new
+                    new
                     {
-                        channels = new[] { $"transaction:{korbitSymbol}" }
+                        method = "subscribe",
+                        type = "trade",
+                        symbols = new[] { korbitSymbol }
                     }
                 };
 
                 var json = JsonSerializer.Serialize(subscribeMessage);
                 await SendMessageAsync(json);
+                MarkSubscriptionActive("trades", symbol);
                 return true;
             }
             catch (Exception ex)
@@ -492,17 +518,20 @@ namespace CCXT.Collector.Korbit
             try
             {
                 var korbitSymbol = FormatSymbol(market);
-                var subscribeMessage = new
+                // v2 API requires array format
+                var subscribeMessage = new[]
                 {
-                    @event = "korbit:subscribe",
-                    data = new
+                    new
                     {
-                        channels = new[] { $"ticker:{korbitSymbol}" }
+                        method = "subscribe",
+                        type = "ticker",
+                        symbols = new[] { korbitSymbol }
                     }
                 };
 
                 var json = JsonSerializer.Serialize(subscribeMessage);
                 await SendMessageAsync(json);
+                MarkSubscriptionActive("ticker", market.ToString());
                 return true;
             }
             catch (Exception ex)
@@ -517,17 +546,20 @@ namespace CCXT.Collector.Korbit
             try
             {
                 var korbitSymbol = ConvertSymbol(symbol);
-                var subscribeMessage = new
+                // v2 API requires array format
+                var subscribeMessage = new[]
                 {
-                    @event = "korbit:subscribe",
-                    data = new
+                    new
                     {
-                        channels = new[] { $"ticker:{korbitSymbol}" }
+                        method = "subscribe",
+                        type = "ticker",
+                        symbols = new[] { korbitSymbol }
                     }
                 };
 
                 var json = JsonSerializer.Serialize(subscribeMessage);
                 await SendMessageAsync(json);
+                MarkSubscriptionActive("ticker", symbol);
                 return true;
             }
             catch (Exception ex)
@@ -542,20 +574,22 @@ namespace CCXT.Collector.Korbit
             try
             {
                 var korbitSymbol = FormatSymbol(market);
-                var channelName = channel.ToLower() switch
+                var type = channel.ToLower() switch
                 {
-                    "orderbook" => $"orderbook:{korbitSymbol}",
-                    "trades" => $"transaction:{korbitSymbol}",
-                    "ticker" => $"ticker:{korbitSymbol}",
-                    _ => $"{channel}:{korbitSymbol}"
+                    "orderbook" => "orderbook",
+                    "trades" or "trade" => "trade",
+                    "ticker" => "ticker",
+                    _ => channel
                 };
 
-                var unsubscribeMessage = new
+                // v2 API unsubscribe format
+                var unsubscribeMessage = new[]
                 {
-                    @event = "korbit:unsubscribe",
-                    data = new
+                    new
                     {
-                        channels = new[] { channelName }
+                        method = "unsubscribe",
+                        type = type,
+                        symbols = new[] { korbitSymbol }
                     }
                 };
 
@@ -575,20 +609,22 @@ namespace CCXT.Collector.Korbit
             try
             {
                 var korbitSymbol = ConvertSymbol(symbol);
-                var channelName = channel.ToLower() switch
+                var type = channel.ToLower() switch
                 {
-                    "orderbook" => $"orderbook:{korbitSymbol}",
-                    "trades" => $"transaction:{korbitSymbol}",
-                    "ticker" => $"ticker:{korbitSymbol}",
-                    _ => $"{channel}:{korbitSymbol}"
+                    "orderbook" => "orderbook",
+                    "trades" or "trade" => "trade",
+                    "ticker" => "ticker",
+                    _ => channel
                 };
 
-                var unsubscribeMessage = new
+                // v2 API unsubscribe format
+                var unsubscribeMessage = new[]
                 {
-                    @event = "korbit:unsubscribe",
-                    data = new
+                    new
                     {
-                        channels = new[] { channelName }
+                        method = "unsubscribe",
+                        type = type,
+                        symbols = new[] { korbitSymbol }
                     }
                 };
 
@@ -607,9 +643,13 @@ namespace CCXT.Collector.Korbit
         {
             try
             {
-                var pingMessage = new
+                // v2 API ping format
+                var pingMessage = new[]
                 {
-                    @event = "korbit:ping"
+                    new
+                    {
+                        method = "ping"
+                    }
                 };
 
                 var json = JsonSerializer.Serialize(pingMessage);
@@ -664,8 +704,7 @@ namespace CCXT.Collector.Korbit
         }
 
         /// <summary>
-        /// Send batch subscriptions for Korbit - multiple symbols comma-separated per channel type
-        /// Example: 'ticker:btc_krw,eth_krw,xrp_krw'
+        /// Send batch subscriptions for Korbit v2 API - multiple symbols per subscription type
         /// </summary>
         protected override async Task<bool> SendBatchSubscriptionsAsync(List<KeyValuePair<string, SubscriptionInfo>> subscriptions)
         {
@@ -676,8 +715,8 @@ namespace CCXT.Collector.Korbit
                     .GroupBy(s => s.Value.Channel.ToLower())
                     .ToList();
 
-                // Build channels array with all subscriptions
-                var channels = new List<string>();
+                // Build subscription messages array
+                var messages = new List<object>();
 
                 foreach (var channelGroup in groupedByChannel)
                 {
@@ -690,43 +729,34 @@ namespace CCXT.Collector.Korbit
                     if (symbols.Count == 0)
                         continue;
 
-                    // Map channel names to Korbit channel types
-                    string korbitChannel = channel switch
+                    // Map channel names to Korbit v2 types
+                    string type = channel switch
                     {
                         "orderbook" or "depth" => "orderbook",
-                        "trades" or "trade" => "transaction",
+                        "trades" or "trade" => "trade",
                         "ticker" => "ticker",
                         _ => channel
                     };
 
-                    // Create channel string with comma-separated symbols
-                    // Example: "ticker:btc_krw,eth_krw,xrp_krw"
-                    var channelString = $"{korbitChannel}:{string.Join(",", symbols)}";
-                    channels.Add(channelString);
+                    // Create subscription message for this type with all symbols
+                    messages.Add(new
+                    {
+                        method = "subscribe",
+                        type = type,
+                        symbols = symbols.ToArray()
+                    });
 
-                    RaiseError($"Added {korbitChannel} subscription for {symbols.Count} markets: {string.Join(", ", symbols.Take(3))}{(symbols.Count > 3 ? "..." : "")}");
+                    RaiseError($"Added {type} subscription for {symbols.Count} markets: {string.Join(", ", symbols.Take(3))}{(symbols.Count > 3 ? "..." : "")}");
                 }
 
-                if (channels.Count == 0)
+                if (messages.Count == 0)
                     return true;
 
-                // Create subscription message with all channels
-                var subscribeMessage = new
-                {
-                    accessToken = (string)null,  // null for public channels
-                    timestamp = TimeExtension.UnixTime,
-                    @event = "korbit:subscribe",
-                    data = new
-                    {
-                        channels = channels.ToArray()
-                    }
-                };
-
-                // Send the batch subscription
-                var json = JsonSerializer.Serialize(subscribeMessage);
+                // Send all subscriptions in one array
+                var json = JsonSerializer.Serialize(messages.ToArray());
                 await SendMessageAsync(json);
 
-                RaiseError($"Sent Korbit batch subscription with {channels.Count} channel groups");
+                RaiseError($"Sent Korbit batch subscription with {messages.Count} message groups");
 
                 return true;
             }

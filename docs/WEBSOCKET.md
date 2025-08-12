@@ -63,7 +63,7 @@ Different exchanges have different requirements for WebSocket subscriptions. The
 | **Single Message** | ALL subscriptions must be in one message | Upbit |
 | **Channel Grouping** | Group by channel type, separate messages | Bithumb, Gate.io |
 | **Unified Array** | All subscriptions in single args/params array | OKX, Binance |
-| **Symbol Grouping** | Comma-separated symbols per channel | Korbit |
+| **Array Batch** | Multiple symbols in array per subscription type | Korbit (v2) |
 | **Individual Messages** | Separate message for each subscription | Huobi, Coinone |
 | **Batched Messages** | Limited number of channels per message | Crypto.com |
 | **Flexible Product IDs** | Global or per-channel product ID specification | Coinbase |
@@ -75,7 +75,7 @@ Different exchanges have different requirements for WebSocket subscriptions. The
 | Upbit | Single message | None | Critical - resending overrides previous |
 | Bithumb | Channel groups | None | Can optimize by grouping |
 | OKX | Single message | None | Efficient single message |
-| Korbit | Comma-separated | None | Reduces message count |
+| Korbit | Array batch | None | v2 API with efficient batching |
 | Huobi | Individual | 50ms delay | Prevents rate limiting |
 | Crypto.com | Batched | 100 channels/msg | Balances efficiency and load |
 | Coinone | Individual | 50ms delay | Respects connection limit |
@@ -242,26 +242,26 @@ Different exchanges have different requirements for WebSocket subscriptions. The
 
 ### 8. Korbit (Korea)
 - **Location**: `src/exchanges/kr/korbit/`
-- **WebSocket URL**: `wss://ws.korbit.co.kr/v1/user/push`
-- **Documentation**: https://apidocs.korbit.co.kr/
+- **WebSocket URL**: `wss://ws-api.korbit.co.kr/v2/public` (v2 API)
+- **Documentation**: https://docs.korbit.co.kr/#WebSocket
 - **Supported Markets**: KRW
 
 #### Features
-- Comma-separated symbols in channel strings
+- Array-based message format for v2 API
 - Format: btc_krw (lowercase with underscore)
-- Efficient message reduction through symbol grouping
-- 30-second ping interval
+- Supports multiple symbols per subscription
+- 60-second ping interval
+- Message type-based routing (ticker, orderbook, trade)
 
-#### Subscription Format
+#### Subscription Format (v2 API)
 ```json
-{
-  "accessToken": null,
-  "timestamp": 1234567890,
-  "event": "korbit:subscribe",
-  "data": {
-    "channels": ["ticker:btc_krw,eth_krw,xrp_krw"]
+[
+  {
+    "method": "subscribe",
+    "type": "ticker",
+    "symbols": ["btc_krw", "eth_krw", "xrp_krw"]
   }
-}
+]
 ```
 
 ### 9. Coinone (Korea)

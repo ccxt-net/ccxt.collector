@@ -43,7 +43,7 @@ The library now includes automatic exchange status tracking to prevent connectio
 
 *Note: Exchange locations indicate registration/headquarters, not service availability
 
-#### Implementation Status (v2.1.5 - 2025-08-12)
+#### Implementation Status (v2.1.6 - 2025-08-12)
 
 | Feature | Implemented | In Progress | Planned |
 |---------|------------|-------------|----------|
@@ -70,18 +70,23 @@ Binance, Bitget, Bithumb, Bittrex, Bybit, Coinbase, Coinone, Crypto.com, Gate.io
 
 ### NuGet Package Manager
 ```bash
-Install-Package CCXT.Collector -Version 2.1.5
+Install-Package CCXT.Collector -Version 2.1.6
 ```
 
 ### .NET CLI
 ```bash
-dotnet add package CCXT.Collector --version 2.1.5
+dotnet add package CCXT.Collector --version 2.1.6
 ```
 
 ### Package Reference
 ```xml
-<PackageReference Include="CCXT.Collector" Version="2.1.5" />
+<PackageReference Include="CCXT.Collector" Version="2.1.6" />
 ```
+
+### ⚠️ Breaking Changes in v2.1.6
+- **KuCoin WebSocket**: Complete rewrite with dynamic endpoint resolution and proper protocol handling
+- **Korbit WebSocket**: Migration to v2 API with array-based message format
+- See [CHANGELOG](docs/CHANGELOG.md#216---2025-08-12) for full details
 
 ### ⚠️ Breaking Changes in v2.1.5
 - **IMPORTANT**: Complete migration from Newtonsoft.Json to System.Text.Json
