@@ -205,8 +205,8 @@ namespace CCXT.Collector.Service
             {
                 TickerEvent(sender, new CCEventArgs
                 {
-                    exchange = exchange,
-                    message = jsonMessage
+                    Exchange = exchange,
+                    Message = jsonMessage
                 });
             }
         }

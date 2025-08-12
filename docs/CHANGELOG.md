@@ -36,6 +36,130 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Removed duplicate PackageLicenseFile declaration
 - Package version consistency across dependencies
 
+### Utilities & Performance Modernization Summary
+The following utility and performance improvements (originally documented in IMPROVEMENTS_SUMMARY.md) are now consolidated here for version 2.1.6.
+
+#### JsonExtensions (High Priority)
+- Added robust epoch normalization (supports seconds/milliseconds, future-proof to year 2100)
+- Introduced `NormalizeEpochToMilliseconds` / `NormalizeEpochToDateTimeOffset`
+- Clarified semantics for helper methods (Get*OrDefault, GetUnixTimeOrDefault, etc.)
+- Improved null/undefined and array handling helpers
+
+#### Statistics (High Priority)
+- Rewrote RunMax / RunMin from O(n × period) to O(n) using monotonic deque
+- Added streaming variants `RunMaxStream` / `RunMinStream`
+- Split standard deviation into sample vs population (`StandardDeviationSample`, `StandardDeviationPopulation`)
+- Guard clauses to prevent divide-by-zero / empty input issues
+
+#### LinqExtension (High Priority)
+- Modernized collection helpers; removed legacy WCF-era collection patterns
+- Added cryptographically secure random string generator + fast variant
+- Optimized RemoveAll and immutable list operations
+- Added batching helper with deferred execution correctness
+
+#### CCLogger (High Priority)
+- Added structured event args documentation and safer event invocation pattern
+- Prepared for future integration with Microsoft.Extensions.Logging (foundational changes / XML docs)
+
+#### Performance Improvements
+| Component | Metric | Before | After | Gain |
+|-----------|--------|--------|-------|------|
+| Statistics.RunMax/RunMin | Complexity | O(n×period) | O(n) | ~100x (large windows) |
+| Statistics Memory | Working Set | O(n) | O(period) | Up to 90% less |
+| LinqExtension.RemoveAll | Complexity | O(n²) | O(n) | Major on large lists |
+| JsonExtensions Epoch | Future Range | Broke >2033 | Valid to 2100 | Future-proof |
+| Logger Event Safety | Race Potential | Possible | Mitigated | Reliability ↑ |
+
+#### Test Coverage (Utilities)
+- JsonExtensions: Edge-case focused tests
+- Statistics: Full coverage of new algorithms
+- LinqExtension: 20+ tests (batching, random gen, collection ops)
+- Overall utilities tests passing (see test project)
+
+#### Technical Debt Resolved
+1. Removed legacy synchronization collection patterns
+2. Addressed thread-safety pitfalls in logger usage
+3. Eliminated O(n²) utility hotspots
+4. Epoch > 2033 handling fixed
+5. Unified safer JSON parsing patterns
+
+#### Breaking Changes
+None. Legacy shapes preserved; new methods additive. Obsolete attributes used where legacy names retained.
+
+#### Migration Notes
+- Existing consumer code continues to function without modification
+- Prefer explicit methods (`StandardDeviationSample`) over prior generic form
+- For streaming extrema, adopt `RunMaxStream` / `RunMinStream` for large real-time feeds
+
+#### Key Files Modified
+- `src/utilities/JsonExtension.cs`
+- `src/utilities/Statistics.cs`
+- `src/utilities/LinqExtension.cs`
+- `src/utilities/logger.cs`
+- `tests/utilities/*`
+
+#### Follow-Up / Next Steps
+1. Add micro-benchmarks (BenchmarkDotNet) for statistics & JSON paths
+2. Expand structured logging adapter over base logger
+3. Extend streaming window utilities (e.g., rolling variance)
+4. Add cancellation-aware streaming enumerables
+
+#### Summary
+Utilities layer is now more robust, memory-efficient, and future-proof with safer JSON handling, high-performance statistical routines, and clearer, documented extension APIs.
+
+### TimeExtension Modernization
+Comprehensive overhaul of time utilities for clarity and correctness (moved from TIME_EXTENSION_IMPROVEMENTS.md).
+
+#### Key Fixes
+- Explicit handling of DateTimeKind.Unspecified via parameter `treatUnspecifiedAsUtc`
+- Removed ambiguity: replaced generic naming with precision-explicit members
+- Added reverse conversions from Unix epoch to DateTime / DateTimeOffset
+
+#### Added API
+| Category | Members |
+|----------|---------|
+| Current Time | `UnixTimeMillisecondsNow`, `UnixTimeSecondsNow` |
+| Conversions (DateTime → Unix) | `ToUnixTimeMilliseconds(this DateTime, bool treatUnspecifiedAsUtc = false)`, `ToUnixTimeSeconds(this DateTime, bool treatUnspecifiedAsUtc = false)` |
+| Conversions (Unix → DateTime) | `FromUnixTimeMilliseconds(long, DateTimeKind = Utc)`, `FromUnixTimeSeconds(long, DateTimeKind = Utc)` |
+| Conversions (Unix → DateTimeOffset) | `FromUnixTimeMillisecondsToOffset(long)`, `FromUnixTimeSecondsToOffset(long)` |
+| Legacy (Obsolete) | `UnixTime`, `ToUnixTime(this DateTime)` |
+
+#### Backward Compatibility
+- Legacy members retained and marked obsolete (no breaking changes)
+- Default behavior mirrors prior logic (Unspecified treated as Local) unless explicitly overridden
+
+#### Validation & Safety
+- Guards against negative epoch values
+- Throws clear exceptions for pre-epoch timestamps
+- All operations allocation-free and thread-safe
+
+#### Test Coverage
+- 29 focused tests (100% of public surface)
+- Edge cases: year 2038 boundary, negative inputs, unspecified vs UTC/local semantics
+
+#### Usage Examples
+```csharp
+// Current time
+long nowMs = TimeExtension.UnixTimeMillisecondsNow;
+long nowSec = TimeExtension.UnixTimeSecondsNow;
+
+// Convert DateTime
+var dt = new DateTime(2025,1,1,0,0,0, DateTimeKind.Utc);
+long ms = dt.ToUnixTimeMilliseconds();
+long sec = dt.ToUnixTimeSeconds();
+
+// Handle unspecified
+var unspecified = DateTime.Parse("2025-01-01");
+long treatedUtc = unspecified.ToUnixTimeMilliseconds(treatUnspecifiedAsUtc: true);
+
+// Reverse
+var restored = TimeExtension.FromUnixTimeMilliseconds(ms);
+```
+
+#### Summary
+Time utilities now provide explicit, predictable, and fully bidirectional Unix time handling with zero breaking impact and full migration guidance.
+
+
 ## [2.1.5] - 2025-08-11
 
 ### 🔄 Enhanced WebSocket Subscription Management

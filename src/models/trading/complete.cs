@@ -565,8 +565,8 @@ namespace CCXT.Collector.Service
             {
                 CompleteEvent(sender, new CCEventArgs
                 {
-                    exchange = exchange,
-                    message = jsonMessage
+                    Exchange = exchange,
+                    Message = jsonMessage
                 });
             }
         }

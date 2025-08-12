@@ -166,8 +166,8 @@ namespace CCXT.Collector.Service
             {
                 OrderBookEvent(sender, new CCEventArgs
                 {
-                    exchange = exchange,
-                    message = jsonMessage
+                    Exchange = exchange,
+                    Message = jsonMessage
                 });
             }
         }
