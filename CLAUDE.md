@@ -16,14 +16,17 @@ CCXT.Collector is a .NET library that connects to cryptocurrency exchanges world
   - Created unified GUIDE.md with architecture, security, API reference, and contributing sections
   - Integrated security best practices and critical vulnerability documentation
   - Final structure: CHANGELOG.md, DEPLOYMENT.md, GUIDE.md, ROADMAP.md
+- **Bitget WebSocket Fixes**: Resolved implementation issues
+  - Fixed instType to use "sp" instead of "SPOT"
+  - Fixed trade data processing: now correctly handles array of objects (not array of arrays)
+  - Symbol format confirmed: BTCUSDT (no slash, no suffix like _SPBL)
+  - Test results: 4/5 tests passing (ticker, orderbook, trades, connection work)
 
 ### Previous Updates (2025-08-13)
 - **v2.1.7 Release**: Fixed WebSocket implementations for multiple exchanges
-  - Fixed Crypto.com, Coinone, Coinbase, and Bitget WebSocket protocols
-  - Bitget: Changed instType from "SPOT" to "sp", removed "_SPBL" suffix
+  - Fixed Crypto.com, Coinone, Coinbase WebSocket protocols
   - Coinbase: Changed from `level2` to `level2_batch` for public access
   - Coinone: Fixed v2 API compatibility with proper response_type handling
-  - All 15 exchanges now have 100% passing tests
 
 ### Previous Updates (2025-08-12)
 - **v2.1.5 Release**: Complete migration from Newtonsoft.Json to System.Text.Json

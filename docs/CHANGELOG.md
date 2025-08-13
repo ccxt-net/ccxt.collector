@@ -43,6 +43,12 @@ Binance, Coinbase, Upbit, OKX, Bybit, Bitget, Huobi, Gate.io, Bithumb, Bittrex, 
 - Target frameworks: .NET 8.0/9.0/10.0
 - SAR indicator now uses StandardDeviationSample
 
+### Fixed
+- Bitget: Corrected instType to "sp" for WebSocket subscriptions
+- Bitget: Fixed trade data processing from array of arrays to array of objects per API spec
+- Bitget: Symbol format confirmed as BTCUSDT (no slash, no suffix)
+- Bitget: 4/5 tests passing (connection, ticker, orderbook, trades work; batch subscription needs investigation)
+
 ### Removed
 - Legacy logging methods (WriteQ/O/X/C)
 - Obsolete StandardDeviation (replaced with StandardDeviationSample)

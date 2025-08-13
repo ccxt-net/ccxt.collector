@@ -1,11 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using CCXT.Collector.Core.Abstractions;
 using CCXT.Collector.Models.WebSocket;
-using CCXT.Collector.Library;
 using CCXT.Collector.Core.Infrastructure; 
 using CCXT.Collector.Service;
 using System.Text.Json;
@@ -20,11 +18,23 @@ namespace CCXT.Collector.Bitget
      *     https://bitgetlimited.github.io/apidoc/en/spot/
      *
      * WebSocket API:
+     * overview
+     *     https://www.bitget.com/api-doc/common/websocket-intro
+     * public
      *     https://www.bitget.com/api-doc/spot/websocket/public/Tickers-Channel
      *     https://www.bitget.com/api-doc/spot/websocket/public/Candlesticks-Channel
      *     https://www.bitget.com/api-doc/spot/websocket/public/Trades-Channel
      *     https://www.bitget.com/api-doc/spot/websocket/public/Depth-Channel
      *     https://www.bitget.com/api-doc/spot/websocket/public/Auction-Channel
+     * private
+     *     https://www.bitget.com/api-doc/spot/websocket/private/Fill-Channel
+     *     https://www.bitget.com/api-doc/spot/websocket/private/Order-Channel
+     *     https://www.bitget.com/api-doc/spot/websocket/private/Plan-Order-Channel
+     *     https://www.bitget.com/api-doc/spot/websocket/private/Account-Channel
+     *     https://www.bitget.com/api-doc/spot/websocket/private/Place-Order-Channel
+     *     https://www.bitget.com/api-doc/spot/websocket/private/Cancel-Order-Channel
+     * error
+     *     https://www.bitget.com/api-doc/spot/error-code/websocket
      *
      * Fees:
      *     https://www.bitget.com/fee
@@ -68,17 +78,11 @@ namespace CCXT.Collector.Bitget
                 if (eventType == "subscribe" || eventType == "subscription")
                 {
                     var code = json.GetStringOrDefault("code");
-                    if (code != "0" && code != null)
+                    if (code != "0" && code != null && code != "")
                     {
                         var errorMsg = json.GetStringOrDefault("msg", "Unknown error");
                         var arg = json.TryGetProperty("arg", out var argProp) ? JsonSerializer.Serialize(argProp) : "";
                         RaiseError($"Subscription failed - Code: {code}, Msg: {errorMsg}, Arg: {arg}");
-                    }
-                    else
-                    {
-                        // Log successful subscription for debugging
-                        var arg = json.TryGetProperty("arg", out var argProp) ? JsonSerializer.Serialize(argProp) : "";
-                        RaiseError($"Subscription successful: {arg}");
                     }
                     return;
                 }
@@ -326,6 +330,7 @@ namespace CCXT.Collector.Bitget
                 var trades = new List<STradeItem>();
                 long latestTimestamp = 0;
                 
+                // Bitget sends trade data as array of trade objects
                 foreach (var trade in dataProp.EnumerateArray())
                 {
                     var timestamp = trade.GetInt64OrDefault("ts", TimeExtension.UnixTime);
@@ -615,7 +620,7 @@ namespace CCXT.Collector.Bitget
         {
             try
             {
-                var instId = ParsingHelpers.RemoveDelimiter(symbol);
+                var instId = ParsingHelpers.RemoveDelimiter(symbol);  // This removes the slash from BTC/USDT -> BTCUSDT
                 var subscription = new
                 {
                     op = "subscribe",
@@ -625,7 +630,7 @@ namespace CCXT.Collector.Bitget
                         {
                             instType = "sp",
                             channel = "books",
-                            instId = instId
+                            instId = instId  // Bitget expects BTCUSDT format (no slash, no suffix)
                         }
                     }
                 };
@@ -647,7 +652,7 @@ namespace CCXT.Collector.Bitget
         {
             try
             {
-                var instId = ParsingHelpers.RemoveDelimiter(symbol);
+                var instId = ParsingHelpers.RemoveDelimiter(symbol);  // This removes the slash from BTC/USDT -> BTCUSDT
                 var subscription = new
                 {
                     op = "subscribe",
@@ -657,7 +662,7 @@ namespace CCXT.Collector.Bitget
                         {
                             instType = "sp",
                             channel = "trade",
-                            instId = instId
+                            instId = instId  // Bitget expects BTCUSDT format (no slash, no suffix)
                         }
                     }
                 };
@@ -679,7 +684,7 @@ namespace CCXT.Collector.Bitget
         {
             try
             {
-                var instId = ParsingHelpers.RemoveDelimiter(symbol);
+                var instId = ParsingHelpers.RemoveDelimiter(symbol);  // This removes the slash from BTC/USDT -> BTCUSDT
                 var subscription = new
                 {
                     op = "subscribe",
@@ -689,7 +694,7 @@ namespace CCXT.Collector.Bitget
                         {
                             instType = "sp",
                             channel = "ticker",
-                            instId = instId
+                            instId = instId  // Bitget expects BTCUSDT format (no slash, no suffix)
                         }
                     }
                 };
@@ -711,7 +716,7 @@ namespace CCXT.Collector.Bitget
         {
             try
             {
-                var instId = ParsingHelpers.RemoveDelimiter(symbol);
+                var instId = ParsingHelpers.RemoveDelimiter(symbol);  // This removes the slash from BTC/USDT -> BTCUSDT
                 var channelInterval = ParsingHelpers.ToBitgetChannelInterval(interval);
                 
                 var subscription = new
@@ -723,7 +728,7 @@ namespace CCXT.Collector.Bitget
                         {
                             instType = "sp",
                             channel = $"candle{channelInterval}",
-                            instId = instId
+                            instId = instId  // Bitget expects BTCUSDT format (no slash, no suffix)
                         }
                     }
                 };
@@ -745,7 +750,7 @@ namespace CCXT.Collector.Bitget
         {
             try
             {
-                var instId = ParsingHelpers.RemoveDelimiter(symbol);
+                var instId = ParsingHelpers.RemoveDelimiter(symbol);  // This removes the slash from BTC/USDT -> BTCUSDT
                 var unsubscription = new
                 {
                     op = "unsubscribe",
@@ -755,7 +760,7 @@ namespace CCXT.Collector.Bitget
                         {
                             instType = "sp",
                             channel = channel,
-                            instId = instId
+                            instId = instId  // Bitget expects BTCUSDT format (no slash, no suffix)
                         }
                     }
                 };
@@ -839,13 +844,15 @@ namespace CCXT.Collector.Bitget
         {
             try
             {
+                RaiseError($"Starting Bitget batch subscription for {subscriptions.Count} subscriptions");
+                
                 // Build list of all subscription args
                 var args = new List<object>();
                 
                 foreach (var kvp in subscriptions)
                 {
                     var subscription = kvp.Value;
-                    var instId = ParsingHelpers.RemoveDelimiter(subscription.Symbol);
+                    var instId = ParsingHelpers.RemoveDelimiter(subscription.Symbol);  // This removes the slash from BTC/USDT -> BTCUSDT
                     
                     // Map channel names to Bitget channel format
                     string channelName = subscription.Channel.ToLower() switch
@@ -862,9 +869,9 @@ namespace CCXT.Collector.Bitget
                     // Create subscription arg object
                     var arg = new
                     {
-                        instType = "sp",
+                        instType = "SPOT",
                         channel = channelName,
-                        instId = instId
+                        instId = instId  // Bitget expects BTCUSDT format (no slash, no suffix)
                     };
 
                     args.Add(arg);
@@ -886,7 +893,8 @@ namespace CCXT.Collector.Bitget
                         args = args.ToArray()
                     };
 
-                    await SendMessageAsync(JsonSerializer.Serialize(subscriptionMessage));
+                    var json = JsonSerializer.Serialize(subscriptionMessage);
+                    await SendMessageAsync(json);
                     RaiseError($"Sent Bitget batch subscription with {args.Count} channels");
                 }
                 else
