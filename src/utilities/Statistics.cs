@@ -68,14 +68,6 @@ namespace CCXT.Collector.Indicator
             return (decimal)Math.Sqrt((double)variance);
         }
 
-        /// <summary>
-        /// Legacy method for backward compatibility - defaults to sample standard deviation
-        /// </summary>
-        [Obsolete("Use StandardDeviationSample or StandardDeviationPopulation for clarity")]
-        public static decimal StandardDeviation(List<decimal> valueList)
-        {
-            return StandardDeviationSample(valueList);
-        }
 
         /// <summary>
         /// Calculates running maximum values over a sliding window using monotonic deque

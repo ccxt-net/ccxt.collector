@@ -42,7 +42,7 @@ namespace CCXT.Collector.Indicator
             }
 
             // STDEV of differences
-            var stDev = Statistics.StandardDeviation(differences);
+            var stDev = Statistics.StandardDeviationSample(differences);
 
             var sarArr = new decimal?[OhlcList.Count];
 

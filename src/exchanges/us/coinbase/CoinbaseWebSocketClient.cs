@@ -2,7 +2,7 @@
 using CCXT.Collector.Models.WebSocket;
 using CCXT.Collector.Service;
 using System;
-using CCXT.Collector.Core.Infrastructure; // 공통 파싱 Helper
+using CCXT.Collector.Core.Infrastructure; 
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.WebSockets;
@@ -29,6 +29,7 @@ namespace CCXT.Collector.Coinbase
      * Fees:
      *     https://help.coinbase.com/en/exchange/trading-and-funding/exchange-fees
      */
+
     /// <summary>
     /// Coinbase WebSocket client for real-time data streaming
     /// </summary>
@@ -59,7 +60,7 @@ namespace CCXT.Collector.Coinbase
         {
             try
             {
-                using var doc = JsonDocument.Parse(message); 
+                using var doc = JsonDocument.Parse(message);
                 var json = doc.RootElement;
                 var type = json.GetStringOrDefault("type");
 
@@ -189,10 +190,10 @@ namespace CCXT.Collector.Coinbase
                     {
                         if (bid.GetArrayLength() < 2)
                             continue;
-                            
+
                         var price = bid[0].GetDecimalValue();
                         var size = bid[1].GetDecimalValue();
-                        
+
                         orderbook.result.bids.Add(new SOrderBookItem
                         {
                             price = price,
@@ -209,10 +210,10 @@ namespace CCXT.Collector.Coinbase
                     {
                         if (ask.GetArrayLength() < 2)
                             continue;
-                            
+
                         var price = ask[0].GetDecimalValue();
                         var size = ask[1].GetDecimalValue();
-                        
+
                         orderbook.result.asks.Add(new SOrderBookItem
                         {
                             price = price,
@@ -245,7 +246,7 @@ namespace CCXT.Collector.Coinbase
 
                 var symbol = ConvertToStandardSymbol(productId);
                 var timestamp = ConvertToUnixTimeMillis(json.GetStringOrDefault("time"));
-                
+
                 if (!_orderbookCache.ContainsKey(symbol))
                 {
                     // Need snapshot first
@@ -262,7 +263,7 @@ namespace CCXT.Collector.Coinbase
                     {
                         if (change.GetArrayLength() < 3)
                             continue;
-                            
+
                         var side = change[0].ToString();
                         var price = change[1].GetDecimalValue();
                         var size = change[2].GetDecimalValue();
@@ -293,7 +294,7 @@ namespace CCXT.Collector.Coinbase
         private void UpdateOrderbookSide(List<SOrderBookItem> side, decimal price, decimal size)
         {
             var existing = side.FirstOrDefault(item => item.price == price);
-            
+
             if (existing != null)
             {
                 if (size == 0)
@@ -362,7 +363,7 @@ namespace CCXT.Collector.Coinbase
             {
                 var type = json.GetStringOrDefault("type");
                 var productId = json.GetStringOrDefault("product_id");
-                
+
                 if (string.IsNullOrEmpty(productId))
                     return;
 
@@ -531,9 +532,9 @@ namespace CCXT.Collector.Coinbase
             var timestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString();
             var method = "GET";
             var requestPath = "/users/self/verify";
-            
+
             var signature = GenerateSignature(secretKey, timestamp, method, requestPath);
-            
+
             return JsonSerializer.Serialize(new
             {
                 type = "subscribe",
@@ -588,7 +589,7 @@ namespace CCXT.Collector.Coinbase
             {
                 return dateTimeOffset.ToUnixTimeMilliseconds();
             }
-            
+
             // If that fails, try parsing as DateTime and assume UTC
             if (DateTime.TryParse(timeString, out var dateTime))
             {
@@ -604,7 +605,7 @@ namespace CCXT.Collector.Coinbase
         {
             if (open == 0)
                 return 0;
-            
+
             return ((close - open) / open) * 100;
         }
 
@@ -753,4 +754,3 @@ namespace CCXT.Collector.Coinbase
         #endregion
     }
 }
-

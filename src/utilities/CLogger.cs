@@ -63,11 +63,6 @@ namespace CCXT.Collector.Service
         /// </summary>
         public LogCommandType CommandType { get; set; }
         
-        /// <summary>
-        /// Legacy command string for backward compatibility
-        /// </summary>
-        [Obsolete("Use CommandType enum instead")]
-        public string Command { get; set; }
 
         /// <summary>
         /// Exchange name associated with the log entry (PascalCase per .NET conventions)
@@ -103,10 +98,10 @@ namespace CCXT.Collector.Service
     /// <summary>
     /// Modern logger implementation with Microsoft.Extensions.Logging integration and backward compatibility
     /// </summary>
-    public class CCLogger
+    public class CLogger
     {
         private readonly string _exchangeName;
-        private readonly ILogger<CCLogger> _logger;
+        private readonly ILogger<CLogger> _logger;
         private readonly ILoggerFactory _loggerFactory;
         
         // Legacy event support with thread-safe invocation
@@ -117,14 +112,14 @@ namespace CCXT.Collector.Service
         /// </summary>
         /// <param name="exchange">Exchange identifier</param>
         /// <param name="loggerFactory">Optional logger factory for structured logging</param>
-        public CCLogger(string exchange, ILoggerFactory loggerFactory = null)
+        public CLogger(string exchange, ILoggerFactory loggerFactory = null)
         {
             _exchangeName = exchange ?? throw new ArgumentNullException(nameof(exchange));
             _loggerFactory = loggerFactory;
             
             if (_loggerFactory != null)
             {
-                _logger = _loggerFactory.CreateLogger<CCLogger>();
+                _logger = _loggerFactory.CreateLogger<CLogger>();
             }
         }
 
@@ -149,7 +144,6 @@ namespace CCXT.Collector.Service
             var args = new CCEventArgs
             {
                 CommandType = commandType,
-                Command = GetLegacyCommand(commandType), // For backward compatibility
                 Exchange = _exchangeName,
                 Message = message,
                 Properties = properties ?? new Dictionary<string, object>(),
@@ -291,63 +285,7 @@ namespace CCXT.Collector.Service
             Write(LogCommandType.Connection, message, properties: properties, logLevel: logLevel);
         }
 
-        #region Legacy Support Methods
 
-        /// <summary>
-        /// Legacy quote logging (WQ) - use WriteQuote instead
-        /// </summary>
-        [Obsolete("Use WriteQuote for structured logging")]
-        public void WriteQ(object sender, string message)
-        {
-            Write(LogCommandType.Quote, message, sender);
-        }
-
-        /// <summary>
-        /// Legacy order logging (WO) - use WriteOrder instead
-        /// </summary>
-        [Obsolete("Use WriteOrder for structured logging")]
-        public void WriteO(object sender, string message)
-        {
-            Write(LogCommandType.Order, message, sender);
-        }
-
-        /// <summary>
-        /// Legacy exception logging (WX) - use WriteException instead
-        /// </summary>
-        [Obsolete("Use WriteException for structured logging")]
-        public void WriteX(object sender, string message)
-        {
-            Write(LogCommandType.Exception, message, sender, logLevel: LogLevel.Error);
-        }
-
-        /// <summary>
-        /// Legacy custom logging (WC) - use Write instead
-        /// </summary>
-        [Obsolete("Use Write for structured logging")]
-        public void WriteC(object sender, string message)
-        {
-            Write(LogCommandType.Custom, message, sender);
-        }
-
-        #endregion
-
-        /// <summary>
-        /// Maps command type to legacy command string
-        /// </summary>
-        private static string GetLegacyCommand(LogCommandType commandType)
-        {
-            return commandType switch
-            {
-                LogCommandType.Quote => "WQ",
-                LogCommandType.Order => "WO",
-                LogCommandType.Exception => "WX",
-                LogCommandType.Custom => "WC",
-                LogCommandType.Debug => "WD",
-                LogCommandType.Performance => "WP",
-                LogCommandType.Connection => "WN",
-                _ => "WC"
-            };
-        }
 
         /// <summary>
         /// Creates a scoped logger for a specific operation
@@ -386,32 +324,32 @@ namespace CCXT.Collector.Service
     /// <summary>
     /// Extension methods for convenient logging
     /// </summary>
-    public static class CCLoggerExtensions
+    public static class CLoggerExtensions
     {
         /// <summary>
         /// Logs an error from a WebSocket client
         /// </summary>
         public static void RaiseError(this IWebSocketClient client, string message)
         {
-            var logger = new CCLogger(client.ExchangeName);
+            var logger = new CLogger(client.ExchangeName);
             logger.WriteException(message, null);
         }
 
         /// <summary>
         /// Logs performance metrics for an operation
         /// </summary>
-        public static IDisposable MeasurePerformance(this CCLogger logger, string operation)
+        public static IDisposable MeasurePerformance(this CLogger logger, string operation)
         {
             return new PerformanceMeasure(logger, operation);
         }
 
         private class PerformanceMeasure : IDisposable
         {
-            private readonly CCLogger _logger;
+            private readonly CLogger _logger;
             private readonly string _operation;
             private readonly DateTime _startTime;
 
-            public PerformanceMeasure(CCLogger logger, string operation)
+            public PerformanceMeasure(CLogger logger, string operation)
             {
                 _logger = logger;
                 _operation = operation;

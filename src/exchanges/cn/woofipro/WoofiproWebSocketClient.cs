@@ -1,13 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using CCXT.Collector.Core.Abstractions;
-using CCXT.Collector.Library;
 using CCXT.Collector.Service;
 using System.Text.Json;
 using CCXT.Collector.Models.WebSocket;
-
 
 namespace CCXT.Collector.Woofipro
 {
@@ -31,12 +28,12 @@ namespace CCXT.Collector.Woofipro
         {
             try
             {
-                using var doc = JsonDocument.Parse(message); 
+                using var doc = JsonDocument.Parse(message);
                 var json = doc.RootElement;
-                
+
                 // TODO: Implement message processing based on Woofipro WebSocket protocol
                 // Handle different message types (orderbook, trades, ticker, etc.)
-                
+
                 RaiseError("Woofipro WebSocket implementation not yet completed");
             }
             catch (Exception ex)
@@ -58,7 +55,7 @@ namespace CCXT.Collector.Woofipro
                 };
 
                 await SendMessageAsync(JsonSerializer.Serialize(subscription));
-                
+
                 MarkSubscriptionActive("orderbook", symbol);
 
                 return true;
@@ -83,7 +80,7 @@ namespace CCXT.Collector.Woofipro
                 };
 
                 await SendMessageAsync(JsonSerializer.Serialize(subscription));
-                
+
                 MarkSubscriptionActive("trades", symbol);
 
                 return true;
@@ -108,7 +105,7 @@ namespace CCXT.Collector.Woofipro
                 };
 
                 await SendMessageAsync(JsonSerializer.Serialize(subscription));
-                
+
                 MarkSubscriptionActive("ticker", symbol);
 
                 return true;
@@ -133,7 +130,7 @@ namespace CCXT.Collector.Woofipro
                 };
 
                 await SendMessageAsync(JsonSerializer.Serialize(unsubscription));
-                
+
                 var key = CreateSubscriptionKey(channel, symbol);
                 if (_subscriptions.TryRemove(key, out var sub))
                 {
@@ -188,7 +185,7 @@ namespace CCXT.Collector.Woofipro
                 };
 
                 await SendMessageAsync(JsonSerializer.Serialize(subscription));
-                
+
                 MarkSubscriptionActive("candles", symbol, interval);
 
                 return true;

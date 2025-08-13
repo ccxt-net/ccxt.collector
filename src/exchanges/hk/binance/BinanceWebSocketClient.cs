@@ -3,31 +3,31 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using CCXT.Collector.Core.Abstractions;
-using CCXT.Collector.Library;
 using CCXT.Collector.Service;
 using System.Text.Json;
 using CCXT.Collector.Models.WebSocket;
-using CCXT.Collector.Core.Infrastructure; // 공통 파싱 Helper
+using CCXT.Collector.Core.Infrastructure;
 
 namespace CCXT.Collector.Binance
 {
-        /*
-         * Binance Support Markets: USDT, BUSD, BTC, ETH, BNB
-         *
-         * API Documentation:
-         *     https://binance-docs.github.io/apidocs/
-         *     https://github.com/binance/binance-spot-api-docs
-         *
-         * WebSocket API:
-         *     https://developers.binance.com/docs/binance-spot-api-docs/websocket-api/general-api-information
-         *     https://developers.binance.com/docs/binance-spot-api-docs/websocket-api/request-format
-         *     https://developers.binance.com/docs/binance-spot-api-docs/websocket-api/response-format
-         *     https://developers.binance.com/docs/binance-spot-api-docs/websocket-api/market-data-requests
-         *     https://developers.binance.com/docs/binance-spot-api-docs/websocket-api/trading-requests
-         *
-         * Fees:
-         *     https://www.binance.com/en/fee/schedule
-         */
+    /*
+     * Binance Support Markets: USDT, BUSD, BTC, ETH, BNB
+     *
+     * API Documentation:
+     *     https://binance-docs.github.io/apidocs/
+     *     https://github.com/binance/binance-spot-api-docs
+     *
+     * WebSocket API:
+     *     https://developers.binance.com/docs/binance-spot-api-docs/websocket-api/general-api-information
+     *     https://developers.binance.com/docs/binance-spot-api-docs/websocket-api/request-format
+     *     https://developers.binance.com/docs/binance-spot-api-docs/websocket-api/response-format
+     *     https://developers.binance.com/docs/binance-spot-api-docs/websocket-api/market-data-requests
+     *     https://developers.binance.com/docs/binance-spot-api-docs/websocket-api/trading-requests
+     *
+     * Fees:
+     *     https://www.binance.com/en/fee/schedule
+     */
+
     /// <summary>
     /// Binance WebSocket client for real-time data streaming
     /// </summary>
@@ -59,7 +59,7 @@ namespace CCXT.Collector.Binance
                 if (json.TryGetProperty("e", out var eProp))
                 {
                     var eventType = json.GetStringOrDefault("e");
-                    
+
                     if (isPrivate)
                     {
                         // Private/User data stream events
@@ -121,14 +121,14 @@ namespace CCXT.Collector.Binance
             {
                 var symbol = ConvertSymbol(json.GetStringOrDefault("s"));
                 var updateId = json.GetInt64OrDefault("u");
-                
+
                 // Check if we should process this update
                 if (_lastUpdateIds.ContainsKey(symbol))
                 {
                     if (updateId <= _lastUpdateIds[symbol])
                         return;
                 }
-                
+
                 _lastUpdateIds[symbol] = updateId;
 
                 var orderbook = new SOrderBook
@@ -263,8 +263,8 @@ namespace CCXT.Collector.Binance
                         vwap = json.GetDecimalOrDefault("w"),
                         count = json.GetInt64OrDefault("C"),
                         change = json.GetDecimalOrDefault("c") - json.GetDecimalOrDefault("o"),
-                        percentage = json.GetDecimalOrDefault("o") > 0 
-                            ? ((json.GetDecimalOrDefault("c") - json.GetDecimalOrDefault("o")) / json.GetDecimalOrDefault("o")) * 100 
+                        percentage = json.GetDecimalOrDefault("o") > 0
+                            ? ((json.GetDecimalOrDefault("c") - json.GetDecimalOrDefault("o")) / json.GetDecimalOrDefault("o")) * 100
                             : 0
                     }
                 };
@@ -283,7 +283,7 @@ namespace CCXT.Collector.Binance
             {
                 var binanceSymbol = ConvertToBinanceSymbol(symbol);
                 var streamName = $"{binanceSymbol.ToLower()}@depth@100ms";
-                
+
                 var subscription = new
                 {
                     method = "SUBSCRIBE",
@@ -309,7 +309,7 @@ namespace CCXT.Collector.Binance
             {
                 var binanceSymbol = ConvertToBinanceSymbol(symbol);
                 var streamName = $"{binanceSymbol.ToLower()}@trade";
-                
+
                 var subscription = new
                 {
                     method = "SUBSCRIBE",
@@ -335,7 +335,7 @@ namespace CCXT.Collector.Binance
             {
                 var binanceSymbol = ConvertToBinanceSymbol(symbol);
                 var streamName = $"{binanceSymbol.ToLower()}@ticker";
-                
+
                 var subscription = new
                 {
                     method = "SUBSCRIBE",
@@ -376,7 +376,7 @@ namespace CCXT.Collector.Binance
                 };
 
                 await SendMessageAsync(JsonSerializer.Serialize(unsubscription));
-                
+
                 var key = CreateSubscriptionKey(channel, symbol);
                 if (_subscriptions.TryRemove(key, out var sub))
                 {
@@ -415,8 +415,8 @@ namespace CCXT.Collector.Binance
 
         #region Helper Methods
 
-    private string ConvertToBinanceSymbol(string symbol) => ParsingHelpers.RemoveDelimiter(symbol);
-    private string ConvertSymbol(string binanceSymbol) => ParsingHelpers.NormalizeSymbol(binanceSymbol);
+        private string ConvertToBinanceSymbol(string symbol) => ParsingHelpers.RemoveDelimiter(symbol);
+        private string ConvertSymbol(string binanceSymbol) => ParsingHelpers.NormalizeSymbol(binanceSymbol);
 
         #endregion
 
@@ -429,7 +429,7 @@ namespace CCXT.Collector.Binance
                 var binanceSymbol = ConvertToBinanceSymbol(symbol);
                 var binanceInterval = ConvertToBinanceInterval(interval);
                 var streamName = $"{binanceSymbol.ToLower()}@kline_{binanceInterval}";
-                
+
                 var subscription = new
                 {
                     method = "SUBSCRIBE",
@@ -438,7 +438,7 @@ namespace CCXT.Collector.Binance
                 };
 
                 await SendMessageAsync(JsonSerializer.Serialize(subscription));
-                
+
                 MarkSubscriptionActive("kline", symbol, interval);
 
                 return true;
@@ -456,10 +456,10 @@ namespace CCXT.Collector.Binance
             {
                 if (!json.TryGetProperty("k", out var klineData))
                     return;
-                    
+
                 var symbol = ConvertSymbol(json.GetStringOrDefault("s"));
                 var timestamp = json.GetInt64OrDefault("E");
-                
+
                 var candle = new SCandle
                 {
                     exchange = ExchangeName,
@@ -494,8 +494,8 @@ namespace CCXT.Collector.Binance
             }
         }
 
-    private string ConvertToBinanceInterval(string interval) => ParsingHelpers.ToBinanceInterval(interval);
-    private string ConvertFromBinanceInterval(string interval) => ParsingHelpers.FromBinanceInterval(interval);
+        private string ConvertToBinanceInterval(string interval) => ParsingHelpers.ToBinanceInterval(interval);
+        private string ConvertFromBinanceInterval(string interval) => ParsingHelpers.FromBinanceInterval(interval);
 
         #endregion
 
@@ -546,12 +546,12 @@ namespace CCXT.Collector.Binance
                 {
                     var balanceItems = new List<SBalanceItem>();
                     var timestamp = json.GetInt64OrDefault("E");
-                    
+
                     foreach (var item in balances.EnumerateArray())
                     {
                         var free = item.GetDecimalOrDefault("f");
                         var locked = item.GetDecimalOrDefault("l");
-                        
+
                         if (free > 0 || locked > 0)
                         {
                             balanceItems.Add(new SBalanceItem
@@ -564,7 +564,7 @@ namespace CCXT.Collector.Binance
                             });
                         }
                     }
-                    
+
                     if (balanceItems.Count > 0)
                     {
                         var balance = new SBalance
@@ -574,7 +574,7 @@ namespace CCXT.Collector.Binance
                             timestamp = timestamp,
                             balances = balanceItems
                         };
-                        
+
                         InvokeBalanceCallback(balance);
                     }
                 }
@@ -650,8 +650,8 @@ namespace CCXT.Collector.Binance
             }
         }
 
-    private OrderType ParseOrderType(string type) => (OrderType)CCXT.Collector.Core.Infrastructure.ParsingHelpers.ParseGenericOrderType(type);
-    private OrderStatus ParseOrderStatus(string status) => (OrderStatus)CCXT.Collector.Core.Infrastructure.ParsingHelpers.ParseGenericOrderStatus(status);
+        private OrderType ParseOrderType(string type) => (OrderType)CCXT.Collector.Core.Infrastructure.ParsingHelpers.ParseGenericOrderType(type);
+        private OrderStatus ParseOrderStatus(string status) => (OrderStatus)CCXT.Collector.Core.Infrastructure.ParsingHelpers.ParseGenericOrderStatus(status);
 
         #endregion
 
@@ -674,19 +674,19 @@ namespace CCXT.Collector.Binance
             {
                 // Build list of all stream names
                 var streamNames = new List<string>();
-                
+
                 foreach (var kvp in subscriptions)
                 {
                     var subscription = kvp.Value;
                     var binanceSymbol = ConvertToBinanceSymbol(subscription.Symbol).ToLower();
-                    
+
                     // Map channel names to Binance stream format
                     string streamName = subscription.Channel.ToLower() switch
                     {
                         "orderbook" or "depth" => $"{binanceSymbol}@depth@100ms",
                         "trades" or "trade" => $"{binanceSymbol}@trade",
                         "ticker" => $"{binanceSymbol}@ticker",
-                        "candles" or "kline" or "candlestick" => !string.IsNullOrEmpty(subscription.Extra) 
+                        "candles" or "kline" or "candlestick" => !string.IsNullOrEmpty(subscription.Extra)
                             ? $"{binanceSymbol}@kline_{ConvertToBinanceInterval(subscription.Extra)}"
                             : $"{binanceSymbol}@kline_1h",
                         "aggTrade" => $"{binanceSymbol}@aggTrade",
@@ -704,7 +704,7 @@ namespace CCXT.Collector.Binance
                 // Binance allows multiple streams in a single subscription message
                 // Limit to 200 streams per connection (Binance's typical limit)
                 const int maxStreamsPerMessage = 200;
-                
+
                 if (streamNames.Count <= maxStreamsPerMessage)
                 {
                     // Send all streams in one message
@@ -722,7 +722,7 @@ namespace CCXT.Collector.Binance
                 {
                     // Split into multiple messages if exceeding limit
                     var messageCount = (streamNames.Count + maxStreamsPerMessage - 1) / maxStreamsPerMessage;
-                    
+
                     for (int i = 0; i < messageCount; i++)
                     {
                         var batch = streamNames
@@ -739,7 +739,7 @@ namespace CCXT.Collector.Binance
 
                         await SendMessageAsync(JsonSerializer.Serialize(subscriptionMessage));
                         RaiseError($"Sent Binance batch subscription {i + 1}/{messageCount} with {batch.Length} streams");
-                        
+
                         // Small delay between batches if multiple messages
                         if (i < messageCount - 1)
                             await Task.Delay(100);

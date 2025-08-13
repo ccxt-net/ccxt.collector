@@ -10,8 +10,15 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 CCXT.Collector is a .NET library that connects to cryptocurrency exchanges worldwide via WebSocket to receive real-time market data (orderbook, trades, ticker, etc.) and delivers it to callback functions using unified data classes. Additionally, it analyzes the data per exchange and market to calculate technical indicators in real-time, providing these indicator values through callbacks. This allows developers to handle both raw market data and technical analysis from different exchanges with a consistent interface.
 
-### Recent Major Updates (2025-08-13)
-- **v2.1.6 Release**: Fixed WebSocket implementations for multiple exchanges
+### Recent Major Updates (2025-08-14)
+- **Documentation Consolidation**: Streamlined documentation structure
+  - Consolidated 13 documents into 4 comprehensive guides
+  - Created unified GUIDE.md with architecture, security, API reference, and contributing sections
+  - Integrated security best practices and critical vulnerability documentation
+  - Final structure: CHANGELOG.md, DEPLOYMENT.md, GUIDE.md, ROADMAP.md
+
+### Previous Updates (2025-08-13)
+- **v2.1.7 Release**: Fixed WebSocket implementations for multiple exchanges
   - Fixed Crypto.com, Coinone, Coinbase, and Bitget WebSocket protocols
   - Bitget: Changed instType from "SPOT" to "sp", removed "_SPBL" suffix
   - Coinbase: Changed from `level2` to `level2_batch` for public access

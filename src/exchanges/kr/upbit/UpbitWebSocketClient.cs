@@ -7,7 +7,7 @@ using CCXT.Collector.Library;
 using CCXT.Collector.Service;
 using System.Text.Json;
 using CCXT.Collector.Models.WebSocket;
-using CCXT.Collector.Core.Infrastructure; // 공통 파싱 Helper
+using CCXT.Collector.Core.Infrastructure; 
 
 namespace CCXT.Collector.Upbit
 {

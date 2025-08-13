@@ -266,3 +266,4 @@ scripts/nuget-config.ps1
 .claude/
 nul
 .mcp.json
+CLAUDE.local.md
