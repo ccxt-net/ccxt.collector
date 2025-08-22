@@ -5,6 +5,7 @@ using System.Collections.Immutable;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
+using System.Threading;
 
 namespace CCXT.Collector.Library
 {
@@ -172,6 +173,9 @@ namespace CCXT.Collector.Library
 
         // Thread-safe random number generator
         private static readonly RandomNumberGenerator CryptoRandom = RandomNumberGenerator.Create();
+        // Fast non-crypto random per-thread instance for netstandard2.0 compatibility (no Random.Shared)
+        private static readonly ThreadLocal<Random> FastRandom = new ThreadLocal<Random>(() =>
+            new Random(unchecked(Environment.TickCount * 31 + Thread.CurrentThread.ManagedThreadId)));
         
         // Character sets for random string generation
         private const string AlphanumericChars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
@@ -214,7 +218,7 @@ namespace CCXT.Collector.Library
             if (length <= 0) throw new ArgumentOutOfRangeException(nameof(length), "Length must be positive");
 
             var result = new StringBuilder(length);
-            var random = Random.Shared; // Thread-safe in .NET 6+
+            var random = FastRandom.Value; // Thread-local random for thread safety
 
             for (int i = 0; i < length; i++)
             {

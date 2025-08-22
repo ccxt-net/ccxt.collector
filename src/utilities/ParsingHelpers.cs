@@ -20,13 +20,13 @@ namespace CCXT.Collector.Core.Infrastructure
         {
             if (string.IsNullOrWhiteSpace(symbol)) return symbol;
             symbol = symbol.Trim().Replace("-", "/").ToUpperInvariant();
-            if (symbol.Contains('/')) return symbol;
+            if (symbol.IndexOf('/') >= 0) return symbol;
             // Delimiter 없는 케이스 (예: BTCUSDT) 분리 시도
             foreach (var quote in CommonQuoteCurrencies)
             {
                 if (symbol.EndsWith(quote, StringComparison.OrdinalIgnoreCase) && symbol.Length > quote.Length)
                 {
-                    var @base = symbol[..^quote.Length];
+                    var @base = symbol.Substring(0, symbol.Length - quote.Length);
                     return @$"{@base}/{quote}".ToUpperInvariant();
                 }
             }

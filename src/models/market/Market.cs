@@ -83,7 +83,13 @@ namespace CCXT.Collector.Service
 
         public override int GetHashCode()
         {
-            return HashCode.Combine(Base, Quote);
+            unchecked
+            {
+                int hash = 17;
+                hash = hash * 31 + (Base != null ? Base.GetHashCode() : 0);
+                hash = hash * 31 + (Quote != null ? Quote.GetHashCode() : 0);
+                return hash;
+            }
         }
 
         public static bool operator ==(Market left, Market right)

@@ -10,6 +10,7 @@ public static class TimeExtension
     /// Unix epoch start time (January 1, 1970 00:00:00 UTC)
     /// </summary>
     private static readonly DateTime UnixEpoch = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+    private static readonly DateTimeOffset UnixEpochOffset = new DateTimeOffset(UnixEpoch);
     
     /// <summary>
     /// Gets the current UTC time as Unix epoch milliseconds.
@@ -69,7 +70,7 @@ public static class TimeExtension
                 throw new ArgumentException($"Unknown DateTimeKind: {dateTime.Kind}", nameof(dateTime));
         }
         
-        if (dto < DateTimeOffset.UnixEpoch)
+    if (dto < UnixEpochOffset)
         {
             throw new ArgumentException("DateTime cannot be before Unix epoch (1970-01-01)", nameof(dateTime));
         }
