@@ -10,9 +10,9 @@
         <RootNamespace>CCXT.Collector</RootNamespace>
         
         <!-- Versioning -->
-        <Version>2.1.7</Version>
-        <AssemblyVersion>2.1.7.0</AssemblyVersion>
-        <FileVersion>2.1.7.0</FileVersion>
+        <Version>2.1.8</Version>
+        <AssemblyVersion>2.1.8.0</AssemblyVersion>
+        <FileVersion>2.1.8.0</FileVersion>
         
         <!-- Package Information -->
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
@@ -30,7 +30,15 @@
         <PackageIcon>ccxt.net.api.png</PackageIcon>
         <PackageReadmeFile>README.md</PackageReadmeFile>
         <PackageTags>cryptocurrency;exchange;trading;market-data;websocket;realtime;orderbook;ticker;trades;bot;crypto;exchange-markets</PackageTags>
-        <PackageReleaseNotes>v2.1.7 - Fixed WebSocket implementations for Crypto.com, Coinone, Coinbase, and Bitget exchanges. Enhanced sample project with comprehensive testing utilities. See CHANGELOG.md for details.</PackageReleaseNotes>
+        <PackageReleaseNotes>v2.1.8 - Changed
+Added System.Collections.Immutable package to fully support ImmutableList and related extension methods on netstandard2.0
+Replaced netstandard2.0-incompatible APIs (Random.Shared, DateTimeOffset.UnixEpoch, C# 8 Index/Range, HashCode.Combine) with compatible alternatives
+Fixed
+Resolved build and runtime compatibility issues for netstandard2.0/2.1 targets
+Prevented platform-specific exceptions in string parsing and hash calculation logic
+Internal
+No API signature changes; test and sample projects unaffected
+All targets (netstandard2.0, netstandard2.1, net8.0, net9.0) build and test successfully</PackageReleaseNotes>
         
         <!-- Repository Information -->
         <RepositoryUrl>https://github.com/ccxt-net/ccxt.collector</RepositoryUrl>
@@ -75,8 +83,7 @@
         <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="9.0.8" />
         <PackageReference Include="Microsoft.Extensions.Logging" Version="9.0.8" />
         <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.8" />
-    <!-- Ensure Immutable collections are available on netstandard2.0/2.1 -->
-    <PackageReference Include="System.Collections.Immutable" Version="8.0.0" />
+        <PackageReference Include="System.Collections.Immutable" Version="8.0.0" />
     </ItemGroup>
 
 </Project>
