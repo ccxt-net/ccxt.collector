@@ -25,7 +25,7 @@
         <Copyright>Copyright OdinSoftware Co., Ltd. 2015~2025</Copyright>
         
         <!-- Package Settings -->
-        <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
+        <PackageLicenseFile>LICENSE.md</PackageLicenseFile>
         <PackageProjectUrl>https://github.com/ccxt-net/ccxt.collector</PackageProjectUrl>
         <PackageIcon>ccxt.net.api.png</PackageIcon>
         <PackageReadmeFile>README.md</PackageReadmeFile>
@@ -68,10 +68,10 @@ All targets (netstandard2.0, netstandard2.1, net8.0, net9.0) build and test succ
 
     <!-- Package Files -->
     <ItemGroup>
-        <None Include="..\LICENSE.txt" Pack="true" PackagePath="" />
+        <None Include="..\LICENSE.md" Pack="true" PackagePath="" />
         <None Include="..\docs\logo-files\ccxt.net.api.png" Pack="true" PackagePath="" />
         <None Include="..\README.md" Pack="true" PackagePath="\" />
-        <Content Include="..\LICENSE.txt" Link="LICENSE.txt" />
+        <Content Include="..\LICENSE.md" Link="LICENSE.md" />
         <Content Include="ccxt.net.ico" />
     </ItemGroup>
 

@@ -168,7 +168,7 @@ Before publishing, update version in `src/ccxt.collector.csproj`:
 Ensure the package includes:
 - All source files from `src/` directory
 - README.md as package readme
-- LICENSE.txt file
+- LICENSE.md file
 - Package icon (ccxt.net.api.png)
 - Target frameworks (net8.0, net9.0)
 - All required dependencies
