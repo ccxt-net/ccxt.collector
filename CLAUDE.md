@@ -15,7 +15,7 @@ CCXT.Collector is a .NET library that connects to cryptocurrency exchanges world
   - Consolidated 13 documents into 4 comprehensive guides
   - Created unified GUIDE.md with architecture, security, API reference, and contributing sections
   - Integrated security best practices and critical vulnerability documentation
-  - Final structure: CHANGELOG.md, DEPLOYMENT.md, GUIDE.md, ROADMAP.md
+  - Final structure: releases\README.md, DEPLOYMENT.md, GUIDE.md, ROADMAP.md
 - **Bitget WebSocket Fixes**: Resolved implementation issues
   - Fixed instType to use "sp" instead of "SPOT"
   - Fixed trade data processing: now correctly handles array of objects (not array of arrays)

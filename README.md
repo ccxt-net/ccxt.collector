@@ -90,19 +90,19 @@ dotnet add package CCXT.Collector --version 2.1.7
 - **Coinone WebSocket**: Fixed response_type handling and channel processing
 - **Coinbase WebSocket**: Changed to level2_batch channel for public access
 - **Sample Project**: Enhanced with comprehensive testing utilities and multi-exchange support
-- See [CHANGELOG](docs/CHANGELOG.md#217---2025-08-13) for full details
+- See [CHANGELOG](docs/releases/README.md#217---2025-08-13) for full details
 
 ### ⚠️ Breaking Changes in v2.1.6
 - **KuCoin WebSocket**: Complete rewrite with dynamic endpoint resolution and proper protocol handling
 - **Korbit WebSocket**: Migration to v2 API with array-based message format
-- See [CHANGELOG](docs/CHANGELOG.md#216---2025-08-13) for full details
+- See [CHANGELOG](docs/releases/README.md#216---2025-08-13) for full details
 
 ### ⚠️ Breaking Changes in v2.1.5
 - **IMPORTANT**: Complete migration from Newtonsoft.Json to System.Text.Json
 - All JSON processing now uses System.Text.Json for better performance and reduced dependencies
 - Added JsonExtensions utility class with safe property access methods
 - Unified subscription handling with `MarkSubscriptionActive` across all exchanges
-- See [CHANGELOG](docs/CHANGELOG.md#215---2025-08-12) for migration details
+- See [CHANGELOG](docs/releases/README.md#215---2025-08-12) for migration details
 
 ### ⚠️ Breaking Changes in v2.1.2
 - `SCandlestick.result` changed from single item to `List<SCandleItem>`
@@ -240,7 +240,7 @@ CCXT.Collector/
 - [Developer Guide](docs/GUIDE.md) - Complete architecture, API reference, and contributing guide
 - [Deployment Guide](docs/DEPLOYMENT.md) - Production deployment instructions
 - [Roadmap & Tasks](docs/ROADMAP.md) - Development roadmap and current tasks
-- [Changelog](docs/CHANGELOG.md) - Version history and release notes
+- [Changelog](docs/releases/README.md) - Version history and release notes
 
 ## 🤝 Contributing
 

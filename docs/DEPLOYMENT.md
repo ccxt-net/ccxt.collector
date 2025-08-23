@@ -153,7 +153,7 @@ Before publishing, update version in `src/ccxt.collector.csproj`:
 
 ### v2.1.0 Release Checklist
 ✅ **Documentation Updated**
-- ✅ docs/CHANGELOG.md - Complete v2.1.0 release notes with performance metrics
+- ✅ docs/releases/README.md - Complete v2.1.0 release notes with performance metrics
 - ✅ docs/DEPLOYMENT.md - Includes NuGet upload checklist and commands
 - ✅ README.md - Updated with v2.1.0 installation instructions
 - ✅ src/ccxt.collector.csproj - Version 2.1.0, updated release notes

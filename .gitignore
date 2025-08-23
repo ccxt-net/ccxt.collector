@@ -262,8 +262,12 @@ __pycache__/
 *.pyc
 
 # Project-specific
-scripts/nuget-config.ps1
 .claude/
-nul
 .mcp.json
-CLAUDE.local.md
+./CLAUD.local.md
+nul
+appsettings.Development.json
+
+# Allow documentation release notes to be tracked
+!docs/releases/
+!docs/releases/**
