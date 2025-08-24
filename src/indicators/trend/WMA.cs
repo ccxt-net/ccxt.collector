@@ -31,7 +31,7 @@ namespace CCXT.Collector.Indicator
         /// Price	77	79	79	81	83
         /// WMA	 	 	 	 	    80.7
         /// </summary>
-        /// <see cref="http://fxtrade.oanda.com/learn/forex-indicators/weighted-moving-average"/>
+        /// <see href="https://fxtrade.oanda.com/learn/forex-indicators/weighted-moving-average"/>
         /// <returns></returns>
         public override SingleDoubleSerie Calculate()
         {

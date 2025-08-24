@@ -1,8 +1,8 @@
 # Releases
 
-이 폴더는 CCXT.Collector의 버전별 릴리스 노트를 보관합니다. 각 파일은 한 버전에 대응하며 `MAJOR.MINOR.PATCH.md` 형식을 따릅니다.
+This folder stores release notes of CCXT.Collector by version. Each file corresponds to one version and follows the `MAJOR.MINOR.PATCH.md` naming convention.
 
-## 인덱스
+## Index
 
 - [2.1.7 - 2025-08-13](./2.1.7.md)
 - [2.1.6 - 2025-08-12](./2.1.6.md)
@@ -14,11 +14,11 @@
 - [2.1.0](./2.1.0.md)
 - [2.0.0](./2.0.0.md)
 
-## 작성 규칙
+## Authoring guidelines
 
-- 파일명: `x.y.z.md`
-- 헤더: `# x.y.z - YYYY-MM-DD`
-- 섹션(필요한 것만 사용):
+- Filename: `x.y.z.md`
+- Header: `# x.y.z - YYYY-MM-DD`
+- Sections (use only what you need):
   - Added
   - Changed
   - Fixed
@@ -26,10 +26,10 @@
   - Performance
   - Security
   - Migration
-- 날짜가 미정인 경우 초안은 `# x.y.z (Unreleased)`로 시작합니다.
+- If the date is not decided yet, start the draft with `# x.y.z (Unreleased)`.
 
-## 팁
+## Tips
 
-- 간결하지만 재현 가능한 수준으로 변경 사항을 기록하세요.
-- 주요 이슈나 PR 번호가 있으면 항목 끝에 괄호로 남겨주세요.
-- 이전 버전과의 호환성에 영향이 있으면 반드시 “Migration” 또는 “Breaking”를 명시하세요.
+- Record changes concisely but with enough detail to reproduce.
+- If relevant, append major issue or PR numbers at the end of the item in parentheses.
+- If there is an impact on backward compatibility, explicitly mark it under “Migration” or “Breaking”.

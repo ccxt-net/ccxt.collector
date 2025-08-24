@@ -31,7 +31,7 @@ namespace CCXT.Collector.Indicator
         /// Second day of 5-day SMA: (12 + 13 + 14 + 15 + 16) / 5 = 14
         /// Third day of 5-day SMA: (13 + 14 + 15 + 16 + 17) / 5 = 15
         /// </summary>
-        /// <see cref="http://stockcharts.com/school/doku.php?id=chart_school:technical_indicators:moving_averages"/>
+        /// <see href="https://stockcharts.com/school/doku.php?id=chart_school:technical_indicators:moving_averages"/>
         /// <returns></returns>
         public override SingleDoubleSerie Calculate()
         {

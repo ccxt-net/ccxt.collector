@@ -30,7 +30,7 @@ namespace CCXT.Collector.Indicator
         /// Upper Envelope: 20-day SMA + (20-day SMA x .025)
         /// Lower Envelope: 20-day SMA - (20-day SMA x .025)
         /// </summary>
-        /// <see cref="http://stockcharts.com/school/doku.php?id=chart_school:technical_indicators:moving_average_envelopes"/>
+        /// <see href="https://stockcharts.com/school/doku.php?id=chart_school:technical_indicators:moving_average_envelopes"/>
         /// <returns></returns>
         public override EnvelopeSerie Calculate()
         {

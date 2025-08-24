@@ -40,7 +40,7 @@ namespace CCXT.Collector.Indicator
         /// EMA: {Close - EMA(previous day)} x multiplier + EMA(previous day).
         /// for Wilder parameter details: http://www.inside-r.org/packages/cran/TTR/docs/GD
         /// </summary>
-        /// <see cref="http://stockcharts.com/school/doku.php?id=chart_school:technical_indicators:moving_averages"/>
+        /// <see href="https://stockcharts.com/school/doku.php?id=chart_school:technical_indicators:moving_averages"/>
         /// <returns></returns>
         public override SingleDoubleSerie Calculate()
         {

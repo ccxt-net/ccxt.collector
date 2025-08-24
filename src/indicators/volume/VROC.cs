@@ -26,7 +26,7 @@ namespace CCXT.Collector.Indicator
         /// <summary>
         /// VROC = ((VOLUME (i) - VOLUME (i - n)) / VOLUME (i - n)) * 100
         /// </summary>
-        /// <see cref="http://ta.mql4.com/indicators/volumes/rate_of_change"/>
+        /// <see href="https://ta.mql4.com/indicators/volumes/rate_of_change"/>
         /// <returns></returns>
         public override SingleDoubleSerie Calculate()
         {

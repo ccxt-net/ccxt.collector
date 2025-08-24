@@ -34,7 +34,7 @@ namespace CCXT.Collector.Indicator
         /// in the middle of this look-back period. In short, DPO(20) equals price
         /// 11 days ago less the 20-day SMA.
         /// </summary>
-        /// <see cref="http://stockcharts.com/school/doku.php?id=chart_school:technical_indicators:detrended_price_osci"/>
+        /// <see href="https://stockcharts.com/school/doku.php?id=chart_school:technical_indicators:detrended_price_osci"/>
         /// <returns></returns>
         public override SingleDoubleSerie Calculate()
         {

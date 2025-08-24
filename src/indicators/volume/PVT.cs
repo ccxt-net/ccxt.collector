@@ -16,7 +16,7 @@ namespace CCXT.Collector.Indicator
         /// <summary>
         /// PVT = [((CurrentClose - PreviousClose) / PreviousClose) x Volume] + PreviousPVT
         /// </summary>
-        /// <see cref="https://www.tradingview.com/stock-charts-support/index.php/Price_Volume_Trend_(PVT)"/>
+        /// <see href="https://www.tradingview.com/stock-charts-support/index.php/Price_Volume_Trend_(PVT)"/>
         /// <returns></returns>
         public override SingleDoubleSerie Calculate()
         {

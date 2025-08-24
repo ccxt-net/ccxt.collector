@@ -21,7 +21,7 @@ namespace CCXT.Collector.Indicator
         /// If today’s close is equal to yesterday’s close then:
         /// OBV(i) = OBV(i-1)
         /// </summary>
-        /// <see cref="http://ta.mql4.com/indicators/volumes/on_balance_volume"/>
+        /// <see href="https://ta.mql4.com/indicators/volumes/on_balance_volume"/>
         /// <returns></returns>
         public override SingleDoubleSerie Calculate()
         {

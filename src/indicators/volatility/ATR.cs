@@ -31,8 +31,8 @@ namespace CCXT.Collector.Indicator
         /// TR = TrueHigh - TrueLow
         /// ATR = EMA(TR)
         /// </summary>
-        /// <see cref="http://www.fmlabs.com/reference/default.htm?url=TR.htm"/>
-        /// <see cref="http://www.fmlabs.com/reference/default.htm?url=ATR.htm"/>
+        /// <see href="https://www.fmlabs.com/reference/default.htm?url=TR.htm"/>
+        /// <see href="https://www.fmlabs.com/reference/default.htm?url=ATR.htm"/>
         /// <returns></returns>
         public override ATRSerie Calculate()
         {

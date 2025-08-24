@@ -16,7 +16,7 @@ namespace CCXT.Collector.Indicator
         /// <summary>
         /// Acc/Dist = ((Close – Low) – (High – Close)) / (High – Low) * Period's volume
         /// </summary>
-        /// <see cref="http://www.investopedia.com/terms/a/accumulationdistribution.asp"/>
+        /// <see href="https://www.investopedia.com/terms/a/accumulationdistribution.asp"/>
         /// <returns></returns>
         public override SingleDoubleSerie Calculate()
         {

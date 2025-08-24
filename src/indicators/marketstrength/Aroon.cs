@@ -28,7 +28,7 @@ namespace CCXT.Collector.Indicator
         /// Aroon up: {((number of periods) - (number of periods since highest high)) / (number of periods)} x 100
         /// Aroon down: {((number of periods) - (number of periods since lowest low)) / (number of periods)} x 100
         /// </summary>
-        /// <see cref="http://www.investopedia.com/ask/answers/112814/what-aroon-indicator-formula-and-how-indicator-calculated.asp"/>
+        /// <see href="https://www.investopedia.com/ask/answers/112814/what-aroon-indicator-formula-and-how-indicator-calculated.asp"/>
         /// <returns></returns>
         public override AroonSerie Calculate()
         {

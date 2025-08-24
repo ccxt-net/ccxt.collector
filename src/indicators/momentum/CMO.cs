@@ -27,7 +27,7 @@ namespace CCXT.Collector.Indicator
         /// <summary>
         /// Chande Momentum Oscillator (CMO)
         /// </summary>
-        /// <see cref="http://www.fmlabs.com/reference/default.htm?url=CMO.htm"/>
+        /// <see href="https://www.fmlabs.com/reference/default.htm?url=CMO.htm"/>
         /// <returns></returns>
         public override SingleDoubleSerie Calculate()
         {

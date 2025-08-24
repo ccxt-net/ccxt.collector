@@ -26,7 +26,7 @@ namespace CCXT.Collector.Indicator
         /// <summary>
         /// ROC = [(Close - Close n periods ago) / (Close n periods ago)] * 100
         /// </summary>
-        /// <see cref="http://stockcharts.com/school/doku.php?id=chart_school:technical_indicators:rate_of_change_roc_and_momentum"/>
+        /// <see href="https://stockcharts.com/school/doku.php?id=chart_school:technical_indicators:rate_of_change_roc_and_momentum"/>
         /// <returns></returns>
         public override SingleDoubleSerie Calculate()
         {

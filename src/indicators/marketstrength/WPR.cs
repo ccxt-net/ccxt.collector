@@ -32,7 +32,7 @@ namespace CCXT.Collector.Indicator
         /// Highest High = highest high for the look-back period
         /// %R is multiplied by -100 correct the inversion and move the decimal.
         /// </summary>
-        /// <see cref="http://www.fmlabs.com/reference/default.htm?url=WilliamsR.htm"/>
+        /// <see href="https://www.fmlabs.com/reference/default.htm?url=WilliamsR.htm"/>
         /// <returns></returns>
         public override SingleDoubleSerie Calculate()
         {

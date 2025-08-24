@@ -108,7 +108,7 @@ dotnet add package CCXT.Collector --version 2.1.7
 - `SCandlestick.result` changed from single item to `List<SCandleItem>`
 - `OnOrderUpdate` event now uses `SOrders` container instead of single `SOrder`
 - `OnPositionUpdate` event now uses `SPositions` container instead of single `SPosition`
-- See [Migration Guide](docs/GUIDE.md#breaking-changes-v212) for details
+- See migration notes in [Releases](docs/releases/README.md) for details
 
 ## 🚀 Quick Start
 
@@ -197,7 +197,7 @@ await upbitClient.SubscribeTickerAsync(btcKrw);
 
 ## 📊 Technical Indicators
 
-The library includes 25+ technical indicators. See the [Developer Guide](docs/GUIDE.md#technical-indicators) for the complete list and usage examples.
+The library includes 25+ technical indicators. See the consolidated [Contributing Guide](docs/CONTRIBUTING.md#architecture-overview) for an overview and pointers.
 
 ## ⚙️ Configuration
 
@@ -214,7 +214,7 @@ The library includes 25+ technical indicators. See the [Developer Guide](docs/GU
 
 ## 🏗️ Architecture
 
-For detailed architecture and system design, see the [Developer Guide](docs/GUIDE.md#system-overview).
+For detailed architecture and system design, see the [Contributing Guide](docs/CONTRIBUTING.md#architecture-overview).
 
 ### Project Structure
 
@@ -237,14 +237,13 @@ CCXT.Collector/
 
 ## 📚 Documentation
 
-- [Developer Guide](docs/GUIDE.md) - Complete architecture, API reference, and contributing guide
-- [Deployment Guide](docs/DEPLOYMENT.md) - Production deployment instructions
+- [Contributing Guide](docs/CONTRIBUTING.md) - Architecture, development workflow, deployment and release notes guidelines
 - [Roadmap & Tasks](docs/ROADMAP.md) - Development roadmap and current tasks
 - [Changelog](docs/releases/README.md) - Version history and release notes
 
 ## 🤝 Contributing
 
-We welcome contributions! Please see our [Contributing Guide](docs/GUIDE.md#contributing) for details.
+We welcome contributions! Please see our [Contributing Guide](docs/CONTRIBUTING.md) for details.
 
 1. Fork the repository
 2. Create your feature branch (`git checkout -b feature/AmazingFeature`)

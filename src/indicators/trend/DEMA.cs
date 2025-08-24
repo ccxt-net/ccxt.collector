@@ -27,7 +27,7 @@ namespace CCXT.Collector.Indicator
         /// <summary>
         /// DEMA = 2 * EMA - EMA of EMA
         /// </summary>
-        /// <see cref="http://forex-indicators.net/trend-indicators/dema"/>
+        /// <see href="https://forex-indicators.net/trend-indicators/dema"/>
         /// <returns></returns>
         public override SingleDoubleSerie Calculate()
         {

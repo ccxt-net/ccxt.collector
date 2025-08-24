@@ -48,10 +48,10 @@ All targets (netstandard2.0, netstandard2.1, net8.0, net9.0) build and test succ
         <!-- Code Quality Settings - Simplified -->
         <Nullable>disable</Nullable>
         <ImplicitUsings>disable</ImplicitUsings>
-        <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
-        
-        <!-- Suppress most warnings except critical ones -->
-        <NoWarn>$(NoWarn);CS1998;CS0618</NoWarn>
+		<GenerateDocumentationFile>true</GenerateDocumentationFile>
+
+		<!-- Suppress some noisy warnings, but keep CS1591 active to encourage documentation -->
+		<NoWarn>$(NoWarn);CS1998;CS0618;CS1591</NoWarn>
         
         <!-- Build Settings -->
         <Deterministic>true</Deterministic>

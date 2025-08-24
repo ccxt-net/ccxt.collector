@@ -624,7 +624,7 @@ namespace CCXT.Collector.Coinbase
                 if (string.Equals(reason, "canceled", StringComparison.OrdinalIgnoreCase))
                     return OrderStatus.Canceled;
             }
-            // 나머지는 일반 매핑 재사용
+            // For the rest, reuse the generic mapping
             return ParsingHelpers.ParseGenericOrderStatus(type);
         }
 

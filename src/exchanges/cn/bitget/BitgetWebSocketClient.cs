@@ -62,7 +62,7 @@ namespace CCXT.Collector.Bitget
         {
             try
             {
-                using var doc = JsonDocument.Parse(message); 
+                using var doc = JsonDocument.Parse(message);
                 var json = doc.RootElement;
 
                 // Handle ping/pong - Bitget uses "op" field
@@ -105,7 +105,7 @@ namespace CCXT.Collector.Bitget
                     {
                         var channel = arg.GetStringOrDefault("channel");
                         var instId = arg.GetStringOrDefault("instId");
-                        
+
                         if (isPrivate)
                         {
                             // Handle private data
@@ -187,7 +187,7 @@ namespace CCXT.Collector.Bitget
                 if (!(json.TryGetArray("data", out var dataProp)))
                     return;
 
-                var data = dataProp.EnumerateArray().FirstOrDefault();                
+                var data = dataProp.EnumerateArray().FirstOrDefault();
                 if (data.ValueKind == JsonValueKind.Undefined)
                     return;
 
@@ -215,7 +215,7 @@ namespace CCXT.Collector.Bitget
                     {
                         if (ask.GetArrayLength() < 2)
                             continue;
-                            
+
                         var price = ask[0].GetDecimalValue();
                         var amount = ask[1].GetDecimalValue();
 
@@ -235,10 +235,10 @@ namespace CCXT.Collector.Bitget
                     {
                         if (bid.GetArrayLength() < 2)
                             continue;
-                            
+
                         var price = bid[0].GetDecimalValue();
                         var amount = bid[1].GetDecimalValue();
-                        
+
                         orderbook.result.bids.Add(new SOrderBookItem
                         {
                             price = price,
@@ -329,7 +329,7 @@ namespace CCXT.Collector.Bitget
                 var symbol = ParsingHelpers.NormalizeSymbol(instId);
                 var trades = new List<STradeItem>();
                 long latestTimestamp = 0;
-                
+
                 // Bitget sends trade data as array of trade objects
                 foreach (var trade in dataProp.EnumerateArray())
                 {
@@ -382,13 +382,13 @@ namespace CCXT.Collector.Bitget
                 if (!(json.TryGetArray("data", out var dataProp)))
                     return;
 
-                var data = dataProp.EnumerateArray().FirstOrDefault();                
+                var data = dataProp.EnumerateArray().FirstOrDefault();
                 if (data.ValueKind == JsonValueKind.Undefined)
                     return;
 
                 var symbol = ParsingHelpers.NormalizeSymbol(instId);
                 var timestamp = data.GetInt64OrDefault("ts", TimeExtension.UnixTime);
-                
+
                 var ticker = new STicker
                 {
                     exchange = ExchangeName,
@@ -437,7 +437,7 @@ namespace CCXT.Collector.Bitget
                 var symbol = ParsingHelpers.NormalizeSymbol(instId);
                 var interval = ParsingHelpers.FromBitgetChannelInterval(channel);
                 var intervalMs = ParsingHelpers.IntervalToMilliseconds(interval);
-                
+
                 var candleItems = new List<SCandleItem>();
                 long latestTimestamp = 0;
 
@@ -495,7 +495,7 @@ namespace CCXT.Collector.Bitget
                     var free = account.GetDecimalOrDefault("availBal");
                     var used = account.GetDecimalOrDefault("frozenBal");
                     var total = account.GetDecimalOrDefault("bal");
-                    
+
                     if (total > 0 || free > 0 || used > 0)
                     {
                         balanceItems.Add(new SBalanceItem
@@ -718,7 +718,7 @@ namespace CCXT.Collector.Bitget
             {
                 var instId = ParsingHelpers.RemoveDelimiter(symbol);  // This removes the slash from BTC/USDT -> BTCUSDT
                 var channelInterval = ParsingHelpers.ToBitgetChannelInterval(interval);
-                
+
                 var subscription = new
                 {
                     op = "subscribe",
@@ -793,9 +793,9 @@ namespace CCXT.Collector.Bitget
             var timestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString();
             var method = "GET";
             var requestPath = "/user/verify";
-            
+
             var sign = GenerateSignature(secretKey, timestamp, method, requestPath);
-            
+
             return JsonSerializer.Serialize(new
             {
                 op = "login",
@@ -825,7 +825,7 @@ namespace CCXT.Collector.Bitget
             }
         }
 
-    // 이후: 개별 심볼/인터벌/주문타입/상태 변환 메소드는 ExchangeParsingHelpers로 대체되었습니다.
+    // Note: per-symbol/interval/order-type/status conversion methods have been replaced by ExchangeParsingHelpers.
 
         #region Batch Subscription Support
 
@@ -845,22 +845,22 @@ namespace CCXT.Collector.Bitget
             try
             {
                 RaiseError($"Starting Bitget batch subscription for {subscriptions.Count} subscriptions");
-                
+
                 // Build list of all subscription args
                 var args = new List<object>();
-                
+
                 foreach (var kvp in subscriptions)
                 {
                     var subscription = kvp.Value;
                     var instId = ParsingHelpers.RemoveDelimiter(subscription.Symbol);  // This removes the slash from BTC/USDT -> BTCUSDT
-                    
+
                     // Map channel names to Bitget channel format
                     string channelName = subscription.Channel.ToLower() switch
                     {
                         "orderbook" or "depth" => "books",
                         "trades" or "trade" => "trade",
                         "ticker" => "ticker",
-                        "candles" or "kline" or "candlestick" => !string.IsNullOrEmpty(subscription.Extra) 
+                        "candles" or "kline" or "candlestick" => !string.IsNullOrEmpty(subscription.Extra)
                             ? $"candle{ParsingHelpers.ToBitgetChannelInterval(subscription.Extra)}"
                             : "candle1m",
                         _ => subscription.Channel
@@ -883,7 +883,7 @@ namespace CCXT.Collector.Bitget
                 // Bitget allows multiple args in a single subscription message
                 // Typical limit is around 100 subscriptions per connection
                 const int maxArgsPerMessage = 100;
-                
+
                 if (args.Count <= maxArgsPerMessage)
                 {
                     // Send all args in one message
@@ -901,7 +901,7 @@ namespace CCXT.Collector.Bitget
                 {
                     // Split into multiple messages if exceeding limit
                     var messageCount = (args.Count + maxArgsPerMessage - 1) / maxArgsPerMessage;
-                    
+
                     for (int i = 0; i < messageCount; i++)
                     {
                         var batch = args
@@ -917,7 +917,7 @@ namespace CCXT.Collector.Bitget
 
                         await SendMessageAsync(JsonSerializer.Serialize(subscriptionMessage));
                         RaiseError($"Sent Bitget batch subscription {i + 1}/{messageCount} with {batch.Length} channels");
-                        
+
                         // Small delay between batches if multiple messages
                         if (i < messageCount - 1)
                             await Task.Delay(100);

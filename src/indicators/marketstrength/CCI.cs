@@ -32,8 +32,8 @@ namespace CCXT.Collector.Indicator
         /// tp = (high + low + close) / 3
         /// cci = (tp - SMA(tp)) / (Factor * meanDeviation(tp))
         /// </summary>
-        /// <see cref="http://www.fmlabs.com/reference/default.htm?url=CCI.htm"/>
-        /// <see cref="http://stockcharts.com/school/doku.php?id=chart_school:technical_indicators:commodity_channel_index_cci"/>
+        /// <see href="https://www.fmlabs.com/reference/default.htm?url=CCI.htm"/>
+        /// <see href="https://stockcharts.com/school/doku.php?id=chart_school:technical_indicators:commodity_channel_index_cci"/>
         /// <returns></returns>
         public override SingleDoubleSerie Calculate()
         {

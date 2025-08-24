@@ -711,7 +711,7 @@ namespace CCXT.Collector.Okx
             try
             {
                 var instId = ConvertToOkxSymbol(symbol);
-                var channelInterval = ParsingHelpers.ToOkxInterval(interval); // OKX 전용 interval 변환 적용
+                var channelInterval = ParsingHelpers.ToOkxInterval(interval); // apply OKX-specific interval conversion
 
                 var subscription = new
                 {

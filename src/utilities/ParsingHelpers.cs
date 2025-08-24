@@ -5,8 +5,8 @@ using System.Text.RegularExpressions;
 namespace CCXT.Collector.Core.Infrastructure
 {
     /// <summary>
-    /// 공통 거래소 파싱/포맷 도우미 집합.
-    /// 개별 거래소 WebSocketClient 구현에서 반복되는 심볼/인터벌/주문상태 파싱 로직을 중앙화.
+    /// Common exchange parsing/formatting helpers.
+    /// Centralizes symbol/interval/order-status parsing logic shared by exchange WebSocketClient implementations.
     /// </summary>
     public static class ParsingHelpers
     {
@@ -14,14 +14,14 @@ namespace CCXT.Collector.Core.Infrastructure
         { "USDT", "USD", "USDC", "BTC", "ETH", "BNB", "BUSD", "KRW" };
 
         /// <summary>
-        /// "BTC/USDT" 형태를 표준(대문자, 구분자 '/')으로 정규화.
+        /// Normalize a symbol to the standard uppercase form with '/' delimiter (e.g., "BTC/USDT").
         /// </summary>
         public static string NormalizeSymbol(string symbol)
         {
             if (string.IsNullOrWhiteSpace(symbol)) return symbol;
             symbol = symbol.Trim().Replace("-", "/").ToUpperInvariant();
             if (symbol.IndexOf('/') >= 0) return symbol;
-            // Delimiter 없는 케이스 (예: BTCUSDT) 분리 시도
+            // Attempt to split base/quote for no-delimiter cases (e.g., BTCUSDT)
             foreach (var quote in CommonQuoteCurrencies)
             {
                 if (symbol.EndsWith(quote, StringComparison.OrdinalIgnoreCase) && symbol.Length > quote.Length)
@@ -34,7 +34,7 @@ namespace CCXT.Collector.Core.Infrastructure
         }
 
         /// <summary>
-        /// "BTC/USDT" -> "BTCUSDT" (Binance 등) 변환.
+        /// Convert "BTC/USDT" -> "BTCUSDT" (e.g., for Binance APIs).
         /// </summary>
         public static string RemoveDelimiter(string symbol)
         {
@@ -42,7 +42,7 @@ namespace CCXT.Collector.Core.Infrastructure
         }
 
         /// <summary>
-        /// Upbit 형식 변환: "BTC/ KRW" -> "KRW-BTC".
+        /// Upbit format: "BTC/KRW" -> "KRW-BTC".
         /// </summary>
         public static string ToUpbitCode(string symbol)
         {
@@ -52,7 +52,7 @@ namespace CCXT.Collector.Core.Infrastructure
         }
 
         /// <summary>
-        /// Upbit 코드 역변환: "KRW-BTC" -> "BTC/KRW".
+        /// Upbit code to standard: "KRW-BTC" -> "BTC/KRW".
         /// </summary>
         public static string FromUpbitCode(string code)
         {
@@ -62,7 +62,7 @@ namespace CCXT.Collector.Core.Infrastructure
         }
 
         /// <summary>
-        /// 공통 인터벌 표준화 (모두 소문자). 1h, 60m 등 동등 처리.
+        /// Normalize interval to a common lowercase standard; treat equivalents like 1h == 60m.
         /// </summary>
         public static string NormalizeInterval(string interval)
         {
@@ -79,12 +79,12 @@ namespace CCXT.Collector.Core.Infrastructure
         }
 
         /// <summary>
-        /// Binance Interval -> 표준.
+        /// Binance interval to standard.
         /// </summary>
         public static string FromBinanceInterval(string val) => NormalizeInterval(val);
 
         /// <summary>
-        /// 표준 -> Binance Interval (대부분 동일, 월=1M 그대로 유지).
+        /// Standard to Binance interval (mostly identical; month remains 1M).
         /// </summary>
         public static string ToBinanceInterval(string val)
         {
@@ -93,7 +93,7 @@ namespace CCXT.Collector.Core.Infrastructure
         }
 
         /// <summary>
-        /// Upbit interval 표준 -> Upbit unit.
+        /// Standard interval to Upbit unit code.
         /// </summary>
         public static string ToUpbitIntervalUnit(string interval)
         {
@@ -116,7 +116,7 @@ namespace CCXT.Collector.Core.Infrastructure
         }
 
         /// <summary>
-        /// Upbit unit -> 표준 interval.
+        /// Upbit unit code to standard interval.
         /// </summary>
         public static string FromUpbitIntervalUnit(string unit) => unit switch
         {
@@ -135,19 +135,19 @@ namespace CCXT.Collector.Core.Infrastructure
         };
 
         /// <summary>
-        /// 표준 심볼 -> DASH 심볼 (BTC/USDT -> BTC-USDT)
+        /// Standard symbol -> dash-delimited symbol (BTC/USDT -> BTC-USDT)
         /// </summary>
         public static string ToDashSymbol(string symbol)
             => NormalizeSymbol(symbol).Replace('/', '-');
 
         /// <summary>
-        /// DASH 심볼 -> 표준 심볼 (BTC-USDT -> BTC/USDT)
+        /// Dash-delimited symbol -> standard symbol (BTC-USDT -> BTC/USDT)
         /// </summary>
         public static string FromDashSymbol(string symbol)
             => symbol?.Replace('-', '/') ?? symbol;
 
         /// <summary>
-        /// Bitget 채널 인터벌 변환 (표준 -> 채널 suffix)
+        /// Bitget channel interval (standard -> channel suffix)
         /// </summary>
         public static string ToBitgetChannelInterval(string interval)
         {
@@ -167,7 +167,7 @@ namespace CCXT.Collector.Core.Infrastructure
         }
 
         /// <summary>
-        /// Bitget channel 문자열(candle1H 등)에서 표준 인터벌 추출.
+    /// Parse standard interval from a Bitget channel string (e.g., candle1H).
         /// </summary>
         public static string FromBitgetChannelInterval(string channel)
         {
@@ -188,7 +188,7 @@ namespace CCXT.Collector.Core.Infrastructure
         }
 
         /// <summary>
-        /// 인터벌을 밀리초로.
+    /// Convert an interval to milliseconds.
         /// </summary>
         public static long IntervalToMilliseconds(string interval)
         {
@@ -210,15 +210,15 @@ namespace CCXT.Collector.Core.Infrastructure
                 "1d" => 86_400_000L,
                 "3d" => 259_200_000L,
                 "1w" => 604_800_000L,
-                "1M" => 2_592_000_000L, // 30d 근사
+        "1M" => 2_592_000_000L, // approx. 30 days
                 _ => 3_600_000L
             };
         }
 
         /// <summary>
-        /// 공통 OrderType 문자열 -> Enum 매핑 (기본 Limit).
-        /// 실제 Enum은 CCXT.Collector.Service 네임스페이스에 존재한다고 가정.
-        /// reflection 없이 문자열 기준.
+    /// Map common order type string to enum (defaults to Limit).
+    /// Assumes the enum is defined under CCXT.Collector.Service namespace.
+    /// String-based mapping, no reflection.
         /// </summary>
         public static CCXT.Collector.Service.OrderType ParseGenericOrderType(string type)
         {
@@ -236,7 +236,7 @@ namespace CCXT.Collector.Core.Infrastructure
         }
 
         /// <summary>
-        /// 공통 OrderStatus 문자열 -> Enum 매핑.
+    /// Map common order status string to enum.
         /// </summary>
         public static CCXT.Collector.Service.OrderStatus ParseGenericOrderStatus(string status)
         {

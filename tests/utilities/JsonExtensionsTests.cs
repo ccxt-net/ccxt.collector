@@ -1,7 +1,7 @@
 using System;
 using System.Text.Json;
 using Xunit;
-// 확장 메서드 네임스페이스 (JsonExtensions가 전역 namespace라 using 불필요하나 안전차원에서 유지)
+// Extension method namespace (JsonExtensions lives in the global namespace; keep this comment for clarity)
 
 namespace CCXT.Collector.Tests.Utilities
 {

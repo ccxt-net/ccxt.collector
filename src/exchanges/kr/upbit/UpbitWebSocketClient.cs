@@ -550,7 +550,7 @@ namespace CCXT.Collector.Upbit
         /// </summary>
         /// <param name="market">Market to format</param>
         /// <returns>Formatted symbol (e.g., "KRW-BTC")</returns>
-    protected override string FormatSymbol(Market market) => $"{market.Quote.ToUpper()}-{market.Base.ToUpper()}"; // 유지
+    protected override string FormatSymbol(Market market) => $"{market.Quote.ToUpper()}-{market.Base.ToUpper()}"; // keep
 
         #endregion
 

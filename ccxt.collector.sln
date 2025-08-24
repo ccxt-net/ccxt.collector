@@ -36,8 +36,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{C8D5274F-AC00-46C7-1F8D-E88E81087A52}"
 	ProjectSection(SolutionItems) = preProject
 		docs\CHANGELOG.md = docs\CHANGELOG.md
-		docs\DEPLOYMENT.md = docs\DEPLOYMENT.md
-		docs\GUIDE.md = docs\GUIDE.md
+		docs\CONTRIBUTING.md = docs\CONTRIBUTING.md
 		docs\ROADMAP.md = docs\ROADMAP.md
 	EndProjectSection
 EndProject

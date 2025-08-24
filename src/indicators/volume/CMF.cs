@@ -30,7 +30,7 @@ namespace CCXT.Collector.Indicator
         /// Money Flow Volume = Money Flow Multiplier x Volume for the Period
         /// 20-period CMF = 20-period Sum of Money Flow Volume / 20 period Sum of Volume
         /// </summary>
-        /// <see cref="http://stockcharts.com/school/doku.php?id=chart_school:technical_indicators:chaikin_money_flow_cmf"/>
+        /// <see href="https://stockcharts.com/school/doku.php?id=chart_school:technical_indicators:chaikin_money_flow_cmf"/>
         /// <returns></returns>
         public override SingleDoubleSerie Calculate()
         {

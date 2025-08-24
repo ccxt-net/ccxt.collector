@@ -34,9 +34,9 @@ namespace CCXT.Collector.Indicator
         /// LowerBand = MidBand - Factor * Stdev(tp)
         /// BandWidth = (UpperBand - LowerBand) / MidBand
         /// </summary>
-        /// <see cref="http://www.fmlabs.com/reference/default.htm?url=Bollinger.htm"/>
-        /// <see cref="http://stockcharts.com/school/doku.php?id=chart_school:technical_indicators:bollinger_bands"/>
-        /// <see cref="http://stockcharts.com/school/doku.php?id=chart_school:technical_indicators:bollinger_band_width"/>
+        /// <see href="https://www.fmlabs.com/reference/default.htm?url=Bollinger.htm"/>
+        /// <see href="https://stockcharts.com/school/doku.php?id=chart_school:technical_indicators:bollinger_bands"/>
+        /// <see href="https://stockcharts.com/school/doku.php?id=chart_school:technical_indicators:bollinger_band_width"/>
         /// <returns></returns>
         public override BollingerBandSerie Calculate()
         {

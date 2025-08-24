@@ -42,7 +42,7 @@ namespace CCXT.Collector.Indicator
         ///    RSI = 100 - --------
         ///                 1 + RS
         /// </summary>
-        /// <see cref="http://stockcharts.com/school/doku.php?id=chart_school:technical_indicators:relative_strength_index_rsi"/>
+        /// <see href="https://stockcharts.com/school/doku.php?id=chart_school:technical_indicators:relative_strength_index_rsi"/>
         /// <returns></returns>
         public override RSISerie Calculate()
         {

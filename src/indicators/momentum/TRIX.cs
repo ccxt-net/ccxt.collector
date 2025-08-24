@@ -35,8 +35,8 @@ namespace CCXT.Collector.Indicator
         /// 4 - a) Calculation with percentage: [ROC(EMA(EMA(EMA(Close))))]
         /// 4 - b) Calculation with percentage: [Momentum(EMA(EMA(EMA(Close))))]
         /// </summary>
-        /// <see cref="http://stockcharts.com/school/doku.php?id=chart_school:technical_indicators:trix"/>
-        /// <see cref="http://www.fmlabs.com/reference/default.htm?url=TRIX.htm"/>
+        /// <see href="https://stockcharts.com/school/doku.php?id=chart_school:technical_indicators:trix"/>
+        /// <see href="https://www.fmlabs.com/reference/default.htm?url=TRIX.htm"/>
         /// <returns></returns>
         public override SingleDoubleSerie Calculate()
         {
